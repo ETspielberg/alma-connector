@@ -1,0 +1,24 @@
+feign:
+  client:
+    config:
+      settings-backend:
+        connectTimeout: 5000
+        readTimeout: 5000
+      blacklist-backend:
+        connectTimeout: 5000
+        readTimeout: 5000
+      getter:
+        connectTimeout: 600000
+        readTimeout: 600000
+server:
+  port: ${server_port:11889}
+  logging:
+    level:
+      org:
+        unidue:
+          ub:
+            libintel:
+              almaconnector:
+                clients:
+                  acquisition:
+                    AlmaPoLinesApiClient: DEBUG
