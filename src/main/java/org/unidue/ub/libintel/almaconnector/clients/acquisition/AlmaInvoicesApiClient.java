@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 import org.unidue.ub.alma.shared.acq.Invoice;
 import org.unidue.ub.alma.shared.acq.InvoiceLine;
+import org.unidue.ub.alma.shared.acq.Invoices;
 
 import java.util.List;
 
@@ -27,7 +28,7 @@ public interface AlmaInvoicesApiClient {
      * @return Object
      */
     @RequestMapping(method=RequestMethod.GET, value="/")
-    List<Invoice> getAlmawsV1AcqInvoices(@RequestParam("baseStatus") String baseStatus, @RequestParam("invoiceWorkflowStatus") String invoiceWorkflowStatus, @RequestParam("owner") String owner, @RequestParam("creationForm") String creationForm, @RequestParam("q") String q, @RequestParam("limit") Integer limit, @RequestParam("offset") Integer offset, @RequestParam("view") String view);
+    Invoices getInvoices(@RequestHeader("Accept") String accept, @RequestParam("base_status") String baseStatus, @RequestParam("invoice_workflow_status") String invoiceWorkflowStatus, @RequestParam("owner") String owner, @RequestParam("creation_form") String creationForm, @RequestParam("q") String q, @RequestParam("limit") Integer limit, @RequestParam("offset") Integer offset, @RequestParam("view") String view);
 
 
     /**
@@ -38,7 +39,7 @@ public interface AlmaInvoicesApiClient {
      * @return Object
      */
     @RequestMapping(method=RequestMethod.GET, value="/{invoiceId}")
-     Invoice getAlmawsV1AcqInvoicesInvoiceId(@PathVariable("invoiceId") String invoiceId, @RequestParam("view") String view);
+     Invoice getInvoicesInvoiceId(@RequestHeader("Accept") String accept, @PathVariable("invoice_id") String invoiceId, @RequestParam("view") String view);
 
     /**
      * Get Invoice Lines
@@ -50,7 +51,7 @@ public interface AlmaInvoicesApiClient {
      * @return Object
      */
     @RequestMapping(method=RequestMethod.GET, value="/{invoiceId}/lines")
-    List<InvoiceLine> getAlmawsV1AcqInvoicesInvoiceIdLines(@PathVariable("invoiceId") String invoiceId, @RequestParam("q") String q, @RequestParam("limit") Integer limit, @RequestParam("offset") Integer offset);
+    List<InvoiceLine> getInvoicesInvoiceIdLines(@RequestHeader("Accept") String accept, @PathVariable("invoiceId") String invoiceId, @RequestParam("q") String q, @RequestParam("limit") Integer limit, @RequestParam("offset") Integer offset);
 
     /**
      * Get Invoice Line
@@ -60,7 +61,7 @@ public interface AlmaInvoicesApiClient {
      * @return Object
      */
     @RequestMapping(method=RequestMethod.GET, value="{invoiceId}/lines/{invoiceLineId}")
-    InvoiceLine getAlmawsV1AcqInvoicesInvoiceIdLinesInvoiceLineId(@PathVariable("invoiceId") String invoiceId, @PathVariable("invoiceLineId") String invoiceLineId);
+    InvoiceLine getInvoicesInvoiceIdLinesInvoiceLineId(@RequestHeader("Accept") String accept, @PathVariable("invoiceId") String invoiceId, @PathVariable("invoiceLineId") String invoiceLineId);
 
     /**
      * Create Invoice
@@ -69,7 +70,7 @@ public interface AlmaInvoicesApiClient {
      * @return Object
      */
     @RequestMapping(method=RequestMethod.POST)
-    Object postAlmawsV1AcqInvoices(@RequestBody Invoice body, @RequestHeader("Accept") String accept );
+    Invoice postAcqInvoices(@RequestBody Invoice body, @RequestHeader("Accept") String accept);
 
     /**
      * Invoice Service
@@ -80,7 +81,7 @@ public interface AlmaInvoicesApiClient {
      * @return Object
      */
     @RequestMapping(method=RequestMethod.POST, value="/{invoiceId}")
-    Object postAlmawsV1AcqInvoicesInvoiceId(@RequestBody Invoice body, @RequestHeader("Accept") String accept, @PathVariable("invoiceId") String invoiceId, @RequestParam("op") String op);
+    Invoice postInvoicesInvoiceId(@RequestBody Invoice body, @RequestHeader("Accept") String accept, @PathVariable("invoiceId") String invoiceId, @RequestParam("op") String op);
 
     /**
      * Create Invoice Line
@@ -90,7 +91,7 @@ public interface AlmaInvoicesApiClient {
      * @return Object
      */
     @RequestMapping(method=RequestMethod.POST, value="/{invoiceId}/lines")
-    InvoiceLine postAlmawsV1AcqInvoicesInvoiceIdLines(@RequestBody InvoiceLine body, @RequestHeader("Accept") String accept, @PathVariable("invoiceId") String invoiceId);
+    InvoiceLine postInvoicesInvoiceIdLines(@RequestBody InvoiceLine body, @RequestHeader("Accept") String accept, @PathVariable("invoiceId") String invoiceId);
 
     /**
      * Update Invoice
@@ -100,7 +101,7 @@ public interface AlmaInvoicesApiClient {
      * @return Object
      */
     @RequestMapping(method= RequestMethod.PUT, value="/{invoiceId}")
-    Invoice putAlmawsV1AcqInvoicesInvoiceId(@RequestBody Invoice body, @RequestHeader("Accept") String accept, @PathVariable("invoiceId") String invoiceId);
+    Invoice putInvoicesInvoiceId(@RequestBody Invoice body, @RequestHeader("Accept") String accept, @PathVariable("invoiceId") String invoiceId);
 
     /**
      * Update Invoice Line
@@ -111,5 +112,5 @@ public interface AlmaInvoicesApiClient {
      * @return Object
      */
     @RequestMapping(method= RequestMethod.PUT, value="/{invoiceId}/lines/{invoiceLineId}")
-    Object putAlmawsV1AcqInvoicesInvoiceIdLinesInvoiceLineId(@RequestBody InvoiceLine body, @RequestHeader("Accept") String accept, @PathVariable("invoiceId") String invoiceId, @PathVariable("invoiceLineId") String invoiceLineId);
+    InvoiceLine putInvoicesInvoiceIdLinesInvoiceLineId(@RequestBody InvoiceLine body, @RequestHeader("Accept") String accept, @PathVariable("invoiceId") String invoiceId, @PathVariable("invoiceLineId") String invoiceLineId);
 }

@@ -27,13 +27,13 @@ public class AlmaPoLineService {
         int offset = 0;
 
         // retrieve first list of po-lines.
-        PoLines poLines = this.almaPoLinesApiClient.getAlmawsV1AcqPoLines("application/json", "", "ACTIVE", batchSize, offset, "", "", "", "", "", "", "");
+        PoLines poLines = this.almaPoLinesApiClient.getPoLines("application/json", "", "ACTIVE", batchSize, offset, "", "", "", "", "", "", "");
         List<PoLine> poLineList = new ArrayList<>(poLines.getPoLine());
 
         // as long as not all data are being collected, collect further
         while (poLineList.size() < poLines.getTotalRecordCount()) {
             offset += batchSize;
-            poLines = this.almaPoLinesApiClient.getAlmawsV1AcqPoLines("application/json", "", "ACTIVE", batchSize, offset, "", "", "", "", "", "", "");
+            poLines = this.almaPoLinesApiClient.getPoLines("application/json", "", "ACTIVE", batchSize, offset, "", "", "", "", "", "", "");
             poLineList.addAll(poLines.getPoLine());
         }
         return poLineList;

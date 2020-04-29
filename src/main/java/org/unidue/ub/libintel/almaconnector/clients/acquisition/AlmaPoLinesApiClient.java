@@ -41,7 +41,7 @@ public interface AlmaPoLinesApiClient {
      * @return Object
      */
     @RequestMapping(method=RequestMethod.GET)
-    PoLines getAlmawsV1AcqPoLines(@RequestHeader("Accept") String accept, @RequestParam("q") String q, @RequestParam("status") String status, @RequestParam("limit") Integer limit, @RequestParam("offset") Integer offset, @RequestParam("order_by") String orderBy, @RequestParam("direction") String direction, @RequestParam("acquisition_method") String acquisitionMethod, @RequestParam("expand") String expand, @RequestParam("library") String library, @RequestParam("min_expected_arrival_date") String minExpectedArrivalDate, @RequestParam("max_expected_arrival_date") String maxExpectedArrivalDate);
+    PoLines getPoLines(@RequestHeader("Accept") String accept, @RequestParam("q") String q, @RequestParam("status") String status, @RequestParam("limit") Integer limit, @RequestParam("offset") Integer offset, @RequestParam("order_by") String orderBy, @RequestParam("direction") String direction, @RequestParam("acquisition_method") String acquisitionMethod, @RequestParam("expand") String expand, @RequestParam("library") String library, @RequestParam("min_expected_arrival_date") String minExpectedArrivalDate, @RequestParam("max_expected_arrival_date") String maxExpectedArrivalDate);
 
     /**
      * Get PO-Line
@@ -51,7 +51,7 @@ public interface AlmaPoLinesApiClient {
      * @return Object
      */
     @RequestMapping(method = RequestMethod.GET, value="/{poLineId}")
-    PoLine getAlmawsV1AcqPoLinesPoLineId(@RequestHeader("Accept") String accept, @PathVariable("po_line_id") String poLineId);
+    PoLine getPoLinesPoLineId(@RequestHeader("Accept") String accept, @PathVariable("po_line_id") String poLineId);
 
     /**
      * Get PO-Line Items
@@ -61,7 +61,7 @@ public interface AlmaPoLinesApiClient {
      * @return Object
      */
     @RequestMapping(method=RequestMethod.GET, value="/{poLineId}/items")
-    Items getAlmawsV1AcqPoLinesPoLineIdItems(@RequestHeader("Accept") String accept, @PathVariable("po_line_id") String poLineId);
+    Items getPoLinesPoLineIdItems(@RequestHeader("Accept") String accept, @PathVariable("po_line_id") String poLineId);
 
     /**
      * Create PO-Line
@@ -114,6 +114,6 @@ public interface AlmaPoLinesApiClient {
      * @return Object
      */
     @RequestMapping(method=RequestMethod.POST, value="/{poLineId}")
-    PoLine putAlmawsV1AcqPoLinesPoLineId(@RequestBody PoLine body, @RequestHeader("Accept") String accept, @PathVariable("poLineId") String poLineId, @RequestParam("update_inventory") String updateInventory);
+    PoLine putPoLinesPoLineId(@RequestBody PoLine body, @RequestHeader("Accept") String accept, @PathVariable("poLineId") String poLineId, @RequestParam("update_inventory") String updateInventory);
 
 }
