@@ -7,7 +7,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.unidue.ub.alma.shared.acq.Invoice;
 import org.unidue.ub.alma.shared.acq.Vendor;
-import org.unidue.ub.libintel.almaconnector.clients.acquisition.AlmaVendorApiClient;
 import org.unidue.ub.libintel.almaconnector.model.SapData;
 import org.unidue.ub.libintel.almaconnector.service.AlmaInvoiceServices;
 import org.unidue.ub.libintel.almaconnector.service.FileWriterService;
@@ -17,7 +16,7 @@ import org.unidue.ub.libintel.almaconnector.service.VendorService;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.unidue.ub.libintel.almaconnector.utils.convertInvoiceToSapData;
+import static org.unidue.ub.libintel.almaconnector.Utils.convertInvoiceToSapData;
 
 @Controller
 public class InvoiceController {

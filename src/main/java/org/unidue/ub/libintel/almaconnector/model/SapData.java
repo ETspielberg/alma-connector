@@ -5,7 +5,7 @@ import java.util.Date;
 
 public class SapData {
 
-    private final static String csvLine = "%s; %s; %s; %s; %s; %f; %s; %s; %s; %s; %s; %s;";
+    private final static String csvLine = "%s; %s; %s; %s; %s; %s; %f; %s; %s; %s; %s; %s;";
 
     private final static SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -144,5 +144,7 @@ public class SapData {
         else
             return formatter.format(date);
     }
+
+
 
 }

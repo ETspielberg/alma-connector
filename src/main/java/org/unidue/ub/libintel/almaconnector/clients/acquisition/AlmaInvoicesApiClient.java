@@ -9,7 +9,7 @@ import org.unidue.ub.alma.shared.acq.Invoices;
 
 import java.util.List;
 
-@FeignClient(name = "invoices", url = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/acq/invoices", configuration = FeignConfiguration.class)
+@FeignClient(name = "invoices", url = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/acq/invoices", configuration = AcquisitionFeignConfiguration.class)
 @Service
 public interface AlmaInvoicesApiClient {
 

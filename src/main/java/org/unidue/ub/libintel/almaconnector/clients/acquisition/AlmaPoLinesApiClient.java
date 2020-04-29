@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 import org.unidue.ub.alma.shared.acq.*;
 
-@FeignClient(name = "po-lines", url = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/acq/po-lines", configuration = FeignConfiguration.class)
+@FeignClient(name = "po-lines", url = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/acq/po-lines", configuration = AcquisitionFeignConfiguration.class)
 @Service
 public interface AlmaPoLinesApiClient {
 

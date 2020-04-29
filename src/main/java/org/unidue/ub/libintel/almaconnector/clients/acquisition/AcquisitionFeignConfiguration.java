@@ -5,17 +5,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.unidue.ub.libintel.almaconnector.clients.ApiKeyAuth;
 
 /**
  * configuration for the Feign clients to allow for basic authentication upon the requests to the settings backend
  * within the libintel architecture.
  */
-public class FeignConfiguration {
+public class AcquisitionFeignConfiguration {
 
     @Value("${alma.api.acq.key}")
     private String almaAcqApiKey;
 
-    private static final Logger log = LoggerFactory.getLogger(org.unidue.ub.libintel.almaconnector.clients.acquisition.FeignConfiguration.class);
+    private static final Logger log = LoggerFactory.getLogger(AcquisitionFeignConfiguration.class);
 
     /**
      * appropriate request interceptor to add the authentication information.

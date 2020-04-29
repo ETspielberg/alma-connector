@@ -9,7 +9,7 @@ import org.unidue.ub.alma.shared.acq.Vendor;
 
 import java.util.List;
 
-@FeignClient(name = "vendors", url = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/acq/vendors", configuration = FeignConfiguration.class)
+@FeignClient(name = "vendors", url = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/acq/vendors", configuration = AcquisitionFeignConfiguration.class)
 @Service
 public interface AlmaVendorApiClient {
 

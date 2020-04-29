@@ -1,4 +1,4 @@
-package org.unidue.ub.libintel.almaconnector.clients.acquisition;
+package org.unidue.ub.libintel.almaconnector.clients;
 
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
