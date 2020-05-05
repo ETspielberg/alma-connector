@@ -5,9 +5,9 @@ import java.util.Date;
 
 public class SapData {
 
-    private final static String csvLine = "%s; %s; %s; %s; %s; %s; %f; %s; %s; %s; %s; %s;";
+    private final static SimpleDateFormat readableDateFormatter = new SimpleDateFormat("dd.MM.yyyy");
 
-    private final static SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+    private final static SimpleDateFormat sapDateFormatter = new SimpleDateFormat("yyyyMMdd");
 
     public String vendorCode;
 
@@ -27,11 +27,13 @@ public class SapData {
 
     public String positionalNumber;
 
-    public String ledgerAccount;
+    public SapAccountData sapAccountData;
 
     public Date fromDate;
 
     public Date toDate;
+
+    public String comment;
 
     public SapData() {
     }
@@ -76,8 +78,8 @@ public class SapData {
         return this;
     }
 
-    public SapData withLedgerAccount(String ledgerAccount) {
-        this.ledgerAccount = ledgerAccount;
+    public SapData withSapAccountData(SapAccountData sapAccountData) {
+        this.sapAccountData = sapAccountData;
         return this;
     }
 
@@ -96,55 +98,66 @@ public class SapData {
         return this;
     }
 
+    public SapData withComment(String comment) {
+        this.comment = comment;
+        return this;
+    }
+
     public String toCsv() {
-        return String.format(csvLine,
-                this.vendorCode,
-                this.creditor,
-                formatter.format(this.commitmentDate),
-                formatter.format(this.invoiceDate),
-                this.costType,
-                this.currency,
-                this.invoiceAmount,
-                this.invoiceNumber,
-                this.positionalNumber,
-                this.ledgerAccount,
-                getDateString(this.fromDate),
-                getDateString(this.toDate));
+        String string = this.vendorCode + ";";
+        string += this.creditor + ";";
+        string += sapDateFormatter.format(this.commitmentDate) + ";";
+        string += this.currency + ";";
+        string += this.invoiceAmount + ";";
+        string += getSizedString(this.positionalNumber, 5).replace(" ", "0") + ";";
+        string += this.comment + ";";
+        if (this.creditor == null || this.creditor.isEmpty()) {
+            string += "C;";
+        } else {
+            string += "K;";
+        }
+        string += this.sapAccountData.getLedgerAccount() + this.sapAccountData.getFonds() + ";";
+        if (!this.sapAccountData.getPspElement().isEmpty()) {
+            string += "P;";
+            string += this.sapAccountData.getPspElement() + ";";
+        } else {
+            string += "K;";
+            string += this.sapAccountData.getCostCentre() + ";";
+        }
+        return string;
     }
 
     public String toFixedLengthLine() {
         String string = "";
-        string += getSizedString(this.vendorCode, 10);
-        string += getSizedString(formatter.format(this.commitmentDate), 12);
-        string += getSizedString(formatter.format(this.invoiceDate), 12);
-        string += getSizedString(this.costType, 2);
-        string += getSizedString(String.valueOf(this.invoiceAmount), 7);
-        string += getSizedString(this.invoiceNumber, 16);
-        string += getSizedString(this.currency, 4);
-        string += getSizedString(this.positionalNumber, 6);
-        string += getSizedString(this.ledgerAccount, 16);
+        string += getSizedString(this.vendorCode, 7);
+        if (this.creditor == null)
+            string += getSizedString("", 10);
+        else
+            string += getSizedString(this.creditor, 10);
+        string += getSizedString(readableDateFormatter.format(this.commitmentDate), 12);
+        string += getSizedString(readableDateFormatter.format(this.invoiceDate), 12);
+        if (this.creditor == null || this.creditor.isEmpty())
+            string += getSizedString("C", 4);
+        else
+            string += getSizedString("K", 4);
+        string += getSizedString(String.valueOf(this.invoiceAmount), 14);
+        string += getSizedString(this.currency, 8);
+        string += getSizedString(this.invoiceNumber, 22);
+        string += getSizedString(getSizedString(this.positionalNumber, 5).replace(" ", "0"), 7);
+        string += getSizedString(this.costType, 12);
+        string += getSizedString(this.sapAccountData.getImportCheckString(), 30);
         if (this.fromDate != null)
-            string += getSizedString(formatter.format(this.fromDate), 12);
+            string += getSizedString(readableDateFormatter.format(this.fromDate), 12);
         else
-            string += getSizedString("", 12);
+            string += getSizedString("0", 12);
         if (this.toDate != null)
-            string += getSizedString(formatter.format(this.toDate), 12);
+            string += getSizedString(readableDateFormatter.format(this.toDate), 12);
         else
-            string += getSizedString("", 12);
+            string += getSizedString("0", 12);
         return string;
     }
 
     private static String getSizedString(String string, int length) {
         return String.format("%1$" + length + "s", string);
     }
-
-    private static String getDateString(Date date) {
-        if (date == null)
-            return "";
-        else
-            return formatter.format(date);
-    }
-
-
-
 }

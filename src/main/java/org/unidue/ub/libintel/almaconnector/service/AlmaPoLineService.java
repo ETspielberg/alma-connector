@@ -13,6 +13,10 @@ public class AlmaPoLineService {
 
     private final AlmaPoLinesApiClient almaPoLinesApiClient;
 
+    /**
+     * constructor based autowiring to the Feign client
+     * @param almaPoLinesApiClient the Feign client for the Alma po line API
+     */
     AlmaPoLineService(AlmaPoLinesApiClient almaPoLinesApiClient) {
         this.almaPoLinesApiClient = almaPoLinesApiClient;
     }

@@ -32,6 +32,9 @@ public class SapAccountData {
         return this;
     }
 
+    /**
+     * @return the check string used to check the correct SAP data
+     */
     public String getImportCheckString() {
         if (!this.pspElement.isEmpty())
             return this.ledgerAccount + "P" + this.pspElement;

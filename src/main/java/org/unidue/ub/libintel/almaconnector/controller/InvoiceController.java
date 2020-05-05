@@ -29,12 +29,22 @@ public class InvoiceController {
 
     private final static Logger log = LoggerFactory.getLogger(InvoiceController.class);
 
+    /**
+     * constructor based autowiring to the invoice service, the filewriter service and the vendorservice.
+     * @param almaInvoiceServices the invoice service bean
+     * @param vendorService the vendor service bean
+     * @param fileWriterService the file writer service
+     */
     InvoiceController(AlmaInvoiceServices almaInvoiceServices, VendorService vendorService, FileWriterService fileWriterService) {
         this.almaInvoiceServices = almaInvoiceServices;
         this.vendorService = vendorService;
         this.fileWriterService = fileWriterService;
     }
 
+    /**
+     * retrieves the active invoices
+     * @return a string representing the success of the file writing.
+     */
     @GetMapping("/invoices/active")
     public ResponseEntity<String> getInvoiceLines() {
         List<Invoice> invoices = this.almaInvoiceServices.getOpenInvoices();
@@ -43,7 +53,10 @@ public class InvoiceController {
             Vendor vendor = this.vendorService.getVendorAccount(invoice.getVendor().getValue());
             sapDataList.addAll(convertInvoiceToSapData(invoice, vendor));
         }
-        this.fileWriterService.writeLines(sapDataList);
-        return ResponseEntity.ok("finished");
+        int missed = this.fileWriterService.writeLines(sapDataList);
+        if (missed == 0)
+            return ResponseEntity.ok("all itmes have been successfully written to file");
+        else
+            return ResponseEntity.ok(missed + " items could not be written");
     }
 }

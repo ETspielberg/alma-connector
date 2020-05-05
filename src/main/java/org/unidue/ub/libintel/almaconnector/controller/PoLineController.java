@@ -13,10 +13,18 @@ public class PoLineController {
 
     private final AlmaPoLineService almaPoLineService;
 
+    /**
+     * constructor based autowiring to the po line service
+     * @param almaPoLineService the po line service
+     */
     PoLineController(AlmaPoLineService almaPoLineService) {
         this.almaPoLineService = almaPoLineService;
     }
 
+    /**
+     * retrieves the active PO lines
+     * @return a response entity holding a list of PoLine objects
+     */
     @GetMapping("/polines/active")
     public ResponseEntity<List<PoLine>> getActivePoLines() {
         return ResponseEntity.ok(this.almaPoLineService.getOpenPoLines());

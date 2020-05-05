@@ -15,10 +15,19 @@ public class VendorService {
 
     private final Logger log = LoggerFactory.getLogger(VendorService.class);
 
+    /**
+     * constructor based autowiring of the Feign client.
+     * @param almaVendorApiClient the Feign client for the Alma Vendor API
+     */
     VendorService(AlmaVendorApiClient almaVendorApiClient) {
         this.almaVendorApiClient = almaVendorApiClient;
     }
 
+    /**
+     * retrieves the vendor by the vendor account code
+     * @param vendorAccountCode the code for the vendor account
+     * @return a vendor object
+     */
     @Cacheable("vendors")
     public Vendor getVendorAccount(String vendorAccountCode) {
         try {

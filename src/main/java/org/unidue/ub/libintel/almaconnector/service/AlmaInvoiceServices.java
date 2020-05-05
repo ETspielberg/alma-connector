@@ -17,10 +17,18 @@ public class AlmaInvoiceServices {
 
     private final static Logger log = LoggerFactory.getLogger(AlmaInvoiceServices.class);
 
+    /**
+     * constructor based autowiring of the Feign client
+     * @param almaInvoicesApiClient the Feign client for the Alma Invoice API
+     */
     AlmaInvoiceServices(AlmaInvoicesApiClient almaInvoicesApiClient) {
         this.almaInvoicesApiClient = almaInvoicesApiClient;
     }
 
+    /**
+     * retrieves the open invoices from the Alma API.
+     * @return  a list of invoices
+     */
     public List<Invoice> getOpenInvoices() {
         // initialize parameters
         int batchSize = 100;
