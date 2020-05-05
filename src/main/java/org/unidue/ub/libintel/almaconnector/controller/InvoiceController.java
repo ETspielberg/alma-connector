@@ -1,7 +1,5 @@
 package org.unidue.ub.libintel.almaconnector.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,8 +24,6 @@ public class InvoiceController {
     private final VendorService vendorService;
 
     private final FileWriterService fileWriterService;
-
-    private final static Logger log = LoggerFactory.getLogger(InvoiceController.class);
 
     /**
      * constructor based autowiring to the invoice service, the filewriter service and the vendorservice.

@@ -43,17 +43,9 @@ public class AlmaInvoiceServices {
         // as long as not all data are being collected, collect further
         while (invoiceList.size() < invoices.getTotalRecordCount()) {
             offset += batchSize;
-            invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "", "", "", "", batchSize, offset, "");;
+            invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "", "", "", "", batchSize, offset, "");
             invoiceList.addAll(invoices.getInvoice());
         }
         return invoiceList;
-    }
-
-    private void addIfStatus(Invoices invoices, String status, List<Invoice> invoiceList) {
-        invoices.getInvoice().forEach(
-                entry -> {
-                    if (entry.getInvoiceStatus().getValue().equals(status))
-                        invoiceList.add(entry);}
-        );
     }
 }

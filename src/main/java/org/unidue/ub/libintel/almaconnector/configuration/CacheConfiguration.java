@@ -10,11 +10,6 @@ public class CacheConfiguration {
 
     @Bean
     public CacheManagerCustomizer<ConcurrentMapCacheManager> cacheManagerCustomizer() {
-        return new CacheManagerCustomizer<ConcurrentMapCacheManager>() {
-            @Override
-            public void customize(ConcurrentMapCacheManager cacheManager) {
-                cacheManager.setAllowNullValues(false);
-            }
-        };
+        return cacheManager -> cacheManager.setAllowNullValues(false);
     }
 }
