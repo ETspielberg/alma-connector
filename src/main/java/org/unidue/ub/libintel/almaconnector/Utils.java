@@ -48,7 +48,12 @@ public class Utils {
                             .withSapAccountData(sapAccountData)
                             .withInvoiceNumber(invoice.getNumber())
                             .withComment(invoiceLine.getNote());
-                            // TO DO: .withCostType("TO BE DONE");
+                    try {
+                        sapData.costType = invoiceLine.getInvoiceLineVat().getVatCode().getValue();
+                    } catch (Exception e) {
+                        log.warn("no vat code given for invoice " + invoice.getId());
+                        sapData.costType = "";
+                    }
                     sapDataList.add(sapData);
                 }
             }

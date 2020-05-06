@@ -1,19 +1,26 @@
 package org.unidue.ub.libintel.almaconnector;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.unidue.ub.alma.shared.acq.Invoice;
 import org.unidue.ub.libintel.almaconnector.model.SapAccountData;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.unidue.ub.libintel.almaconnector.Utils.convertFundCodeToSapAccountData;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 public class UtilsTests {
+
+    SimpleDateFormat testDateformatter=new SimpleDateFormat("dd-MM-yyyy");
 
     private final Logger log = LoggerFactory.getLogger(UtilsTests.class);
 
@@ -188,6 +195,23 @@ public class UtilsTests {
             "",
             "402010203",
             "");
+
+
+    private Invoice testInvoice;
+
+    public UtilsTests() throws ParseException {
+    }
+
+    @Before
+    public void setupTestInvoice() {
+        try {
+            Date testInvoiceDate = testDateformatter.parse("01.05.2020");
+            testInvoice = new Invoice().invoiceDate(testInvoiceDate);
+        } catch (ParseException pe) {
+            pe.printStackTrace();
+        }
+
+    }
 
     @Test
     public void testSapAccountDataGeneration() {
