@@ -3,7 +3,7 @@ package org.unidue.ub.libintel.almaconnector.model;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class SapData {
+public class SapData implements Comparable<SapData> {
 
     private final static SimpleDateFormat readableDateFormatter = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -105,46 +105,58 @@ public class SapData {
 
     public String toCsv() {
         String string = this.vendorCode + ";";
-        string += this.creditor + ";";
+        if (this.creditor != null)
+            string += this.creditor + ";";
+        else
+            string += ";";
         string += sapDateFormatter.format(this.commitmentDate) + ";";
+        string += sapDateFormatter.format(this.invoiceDate) + ";";
+        string += this.costType + ";";
         string += this.currency + ";";
         string += this.invoiceAmount + ";";
+        string += this.invoiceNumber + ";";
         string += getSizedString(this.positionalNumber, 5).replace(" ", "0") + ";";
         string += this.comment + ";";
-        if (this.creditor == null || this.creditor.isEmpty()) {
-            string += "C;";
-        } else {
+        if (this.fromDate != null)
+            string += sapDateFormatter.format(this.fromDate) + ";";
+        else
+            string += "0;";
+        if (this.toDate != null)
+            string += sapDateFormatter.format(this.toDate) + ";";
+        else
+            string += "0;";
+        if (this.vendorCode != null) {
+            if (this.vendorCode.equals("A-500") || this.vendorCode.equals("A-510") || this.vendorCode.equals("A-520"))
+                string += "C;";
+            else
+                string += "K;";
+        } else
             string += "K;";
-        }
-        string += this.sapAccountData.getLedgerAccount() + this.sapAccountData.getFonds() + ";";
-        if (!this.sapAccountData.getPspElement().isEmpty()) {
-            string += "P;";
-            string += this.sapAccountData.getPspElement() + ";";
-        } else {
-            string += "K;";
-            string += this.sapAccountData.getCostCentre() + ";";
-        }
+        string += this.sapAccountData.getImportCheckString();
         return string;
     }
 
     public String toFixedLengthLine() {
         String string = "";
-        string += getSizedString(this.vendorCode, 7);
+        string += getSizedString(this.vendorCode, 14);
         if (this.creditor == null)
-            string += getSizedString("", 10);
+            string += getSizedString("", 14);
         else
-            string += getSizedString(this.creditor, 10);
+            string += getSizedString(this.creditor, 14);
         string += getSizedString(readableDateFormatter.format(this.commitmentDate), 12);
         string += getSizedString(readableDateFormatter.format(this.invoiceDate), 12);
-        if (this.creditor == null || this.creditor.isEmpty())
-            string += getSizedString("C", 4);
-        else
-            string += getSizedString("K", 4);
+        string += getSizedString(this.costType, 12);
         string += getSizedString(String.valueOf(this.invoiceAmount), 14);
         string += getSizedString(this.currency, 8);
         string += getSizedString(this.invoiceNumber, 22);
         string += getSizedString(getSizedString(this.positionalNumber, 5).replace(" ", "0"), 7);
-        string += getSizedString(this.costType, 12);
+        if (this.vendorCode != null) {
+            if (this.vendorCode.trim().equals("A-500") || this.vendorCode.trim().equals("A-510") || this.vendorCode.trim().equals("A-520"))
+                string += getSizedString("C", 4);
+            else
+                string += getSizedString("K", 4);
+        } else
+            string += getSizedString("K", 4);
         string += getSizedString(this.sapAccountData.getImportCheckString(), 30);
         if (this.fromDate != null)
             string += getSizedString(readableDateFormatter.format(this.fromDate), 12);
@@ -159,5 +171,82 @@ public class SapData {
 
     private static String getSizedString(String string, int length) {
         return String.format("%1$" + length + "s", string);
+    }
+
+    public void generateComment() {
+        switch (this.sapAccountData.getLedgerAccount()) {
+            case "68100000": {
+                this.comment = "Monographien";
+                break;
+            }
+            case "68100200": {
+                this.comment = "Zeitschriften-Abo";
+                break;
+            }
+            case "68100210": {
+                this.comment = "Zeitschriften-Abo Verbrauch";
+                break;
+            }
+            case "68100300": {
+                this.comment = "Fortsetzungen";
+                break;
+            }
+            case "68100400": {
+                this.comment = "Elektron. Zeitschr., Kauf";
+                break;
+            }
+            case "68100500": {
+                this.comment = "Elektron. Zeitschr., Lizenz";
+                break;
+            }
+            case "68100600": {
+                this.comment = "Datenbanken, laufend/Kauf";
+                break;
+            }
+            case "68100700": {
+                this.comment = "Datenbanken, laufend/Lizenz";
+                break;
+            }
+            case "68100800": {
+                this.comment = "Datenbanken, einmalig/Kauf";
+                break;
+            }
+            case "68100900": {
+                this.comment = "Datenbanken, einmalig/Lizenz";
+                break;
+            }
+            case "68101000": {
+                this.comment = "Sonst. Non-Book-Materialien";
+                break;
+            }
+            case "68101100": {
+                this.comment = "Einband";
+                break;
+            }
+            case "68101200": {
+                this.comment = "Bestandserhaltung";
+                break;
+            }
+            case "68101900": {
+                this.comment = "Sonst. Literaturkosten";
+                break;
+            }
+            default:
+                this.comment = "";
+
+        }
+    }
+
+    @Override
+    public int compareTo(SapData sapData) {
+        if (this.creditor == null || this.creditor.isEmpty()) {
+            if (sapData.creditor == null || sapData.creditor.isEmpty())
+                return this.vendorCode.compareTo(sapData.vendorCode);
+            else
+                return 100000000;
+        }
+        else {
+            return this.vendorCode.compareTo(sapData.vendorCode);
+        }
     }
 }

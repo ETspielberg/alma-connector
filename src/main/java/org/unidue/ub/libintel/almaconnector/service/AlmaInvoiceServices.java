@@ -7,7 +7,9 @@ import org.unidue.ub.alma.shared.acq.Invoice;
 import org.unidue.ub.alma.shared.acq.Invoices;
 import org.unidue.ub.libintel.almaconnector.clients.acquisition.AlmaInvoicesApiClient;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -47,5 +49,22 @@ public class AlmaInvoiceServices {
             invoiceList.addAll(invoices.getInvoice());
         }
         return invoiceList;
+    }
+
+    public List<Invoice> getOpenInvoicesForDate(Date date) {
+        return filterList(date, getOpenInvoices());
+    }
+
+
+    private List<Invoice> filterList(Date date, List<Invoice> invoices) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        List<Invoice> filteredInvoices = new ArrayList<>();
+        for (Invoice invoice : invoices)
+            if (invoice.getPayment() != null) {
+                if (dateFormat.format(invoice.getPayment().getVoucherDate()).equals(dateFormat.format(date))) {
+                    filteredInvoices.add(invoice);
+                }
+            }
+        return filteredInvoices;
     }
 }

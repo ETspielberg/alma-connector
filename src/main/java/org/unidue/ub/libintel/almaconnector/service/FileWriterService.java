@@ -45,9 +45,8 @@ public class FileWriterService {
      * @return the number of sap data which could not be written
      */
     @Secured({ "ROLE_SYSTEM", "ROLE_SAP" })
-    public int writeLines(List<SapData> sapDataList) {
+    public int writeLines(List<SapData> sapDataList, String currentDate) {
         int failures = 0;
-        String currentDate = formatter.format(new Date());
         String checkFilename = "Druck_sap-" + currentDate + ".txt";
         String sapFilename = "sap-" + currentDate + ".txt";
         initializeFiles(currentDate, checkFilename, sapFilename);
@@ -58,6 +57,7 @@ public class FileWriterService {
                 failures++;
                 log.warn("could not write line: " + sapData.toFixedLengthLine());
             }
+            sapData.generateComment();
             try (BufferedWriter bw = new BufferedWriter(new FileWriter(this.file + sapFilename, true))) {
                 addLine(bw, sapData.toCsv());
             } catch(IOException ex) {

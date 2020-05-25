@@ -10,7 +10,6 @@ import org.unidue.ub.libintel.almaconnector.model.SapAccountData;
 import org.unidue.ub.libintel.almaconnector.model.SapData;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class Utils {
@@ -42,7 +41,7 @@ public class Utils {
                             .withCreditor(vendor.getFinancialSysCode())
                             .withToDate(invoiceLine.getSubscriptionToDate())
                             .withFromDate(invoiceLine.getSubscriptionFromDate())
-                            .withCommitmentDate(new Date())
+                            .withCommitmentDate(invoice.getPayment().getVoucherDate())
                             .withCurrency(invoice.getCurrency().getValue())
                             .withPositionalNumber(invoiceLine.getNumber())
                             .withSapAccountData(sapAccountData)
@@ -52,7 +51,7 @@ public class Utils {
                         sapData.costType = invoiceLine.getInvoiceLineVat().getVatCode().getValue();
                     } catch (Exception e) {
                         log.warn("no vat code given for invoice " + invoice.getId());
-                        sapData.costType = "";
+                        sapData.costType = "H1";
                     }
                     sapDataList.add(sapData);
                 }
@@ -99,7 +98,7 @@ public class Utils {
             else
                 sapAccountData.setLedgerAccount(parts[3]);
 
-        //second case: Berufungsmittel (starting with 1)
+        // second case: Berufungsmittel (starting with 1)
         } else if (parts[0].startsWith("1")) {
             log.debug("Berufungsmittel");
             sapAccountData
@@ -107,7 +106,7 @@ public class Utils {
                     .withPspElement("555100000" + "9" + parts[0])
                     .withLedgerAccount("6810" + parts[2]);
 
-        //third case: Haushaltsmittel (starting with 0)
+        // third case: Haushaltsmittel (starting with 0)
         } else if (parts[0].startsWith("0")) {
             log.debug("Haushalt");
             sapAccountData
