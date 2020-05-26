@@ -6,15 +6,15 @@ public class LocalizationService {
 
     static SapData generateComment(SapData sapData) {
         switch (sapData.sapAccountData.getImportCheckString()) {
-            case "681004002020P55300000030002": sapData.comment = "Kursbuch - " + sapData.comment;
-            case "681000002020P55300000030002": sapData.comment = "Kursbuch - " + sapData.comment;
-            case "681002002020P55300000030002": sapData.comment = "Kursbuch - " + sapData.comment;
-            case "681000002020P40100000130010": sapData.comment = "Kursbuch - " + sapData.comment;
-            case "681010002020P55300000030002": sapData.comment = "Kursbuch - " + sapData.comment;
-            case "681005002020P55300000030002": sapData.comment = "Kursbuch - " + sapData.comment;
-            case "681000002020P40112010130008": sapData.comment = "FKZ:01JA1610, ProViel, Teilproj.: Deutsch inklusiv";
+            case "681004002020P55300000030002":
+            case "681010002020P55300000030002":
+            case "681000002020P40100000130010":
+            case "681002002020P55300000030002":
+            case "681000002020P55300000030002":
+            case "681005002020P55300000030002":
+                break;
             default: {
-                if ("B-1626".equals(sapData.vendorCode) || "B-1632".equals(sapData.vendorCode)) {
+                if ("B-HBZ".equals(sapData.vendorCode)) {
                     return sapData;
                 }
                 switch (sapData.sapAccountData.getLedgerAccount()) {
