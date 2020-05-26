@@ -45,6 +45,7 @@ public class AlmaInvoiceServices {
         // as long as not all data are being collected, collect further
         while (invoiceList.size() < invoices.getTotalRecordCount()) {
             offset += batchSize;
+            log.info("collecting invoices from " + offset + " to " + offset + batchSize);
             invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "", "", "", "", batchSize, offset, "");
             invoiceList.addAll(invoices.getInvoice());
         }

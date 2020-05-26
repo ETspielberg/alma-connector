@@ -15,6 +15,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import static org.unidue.ub.libintel.almaconnector.service.LocalizationService.generateComment;
+
 @Service
 public class FileWriterService {
 
@@ -57,12 +59,11 @@ public class FileWriterService {
                 failures++;
                 log.warn("could not write line: " + sapData.toFixedLengthLine());
             }
-            sapData.generateComment();
             try (BufferedWriter bw = new BufferedWriter(new FileWriter(this.file + sapFilename, true))) {
-                addLine(bw, sapData.toCsv());
+                addLine(bw, generateComment(sapData).toCsv());
             } catch(IOException ex) {
                 failures++;
-                log.warn("could not write line: " + sapData.toFixedLengthLine());
+                log.warn("could not write line: " + sapData.toCsv());
             }
         }
         return failures;
