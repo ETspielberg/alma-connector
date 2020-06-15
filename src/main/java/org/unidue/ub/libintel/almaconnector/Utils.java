@@ -48,7 +48,11 @@ public class Utils {
                             .withInvoiceNumber(invoice.getNumber())
                             .withComment(invoiceLine.getNote());
                     try {
-                        sapData.costType = invoiceLine.getInvoiceLineVat().getVatCode().getValue();
+                        String invoiceLineVatCode = invoiceLine.getInvoiceLineVat().getVatCode().getValue();
+                        if (!"".equals(invoiceLineVatCode))
+                            sapData.costType = invoiceLine.getInvoiceLineVat().getVatCode().getValue();
+                        else
+                            sapData.costType = invoice.getInvoiceVat().getVatCode().getValue();
                     } catch (Exception e) {
                         log.warn("no vat code given for invoice " + invoice.getId());
                         sapData.costType = "H1";

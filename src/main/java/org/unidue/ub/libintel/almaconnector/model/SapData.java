@@ -132,7 +132,7 @@ public class SapData implements Comparable<SapData> {
                 string += "K;";
         } else
             string += "K;";
-        string += this.sapAccountData.getImportCheckString();
+        string += this.sapAccountData.getSapString();
         return string;
     }
 

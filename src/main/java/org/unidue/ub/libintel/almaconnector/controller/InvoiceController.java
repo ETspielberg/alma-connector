@@ -68,7 +68,7 @@ public class InvoiceController {
         List<Invoice> invoices = this.almaInvoiceServices.getOpenInvoicesForDate(dateToSearch);
         int missed = writeSapData(invoices, date);
         if (missed == 0)
-            return ResponseEntity.ok("all itmes have been successfully written to file");
+            return ResponseEntity.ok("all items have been successfully written to file");
         else
             return ResponseEntity.ok(missed + " items could not be written");
     }

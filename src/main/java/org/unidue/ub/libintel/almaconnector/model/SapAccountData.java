@@ -42,6 +42,13 @@ public class SapAccountData {
             return this.ledgerAccount + "K" + costCentre;
     }
 
+    public String getSapString() {
+        if (!this.pspElement.isEmpty())
+            return this.ledgerAccount  + this.fonds + "P" + this.pspElement;
+        else
+            return this.ledgerAccount + this.fonds +  "K" + costCentre;
+    }
+
     public String getFonds() {
         return fonds;
     }

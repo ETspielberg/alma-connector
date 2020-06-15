@@ -37,7 +37,7 @@ public class AlmaInvoiceServices {
         int offset = 0;
 
         // retrieve first list of po-lines.
-        Invoices invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "", "", "", "", batchSize, offset, "");
+        Invoices invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "Ready to be Paid", "", "", "", batchSize, offset, "");
         List<Invoice> invoiceList = new ArrayList<>(invoices.getInvoice());
 
         log.info("retrieving " + invoices.getTotalRecordCount() + " invoices");
