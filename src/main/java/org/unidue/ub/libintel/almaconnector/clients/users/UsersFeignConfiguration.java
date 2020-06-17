@@ -32,6 +32,10 @@ public class UsersFeignConfiguration {
         return apiKeyAuth;
     }
 
+    /**
+     * activates the full logging of the Feign-client
+     * @return a logger level
+     */
     @Bean
     feign.Logger.Level feignLoggerLevel() {
         return feign.Logger.Level.FULL;

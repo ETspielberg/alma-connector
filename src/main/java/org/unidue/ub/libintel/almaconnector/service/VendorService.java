@@ -31,7 +31,7 @@ public class VendorService {
     @Cacheable("vendors")
     public Vendor getVendorAccount(String vendorAccountCode) {
         try {
-            return this.almaVendorApiClient.getVendorsVendorCode("aaplication/json", vendorAccountCode);
+            return this.almaVendorApiClient.getVendorsVendorCode("application/json", vendorAccountCode);
         } catch (FeignException fe) {
             log.warn("could not retrieve vendor " + vendorAccountCode, fe);
             return null;

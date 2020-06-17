@@ -1,4 +1,6 @@
 feign:
+  httpclient:
+    disableSslValidation: true
   client:
     config:
       settings-backend:
@@ -12,13 +14,16 @@ feign:
         readTimeout: 600000
 server:
   port: ${server_port:11889}
-  logging:
-    level:
-      org:
-        unidue:
-          ub:
-            libintel:
-              almaconnector:
-                clients:
-                  acquisition:
-                    AlmaPoLinesApiClient: DEBUG
+logging:
+  level:
+    org:
+      unidue:
+        ub:
+          libintel:
+            almaconnector:
+              clients:
+                acquisition:
+                  AlmaPoLinesApiClient: DEBUG
+                  AlmaInvoicesApiClient: DEBUG
+            service:
+              AlmaInvoiceService: DEBUG

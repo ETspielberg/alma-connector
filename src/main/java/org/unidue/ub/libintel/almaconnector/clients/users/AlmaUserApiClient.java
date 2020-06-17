@@ -29,7 +29,7 @@ public interface AlmaUserApiClient {
      * @param orderBy A few sort options are available: last_name, first_name and primary_id. One sort option may be used at a time. A secondary sort key, primary_id, is added if last_name or first_name is the primary sort. Default sorting is by all three in the following order: last_name, first_name, primary_id. If the query option is used, the result will not sort by primary_id. (optional, default to &quot;last_name, first_name, primary_id&quot;)
      * @param sourceInstitutionCode The code of the source institution from which the user was linked. Optional (optional, default to &quot;&quot;)
      * @param sourceUserId The ID of the user in the source institution. Optional. (optional, default to &quot;&quot;)
-     * @return Object
+     * @return List<AlmaUser>
      */
     @RequestMapping(method=RequestMethod.GET, value="")
     List<AlmaUser> getAlmawsV1Users(@RequestParam("Accept") String accept, @RequestParam("limit") Integer limit, @RequestParam("offset") Integer offset, @RequestParam("q") String q, @RequestParam("order_by") String orderBy, @RequestParam("source_institution_code") String sourceInstitutionCode, @RequestParam("source_user_id") String sourceUserId);
@@ -42,7 +42,7 @@ public interface AlmaUserApiClient {
      * @param view Special view of User object. Optional. Possible values: full - full User object will be returned. brief - only user&#39;s core information, emails, identifiers and statistics are returned. By default, the full User object will be returned. (optional, default to &quot;full&quot;)
      * @param expand This parameter allows for expanding on some user information. Three options are available: loans-Include the total number of loans; requests-Include the total number of requests; fees-Include the balance of fees. To have more than one option, use a comma separator. (optional, default to &quot;none&quot;)
      * @param sourceInstitutionCode The source institution Code. Optional. When used the user_id is used to locate a copied user (linked account) based on source_link_id. (optional, default to &quot;&quot;)
-     * @return Object
+     * @return AlmaUser
      */
     @RequestMapping(method=RequestMethod.GET, value="/{userId}")
     AlmaUser getAlmawsV1UsersUserId(@RequestParam("Accept") String accept, @PathVariable("userId") String userId, @RequestParam("user_id_type") String userIdType, @RequestParam("view") String view, @RequestParam("expand") String expand, @RequestParam("source_institution_code") String sourceInstitutionCode);
@@ -55,7 +55,7 @@ public interface AlmaUserApiClient {
      * @param sendPinNumberLetter The email notification for PIN setting change will be sent (optional, default to &quot;false&quot;)
      * @param sourceInstitutionCode The code of the source institution from which the user was linked. Optional (optional, default to &quot;&quot;)
      * @param sourceUserId The ID of the user in the source institution. Optional. (optional, default to &quot;&quot;)
-     * @return Object
+     * @return AlmaUser
      */
     @RequestMapping(method=RequestMethod.POST, value="")
     AlmaUser postAlmawsV1Users(@RequestBody AlmaUser body, @RequestParam("Accept") String accept, @RequestParam("social_authentication") String socialAuthentication, @RequestParam("send_pin_number_letter") String sendPinNumberLetter, @RequestParam("source_institution_code") String sourceInstitutionCode, @RequestParam("source_user_id") String sourceUserId);
@@ -67,10 +67,10 @@ public interface AlmaUserApiClient {
      * @param password Add the user&#39;s password. Or, enter the password in the header Exl-User-Pw. A password is mandatory for op&#x3D;auth. (required)
      * @param userIdType The type of identifier that is being searched. Optional. If this is not provided, all unique identifier types are used. The values that can be used are any of the values in UserIdentifierTypes code table. (optional, default to &quot;all_unique&quot;)
      * @param op The operation to be performed on the user. Mandatory. Currently op&#x3D;auth or op&#x3D;refresh are supported.  The default is auth. (optional, default to &quot;auth&quot;)
-     * @return Object
+     * @return AlmaUser
      */
     @RequestMapping(method=RequestMethod.POST, value="/{userId}")
-    Object postAlmawsV1UsersUserId(@RequestParam("Accept") String accept, @PathVariable("userId") String userId, @RequestParam("password") String password, @RequestParam("user_id_type") String userIdType, @RequestParam("op") String op);
+    AlmaUser postAlmawsV1UsersUserId(@RequestParam("Accept") String accept, @PathVariable("userId") String userId, @RequestParam("password") String password, @RequestParam("user_id_type") String userIdType, @RequestParam("op") String op);
 
     /**
      * Update User Details
@@ -80,7 +80,7 @@ public interface AlmaUserApiClient {
      * @param userIdType The type of identifier that is being searched. Optional. If this is not provided, all unique identifier types are used. The values that can be used are any of the values in UserIdentifierTypes code table. (optional, default to &quot;all_unique&quot;)
      * @param override The following fields of the user object are not replaced if they were updated manually:   user_group, job_category, pin_number, preferred_language, campus_code, rs_libraries, user_title, library_notices.   To update these fields, specify the fields you want to replace in this parameter.   For example override&#x3D;user_group,job_category. Default is empty. (optional, default to &quot;&quot;)
      * @param sendPinNumberLetter The email notification for PIN setting change will be sent (optional, default to &quot;false&quot;)
-     * @return Object
+     * @return AlmaUser
      */
     @RequestMapping(method=RequestMethod.PUT, value="/{userId}")
     AlmaUser putAlmawsV1UsersUserId(@RequestBody AlmaUser body, @RequestParam("Accept") String accept, @PathVariable("userId") String userId, @RequestParam("user_id_type") String userIdType, @RequestParam("override") String override, @RequestParam("send_pin_number_letter") String sendPinNumberLetter);

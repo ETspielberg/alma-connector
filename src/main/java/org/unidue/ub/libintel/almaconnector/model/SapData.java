@@ -3,6 +3,9 @@ package org.unidue.ub.libintel.almaconnector.model;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ *
+ */
 public class SapData implements Comparable<SapData> {
 
     private final static SimpleDateFormat readableDateFormatter = new SimpleDateFormat("dd.MM.yyyy");

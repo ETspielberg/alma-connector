@@ -5,6 +5,9 @@ import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Configuration of the cache used in API calls.
+ */
 @Configuration
 public class CacheConfiguration {
 

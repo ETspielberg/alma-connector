@@ -1,5 +1,7 @@
 package org.unidue.ub.libintel.almaconnector;
 
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unidue.ub.alma.shared.acq.FundDistribution;
@@ -8,10 +10,17 @@ import org.unidue.ub.alma.shared.acq.InvoiceLine;
 import org.unidue.ub.alma.shared.acq.Vendor;
 import org.unidue.ub.libintel.almaconnector.model.SapAccountData;
 import org.unidue.ub.libintel.almaconnector.model.SapData;
+import org.unidue.ub.libintel.almaconnector.model.SapResponse;
+import org.unidue.ub.libintel.almaconnector.model.SapResponseContainer;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * a number of static helper functions to convert data
+ */
 public class Utils {
 
     private final static Logger log = LoggerFactory.getLogger(Utils.class);
@@ -23,16 +32,25 @@ public class Utils {
      * @return a List of SapData, one for each fund to be used
      */
     public static List<SapData> convertInvoiceToSapData(Invoice invoice, Vendor vendor) {
+        // initialize the empty list
         List<SapData> sapDataList = new ArrayList<>();
+        // check if there are invoices
         if (invoice.getInvoiceLines() != null) {
+            // go through the invoices
             for (InvoiceLine invoiceLine : invoice.getInvoiceLines().getInvoiceLine()) {
+                //go through the individual funds to create a single entry for each of the funds to be allocated
                 for (FundDistribution fundDistribution : invoiceLine.getFundDistribution()) {
+                    // read the fund code
                     String fundCode = fundDistribution.getFundCode().getValue();
+                    // convert the fund code into the corresponding SAP account data
                     SapAccountData sapAccountData = convertFundCodeToSapAccountData(fundCode);
+
+                    // if the conversion fails, log the error
                     if (sapAccountData == null) {
                         log.warn("no sap account available for fund " + fundDistribution.getFundCode().getValue());
                         continue;
                     }
+                    // create an SAP data object by the given data
                     SapData sapData = new SapData()
                             .withCurrency(invoice.getCurrency().getValue())
                             .withInvoiceAmount(fundDistribution.getAmount())
@@ -47,16 +65,23 @@ public class Utils {
                             .withSapAccountData(sapAccountData)
                             .withInvoiceNumber(invoice.getNumber())
                             .withComment(invoiceLine.getNote());
+                    // read the VAT code from the data.
                     try {
                         String invoiceLineVatCode = invoiceLine.getInvoiceLineVat().getVatCode().getValue();
                         if (!"".equals(invoiceLineVatCode))
-                            sapData.costType = invoiceLine.getInvoiceLineVat().getVatCode().getValue();
-                        else
-                            sapData.costType = invoice.getInvoiceVat().getVatCode().getValue();
+                            sapData.costType = invoiceLineVatCode;
+                        else {
+                            String invoiceVatCode = invoice.getInvoiceVat().getVatCode().getValue();
+                            if (!"".equals(invoiceVatCode))
+                                sapData.costType = invoiceLineVatCode;
+                            else
+                                sapData.costType = "H9";
+                        }
                     } catch (Exception e) {
                         log.warn("no vat code given for invoice " + invoice.getId());
                         sapData.costType = "H1";
                     }
+
                     sapDataList.add(sapData);
                 }
             }
@@ -69,7 +94,7 @@ public class Utils {
      * @param fundCode the fund code to be converted
      * @return a SapAccountData object holding the individual SAP data
      */
-    public static SapAccountData convertFundCodeToSapAccountData(String fundCode) {
+    private static SapAccountData convertFundCodeToSapAccountData(String fundCode) {
         SapAccountData sapAccountData = new SapAccountData();
         // cut the string at the '-'
         String[] parts = fundCode.split("-");
@@ -143,5 +168,45 @@ public class Utils {
             }
         }
         return sapAccountData;
+    }
+
+    /**
+     * calculates a container holding the list of SAP response objects and the number of unsuccessful readings from an
+     * excel file
+     * @param worksheet a XSSFSheet object of a sheet in an excel file
+     * @return a container object holding the number of errors upon reading individual lines and the list of read SAP
+     * response objects
+     */
+    public static SapResponseContainer getFromExcel(XSSFSheet worksheet) {
+        SapResponseContainer container = new SapResponseContainer();
+        for (int i = 1; i < worksheet.getPhysicalNumberOfRows() - 1; i++) {
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+            //read the row and get all the data from it.
+            XSSFRow row = worksheet.getRow(i);
+            String runId = row.getCell(0).getStringCellValue();
+            String creditor = row.getCell(1).getStringCellValue();
+            String invoiceId = row.getCell(2).getStringCellValue();
+            String currency = row.getCell(3).getStringCellValue();
+            double amount = 0.0;
+            try {
+                amount = row.getCell(4).getNumericCellValue();
+            } catch (IllegalStateException ise) {
+                container.increaseNumberOfErrors();
+                log.warn("could not parse amount" + row.getCell(4).getStringCellValue(), ise);
+            }
+            String voucherId = row.getCell(5).getStringCellValue();
+            String fromString = row.getCell(6).getStringCellValue();
+            String toString = row.getCell(7).getStringCellValue();
+            // create the sap response object
+            SapResponse sapResponse = new SapResponse(runId, creditor, invoiceId, amount, currency, voucherId);
+            // try to read in the dates. If none are present, let the date be null
+            try {
+                sapResponse.withInvoiceFrom(format.parse(fromString)).withInvoiceTo(format.parse(toString));
+            } catch (ParseException e) {
+                log.debug("no dates given");
+            }
+            container.addSapResponse(sapResponse);
+        }
+        return container;
     }
 }

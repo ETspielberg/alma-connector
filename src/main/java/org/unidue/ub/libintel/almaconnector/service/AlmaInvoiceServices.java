@@ -3,14 +3,14 @@ package org.unidue.ub.libintel.almaconnector.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.unidue.ub.alma.shared.acq.Invoice;
-import org.unidue.ub.alma.shared.acq.Invoices;
+import org.unidue.ub.alma.shared.acq.*;
 import org.unidue.ub.libintel.almaconnector.clients.acquisition.AlmaInvoicesApiClient;
+import org.unidue.ub.libintel.almaconnector.model.InvoiceUpdate;
+import org.unidue.ub.libintel.almaconnector.model.SapResponse;
+import org.unidue.ub.libintel.almaconnector.model.SapResponseContainer;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class AlmaInvoiceServices {
@@ -33,7 +33,7 @@ public class AlmaInvoiceServices {
      */
     public List<Invoice> getOpenInvoices() {
         // initialize parameters
-        int batchSize = 100;
+        int batchSize = 25;
         int offset = 0;
 
         // retrieve first list of po-lines.
@@ -45,8 +45,8 @@ public class AlmaInvoiceServices {
         // as long as not all data are being collected, collect further
         while (invoiceList.size() < invoices.getTotalRecordCount()) {
             offset += batchSize;
-            log.info("collecting invoices from " + offset + " to " + offset + batchSize);
-            invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "", "", "", "", batchSize, offset, "");
+            log.info("collecting invoices from " + offset + " to " + (offset + batchSize));
+            invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "Ready to be Paid", "", "", "", batchSize, offset, "");
             invoiceList.addAll(invoices.getInvoice());
         }
         return invoiceList;
@@ -54,6 +54,49 @@ public class AlmaInvoiceServices {
 
     public List<Invoice> getOpenInvoicesForDate(Date date) {
         return filterList(date, getOpenInvoices());
+    }
+
+    public SapResponseContainer updateInvoiceWithErpData(SapResponseContainer container) {
+        List<SapResponse> sapResponses = container.getResponses();
+        log.debug("got " + sapResponses.size() + "SAP responses");
+        Map<String, List<SapResponse>> sapResponsesPerInvoice = new HashMap<>();
+        for (SapResponse sapResponse : sapResponses) {
+            String invoiceNumber = sapResponse.getInvoiceNumber();
+            if (sapResponsesPerInvoice.containsKey(invoiceNumber)) {
+                log.debug("invoice number already in map, adding sap response to list");
+                sapResponsesPerInvoice.get(invoiceNumber).add(sapResponse);
+            } else {
+                sapResponsesPerInvoice.put(invoiceNumber, new ArrayList<>(Collections.singletonList(sapResponse)));
+                log.debug("invoice number not in map, creating new entry");
+            }
+        }
+        for (Map.Entry<String, List<SapResponse>> entry : sapResponsesPerInvoice.entrySet()) {
+            String searchQuery = "invoice_number~" + entry.getKey();
+            Invoices invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "Ready to be Paid", "", "", searchQuery, 20, 0, "");
+            if (invoices.getTotalRecordCount() == 1) {
+                Invoice invoice = invoices.getInvoice().get(0);
+                List<SapResponse> indiviudalResponses = entry.getValue();
+                log.info("got " + indiviudalResponses.size() + " + invoice confirmations for " + invoice.getInvoiceLines().getInvoiceLine().size() + " invoices");
+                if (invoice.getInvoiceLines().getInvoiceLine().size() == indiviudalResponses.size()) {
+                    Payment payment = invoice.getPayment();
+                    double totalAmount = 0.0;
+                    for (SapResponse individualResponse: indiviudalResponses) {
+                        totalAmount += individualResponse.getAmount();
+                    }
+                    InvoiceUpdate invoiceUpdate = new InvoiceUpdate(payment);
+                    try {
+                        this.almaInvoicesApiClient.postInvoicesInvoiceIdToUpdate(invoiceUpdate, "application/json", invoice.getId(), "paid");
+                    } catch (Exception e) {
+                        container.increaseNumberOfErrors();
+                    }
+                    payment.setVoucherNumber(indiviudalResponses.get(0).getVoucherNumber());
+                    payment.setVoucherAmount(String.valueOf(totalAmount));
+                    payment.setVoucherCurrency(new PaymentVoucherCurrency().value(indiviudalResponses.get(0).getCurrency()));
+                    payment.setPaymentStatus(new PaymentPaymentStatus().value("PAID").desc("bezahlt"));
+                }
+            }
+        }
+        return container;
     }
 
 

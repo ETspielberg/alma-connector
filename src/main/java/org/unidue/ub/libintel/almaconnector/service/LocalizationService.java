@@ -2,7 +2,7 @@ package org.unidue.ub.libintel.almaconnector.service;
 
 import org.unidue.ub.libintel.almaconnector.model.SapData;
 
-public class LocalizationService {
+class LocalizationService {
 
     static SapData generateComment(SapData sapData) {
         switch (sapData.sapAccountData.getImportCheckString()) {

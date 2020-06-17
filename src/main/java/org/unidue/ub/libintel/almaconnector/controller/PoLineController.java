@@ -8,6 +8,9 @@ import org.unidue.ub.libintel.almaconnector.service.AlmaPoLineService;
 
 import java.util.List;
 
+/**
+ * Controller defining the endpoints for retrieving the po lines.
+ */
 @Controller
 public class PoLineController {
 

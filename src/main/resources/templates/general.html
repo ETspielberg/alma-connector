@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title><!doctype html>
+        <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+        <head th:fragment="generalHead">
+            <meta charset="utf-8">
+            <title>Lib:Intel</title>
+            <base href="/">
+            <meta name="viewport" content="width=device-width,initial-scale=1">
+            <link rel="icon" type="image/x-icon" href="favicon.ico">
+            <link type="text/css" th:rel="stylesheet"  th:href="@{webjars/bootstrap/4.4.1-1/css/bootstrap.css} "/>
+            <link type="text/css" th:rel="stylesheet"  th:href="@{webjars/primeng/6.1.4/resources/primeng.css} "/>
+            <link th:href="@{/css/styles.css}" rel="stylesheet" type="text/css"/>
+        </head>
+<body>
+
+<div th:fragment="jumbotron" class="jumbotron">
+    <div class="container">
+        <h1><i>Lib</i>:Intel</h1>
+    </div>
+</div>
+
+<div class="container">
+</div>
+
+<footer th:fragement="footer" class="footer">
+    <div class="footer-copyright text-center py-3">
+        <a href="https://www.uni-due.de/ub/dsgvo.php#email/">Datenschutz an der UB</a>
+    </div>
+</footer>
+</body>
+</html>

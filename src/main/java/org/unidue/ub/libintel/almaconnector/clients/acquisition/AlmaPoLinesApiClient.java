@@ -38,7 +38,7 @@ public interface AlmaPoLinesApiClient {
      * @param library                The code of the library that owns the PO lines. Optional. If supplied, only the PO Lines for this library will be retrieved. If not supplied, all the PO Lines that match the other parameters will be retrieved. (optional, default to &quot;&quot;)
      * @param minExpectedArrivalDate Retrieve PO lines with expected arrival date starting this Date (YYYY-MM-DD). Optional. (optional, default to &quot;&quot;)
      * @param maxExpectedArrivalDate Retrieve PO lines with expected arrival date until this Date (YYYY-MM-DD), included. Optional. (optional, default to &quot;&quot;)
-     * @return Object
+     * @return PoLines
      */
     @RequestMapping(method=RequestMethod.GET)
     PoLines getPoLines(@RequestHeader("Accept") String accept, @RequestParam("q") String q, @RequestParam("status") String status, @RequestParam("limit") Integer limit, @RequestParam("offset") Integer offset, @RequestParam("order_by") String orderBy, @RequestParam("direction") String direction, @RequestParam("acquisition_method") String acquisitionMethod, @RequestParam("expand") String expand, @RequestParam("library") String library, @RequestParam("min_expected_arrival_date") String minExpectedArrivalDate, @RequestParam("max_expected_arrival_date") String maxExpectedArrivalDate);
@@ -48,7 +48,7 @@ public interface AlmaPoLinesApiClient {
      * This API returns a specific PO-Line.
      *
      * @param poLineId The PO-Line number. (required)
-     * @return Object
+     * @return PoLine
      */
     @RequestMapping(method = RequestMethod.GET, value="/{poLineId}")
     PoLine getPoLinesPoLineId(@RequestHeader("Accept") String accept, @PathVariable("po_line_id") String poLineId);
@@ -58,7 +58,7 @@ public interface AlmaPoLinesApiClient {
      * This API returns the items related to a specific PO-Line.   The items retrieved include only barcodes and a link for the Get-Item API
      *
      * @param poLineId The PO-Line number. (required)
-     * @return Object
+     * @return Items
      */
     @RequestMapping(method=RequestMethod.GET, value="/{poLineId}/items")
     Items getPoLinesPoLineIdItems(@RequestHeader("Accept") String accept, @PathVariable("po_line_id") String poLineId);
@@ -69,7 +69,7 @@ public interface AlmaPoLinesApiClient {
      *
      * @param body        This method creates a PO Line object. See [here](/alma/apis/docs/xsd/rest_po_line.xsd?tags&#x3D;POST) (required)
      * @param profileCode New Order API profile code. Optional. (optional, default to &quot;&quot;)
-     * @return Object
+     * @return PoLine
      */
     @RequestMapping(method=RequestMethod.POST)
     PoLine postAcqPoLines(@RequestBody PoLine body, @RequestHeader("Accept") String accept, @RequestParam("profile_code") String profileCode);
@@ -83,7 +83,7 @@ public interface AlmaPoLinesApiClient {
      * @param receiveDate       The receive date. Default value is current time.  Expected Format: YYYY-MM-DDZ (optional, default to &quot;&quot;)
      * @param department        The code of the department where the item is being received. If not supplied, a random department will be chosen from the owning library&#39;s acquisition departments. (optional, default to &quot;&quot;)
      * @param departmentLibrary The library code of the department where the item is being received. (optional, default to &quot;&quot;)
-     * @return Object
+     * @return Item
      */
     @RequestMapping(method=RequestMethod.POST, value="/{poLineId}/items")
     Item postPoLinesPoLineIdItems(@RequestBody Item body, @RequestHeader("Accept") String accept, @PathVariable("po_line_id") String poLineId, @RequestParam("receive_date") String receiveDate, @RequestParam("department") String department, @RequestParam("department_library") String departmentLibrary);
@@ -99,7 +99,7 @@ public interface AlmaPoLinesApiClient {
      * @param receiveDate       The receive date. Default value is current time.  Expected Format: YYYY-MM-DDZ (optional, default to &quot;&quot;)
      * @param department        The code of the department where the item is being received. If not supplied, a random department will be chosen from the owning library&#39;s acquisition departments. (optional, default to &quot;&quot;)
      * @param departmentLibrary The library code of the department where the item is being received. (optional, default to &quot;&quot;)
-     * @return Object
+     * @return PoLines
      */
     @RequestMapping(method=RequestMethod.POST, value="/{poLineId}/items/{itemId}")
     PoLines postPoLinesPoLineIdItemsItemId(@RequestBody PoLines body, @RequestHeader("Accept") String accept, @PathVariable("poLineId") String poLineId, @PathVariable("itemId") String itemId, @RequestParam("op") String op, @RequestParam("receive_date") String receiveDate, @RequestParam("department") String department, @RequestParam("department_library") String departmentLibrary);
@@ -111,7 +111,7 @@ public interface AlmaPoLinesApiClient {
      * @param poLineId        The PO-Line number. (required)
      * @param body            This method creates a PO Line object. See [here](/alma/apis/docs/xsd/rest_po_line.xsd?tags&#x3D;PUT) (required)
      * @param updateInventory Flag for updating the PO Line&#39;s inventory. Options: true, false. Default: true. (optional, default to &quot;true&quot;)
-     * @return Object
+     * @return PoLine
      */
     @RequestMapping(method=RequestMethod.POST, value="/{poLineId}")
     PoLine putPoLinesPoLineId(@RequestBody PoLine body, @RequestHeader("Accept") String accept, @PathVariable("poLineId") String poLineId, @RequestParam("update_inventory") String updateInventory);

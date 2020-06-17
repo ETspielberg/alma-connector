@@ -11,8 +11,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 import static org.unidue.ub.libintel.almaconnector.service.LocalizationService.generateComment;
@@ -26,8 +24,6 @@ public class FileWriterService {
 
     private final String file;
 
-    private final static SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-
     /**
      * constructor based autowiring with the data directory. Creates the folder if it does not exist.
      * @param dataDir the config property ub.statistics.data.dir
@@ -37,8 +33,10 @@ public class FileWriterService {
         this.dataDir = dataDir;
         this.file = this.dataDir + "/sapData/";
         File folder = new File(this.file);
-        if (!folder.exists())
-            folder.mkdirs();
+        if (!folder.exists()) {
+            if (!folder.mkdirs())
+                log.warn("could not create data directory");
+        }
     }
 
     /**

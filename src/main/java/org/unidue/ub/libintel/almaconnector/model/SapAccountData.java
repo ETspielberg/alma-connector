@@ -1,5 +1,8 @@
 package org.unidue.ub.libintel.almaconnector.model;
 
+/**
+ *
+ */
 public class SapAccountData {
 
     private String fonds = "";

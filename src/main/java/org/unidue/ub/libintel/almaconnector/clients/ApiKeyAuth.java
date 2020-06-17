@@ -36,6 +36,8 @@ public class ApiKeyAuth implements RequestInterceptor {
     }
 
     /**
+     * applies the API key authentication to each request. Depending on the location parameter the API key is added
+     * to the query, the header or the cookie with the name defined by the parameter paramName.
      * @param template the request template the authentication data are added to.
      */
     @Override
