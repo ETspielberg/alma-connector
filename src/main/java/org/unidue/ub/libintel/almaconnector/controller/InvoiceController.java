@@ -1,20 +1,16 @@
 package org.unidue.ub.libintel.almaconnector.controller;
 
-import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.unidue.ub.alma.shared.acq.Invoice;
 import org.unidue.ub.alma.shared.acq.Vendor;
 import org.unidue.ub.libintel.almaconnector.model.SapData;
-import org.unidue.ub.libintel.almaconnector.model.SapResponse;
 import org.unidue.ub.libintel.almaconnector.model.SapResponseContainer;
 import org.unidue.ub.libintel.almaconnector.service.AlmaInvoiceServices;
 import org.unidue.ub.libintel.almaconnector.service.FileWriterService;
@@ -35,7 +31,7 @@ import static org.unidue.ub.libintel.almaconnector.Utils.getFromExcel;
 /**
  * Controller defining the endpoints for retrieving the invoices.
  */
-@RestController
+@Controller
 public class InvoiceController {
 
     private final AlmaInvoiceServices almaInvoiceServices;
@@ -66,7 +62,7 @@ public class InvoiceController {
      *
      * @return a string representing the success of the file writing.
      */
-    @GetMapping("/invoices/active")
+    @GetMapping("/invoicesActive")
     public ResponseEntity<String> getInvoiceLines() {
         // collect the open invoices from the alma API
         List<Invoice> invoices = this.almaInvoiceServices.getOpenInvoices();
@@ -86,8 +82,18 @@ public class InvoiceController {
      *
      * @return a string representing the success of the file writing.
      */
-    @GetMapping("/invoices/active/bydate")
-    public ResponseEntity<String> getInvoiceLineForDate(@RequestParam String date) throws ParseException {
+    @GetMapping("/invoicesByDate")
+    public String getByDatePage() {
+        return "invoiceByDate";
+    }
+
+    /**
+     * retrieves the active invoices
+     *
+     * @return a string representing the success of the file writing.
+     */
+    @PostMapping("/invoicesByDate")
+    public ResponseEntity<String> getInvoiceLineForDate(String date) throws ParseException {
         // set the date to the desired date
         Date dateToSearch = dateFormat.parse(date);
         // collect to open invoices from the alma for a given date

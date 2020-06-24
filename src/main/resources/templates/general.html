@@ -3,18 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <title><!doctype html>
-        <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+        <html lang="en" xmlns:th="http://www.thymeleaf.org">
         <head th:fragment="generalHead">
             <meta charset="utf-8">
             <title>Lib:Intel</title>
             <base href="/">
             <meta name="viewport" content="width=device-width,initial-scale=1">
             <link rel="icon" type="image/x-icon" href="favicon.ico">
-            <link type="text/css" th:rel="stylesheet"  th:href="@{webjars/bootstrap/4.4.1-1/css/bootstrap.css} "/>
-            <link type="text/css" th:rel="stylesheet"  th:href="@{webjars/primeng/6.1.4/resources/primeng.css} "/>
+            <link type="text/css" th:rel="stylesheet" th:href="@{webjars/bootstrap/4.4.1-1/css/bootstrap.css} "/>
+            <link type="text/css" th:rel="stylesheet" th:href="@{webjars/primeng/6.1.4/resources/primeng.css} "/>
             <link th:href="@{/css/styles.css}" rel="stylesheet" type="text/css"/>
         </head>
 <body>
+
+<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="/">Lib-Intel</a>
+    <a style="color: greenyellow;" class="navbar-brand" th:href="@{/start}">:: Alma-Connector</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown"
+            aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav justify-content-end">
+            <li class="nav-item" >
+                <a class="nav-link" style="color: greenyellow;" href="/protokoll">Protokoll</a>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    SAP
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                    <a class="dropdown-item" th:href="@{/alma/sap}">Collect Invoices for Date</a>
+                    <a class="dropdown-item" th:href="@{/alma/invoicesActive}">Collect all open Invoices</a>
+                    <a class="dropdown-item" th:href="@{/alma/invoiceByDate}">Upload SAP Response Sheet</a>
+                </div>
+            </li>
+            <li class="nav-item" >
+                <a class="nav-link"  style="color: greenyellow;" th:href="@{/sap}">SAP</a>
+            </li>
+            <li class="nav-item" >
+                <a class="nav-link"  style="color: greenyellow;" href="/logout">Logout</a>
+            </li>
+        </ul>
+    </div>
+</nav>
 
 <div th:fragment="jumbotron" class="jumbotron">
     <div class="container">
@@ -29,6 +61,9 @@
     <div class="footer-copyright text-center py-3">
         <a href="https://www.uni-due.de/ub/dsgvo.php#email/">Datenschutz an der UB</a>
     </div>
+    <script th:src="@{~/alma/webjars/jquery/3.4.1/jquery.min.js}"></script>
+    <script th:src="@{~/alma/webjars/bootstrap/4.4.1-1/js/bootstrap.min.js}"></script>
 </footer>
+
 </body>
 </html>

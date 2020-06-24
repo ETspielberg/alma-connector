@@ -2,6 +2,9 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 <head th:replace="general :: generalHead" />
 <body>
+
+<nav th:replace="general :: navbar"></nav>
+
 <div th:replace="general :: jumbotron" />
 
 <div class="container">
@@ -18,13 +21,6 @@
                 <h3 th:text="#{protokoll}"></h3>
                 <p th:text="#{protokoll.short}"></p>
                 <a href="/protokoll"><button type="button" class="btn btn-primary">Zum Ausleihprotokoll</button></a>
-            </div>
-        </div>
-        <div th:each="module: ${modules}" class="ui-g-12 ui-md-6 ui-lg-3">
-            <div class="tile">
-                <h3 th:text="${module.title}"></h3>
-                <p th:text="${module.shortDescription}"></p>
-                <a th:href="${module.href}"><button type="button" class="btn btn-primary" th:text="${module.buttonLabel}    "></button></a>
             </div>
         </div>
     </div>

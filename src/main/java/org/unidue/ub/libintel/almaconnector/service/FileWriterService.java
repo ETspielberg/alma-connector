@@ -20,7 +20,6 @@ public class FileWriterService {
 
     private final Logger log = LoggerFactory.getLogger(FileWriterService.class);
 
-    private final String dataDir;
 
     private final String file;
 
@@ -30,8 +29,7 @@ public class FileWriterService {
      */
     // put in @Value annotation in constructor to make sure, the value is initiated before the bean is created.
     FileWriterService(@Value("${ub.statistics.data.dir}") String dataDir) {
-        this.dataDir = dataDir;
-        this.file = this.dataDir + "/sapData/";
+        this.file = dataDir + "/sapData/";
         File folder = new File(this.file);
         if (!folder.exists()) {
             if (!folder.mkdirs())

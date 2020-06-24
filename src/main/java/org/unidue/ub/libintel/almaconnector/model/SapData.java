@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- *
+ * holds all Data for a single invoice line to be uploaded to SAP
  */
 public class SapData implements Comparable<SapData> {
 

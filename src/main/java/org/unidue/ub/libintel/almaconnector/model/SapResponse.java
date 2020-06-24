@@ -3,7 +3,7 @@ package org.unidue.ub.libintel.almaconnector.model;
 import java.util.Date;
 
 /**
- *
+ * holds the information returned from the SAP import
  */
 public class SapResponse {
 

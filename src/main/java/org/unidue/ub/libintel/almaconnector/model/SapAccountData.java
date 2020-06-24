@@ -1,7 +1,7 @@
 package org.unidue.ub.libintel.almaconnector.model;
 
 /**
- *
+ * Container object for all SAP account related data.
  */
 public class SapAccountData {
 

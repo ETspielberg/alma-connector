@@ -94,7 +94,7 @@ public class Utils {
      * @param fundCode the fund code to be converted
      * @return a SapAccountData object holding the individual SAP data
      */
-    private static SapAccountData convertFundCodeToSapAccountData(String fundCode) {
+    public static SapAccountData convertFundCodeToSapAccountData(String fundCode) {
         SapAccountData sapAccountData = new SapAccountData();
         // cut the string at the '-'
         String[] parts = fundCode.split("-");

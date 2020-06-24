@@ -24,6 +24,10 @@ public class WebConfiguration implements WebMvcConfigurer {
         registry.addInterceptor(localeChangeInterceptor());
     }
 
+    /**
+     * the bean definition for the location resolver
+     * @return the locale resolver
+     */
     @Bean
     public LocaleResolver localeResolver() {
         SessionLocaleResolver slr = new SessionLocaleResolver();
@@ -31,6 +35,11 @@ public class WebConfiguration implements WebMvcConfigurer {
         return slr;
     }
 
+    /**
+     * registering a bean intercepting the request to read the lang parameter and intercept changes in the selected
+     * language.
+     * @return a LocaleChangeInterceptor
+     */
     @Bean
     public LocaleChangeInterceptor localeChangeInterceptor() {
         LocaleChangeInterceptor lci = new LocaleChangeInterceptor();
@@ -38,6 +47,10 @@ public class WebConfiguration implements WebMvcConfigurer {
         return lci;
     }
 
+    /**
+     * bean defining the source for the localization messages.
+     * @return  a MessageSource object
+     */
     @Bean
     public MessageSource messageSource() {
         ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
@@ -46,6 +59,10 @@ public class WebConfiguration implements WebMvcConfigurer {
         return messageSource;
     }
 
+    /**
+     * sets the paths to the resources such as images, style files and javascript
+     * @param registry the resource handler registry
+     */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler(

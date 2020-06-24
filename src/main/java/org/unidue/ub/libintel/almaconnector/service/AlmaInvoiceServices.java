@@ -53,6 +53,7 @@ public class AlmaInvoiceServices {
     }
 
     public List<Invoice> getOpenInvoicesForDate(Date date) {
+        log.info("collecting invoices for date " + new SimpleDateFormat("dd.MM.yyyy").format(date));
         return filterList(date, getOpenInvoices());
     }
 
@@ -76,7 +77,7 @@ public class AlmaInvoiceServices {
             if (invoices.getTotalRecordCount() == 1) {
                 Invoice invoice = invoices.getInvoice().get(0);
                 List<SapResponse> indiviudalResponses = entry.getValue();
-                log.info("got " + indiviudalResponses.size() + " + invoice confirmations for " + invoice.getInvoiceLines().getInvoiceLine().size() + " invoices");
+                log.info("Invoice " + entry.getKey() + ": got " + indiviudalResponses.size() + " + vouchers for " + invoice.getInvoiceLines().getInvoiceLine().size() + " invoices lines");
                 if (invoice.getInvoiceLines().getInvoiceLine().size() == indiviudalResponses.size()) {
                     Payment payment = invoice.getPayment();
                     double totalAmount = 0.0;

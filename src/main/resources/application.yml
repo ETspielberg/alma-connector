@@ -26,4 +26,4 @@ logging:
                   AlmaPoLinesApiClient: DEBUG
                   AlmaInvoicesApiClient: DEBUG
             service:
-              AlmaInvoiceService: DEBUG
+              AlmaInvoiceService: INFO
