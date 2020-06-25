@@ -20,7 +20,6 @@ public class FileWriterService {
 
     private final Logger log = LoggerFactory.getLogger(FileWriterService.class);
 
-
     private final String file;
 
     /**
@@ -44,6 +43,7 @@ public class FileWriterService {
      */
     @Secured({ "ROLE_SYSTEM", "ROLE_SAP" })
     public int writeLines(List<SapData> sapDataList, String currentDate) {
+        // initialize failure counter, print file and csv-file
         int failures = 0;
         String checkFilename = "Druck_sap-" + currentDate + ".txt";
         String sapFilename = "sap-" + currentDate + ".txt";
@@ -78,6 +78,7 @@ public class FileWriterService {
     }
 
     /**
+     * initialize files and deletes the files if present.
      * @param currentDate the current date
      * @param checkFilename the filename of the check/printed version
      * @param sapFilename the filename of the SAP import file

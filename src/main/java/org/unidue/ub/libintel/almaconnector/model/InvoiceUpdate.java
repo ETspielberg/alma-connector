@@ -13,9 +13,9 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 /**
- * Invoice Object.
+ * Invoice update object.
  */
-@ApiModel(description = "Invoice Object.")
+@ApiModel(description = "Invoice update object.")
 @XmlRootElement(name = "invoice")
 @XmlAccessorType(XmlAccessType.FIELD)
 @JacksonXmlRootElement(localName = "invoice")
@@ -33,7 +33,6 @@ public class InvoiceUpdate {
      * Get payment
      * @return payment
      **/
-
     @ApiModelProperty(value = "")
     @JsonProperty(JSON_PROPERTY_PAYMENT)
     @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)

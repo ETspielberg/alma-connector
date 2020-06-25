@@ -1,5 +1,6 @@
 package org.unidue.ub.libintel.almaconnector.service;
 
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.PoLine;
 import org.unidue.ub.alma.shared.acq.PoLines;
@@ -25,6 +26,7 @@ public class AlmaPoLineService {
      * retrieves the active po-lines.
      * @return a list of po-lines
      */
+    @Secured({ "ROLE_SYSTEM", "ROLE_ALMA" })
     public List<PoLine> getOpenPoLines() {
         // initialize parameters
         int batchSize = 100;

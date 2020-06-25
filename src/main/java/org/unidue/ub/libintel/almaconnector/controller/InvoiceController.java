@@ -2,8 +2,6 @@ package org.unidue.ub.libintel.almaconnector.controller;
 
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -42,8 +40,6 @@ public class InvoiceController {
 
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-    private final Logger log = LoggerFactory.getLogger(InvoiceController.class);
-
     /**
      * constructor based autowiring to the invoice service, the filewriter service and the vendorservice.
      *
@@ -58,11 +54,18 @@ public class InvoiceController {
     }
 
     /**
+     * the overview page of the
+     * @return the string sap for to use the sap.html template
+     */
+    @GetMapping("/sap")
+    public String getSapPage() { return "sap"; }
+
+    /**
      * retrieves the active invoices
      *
      * @return a string representing the success of the file writing.
      */
-    @GetMapping("/invoicesActive")
+    @PostMapping("/invoicesActive")
     public ResponseEntity<String> getInvoiceLines() {
         // collect the open invoices from the alma API
         List<Invoice> invoices = this.almaInvoiceServices.getOpenInvoices();
@@ -75,16 +78,6 @@ public class InvoiceController {
             return ResponseEntity.ok("all itmes have been successfully written to file");
         else
             return ResponseEntity.ok(missed + " items could not be written");
-    }
-
-    /**
-     * retrieves the active invoices
-     *
-     * @return a string representing the success of the file writing.
-     */
-    @GetMapping("/invoicesByDate")
-    public String getByDatePage() {
-        return "invoiceByDate";
     }
 
     /**
@@ -128,7 +121,7 @@ public class InvoiceController {
      * @return returns a status of 200 if the import was successful
      * @throws IOException thrown if the file could not be read
      */
-    @PostMapping("/invoices/update")
+    @PostMapping("/invoicesUpdate")
     public ResponseEntity<?> updateInvoicesWithSapData(@RequestParam("file") MultipartFile sapReturnFile) throws IOException {
         // read the excel spreadsheet from the request
         XSSFWorkbook workbook = new XSSFWorkbook(sapReturnFile.getInputStream());

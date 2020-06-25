@@ -4,6 +4,7 @@ import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.Vendor;
 import org.unidue.ub.libintel.almaconnector.clients.acquisition.AlmaVendorApiClient;
@@ -29,6 +30,7 @@ public class VendorService {
      * @return a vendor object
      */
     @Cacheable("vendors")
+    @Secured({ "ROLE_SYSTEM", "ROLE_SAP" })
     public Vendor getVendorAccount(String vendorAccountCode) {
         try {
             return this.almaVendorApiClient.getVendorsVendorCode("application/json", vendorAccountCode);

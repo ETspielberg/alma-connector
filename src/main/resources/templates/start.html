@@ -9,30 +9,11 @@
 
 <div class="container">
     <div class="ui-g">
-        <div class="ui-g-12 ui-md-6 ui-lg-3">
+        <div class="ui-g-12 ui-md-6 ui-lg-4">
             <div class="tile">
-                <h3 th:text="#{settings}"></h3>
-                <p th:text="#{settings.short}"></p>
-                <a th:href="@{/usersettings}"><button type="button" class="btn btn-primary">Einstellungen</button></a>
-            </div>
-        </div>
-        <div class="ui-g-12 ui-md-6 ui-lg-3">
-            <div class="tile">
-                <h3 th:text="#{protokoll}"></h3>
-                <p th:text="#{protokoll.short}"></p>
-                <a href="/protokoll"><button type="button" class="btn btn-primary">Zum Ausleihprotokoll</button></a>
-            </div>
-        </div>
-    </div>
-    <div class="ui-g">
-        <div class="ui-g-12 ui-md-6 ui-md-offset-3">
-            <div class="tile">
-                <h3>Logout</h3>
-                <a class="nav-link" sec:authorize="isAuthenticated()" th:href="@{/logout}">
-                    <button type="button" class="btn btn-danger">
-                        Logout
-                    </button>
-                </a>
+                <h3 style="height: 1.2em;" th:text="#{sap}"></h3>
+                <p  style="height: 8em;" th:text="#{sap.short}"></p>
+                <a th:href="@{/alma/sap}"><button type="button" class="btn btn-primary" th:text="#{sap.link}"></button></a>
             </div>
         </div>
     </div>

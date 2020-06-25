@@ -2,6 +2,7 @@ package org.unidue.ub.libintel.almaconnector.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.*;
 import org.unidue.ub.libintel.almaconnector.clients.acquisition.AlmaInvoicesApiClient;
@@ -31,6 +32,7 @@ public class AlmaInvoiceServices {
      * retrieves the open invoices from the Alma API.
      * @return  a list of invoices
      */
+    @Secured({ "ROLE_SYSTEM", "ROLE_SAP" })
     public List<Invoice> getOpenInvoices() {
         // initialize parameters
         int batchSize = 25;
@@ -52,15 +54,30 @@ public class AlmaInvoiceServices {
         return invoiceList;
     }
 
+    /**
+     * returns a list of open invoices for a given date
+     * @param date the date invoices should be returned for
+     * @return a list of invoices
+     */
+    @Secured({ "ROLE_SYSTEM", "ROLE_SAP" })
     public List<Invoice> getOpenInvoicesForDate(Date date) {
         log.info("collecting invoices for date " + new SimpleDateFormat("dd.MM.yyyy").format(date));
         return filterList(date, getOpenInvoices());
     }
 
+    /**
+     * updates the Invoices in Alma with the results of the SAP import
+     * @param container an SAP container object holding a list of SAP response object
+     * @return the SAP container objects the number of missed entries
+     */
+    @Secured({ "ROLE_SYSTEM", "ROLE_SAP" })
     public SapResponseContainer updateInvoiceWithErpData(SapResponseContainer container) {
         List<SapResponse> sapResponses = container.getResponses();
         log.debug("got " + sapResponses.size() + "SAP responses");
         Map<String, List<SapResponse>> sapResponsesPerInvoice = new HashMap<>();
+
+        // first order all items in a hashmap to collect the individual responses grouped together to rebuild the
+        // invoices from the invoice lines.
         for (SapResponse sapResponse : sapResponses) {
             String invoiceNumber = sapResponse.getInvoiceNumber();
             if (sapResponsesPerInvoice.containsKey(invoiceNumber)) {
@@ -100,7 +117,12 @@ public class AlmaInvoiceServices {
         return container;
     }
 
-
+    /**
+     * filters a list of Invoices according a given voucher date
+     * @param date the date of the voucher date to be returned
+     * @param invoices the list of invoices to be filtered
+     * @return the filtered list of invoices
+     */
     private List<Invoice> filterList(Date date, List<Invoice> invoices) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
         List<Invoice> filteredInvoices = new ArrayList<>();
@@ -109,6 +131,8 @@ public class AlmaInvoiceServices {
                 if (dateFormat.format(invoice.getPayment().getVoucherDate()).equals(dateFormat.format(date))) {
                     filteredInvoices.add(invoice);
                 }
+            } else {
+                log.warn("no voucher date given for invoice " + invoice.getId());
             }
         return filteredInvoices;
     }

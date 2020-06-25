@@ -15,7 +15,7 @@ Therefore several conditions must be fulfilled to run the service:
 
 ## Configuration
 
-The microservice treis to retrieve three configuration files from the central config server:
+The microservice tries to retrieve three configuration files from the central config server:
 * the 'files' configuration, defining the mandatory `ub.statistics.data.dir`property holding the information about the central data directory to store the sap files.
 * the 'client' configuration, holding several optional properties for the interaction within the Lib-Intel-platform.
 * the 'alma' configuration, holding the keys for the alma API. These should either be supplied in an encrypted properties file or by defining the environment variables. 

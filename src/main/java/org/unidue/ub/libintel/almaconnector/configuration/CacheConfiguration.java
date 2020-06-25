@@ -11,6 +11,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class CacheConfiguration {
 
+    /**
+     * customizes the cache manager to be used for retrieving the vendor accounts
+     * @return CacheManagerCustomizer
+     */
     @Bean
     public CacheManagerCustomizer<ConcurrentMapCacheManager> cacheManagerCustomizer() {
         return cacheManager -> cacheManager.setAllowNullValues(false);

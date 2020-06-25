@@ -14,6 +14,9 @@
 package org.unidue.ub.libintel.almaconnector.clients;
 
 
+/**
+ * helper methods for string handling
+ */
 public class StringUtil {
   /**
    * Check if the given array contains the given value (with case-insensitive comparison).

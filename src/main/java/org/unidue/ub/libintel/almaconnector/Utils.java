@@ -36,8 +36,10 @@ public class Utils {
         List<SapData> sapDataList = new ArrayList<>();
         // check if there are invoices
         if (invoice.getInvoiceLines() != null) {
+            log.debug("processing invoice " + invoice.getId());
             // go through the invoices
             for (InvoiceLine invoiceLine : invoice.getInvoiceLines().getInvoiceLine()) {
+                log.debug("processing invoice line " + invoiceLine.getId());
                 //go through the individual funds to create a single entry for each of the funds to be allocated
                 for (FundDistribution fundDistribution : invoiceLine.getFundDistribution()) {
                     // read the fund code
@@ -67,21 +69,25 @@ public class Utils {
                             .withComment(invoiceLine.getNote());
                     // read the VAT code from the data.
                     try {
+                        // get the vat code
                         String invoiceLineVatCode = invoiceLine.getInvoiceLineVat().getVatCode().getValue();
+                        // set the value of the vat code to a value which is not empty
                         if (!"".equals(invoiceLineVatCode))
                             sapData.costType = invoiceLineVatCode;
+                        // if no vat code is set on the invoice line take the one from the invoice
                         else {
                             String invoiceVatCode = invoice.getInvoiceVat().getVatCode().getValue();
                             if (!"".equals(invoiceVatCode))
                                 sapData.costType = invoiceLineVatCode;
-                            else
-                                sapData.costType = "H9";
+                            else {
+                                log.warn("no vat code given for invoice line " + invoiceLine.getId());
+                                sapData.costType = "";
+                            }
                         }
                     } catch (Exception e) {
-                        log.warn("no vat code given for invoice " + invoice.getId());
-                        sapData.costType = "H1";
+                        log.warn("no vat code given for invoice line " + invoiceLine.getId());
+                        sapData.costType = "";
                     }
-
                     sapDataList.add(sapData);
                 }
             }

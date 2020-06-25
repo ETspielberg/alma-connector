@@ -83,7 +83,6 @@ class LocalizationService {
                 }
             }
         }
-
         return sapData;
     }
 }

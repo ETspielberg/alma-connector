@@ -1,10 +1,55 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head th:replace="general :: generalHead" />
 <body>
+
+<nav th:replace="general :: navbar"></nav>
+
+<div th:replace="general :: jumbotron" />
+
+<div class="container">
+    <div class="ui-g">
+        <div class="ui-g-12 ui-md-6 ui-lg-4">
+            <div class="tile">
+                <h3 style="height:1.2em;" th:text="#{collect.open}"></h3>
+                <p style="height:8em;" th:text="#{collect.open.short}"></p>
+                <form th:action="@{alma/invoicesActive}" method="post">
+                    <input type="submit" class="btn btn-primary" th:value="#{invoices.collect.open}"/>
+                </form>
+            </div>
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-4">
+            <div class="tile">
+                <h3 style="height:1.2em;" th:text="#{collect.bydate}"></h3>
+                <p style="height:6em;" th:text="#{collect.bydate.short}"></p>
+                <form th:action="@{alma/invoicesByDate}" method="post">
+                    <div>
+                        <label for="dateToSearch" th:text="#{day.to.collect}"></label>
+                        <input id="dateToSearch" type="date" name="date">
+                    </div>
+                    <input type="submit" class="btn btn-primary" th:value="#{invoices.collect.bydate}"/>
+                </form>
+            </div>
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-4">
+            <div class="tile">
+                <h3 style="height:1.2em;" th:text="#{upload.excel}"></h3>
+                <p style="height:6em;" th:text="#{upload.excel.short}"></p>
+                <form th:action="@{/alma/invoicesUpdate}" method="post" enctype="multipart/form-data">
+                    <form th:action="@{alma/invoicesByDate}" method="post">
+                        <div>
+                            <label for="excelUpload" th:text="#{upload.excel.choose}"></label>
+                            <input id="excelUpload" type="file" th:name="file">
+                        </div>
+
+                    <input  class="btn btn-primary" th:type="submit" value="Import" />
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="general :: footer" />
 
 </body>
 </html>

@@ -18,7 +18,7 @@
 
 <nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-dark">
     <a class="navbar-brand" href="/">Lib-Intel</a>
-    <a style="color: greenyellow;" class="navbar-brand" th:href="@{/start}">:: Alma-Connector</a>
+    <a style="color: greenyellow;" class="navbar-brand" th:href="@{/alma/start}">:: Alma-Connector</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown"
             aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -28,18 +28,8 @@
             <li class="nav-item" >
                 <a class="nav-link" style="color: greenyellow;" href="/protokoll">Protokoll</a>
             </li>
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    SAP
-                </a>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                    <a class="dropdown-item" th:href="@{/alma/sap}">Collect Invoices for Date</a>
-                    <a class="dropdown-item" th:href="@{/alma/invoicesActive}">Collect all open Invoices</a>
-                    <a class="dropdown-item" th:href="@{/alma/invoiceByDate}">Upload SAP Response Sheet</a>
-                </div>
-            </li>
             <li class="nav-item" >
-                <a class="nav-link"  style="color: greenyellow;" th:href="@{/sap}">SAP</a>
+                <a class="nav-link"  style="color: greenyellow;" th:href="@{/alma/sap}">SAP</a>
             </li>
             <li class="nav-item" >
                 <a class="nav-link"  style="color: greenyellow;" href="/logout">Logout</a>
