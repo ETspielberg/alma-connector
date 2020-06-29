@@ -4,12 +4,15 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.unidue.ub.alma.shared.acq.Invoice;
 import org.unidue.ub.alma.shared.acq.Vendor;
+import org.unidue.ub.libintel.almaconnector.model.AlmaExportRun;
 import org.unidue.ub.libintel.almaconnector.model.SapData;
 import org.unidue.ub.libintel.almaconnector.model.SapResponseContainer;
+import org.unidue.ub.libintel.almaconnector.service.AlmaExportRunService;
 import org.unidue.ub.libintel.almaconnector.service.AlmaInvoiceServices;
 import org.unidue.ub.libintel.almaconnector.service.FileWriterService;
 import org.unidue.ub.libintel.almaconnector.service.VendorService;
@@ -38,6 +41,8 @@ public class InvoiceController {
 
     private final FileWriterService fileWriterService;
 
+    private final AlmaExportRunService almaExportRunService;
+
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     /**
@@ -47,10 +52,14 @@ public class InvoiceController {
      * @param vendorService       the vendor service bean
      * @param fileWriterService   the file writer service
      */
-    InvoiceController(AlmaInvoiceServices almaInvoiceServices, VendorService vendorService, FileWriterService fileWriterService) {
+    InvoiceController(AlmaInvoiceServices almaInvoiceServices,
+                      VendorService vendorService,
+                      FileWriterService fileWriterService,
+                      AlmaExportRunService almaExportRunService) {
         this.almaInvoiceServices = almaInvoiceServices;
         this.vendorService = vendorService;
         this.fileWriterService = fileWriterService;
+        this.almaExportRunService = almaExportRunService;
     }
 
     /**
@@ -58,7 +67,25 @@ public class InvoiceController {
      * @return the string sap for to use the sap.html template
      */
     @GetMapping("/sap")
-    public String getSapPage() { return "sap"; }
+    public String getSapPage(Model model) {
+        AlmaExportRun almaExportRun = this.almaExportRunService.getAlmaExportRun(dateFormat.format(new Date()));
+        model.addAttribute("almaExportRun", almaExportRun);
+        return "sap";
+    }
+
+    @PostMapping("/collectInvoices")
+    public String collectInvoices(@ModelAttribute("almaExportRun") AlmaExportRun almaExportRun, Model model) {
+        almaExportRun.newRun();
+        almaExportRun = this.almaInvoiceServices.getInvoices(almaExportRun);
+        for (Invoice invoice : almaExportRun.getInvoices()) {
+            Vendor vendor = this.vendorService.getVendorAccount(invoice.getVendor().getValue());
+            almaExportRun.addSapDataList(convertInvoiceToSapData(invoice, vendor));
+        }
+        almaExportRun.sortSapData();
+        almaExportRun = this.fileWriterService.writeAlmaExport(almaExportRun);
+        model.addAttribute("almaExportRun", almaExportRun);
+        return "finishedRum";
+    }
 
     /**
      * retrieves the active invoices
@@ -67,6 +94,8 @@ public class InvoiceController {
      */
     @PostMapping("/invoicesActive")
     public ResponseEntity<String> getInvoiceLines() {
+
+
         // collect the open invoices from the alma API
         List<Invoice> invoices = this.almaInvoiceServices.getOpenInvoices();
         // set the current date
@@ -87,6 +116,8 @@ public class InvoiceController {
      */
     @PostMapping("/invoicesByDate")
     public ResponseEntity<String> getInvoiceLineForDate(String date) throws ParseException {
+        AlmaExportRun almaExportRun = this.almaExportRunService.getAlmaExportRun(dateFormat.format(new Date()))
+        .withSpecificDate(dateFormat.parse(date));
         // set the date to the desired date
         Date dateToSearch = dateFormat.parse(date);
         // collect to open invoices from the alma for a given date
@@ -139,5 +170,10 @@ public class InvoiceController {
             return ResponseEntity.accepted().body(numberOfErrors + "Errors on updating invoices: ");
         else
             return ResponseEntity.accepted().build();
+    }
+
+    @GetMapping("/showImportFiles")
+    public String getImportFiles(ModelAttribute modelAttribute) {
+        return "importFiles";
     }
 }

@@ -5,13 +5,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
+import org.unidue.ub.libintel.almaconnector.model.AlmaExportRun;
 import org.unidue.ub.libintel.almaconnector.model.SapData;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.unidue.ub.libintel.almaconnector.service.LocalizationService.generateComment;
 
@@ -33,6 +40,55 @@ public class FileWriterService {
         if (!folder.exists()) {
             if (!folder.mkdirs())
                 log.warn("could not create data directory");
+        }
+    }
+
+    /**
+     * writes the SAP data contained in an AlmaExportRun object as files to disk
+     * @param almaExportRun the AlmaExportRun object holding a list of SAP data
+     * @return the AlmaExportRun object updated with the files created and the number of failed entries to be written
+     */
+    public AlmaExportRun writeAlmaExport(AlmaExportRun almaExportRun) {
+        String checkFilename;
+        String sapFilename;
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String currentDate = dateFormat.format(new Date());
+        if (almaExportRun.isDateSpecific()) {
+            // initialize failure counter, print file and csv-file
+            checkFilename = "Druck_sap-" + dateFormat.format(almaExportRun.getDesiredDate()) + ".txt";
+            sapFilename = "sap-" + dateFormat.format(almaExportRun.getDesiredDate()) + ".txt";
+        } else {
+            checkFilename = "Druck_sap-" + currentDate + ".txt";
+            sapFilename = "sap-" + currentDate + ".txt";
+        }
+        initializeFiles(currentDate, checkFilename, sapFilename);
+        for (SapData sapData: almaExportRun.getSapData()) {
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter(this.file + checkFilename, true))) {
+                addLine(bw, sapData.toFixedLengthLine());
+                addLine(bw, generateComment(sapData).toCsv());
+            } catch(IOException ex) {
+                almaExportRun.increaseMissedSapData();
+                almaExportRun.addMissedSapData(sapData);
+                log.warn("could not write line: " + sapData.toFixedLengthLine());
+            }
+        }
+        return almaExportRun;
+    }
+
+    @Secured("Role_SAP")
+    public List<String> getFiles(@Value("${ub.statistics.data.dir}") String dataDir) {
+        Path rootLocation = Paths.get(dataDir);
+        try {
+            return Files.walk(rootLocation, 1)
+                    .filter(path -> !path.equals(rootLocation))
+                    .map(rootLocation::relativize)
+                    .map(path -> path.getFileName().toString())
+                    .filter(filename -> !filename.startsWith("Druck"))
+                    .map(filename -> filename.replace("sap-",""))
+                    .collect(Collectors.toList());
+        } catch (IOException ioe) {
+            log.error("failed to read stored files", ioe);
+            return null;
         }
     }
 

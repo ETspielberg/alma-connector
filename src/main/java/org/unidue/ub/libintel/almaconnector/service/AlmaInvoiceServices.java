@@ -6,6 +6,7 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.*;
 import org.unidue.ub.libintel.almaconnector.clients.acquisition.AlmaInvoicesApiClient;
+import org.unidue.ub.libintel.almaconnector.model.AlmaExportRun;
 import org.unidue.ub.libintel.almaconnector.model.InvoiceUpdate;
 import org.unidue.ub.libintel.almaconnector.model.SapResponse;
 import org.unidue.ub.libintel.almaconnector.model.SapResponseContainer;
@@ -26,6 +27,16 @@ public class AlmaInvoiceServices {
      */
     AlmaInvoiceServices(AlmaInvoicesApiClient almaInvoicesApiClient) {
         this.almaInvoicesApiClient = almaInvoicesApiClient;
+    }
+
+    @Secured({ "ROLE_SYSTEM", "ROLE_SAP" })
+    public AlmaExportRun getInvoices(AlmaExportRun almaExportRun) {
+        if (almaExportRun.isDateSpecific()) {
+            almaExportRun.setInvoices(getOpenInvoices());
+        } else {
+            almaExportRun.setInvoices(getOpenInvoicesForDate(almaExportRun.getDesiredDate()));
+        }
+        return almaExportRun;
     }
 
     /**

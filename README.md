@@ -1,12 +1,13 @@
 # alma-connector
 
-The Alma-connector offers the basic features to connect the Lib-Intel-Plattform to the next CBMS Alma.
-For the communication to the Alma API a number of Feign clients are defined, taking the model classes from the alma-shared package.
-
-## Prerequisites
+The Alma-connector is a web application offering a number of features to connect the Lib-Intel-Plattform to the CBMS Alma.
+For the communication to the Alma API Feign clients are defined, taking the model classes from the alma-shared package.
 
 This program is designed to run as part of a microservice architecture. 
-Therefore several conditions must be fulfilled to run the service:
+
+## Prerequisites as microservice
+
+In this environment several conditions must be fulfilled to run the service:
 * A eureka type service registry,
 * A Redis key value store
 * A central config server
