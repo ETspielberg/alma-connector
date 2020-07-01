@@ -2,6 +2,8 @@ package org.unidue.ub.libintel.almaconnector.controller;
 
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -9,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.unidue.ub.alma.shared.acq.Invoice;
 import org.unidue.ub.alma.shared.acq.Vendor;
-import org.unidue.ub.libintel.almaconnector.model.AlmaExportRun;
+import org.unidue.ub.libintel.almaconnector.model.run.AlmaExportRun;
 import org.unidue.ub.libintel.almaconnector.model.SapData;
 import org.unidue.ub.libintel.almaconnector.model.SapResponseContainer;
 import org.unidue.ub.libintel.almaconnector.service.AlmaExportRunService;
@@ -43,6 +45,8 @@ public class InvoiceController {
 
     private final AlmaExportRunService almaExportRunService;
 
+    private final static Logger log = LoggerFactory.getLogger(InvoiceController.class);
+
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     /**
@@ -68,23 +72,28 @@ public class InvoiceController {
      */
     @GetMapping("/sap")
     public String getSapPage(Model model) {
-        AlmaExportRun almaExportRun = this.almaExportRunService.getAlmaExportRun(dateFormat.format(new Date()));
+        AlmaExportRun almaExportRun = this.almaExportRunService.getAlmaExportRun(new Date());
         model.addAttribute("almaExportRun", almaExportRun);
         return "sap";
     }
 
     @PostMapping("/collectInvoices")
     public String collectInvoices(@ModelAttribute("almaExportRun") AlmaExportRun almaExportRun, Model model) {
+        AlmaExportRun almaExportRunNew = this.almaExportRunService.getAlmaExportRun(new Date());
+        almaExportRun.updateIdentifier();
         almaExportRun.newRun();
+        log.info(almaExportRun.log());
+        this.almaExportRunService.saveAlmaExportRun(almaExportRun);
         almaExportRun = this.almaInvoiceServices.getInvoices(almaExportRun);
         for (Invoice invoice : almaExportRun.getInvoices()) {
             Vendor vendor = this.vendorService.getVendorAccount(invoice.getVendor().getValue());
             almaExportRun.addSapDataList(convertInvoiceToSapData(invoice, vendor));
         }
         almaExportRun.sortSapData();
+        log.info(almaExportRun.log());
         almaExportRun = this.fileWriterService.writeAlmaExport(almaExportRun);
         model.addAttribute("almaExportRun", almaExportRun);
-        return "finishedRum";
+        return "finishedRun";
     }
 
     /**
@@ -116,7 +125,7 @@ public class InvoiceController {
      */
     @PostMapping("/invoicesByDate")
     public ResponseEntity<String> getInvoiceLineForDate(String date) throws ParseException {
-        AlmaExportRun almaExportRun = this.almaExportRunService.getAlmaExportRun(dateFormat.format(new Date()))
+        AlmaExportRun almaExportRun = this.almaExportRunService.getAlmaExportRun(new Date())
         .withSpecificDate(dateFormat.parse(date));
         // set the date to the desired date
         Date dateToSearch = dateFormat.parse(date);

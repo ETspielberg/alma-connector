@@ -23,5 +23,7 @@ The microservice tries to retrieve three configuration files from the central co
 The variables have the form `alma.api.XXX.key`, where the XXX are 'acq' for the acquisition API, 'user' for the user API 
 
 
-## Endpoints
+## Installation
+
+Y>ou can run this application by typing ```mvn spring-boot:run```.
 

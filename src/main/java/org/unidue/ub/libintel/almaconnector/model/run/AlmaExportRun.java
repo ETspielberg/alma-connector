@@ -1,12 +1,15 @@
-package org.unidue.ub.libintel.almaconnector.model;
+package org.unidue.ub.libintel.almaconnector.model.run;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.unidue.ub.alma.shared.acq.Invoice;
+import org.unidue.ub.libintel.almaconnector.model.SapData;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+import static org.unidue.ub.libintel.almaconnector.Utils.dateformat;
 
 @Entity
 @Table(name="alma_export_run")
@@ -19,16 +22,22 @@ public class AlmaExportRun {
     private boolean dateSpecific = false;
 
     @Column(name="desired_date")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date desiredDate;
 
     @Column(name="last_run")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date lastRun;
 
     @Column(name="run_index")
     private long runIndex;
 
     @Column(name="files_created")
-    private List<String> filesCreated = new ArrayList<>();
+    @ElementCollection
+    // @CollectionTable(name="FilesCreated", joinColumns=@JoinColumn(name="alma_export_run_identifier"))
+    private Set<String> filesCreated = new HashSet<>();
 
     @Column(name="number_invoices")
     private long numberInvoices = 0;
@@ -43,10 +52,14 @@ public class AlmaExportRun {
     private long missedSapData = 0;
 
     @Column(name="missed_invoice_lines")
-    private List<String> missedInvoiceLines = new ArrayList<>();
+    @ElementCollection
+    // @CollectionTable(name="MissedInvoiceLines", joinColumns=@JoinColumn(name="alma_export_run_identifier"))
+    private Set<String> missedInvoiceLines = new HashSet<>();
 
     @Column(name="empty_invoices")
-    private List<String> emptyInvoices = new ArrayList<>();
+    @ElementCollection
+    // @CollectionTable(name="EmptyInvoices", joinColumns=@JoinColumn(name="alma_export_run_identifier"))
+    private Set<String> emptyInvoices = new HashSet<>();
 
     @Transient
     private List<SapData> missedSapDataList = new ArrayList<>();
@@ -60,8 +73,16 @@ public class AlmaExportRun {
     @Transient
     private List<SapData> sapData= new ArrayList<>();
 
-    public AlmaExportRun(String identifier) {
-        this.identifier = identifier;
+    public AlmaExportRun() {
+        this.desiredDate = new Date();
+        this.runIndex = 0;
+        this.identifier = dateformat.format(desiredDate) + "-" + this.runIndex;
+    }
+
+    public AlmaExportRun(Date desiredDate) {
+        this.desiredDate = desiredDate;
+        this.runIndex = 0;
+        this.identifier = dateformat.format(desiredDate);
     }
 
     public AlmaExportRun withSpecificDate(Date desiredDate) {
@@ -72,6 +93,7 @@ public class AlmaExportRun {
 
     public AlmaExportRun withRunIndex(long runIndex) {
         this.runIndex = runIndex;
+        this.identifier = dateformat.format(desiredDate) + "-" + this.runIndex;
         return this;
     }
 
@@ -97,6 +119,7 @@ public class AlmaExportRun {
 
     public void setDesiredDate(Date desiredDate) {
         this.desiredDate = desiredDate;
+        this.identifier = dateformat.format(desiredDate) + "-" + this.runIndex;
     }
 
     public Date getLastRun() {
@@ -107,11 +130,11 @@ public class AlmaExportRun {
         this.lastRun = lastRun;
     }
 
-    public List<String> getFilesCreated() {
+    public Set<String> getFilesCreated() {
         return filesCreated;
     }
 
-    public void setFilesCreated(List<String> filesCreated) {
+    public void setFilesCreated(Set<String> filesCreated) {
         this.filesCreated = filesCreated;
     }
 
@@ -151,11 +174,11 @@ public class AlmaExportRun {
         this.missedSapData++;
     }
 
-    public List<String> getMissedInvoiceLines() {
+    public Set<String> getMissedInvoiceLines() {
         return missedInvoiceLines;
     }
 
-    public void setMissedInvoiceLines(List<String> missedInvoiceLines) {
+    public void setMissedInvoiceLines(Set<String> missedInvoiceLines) {
         this.missedInvoiceLines = missedInvoiceLines;
     }
 
@@ -163,11 +186,11 @@ public class AlmaExportRun {
         this.numberInvoiceLines += numberInvoiceLines;
     }
 
-    public List<String> getEmptyInvoices() {
+    public Set<String> getEmptyInvoices() {
         return emptyInvoices;
     }
 
-    public void setEmptyInvoices(List<String> emptyInvoices) {
+    public void setEmptyInvoices(Set<String> emptyInvoices) {
         this.emptyInvoices = emptyInvoices;
     }
 
@@ -241,10 +264,20 @@ public class AlmaExportRun {
     public void newRun() {
         this.sapData = new ArrayList<>();
         this.invoices = new ArrayList<>();
-        this.filesCreated = new ArrayList<>();
+        this.filesCreated = new HashSet<>();
         this.numberInvoiceLines = 0;
         this.numberInvoices = 0;
         this.successfullSapData = 0;
         this.missedSapData = 0;
+    }
+
+    public String log() {
+        String logString = "runID: %s, date: %s, runIndex: %d dateSpecific: %s, numberInvoices; %s, numberSapData: %s";
+        return String.format(logString, this.identifier, this.desiredDate, this.runIndex, this.dateSpecific, this.invoices.size(),
+                this.sapData.size());
+    }
+
+    public void updateIdentifier() {
+        this.identifier = dateformat.format(this.desiredDate) + "-" + this.runIndex;
     }
 }

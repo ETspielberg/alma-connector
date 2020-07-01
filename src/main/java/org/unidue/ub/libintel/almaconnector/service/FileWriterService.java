@@ -5,8 +5,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
-import org.unidue.ub.libintel.almaconnector.model.AlmaExportRun;
+import org.unidue.ub.libintel.almaconnector.model.run.AlmaExportRun;
 import org.unidue.ub.libintel.almaconnector.model.SapData;
+import org.unidue.ub.libintel.almaconnector.repository.AlmaExportRunRepository;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -29,13 +30,15 @@ public class FileWriterService {
 
     private final String file;
 
+    private final AlmaExportRunRepository almaExportRunRepository;
     /**
      * constructor based autowiring with the data directory. Creates the folder if it does not exist.
      * @param dataDir the config property ub.statistics.data.dir
      */
     // put in @Value annotation in constructor to make sure, the value is initiated before the bean is created.
-    FileWriterService(@Value("${ub.statistics.data.dir}") String dataDir) {
+    FileWriterService(@Value("${ub.statistics.data.dir}") String dataDir, AlmaExportRunRepository almaExportRunRepository) {
         this.file = dataDir + "/sapData/";
+        this.almaExportRunRepository = almaExportRunRepository;
         File folder = new File(this.file);
         if (!folder.exists()) {
             if (!folder.mkdirs())
@@ -72,6 +75,7 @@ public class FileWriterService {
                 log.warn("could not write line: " + sapData.toFixedLengthLine());
             }
         }
+        this.almaExportRunRepository.save(almaExportRun);
         return almaExportRun;
     }
 

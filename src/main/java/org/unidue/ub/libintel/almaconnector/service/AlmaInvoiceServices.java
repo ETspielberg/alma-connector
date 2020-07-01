@@ -6,10 +6,11 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.*;
 import org.unidue.ub.libintel.almaconnector.clients.acquisition.AlmaInvoicesApiClient;
-import org.unidue.ub.libintel.almaconnector.model.AlmaExportRun;
+import org.unidue.ub.libintel.almaconnector.model.run.AlmaExportRun;
 import org.unidue.ub.libintel.almaconnector.model.InvoiceUpdate;
 import org.unidue.ub.libintel.almaconnector.model.SapResponse;
 import org.unidue.ub.libintel.almaconnector.model.SapResponseContainer;
+import org.unidue.ub.libintel.almaconnector.repository.AlmaExportRunRepository;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -19,16 +20,24 @@ public class AlmaInvoiceServices {
 
     private final AlmaInvoicesApiClient almaInvoicesApiClient;
 
+    private final AlmaExportRunRepository almaExportRunRepository;
+
     private final static Logger log = LoggerFactory.getLogger(AlmaInvoiceServices.class);
 
     /**
      * constructor based autowiring of the Feign client
      * @param almaInvoicesApiClient the Feign client for the Alma Invoice API
      */
-    AlmaInvoiceServices(AlmaInvoicesApiClient almaInvoicesApiClient) {
+    AlmaInvoiceServices(AlmaInvoicesApiClient almaInvoicesApiClient, AlmaExportRunRepository almaExportRunRepository) {
         this.almaInvoicesApiClient = almaInvoicesApiClient;
+        this.almaExportRunRepository = almaExportRunRepository;
     }
 
+    /**
+     * collects the invoices from alma and saves them to the alma export run object
+     * @param almaExportRun the alma export run object containing the data for the invoices to collect
+     * @return the alma export run object holding the list of invoices
+     */
     @Secured({ "ROLE_SYSTEM", "ROLE_SAP" })
     public AlmaExportRun getInvoices(AlmaExportRun almaExportRun) {
         if (almaExportRun.isDateSpecific()) {
@@ -36,6 +45,7 @@ public class AlmaInvoiceServices {
         } else {
             almaExportRun.setInvoices(getOpenInvoicesForDate(almaExportRun.getDesiredDate()));
         }
+        this.almaExportRunRepository.save(almaExportRun);
         return almaExportRun;
     }
 

@@ -9,33 +9,29 @@
 
 <div class="container">
     <div class="ui-g">
+
         <div class="ui-g-12 ui-md-6 ui-lg-4">
             <div class="tile">
-                <h3 style="height:1.2em;" th:text="#{collect.open}"></h3>
-                <p style="height:8em;" th:text="#{collect.open.short}"></p>
-                <form th:action="@{alma/invoicesActive}" method="post">
-                    <input type="submit" class="btn btn-primary" th:value="#{invoices.collect.open}"/>
+                <h3 style="height:1.2em;" th:text="#{sap.collect.open}"></h3>
+                <p style="height:8em;" th:text="#{sap.collect.open.short}"></p>
+                <form th:action="@{/collectInvoices}" th:object="${almaExportRun}" method="post">
+                <div class="form-group">
+                    <label for="dateSpecific" th:text="#{sap.date.specific}"></label>
+                    <input id="dateSpecific" type="checkbox" th:field="*{dateSpecific}">
+                </div>
+                <div class="form-group">
+                    <label for="dateToSearch" th:text="#{sap.day.to.collect}"></label>
+                    <input id="dateToSearch" type="date" th:field="*{desiredDate}">
+                </div>
+                <input type="submit" class="btn btn-primary" th:value="#{invoices.collect.open}"/>
                 </form>
             </div>
         </div>
-        <div class="ui-g-12 ui-md-6 ui-lg-4">
-            <div class="tile">
-                <h3 style="height:1.2em;" th:text="#{collect.bydate}"></h3>
-                <p style="height:6em;" th:text="#{collect.bydate.short}"></p>
-                <form th:action="@{alma/invoicesByDate}" method="post">
-                    <div>
-                        <label for="dateToSearch" th:text="#{day.to.collect}"></label>
-                        <input id="dateToSearch" type="date" name="date">
-                    </div>
-                    <input type="submit" class="btn btn-primary" th:value="#{invoices.collect.bydate}"/>
-                </form>
-            </div>
-        </div>
+
         <div class="ui-g-12 ui-md-6 ui-lg-4">
             <div class="tile">
                 <h3 style="height:1.2em;" th:text="#{upload.excel}"></h3>
                 <p style="height:6em;" th:text="#{upload.excel.short}"></p>
-                <form th:action="@{/alma/invoicesUpdate}" method="post" enctype="multipart/form-data">
                     <form th:action="@{alma/invoicesByDate}" method="post">
                         <div>
                             <label for="excelUpload" th:text="#{upload.excel.choose}"></label>

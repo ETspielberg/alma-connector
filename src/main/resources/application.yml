@@ -23,7 +23,8 @@ logging:
             almaconnector:
               clients:
                 acquisition:
-                  AlmaPoLinesApiClient: DEBUG
-                  AlmaInvoicesApiClient: DEBUG
-            service:
-              AlmaInvoiceService: INFO
+                  AlmaPoLinesApiClient: INFO
+                  AlmaInvoicesApiClient: INFO
+              service:
+                AlmaInvoiceService: INFO
+                AlmaExportRunService: DEBUG

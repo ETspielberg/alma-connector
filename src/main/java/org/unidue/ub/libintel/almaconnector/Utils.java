@@ -25,6 +25,8 @@ public class Utils {
 
     private final static Logger log = LoggerFactory.getLogger(Utils.class);
 
+    public static SimpleDateFormat dateformat = new SimpleDateFormat("yyyy-MM-dd");
+
     /**
      * converts an Alma invoice and the corresponding vendor information into a set of SAP data
      * @param invoice the Alma Invoice object to be converted
