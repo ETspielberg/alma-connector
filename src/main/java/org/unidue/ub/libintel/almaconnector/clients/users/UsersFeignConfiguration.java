@@ -1,10 +1,12 @@
 package org.unidue.ub.libintel.almaconnector.clients.users;
 
 import feign.RequestInterceptor;
+import feign.Retryer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.unidue.ub.libintel.almaconnector.clients.AlmaRetryer;
 import org.unidue.ub.libintel.almaconnector.clients.ApiKeyAuth;
 
 /**
@@ -39,5 +41,10 @@ public class UsersFeignConfiguration {
     @Bean
     feign.Logger.Level feignLoggerLevel() {
         return feign.Logger.Level.FULL;
+    }
+
+    @Bean
+    public Retryer retryer() {
+        return new AlmaRetryer();
     }
 }
