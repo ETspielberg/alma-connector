@@ -6,10 +6,10 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.*;
 import org.unidue.ub.libintel.almaconnector.clients.acquisition.AlmaInvoicesApiClient;
+import org.unidue.ub.libintel.almaconnector.model.run.SapResponseRun;
 import org.unidue.ub.libintel.almaconnector.model.run.AlmaExportRun;
 import org.unidue.ub.libintel.almaconnector.model.InvoiceUpdate;
 import org.unidue.ub.libintel.almaconnector.model.SapResponse;
-import org.unidue.ub.libintel.almaconnector.model.SapResponseContainer;
 import org.unidue.ub.libintel.almaconnector.repository.AlmaExportRunRepository;
 
 import java.text.SimpleDateFormat;
@@ -40,11 +40,17 @@ public class AlmaInvoiceServices {
      */
     @Secured({ "ROLE_SYSTEM", "ROLE_SAP" })
     public AlmaExportRun getInvoices(AlmaExportRun almaExportRun) {
+        List<Invoice> invoices;
         if (almaExportRun.isDateSpecific()) {
-            almaExportRun.setInvoices(getOpenInvoices());
+            log.info("collecting invoices for date");
+            invoices = getOpenInvoicesForDate(almaExportRun.getDesiredDate());
         } else {
-            almaExportRun.setInvoices(getOpenInvoicesForDate(almaExportRun.getDesiredDate()));
+            log.info("collecting all invoices");
+            invoices = getOpenInvoices();
         }
+        log.info("retrieved " + invoices.size() + " (filtered) invoices");
+        almaExportRun.setInvoices(invoices);
+        almaExportRun.setLastRun(new Date());
         this.almaExportRunRepository.save(almaExportRun);
         return almaExportRun;
     }
@@ -72,6 +78,7 @@ public class AlmaInvoiceServices {
             invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "Ready to be Paid", "", "", "", batchSize, offset, "");
             invoiceList.addAll(invoices.getInvoice());
         }
+        log.info(String.format("retrieved list of %d invoices", invoiceList.size()));
         return invoiceList;
     }
 
@@ -92,7 +99,7 @@ public class AlmaInvoiceServices {
      * @return the SAP container objects the number of missed entries
      */
     @Secured({ "ROLE_SYSTEM", "ROLE_SAP" })
-    public SapResponseContainer updateInvoiceWithErpData(SapResponseContainer container) {
+    public SapResponseRun updateInvoiceWithErpData(SapResponseRun container) {
         List<SapResponse> sapResponses = container.getResponses();
         log.debug("got " + sapResponses.size() + "SAP responses");
         Map<String, List<SapResponse>> sapResponsesPerInvoice = new HashMap<>();
@@ -149,7 +156,9 @@ public class AlmaInvoiceServices {
         List<Invoice> filteredInvoices = new ArrayList<>();
         for (Invoice invoice : invoices)
             if (invoice.getPayment() != null) {
+                log.info("checking invoice from " + dateFormat.format(invoice.getPayment().getVoucherDate()));
                 if (dateFormat.format(invoice.getPayment().getVoucherDate()).equals(dateFormat.format(date))) {
+                    log.info("found invoice for date " + dateFormat.format(date));
                     filteredInvoices.add(invoice);
                 }
             } else {

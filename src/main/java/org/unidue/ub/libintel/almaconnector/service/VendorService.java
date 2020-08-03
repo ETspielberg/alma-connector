@@ -33,7 +33,9 @@ public class VendorService {
     @Secured({ "ROLE_SYSTEM", "ROLE_SAP" })
     public Vendor getVendorAccount(String vendorAccountCode) {
         try {
-            return this.almaVendorApiClient.getVendorsVendorCode("application/json", vendorAccountCode);
+            Vendor vendor = this.almaVendorApiClient.getVendorsVendorCode("application/json", vendorAccountCode);
+            log.info("retrieved vendor " + vendor.getCode());
+            return vendor;
         } catch (FeignException fe) {
             log.warn("could not retrieve vendor " + vendorAccountCode, fe);
             return null;

@@ -11,7 +11,7 @@ import org.unidue.ub.alma.shared.acq.Vendor;
 import org.unidue.ub.libintel.almaconnector.model.SapAccountData;
 import org.unidue.ub.libintel.almaconnector.model.SapData;
 import org.unidue.ub.libintel.almaconnector.model.SapResponse;
-import org.unidue.ub.libintel.almaconnector.model.SapResponseContainer;
+import org.unidue.ub.libintel.almaconnector.model.run.SapResponseRun;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -74,13 +74,17 @@ public class Utils {
                         // get the vat code
                         String invoiceLineVatCode = invoiceLine.getInvoiceLineVat().getVatCode().getValue();
                         // set the value of the vat code to a value which is not empty
-                        if (!"".equals(invoiceLineVatCode))
+                        if (!"".equals(invoiceLineVatCode)) {
                             sapData.costType = invoiceLineVatCode;
+                            log.info("set VAT code ot " + invoiceLineVatCode);
+                        }
                         // if no vat code is set on the invoice line take the one from the invoice
                         else {
                             String invoiceVatCode = invoice.getInvoiceVat().getVatCode().getValue();
-                            if (!"".equals(invoiceVatCode))
+                            if (!"".equals(invoiceVatCode)) {
                                 sapData.costType = invoiceLineVatCode;
+                                log.info("set VAT code ot " + invoiceVatCode);
+                            }
                             else {
                                 log.warn("no vat code given for invoice line " + invoiceLine.getId());
                                 sapData.costType = "";
@@ -185,8 +189,9 @@ public class Utils {
      * @return a container object holding the number of errors upon reading individual lines and the list of read SAP
      * response objects
      */
-    public static SapResponseContainer getFromExcel(XSSFSheet worksheet) {
-        SapResponseContainer container = new SapResponseContainer();
+    public static SapResponseRun getFromExcel(XSSFSheet worksheet) {
+        SapResponseRun container = new SapResponseRun();
+        // go through all lines except the first one (the headers) and the last one (summary of all invoices).
         for (int i = 1; i < worksheet.getPhysicalNumberOfRows() - 1; i++) {
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
             //read the row and get all the data from it.
@@ -199,7 +204,7 @@ public class Utils {
             try {
                 amount = row.getCell(4).getNumericCellValue();
             } catch (IllegalStateException ise) {
-                container.increaseNumberOfErrors();
+                container.increaseNumberOfReadErrors();
                 log.warn("could not parse amount" + row.getCell(4).getStringCellValue(), ise);
             }
             String voucherId = row.getCell(5).getStringCellValue();

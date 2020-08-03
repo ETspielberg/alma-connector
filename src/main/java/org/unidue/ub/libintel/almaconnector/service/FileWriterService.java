@@ -3,24 +3,24 @@ package org.unidue.ub.libintel.almaconnector.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.libintel.almaconnector.model.run.AlmaExportRun;
 import org.unidue.ub.libintel.almaconnector.model.SapData;
 import org.unidue.ub.libintel.almaconnector.repository.AlmaExportRunRepository;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.unidue.ub.libintel.almaconnector.Utils.dateformat;
 import static org.unidue.ub.libintel.almaconnector.service.LocalizationService.generateComment;
 
 @Service
@@ -51,25 +51,37 @@ public class FileWriterService {
      * @param almaExportRun the AlmaExportRun object holding a list of SAP data
      * @return the AlmaExportRun object updated with the files created and the number of failed entries to be written
      */
+    @Secured({ "ROLE_SYSTEM", "ROLE_SAP" })
     public AlmaExportRun writeAlmaExport(AlmaExportRun almaExportRun) {
         String checkFilename;
         String sapFilename;
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        String currentDate = dateFormat.format(new Date());
+        String foreignFilename;
+        String currentDate = dateformat.format(new Date());
         if (almaExportRun.isDateSpecific()) {
             // initialize failure counter, print file and csv-file
-            checkFilename = "Druck_sap-" + dateFormat.format(almaExportRun.getDesiredDate()) + ".txt";
-            sapFilename = "sap-" + dateFormat.format(almaExportRun.getDesiredDate()) + ".txt";
+            checkFilename = "Druck_sap-" + dateformat.format(almaExportRun.getDesiredDate()) + ".txt";
+            sapFilename = "sap-" + dateformat.format(almaExportRun.getDesiredDate()) + ".txt";
+            foreignFilename = "foreign-sap-" + dateformat.format(almaExportRun.getDesiredDate()) + ".txt";
         } else {
-            checkFilename = "Druck_sap-" + currentDate + ".txt";
-            sapFilename = "sap-" + currentDate + ".txt";
+            checkFilename = "Druck_sap.txt";
+            sapFilename = "sap.txt";
+            foreignFilename = "foreign-sap.txt";
         }
-        initializeFiles(currentDate, checkFilename, sapFilename);
+        initializeFiles(currentDate, checkFilename, sapFilename, foreignFilename);
+
         for (SapData sapData: almaExportRun.getSapData()) {
-            try (BufferedWriter bw = new BufferedWriter(new FileWriter(this.file + checkFilename, true))) {
-                addLine(bw, sapData.toFixedLengthLine());
-                addLine(bw, generateComment(sapData).toCsv());
-            } catch(IOException ex) {
+            try {
+                addLineToFile(checkFilename, sapData.toFixedLengthLine());
+            } catch (IOException ex) {
+                log.warn("could not write line: " + sapData.toFixedLengthLine());
+            }
+            try {
+                if (("H9".equals(sapData.costType) || "H8".equals(sapData.costType)) && "EUR".equals(sapData.currency))
+                    addLineToFile(sapFilename, generateComment(sapData).toCsv());
+                else
+                    addLineToFile(foreignFilename, generateComment(sapData).toCsv());
+                almaExportRun.increaseSuccessfullSapData();
+            } catch (IOException ex) {
                 almaExportRun.increaseMissedSapData();
                 almaExportRun.addMissedSapData(sapData);
                 log.warn("could not write line: " + sapData.toFixedLengthLine());
@@ -79,7 +91,15 @@ public class FileWriterService {
         return almaExportRun;
     }
 
-    @Secured("Role_SAP")
+    private void addLineToFile(String filename, String line) throws IOException {
+        BufferedWriter bw = new BufferedWriter(new FileWriter(this.file + filename, true));
+        bw.write(line);
+        bw.newLine();
+        bw.flush();
+        bw.close();
+    }
+
+    @Secured({ "ROLE_SYSTEM", "ROLE_SAP" })
     public List<String> getFiles(@Value("${ub.statistics.data.dir}") String dataDir) {
         Path rootLocation = Paths.get(dataDir);
         try {
@@ -107,7 +127,8 @@ public class FileWriterService {
         int failures = 0;
         String checkFilename = "Druck_sap-" + currentDate + ".txt";
         String sapFilename = "sap-" + currentDate + ".txt";
-        initializeFiles(currentDate, checkFilename, sapFilename);
+        String foreignFilename = "foreign-sap-" + currentDate + ".txt";
+        initializeFiles(currentDate, checkFilename, sapFilename, foreignFilename);
         for (SapData sapData: sapDataList) {
             try (BufferedWriter bw = new BufferedWriter(new FileWriter(this.file + checkFilename, true))) {
                 addLine(bw, sapData.toFixedLengthLine());
@@ -143,17 +164,58 @@ public class FileWriterService {
      * @param checkFilename the filename of the check/printed version
      * @param sapFilename the filename of the SAP import file
      */
-    private void initializeFiles(String currentDate, String checkFilename, String sapFilename) {
+    private void initializeFiles(String currentDate, String checkFilename, String sapFilename, String foreignFilename) {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(this.file + checkFilename, false))) {
             addLine(bw, "Kontrollausdruck der SAP-Datei, Bearbeitungsdatum: " + currentDate);
         } catch(IOException ioe) {
             log.warn("could not create empty check file at " + currentDate, ioe);
         }
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(this.file + sapFilename, false))) {
+        initializeSapFiles(sapFilename);
+        initializeSapFiles(foreignFilename);
+    }
+
+    private void initializeSapFiles(String filename) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(this.file + filename, false))) {
             bw.write("");
             bw.flush();
         } catch(IOException ioe) {
-            log.warn("could not create empty sap file at " + currentDate, ioe);
+            log.warn("could not create empty sap file.", ioe);
+        }
+    }
+
+    /**
+     * loads the sap files from  disk
+     * @param date the date for which the file shall be obtained
+     * @param type the type of the file to be obtained (HomeCurrency or ForeignCurrency)
+     * @return the file as Resource object
+     * @throws FileNotFoundException thrown if the file could not be loaded
+     */
+    @Secured({ "ROLE_SYSTEM", "ROLE_SAP" })
+    public Resource loadFiles(String date, String type) throws FileNotFoundException {
+        String filename;
+        if ("all".equals(date)) {
+            if ("sap".equals(type))
+                filename = "sap.txt";
+            else
+                filename = "foreign-sap.txt";
+        } else {
+            if ("sap".equals(type))
+                filename = "sap-" + date + ".txt";
+            else
+                filename = "foreign-sap-" + date + ".txt";
+        }
+        Path file =Paths.get(this.file + filename);
+        try {
+            Resource resource = new UrlResource(file.toUri());
+            if (resource.exists() || resource.isReadable()) {
+                return resource;
+            } else {
+                throw new FileNotFoundException(
+                        "Could not read file: " + filename);
+            }
+        } catch (MalformedURLException e) {
+            log.error("could not read file: " + filename, e);
+            return null;
         }
     }
 }

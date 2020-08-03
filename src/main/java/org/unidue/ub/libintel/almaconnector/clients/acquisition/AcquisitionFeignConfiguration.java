@@ -43,6 +43,10 @@ public class AcquisitionFeignConfiguration {
         return feign.Logger.Level.FULL;
     }
 
+    /**
+     * add the retryer bean to allow for retries upon errors connecting to alma API
+     * @return the AlmaRetryer
+     */
     @Bean
     public Retryer retryer() {
         return new AlmaRetryer();
