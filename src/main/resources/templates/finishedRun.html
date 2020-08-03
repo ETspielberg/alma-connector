@@ -1,54 +1,132 @@
 <!doctype html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
-<head th:replace="general :: generalHead" />
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="general :: generalHead"/>
 <body>
 
 <nav th:replace="general :: navbar"></nav>
 
-<div th:replace="general :: jumbotron" />
-
-<div class="container">
-    <div class="ui-g">
-
-        <div class="ui-g-12 ui-md-12 ui-lg-10 ui-lg-offset-1">
-            <div class="tile">
-                <h3 style="height:1.2em;" th:text="#{sap.run.result}"></h3>
-                <p th:text="#{sap.run.result.short}"></p>
-                <table class="table table-hover">
-                    <tr>
-                        <th th:text="#{sap.result.runId}"></th>
-                        <td th:text="${almaExportRun.identifier}"></td>
-                    </tr>
-                    <tr>
-                        <th th:text="#{sap.result.number.invoices}"></th>
-                        <td th:text="${almaExportRun.numberInvoices}"></td>
-                    </tr>
-                    <tr>
-                        <th th:text="#{sap.result.number.invoicelines}"></th>
-                        <td th:text="${almaExportRun.numberInvoiceLines}"></td>
-                    </tr>
-                    <tr>
-                        <th th:text="#{sap.result.number.successful.sapdata}"></th>
-                        <td th:text="${almaExportRun.successfullSapData}"></td>
-                    </tr>
-                    <tr>
-                        <th th:text="#{sap.result.number.missedsapdata}"></th>
-                        <td th:text="${almaExportRun.missedSapData}"></td>
-                    </tr>
-                </table>
-                <table class="table table-striped">
-                    <tr th:each="sapDatum : ${almaExportRun.sapData}">
-                        <td th:text="${sapDatum.creditor}"></td>
-                        <td th:text="${sapDatum.invoiceAmount}"></td>
-                        <td th:text="${sapDatum.currency}"></td>
-                    </tr>
-                </table>
+<div class="container-fluid">
+    <form th:action="@{/alma/showImportFiles}" method="post" th:object="${almaExportRun}">
+        <div class="ui-g">
+            <div class="ui-g-12 ui-md-12 ui-lg-10 ui-lg-offset-1">
+                <div class="tile">
+                    <h3 style="height:1.2em;" th:text="#{sap.run.result}"></h3>
+                    <p>Lauf vom <span th:text="${#dates.format(almaExportRun.lastRun, 'dd.MM.yyyy')}"></span> for the
+                        <span th:text="${#dates.format(almaExportRun.desiredDate, 'dd.MM.yyyy')}"></span>, Nummer <span
+                                th:text="${almaExportRun.runIndex}"></span></p>
+                    <input type="hidden" th:field="*{dateSpecific}">
+                    <input type="hidden" th:field="*{desiredDate}">
+                    <input type="hidden" th:field="*{numberForeignSapData}">
+                    <input type="hidden" th:field="*{numberHomeSapData}">
+                    <table class="table table-borderless text-left">
+                        <tr>
+                            <th th:text="#{sap.result.number.invoices}"></th>
+                            <td th:text="${almaExportRun.numberInvoices}"></td>
+                            <th th:text="#{sap.result.number.created.sapdata}"></th>
+                            <td th:text="${almaExportRun.sapData.size()}"></td>
+                            <th style="text-align: center;"><span style="font-size: larger; font-weight: bold;"
+                                      th:text="#{sap.result.number.missedsapdata}"></span>:
+                            </th>
+                        </tr>
+                        <tr>
+                            <th th:text="#{sap.result.number.invoicelines}"></th>
+                            <td th:text="${almaExportRun.numberInvoiceLines}"></td>
+                            <th th:text="#{sap.result.number.successful.sapdata}"></th>
+                            <td th:text="${almaExportRun.successfullSapData}"></td>
+                            <td style="text-align: center;"><span style="color: darkred; font-size: larger; font-weight: bold;"
+                                      th:text="${almaExportRun.missedSapData}"></span></td>
+                        </tr>
+                    </table>
+                </div>
             </div>
         </div>
-    </div>
+        <div class="ui-g">
+            <div class="ui-g-12 ui-md-12 ui-lg-12">
+                <div class="tile">
+                    <h2 th:text="#{sap.title.home}"></h2>
+                    <table class="table table-striped text-left">
+                        <tr>
+                            <th th:text="#{sap.result.vendorcode}"></th>
+                            <th th:text="#{sap.result.creditor}"></th>
+                            <th th:text="#{sap.result.date.invoice}"></th>
+                            <th th:text="#{sap.result.date.processing}"></th>
+                            <th th:text="#{sap.result.costtype}"></th>
+                            <th th:text="#{sap.result.amount}"></th>
+                            <th th:text="#{sap.result.currency}"></th>
+                            <th th:text="#{sap.result.invoicenumber}"></th>
+                            <th th:text="#{sap.result.invoicelinenumber}"></th>
+                            <th th:text="#{sap.result.briefcode}"></th>
+                            <th th:text="#{sap.result.checkcode}"></th>
+                            <th th:text="#{sap.result.date.from}"></th>
+                            <th th:text="#{sap.result.date.to}"></th>
+                            <th th:text="#{sap.result.checked}"></th>
+                        </tr>
+                        <tr th:each="sapDatum : ${almaExportRun.sapData}">
+                            <td th:text="${sapDatum.vendorCode}"></td>
+                            <td th:text="${sapDatum.creditor}"></td>
+                            <td th:text="${#dates.format(sapDatum.invoiceDate, 'dd.MM.yyyy')}"></td>
+                            <td th:text="${#dates.format(sapDatum.commitmentDate, 'dd.MM.yyyy')}"></td>
+                            <td th:text="${sapDatum.costType}"></td>
+                            <td th:text="${sapDatum.invoiceAmount}"></td>
+                            <td th:text="${sapDatum.currency}"></td>
+                            <td th:text="${sapDatum.invoiceNumber}"></td>
+                            <td th:text="${sapDatum.positionalNumber}"></td>
+                            <td th:text="${sapDatum.getCheckCharacter()}"></td>
+                            <td th:text="${sapDatum.sapAccountData.getImportCheckString()}"></td>
+                            <td th:text="${#dates.format(sapDatum.fromDate, 'dd.MM.yyyy')}"></td>
+                            <td th:text="${#dates.format(sapDatum.toDate, 'dd.MM.yyyy')}"></td>
+                            <td><input type="checkbox" required></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="ui-g-12 ui-md-12 ui-lg-12">
+                <div class="tile">
+                    <h2 th:text="#{sap.title.foreign}"></h2>
+                    <table class="table table-striped text-left">
+                        <tr>
+                            <th th:text="#{sap.result.vendorcode}"></th>
+                            <th th:text="#{sap.result.creditor}"></th>
+                            <th th:text="#{sap.result.date.invoice}"></th>
+                            <th th:text="#{sap.result.date.processing}"></th>
+                            <th th:text="#{sap.result.costtype}"></th>
+                            <th th:text="#{sap.result.amount}"></th>
+                            <th th:text="#{sap.result.currency}"></th>
+                            <th th:text="#{sap.result.invoicenumber}"></th>
+                            <th th:text="#{sap.result.invoicelinenumber}"></th>
+                            <th th:text="#{sap.result.briefcode}"></th>
+                            <th th:text="#{sap.result.checkcode}"></th>
+                            <th th:text="#{sap.result.date.from}"></th>
+                            <th th:text="#{sap.result.date.to}"></th>
+                            <th th:text="#{sap.result.checked}"></th>
+                        </tr>
+                        <tr th:each="sapDatum : ${almaExportRun.foreignSapData}">
+                            <td th:text="${sapDatum.vendorCode}"></td>
+                            <td th:text="${sapDatum.creditor}"></td>
+                            <td th:text="${#dates.format(sapDatum.invoiceDate, 'dd.MM.yyyy')}"></td>
+                            <td th:text="${#dates.format(sapDatum.commitmentDate, 'dd.MM.yyyy')}"></td>
+                            <td th:text="${sapDatum.costType}"></td>
+                            <td th:text="${sapDatum.invoiceAmount}"></td>
+                            <td th:text="${sapDatum.currency}"></td>
+                            <td th:text="${sapDatum.invoiceNumber}"></td>
+                            <td th:text="${sapDatum.positionalNumber}"></td>
+                            <td th:text="${sapDatum.getCheckCharacter()}"></td>
+                            <td th:text="${sapDatum.sapAccountData.getImportCheckString()}"></td>
+                            <td th:text="${#dates.format(sapDatum.fromDate, 'dd.MM.yyyy')}"></td>
+                            <td th:text="${#dates.format(sapDatum.toDate, 'dd.MM.yyyy')}"></td>
+                            <td><input type="checkbox" required></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="ui-g-12 ui-md-12 ui-lg-12">
+            <div style="margin: auto;" class="tile">
+                <input type="submit" class="btn btn-primary" th:value="#{invoices.collect.open}"/>
+            </div>
+        </div>
+    </form>
 </div>
-
-<footer th:replace="general :: footer" />
 
 </body>
 </html>

@@ -1,4 +1,6 @@
-package org.unidue.ub.libintel.almaconnector.model;
+package org.unidue.ub.libintel.almaconnector.model.run;
+
+import org.unidue.ub.libintel.almaconnector.model.SapResponse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,13 +8,15 @@ import java.util.List;
 /**
  * container object holding the list of SAP responses and the number of errors upon parsing or updating.
  */
-public class SapResponseContainer {
+public class SapResponseRun {
 
     private int numberOfErrors = 0;
 
+    private int numberOfReadErrors = 0;
+
     private List<SapResponse> responses = new ArrayList<>();
 
-    public SapResponseContainer() {}
+    public SapResponseRun() {}
 
     public int getNumberOfErrors() {
         return numberOfErrors;
@@ -20,6 +24,14 @@ public class SapResponseContainer {
 
     public void setNumberOfErrors(int numberOfErrors) {
         this.numberOfErrors = numberOfErrors;
+    }
+
+    public int getNumberOfReadErrors() {
+        return numberOfReadErrors;
+    }
+
+    public void setNumberOfReadErrors(int numberOfReadErrors) {
+        this.numberOfReadErrors = numberOfReadErrors;
     }
 
     public List<SapResponse> getResponses() {
@@ -37,5 +49,10 @@ public class SapResponseContainer {
     public long increaseNumberOfErrors() {
         this.numberOfErrors++;
         return this.numberOfErrors;
+    }
+
+    public long increaseNumberOfReadErrors() {
+        this.numberOfReadErrors++;
+        return this.numberOfReadErrors;
     }
 }

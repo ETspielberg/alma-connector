@@ -4,6 +4,8 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,25 +13,21 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.unidue.ub.alma.shared.acq.Invoice;
 import org.unidue.ub.alma.shared.acq.Vendor;
-import org.unidue.ub.libintel.almaconnector.model.run.AlmaExportRun;
 import org.unidue.ub.libintel.almaconnector.model.SapData;
-import org.unidue.ub.libintel.almaconnector.model.SapResponseContainer;
+import org.unidue.ub.libintel.almaconnector.model.run.AlmaExportRun;
+import org.unidue.ub.libintel.almaconnector.model.run.SapResponseRun;
 import org.unidue.ub.libintel.almaconnector.service.AlmaExportRunService;
 import org.unidue.ub.libintel.almaconnector.service.AlmaInvoiceServices;
 import org.unidue.ub.libintel.almaconnector.service.FileWriterService;
 import org.unidue.ub.libintel.almaconnector.service.VendorService;
 
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import static org.unidue.ub.libintel.almaconnector.Utils.convertInvoiceToSapData;
-import static org.unidue.ub.libintel.almaconnector.Utils.getFromExcel;
+import static org.unidue.ub.libintel.almaconnector.Utils.*;
 
 /**
  * Controller defining the endpoints for retrieving the invoices.
@@ -46,8 +44,6 @@ public class InvoiceController {
     private final AlmaExportRunService almaExportRunService;
 
     private final static Logger log = LoggerFactory.getLogger(InvoiceController.class);
-
-    private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     /**
      * constructor based autowiring to the invoice service, the filewriter service and the vendorservice.
@@ -79,80 +75,25 @@ public class InvoiceController {
 
     @PostMapping("/collectInvoices")
     public String collectInvoices(@ModelAttribute("almaExportRun") AlmaExportRun almaExportRun, Model model) {
-        AlmaExportRun almaExportRunNew = this.almaExportRunService.getAlmaExportRun(new Date());
-        almaExportRun.updateIdentifier();
-        almaExportRun.newRun();
-        log.info(almaExportRun.log());
-        this.almaExportRunService.saveAlmaExportRun(almaExportRun);
-        almaExportRun = this.almaInvoiceServices.getInvoices(almaExportRun);
-        for (Invoice invoice : almaExportRun.getInvoices()) {
+        log.debug(String.format("collecting invoices for %s", dateformat.format(almaExportRun.getDesiredDate())));
+        AlmaExportRun almaExportRunNew = this.almaExportRunService.getAlmaExportRun(almaExportRun.getDesiredDate());
+        almaExportRunNew.setDateSpecific(almaExportRun.isDateSpecific());
+        log.info(almaExportRunNew.log());
+        this.almaExportRunService.saveAlmaExportRun(almaExportRunNew);
+        almaExportRunNew = this.almaInvoiceServices.getInvoices(almaExportRunNew);
+        log.info(almaExportRunNew.log());
+        for (Invoice invoice : almaExportRunNew.getInvoices()) {
             Vendor vendor = this.vendorService.getVendorAccount(invoice.getVendor().getValue());
-            almaExportRun.addSapDataList(convertInvoiceToSapData(invoice, vendor));
+            List<SapData> sapDataList = convertInvoiceToSapData(invoice, vendor);
+            log.debug(String.format("adding %d SAP data to the list", sapDataList.size()));
+            almaExportRunNew.addSapDataList(sapDataList);
+            log.debug(String.format("list contains now %d entries",almaExportRunNew.getSapData().size() ));
         }
-        almaExportRun.sortSapData();
-        log.info(almaExportRun.log());
-        almaExportRun = this.fileWriterService.writeAlmaExport(almaExportRun);
-        model.addAttribute("almaExportRun", almaExportRun);
+        almaExportRunNew.sortSapData();
+        log.info(almaExportRunNew.log());
+        almaExportRunNew = this.fileWriterService.writeAlmaExport(almaExportRunNew);
+        model.addAttribute("almaExportRun", almaExportRunNew);
         return "finishedRun";
-    }
-
-    /**
-     * retrieves the active invoices
-     *
-     * @return a string representing the success of the file writing.
-     */
-    @PostMapping("/invoicesActive")
-    public ResponseEntity<String> getInvoiceLines() {
-
-
-        // collect the open invoices from the alma API
-        List<Invoice> invoices = this.almaInvoiceServices.getOpenInvoices();
-        // set the current date
-        String date = dateFormat.format(new Date());
-        // write the SAP data to the file
-        int missed = writeSapData(invoices, date);
-
-        if (missed == 0)
-            return ResponseEntity.ok("all itmes have been successfully written to file");
-        else
-            return ResponseEntity.ok(missed + " items could not be written");
-    }
-
-    /**
-     * retrieves the active invoices
-     *
-     * @return a string representing the success of the file writing.
-     */
-    @PostMapping("/invoicesByDate")
-    public ResponseEntity<String> getInvoiceLineForDate(String date) throws ParseException {
-        AlmaExportRun almaExportRun = this.almaExportRunService.getAlmaExportRun(new Date())
-        .withSpecificDate(dateFormat.parse(date));
-        // set the date to the desired date
-        Date dateToSearch = dateFormat.parse(date);
-        // collect to open invoices from the alma for a given date
-        List<Invoice> invoices = this.almaInvoiceServices.getOpenInvoicesForDate(dateToSearch);
-        // write the SAP data to the file
-        int missed = writeSapData(invoices, date);
-        if (missed == 0)
-            return ResponseEntity.ok("all items have been successfully written to file");
-        else
-            return ResponseEntity.ok(missed + " items could not be written");
-    }
-
-    /**
-     * private function to write the SAP import file and the check file
-     * @param invoices the list of invoices to be written
-     * @param date the date for which the data shall be written
-     * @return the number of invoices for which no files could be written
-     */
-    private int writeSapData(List<Invoice> invoices, String date) {
-        List<SapData> sapDataList = new ArrayList<>();
-        for (Invoice invoice : invoices) {
-            Vendor vendor = this.vendorService.getVendorAccount(invoice.getVendor().getValue());
-            sapDataList.addAll(convertInvoiceToSapData(invoice, vendor));
-        }
-        Collections.sort(sapDataList);
-        return this.fileWriterService.writeLines(sapDataList, date);
     }
 
     /**
@@ -168,21 +109,29 @@ public class InvoiceController {
         // retrieve first sheet
         XSSFSheet worksheet = workbook.getSheetAt(0);
 
-        SapResponseContainer container = getFromExcel(worksheet);
-        // initialize the error counter
-        long numberOfErrors = 0;
-        // go through all lines except the first one (the headers) and the last one (summary of all invoices).
-        if (container.getNumberOfErrors() > 0)
-            return ResponseEntity.badRequest().body(numberOfErrors + "Errors on parsing amount");
+        //convert the excel sheet to a SapResponseRun holding the individual responses
+        SapResponseRun container = getFromExcel(worksheet);
+
+        if (container.getNumberOfReadErrors() > 0)
+            return ResponseEntity.badRequest().body(container.getNumberOfReadErrors() + "Errors on parsing amount");
         container = this.almaInvoiceServices.updateInvoiceWithErpData(container);
         if (container.getNumberOfErrors() > 0)
-            return ResponseEntity.accepted().body(numberOfErrors + "Errors on updating invoices: ");
+            return ResponseEntity.accepted().body(container.getNumberOfErrors() + "Errors on updating invoices: ");
         else
             return ResponseEntity.accepted().build();
     }
 
-    @GetMapping("/showImportFiles")
-    public String getImportFiles(ModelAttribute modelAttribute) {
-        return "importFiles";
+    @PostMapping("/showImportFiles")
+    public String getImportFiles(@ModelAttribute("almaExportRun") AlmaExportRun almaExportRun, Model model) {
+        log.info(String.format("showing files for %s : %s ", dateformat.format(almaExportRun.getDesiredDate()), almaExportRun.isDateSpecific()));
+        model.addAttribute("almaExportRun", almaExportRun);
+        return "showImportFiles";
+    }
+
+    @GetMapping("/downloadFile/{type}/{date}")
+    public ResponseEntity<Resource> serveFile(@PathVariable String type, @PathVariable String date) throws FileNotFoundException {
+        Resource file = fileWriterService.loadFiles(date, type);
+        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=\"" + file.getFilename() + "\"").body(file);
     }
 }

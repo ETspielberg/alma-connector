@@ -6,7 +6,6 @@ import org.unidue.ub.alma.shared.acq.Invoice;
 import org.unidue.ub.libintel.almaconnector.model.SapData;
 
 import javax.persistence.*;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.unidue.ub.libintel.almaconnector.Utils.dateformat;
@@ -36,7 +35,6 @@ public class AlmaExportRun {
 
     @Column(name="files_created")
     @ElementCollection
-    // @CollectionTable(name="FilesCreated", joinColumns=@JoinColumn(name="alma_export_run_identifier"))
     private Set<String> filesCreated = new HashSet<>();
 
     @Column(name="number_invoices")
@@ -51,14 +49,18 @@ public class AlmaExportRun {
     @Column(name="missed_sap_data")
     private long missedSapData = 0;
 
+    @Column(name="number_home_sap_data")
+    private long numberHomeSapData = 0;
+
+    @Column(name="number_foreign_sap_data")
+    private long numberForeignSapData = 0;
+
     @Column(name="missed_invoice_lines")
     @ElementCollection
-    // @CollectionTable(name="MissedInvoiceLines", joinColumns=@JoinColumn(name="alma_export_run_identifier"))
     private Set<String> missedInvoiceLines = new HashSet<>();
 
     @Column(name="empty_invoices")
     @ElementCollection
-    // @CollectionTable(name="EmptyInvoices", joinColumns=@JoinColumn(name="alma_export_run_identifier"))
     private Set<String> emptyInvoices = new HashSet<>();
 
     @Transient
@@ -72,6 +74,9 @@ public class AlmaExportRun {
 
     @Transient
     private List<SapData> sapData= new ArrayList<>();
+
+    @Transient
+    private List<SapData> foreignSapData= new ArrayList<>();
 
     public AlmaExportRun() {
         this.desiredDate = new Date();
@@ -162,6 +167,8 @@ public class AlmaExportRun {
         this.successfullSapData = successfullSapData;
     }
 
+    public void increaseSuccessfullSapData() { this.successfullSapData++; }
+
     public long getMissedSapData() {
         return missedSapData;
     }
@@ -206,6 +213,39 @@ public class AlmaExportRun {
         this.missedSapDataList.add(sapData);
     }
 
+    public long getNumberHomeSapData() {
+        return numberHomeSapData;
+    }
+
+    public void setNumberHomeSapData(long numberHomeSapData) {
+        this.numberHomeSapData = numberHomeSapData;
+    }
+
+    public void increaseNumberHomeSapData() {
+        this.numberHomeSapData++;
+    }
+
+    public long getNumberForeignSapData() {
+        return numberForeignSapData;
+    }
+
+    public void setNumberForeignSapData(long numberForeignSapData) {
+        this.numberForeignSapData = numberForeignSapData;
+    }
+
+    public void increaseNumberForeignSapData() {
+        this.numberForeignSapData++;
+    }
+
+    public List<SapData> getForeignSapData() {
+        return foreignSapData;
+    }
+
+    public void setForeignSapData(List<SapData> foreignSapData) {
+        this.foreignSapData = foreignSapData;
+        this.numberForeignSapData = foreignSapData.size();
+    }
+
     public void setInvoices(List<Invoice> invoices) {
         this.invoices = invoices;
         this.numberInvoices = invoices.size();
@@ -219,18 +259,27 @@ public class AlmaExportRun {
 
     public void setSapData(List<SapData> sapData) {
         this.sapData = sapData;
+        this.numberHomeSapData = sapData.size();
     }
 
     public void addSapData(SapData sapData) {
-        this.sapData.add(sapData);
+        if (("H9".equals(sapData.costType) || "H8".equals(sapData.costType)) && "EUR".equals(sapData.currency)) {
+            this.sapData.add(sapData);
+            this.numberHomeSapData++;
+        } else {
+            this.foreignSapData.add(sapData);
+            this.numberForeignSapData++;
+        }
     }
 
     public void addSapDataList(List<SapData> sapDataList) {
-        this.sapData.addAll(sapDataList);
+        for (SapData sapData: sapDataList)
+            addSapData(sapData);
     }
 
     public void sortSapData(){
         Collections.sort(this.sapData);
+        Collections.sort(this.foreignSapData);
     }
 
     public List<SapData> getMissedSapDataList() {
@@ -269,6 +318,8 @@ public class AlmaExportRun {
         this.numberInvoices = 0;
         this.successfullSapData = 0;
         this.missedSapData = 0;
+        this.numberForeignSapData = 0;
+        this.numberHomeSapData = 0;
     }
 
     public String log() {

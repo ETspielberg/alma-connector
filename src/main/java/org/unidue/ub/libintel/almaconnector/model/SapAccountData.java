@@ -39,10 +39,14 @@ public class SapAccountData {
      * @return the check string used to check the correct SAP data
      */
     public String getImportCheckString() {
-        if (!this.pspElement.isEmpty())
-            return this.ledgerAccount + "P" + this.pspElement;
-        else
-            return this.ledgerAccount + "K" + costCentre;
+        if (this.ledgerAccount != "") {
+            if (!this.pspElement.isEmpty())
+                return this.ledgerAccount + "P" + this.pspElement;
+            else
+                return this.ledgerAccount + "K" + costCentre;
+        } else {
+            return "";
+        }
     }
 
     public String getSapString() {

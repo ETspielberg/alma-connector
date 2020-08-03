@@ -128,15 +128,19 @@ public class SapData implements Comparable<SapData> {
             string += sapDateFormatter.format(this.toDate) + ";";
         else
             string += "0;";
-        if (this.vendorCode != null) {
-            if (this.vendorCode.equals("A-500") || this.vendorCode.equals("A-510") || this.vendorCode.equals("A-520"))
-                string += "C;";
-            else
-                string += "K;";
-        } else
-            string += "K;";
+        string += getCheckCharacter() + ";";
         string += this.sapAccountData.getSapString();
         return string;
+    }
+
+    public String getCheckCharacter() {
+        if (this.vendorCode != null) {
+            if (this.vendorCode.equals("A-500") || this.vendorCode.equals("A-510") || this.vendorCode.equals("A-520"))
+                return"C";
+            else
+                return "K";
+        } else
+            return "K";
     }
 
     public String toFixedLengthLine() {
@@ -153,13 +157,7 @@ public class SapData implements Comparable<SapData> {
         string += getSizedString(this.currency, 8);
         string += getSizedString(this.invoiceNumber, 22);
         string += getSizedString(getSizedString(this.positionalNumber, 5).replace(" ", "0"), 7);
-        if (this.vendorCode != null) {
-            if (this.vendorCode.trim().equals("A-500") || this.vendorCode.trim().equals("A-510") || this.vendorCode.trim().equals("A-520"))
-                string += getSizedString("C", 4);
-            else
-                string += getSizedString("K", 4);
-        } else
-            string += getSizedString("K", 4);
+        string += getSizedString(getCheckCharacter(), 4);
         string += getSizedString(this.sapAccountData.getImportCheckString(), 30);
         if (this.fromDate != null)
             string += getSizedString(readableDateFormatter.format(this.fromDate), 12);

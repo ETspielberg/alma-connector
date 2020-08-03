@@ -14,7 +14,7 @@
             <div class="tile">
                 <h3 style="height:1.2em;" th:text="#{sap.collect.open}"></h3>
                 <p style="height:8em;" th:text="#{sap.collect.open.short}"></p>
-                <form th:action="@{/collectInvoices}" th:object="${almaExportRun}" method="post">
+                <form th:action="@{/alma/collectInvoices}" th:object="${almaExportRun}" method="post">
                 <div class="form-group">
                     <label for="dateSpecific" th:text="#{sap.date.specific}"></label>
                     <input id="dateSpecific" type="checkbox" th:field="*{dateSpecific}">
