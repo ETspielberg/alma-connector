@@ -13,6 +13,7 @@ public class AlmaInvoiceServiceTest {
 
     @Test
     public void loadAllActiveInvoices() {
-        this.almaInvoiceServices.getOpenInvoices();
+        String owner = "E0001";
+        this.almaInvoiceServices.getOpenInvoices(owner);
     }
 }
