@@ -83,7 +83,7 @@ public class Utils {
                             String invoiceVatCode = invoice.getInvoiceVat().getVatCode().getValue();
                             if (!"".equals(invoiceVatCode)) {
                                 sapData.costType = invoiceLineVatCode;
-                                log.info("set VAT code ot " + invoiceVatCode);
+                                log.info("set VAT code to " + invoiceVatCode);
                             }
                             else {
                                 log.warn("no vat code given for invoice line " + invoiceLine.getId());

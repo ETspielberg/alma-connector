@@ -20,7 +20,7 @@
                     </a>
                 </p>
                 <p th:if="${almaExportRun.isDateSpecific()}">
-                    <a target="_blank" th:href="@{/downloadFile/sap/{date}(date=${#dates.format(almaExportRun.desiredDate, 'yyyy-MM-dd')}, owner=${almaExportRun.invoiceOwner})}">
+                    <a target="_blank" th:href="@{/downloadFile/sap/{owner}/{date}(owner=${almaExportRun.invoiceOwner},date=${#dates.format(almaExportRun.desiredDate, 'yyyy-MM-dd')})}">
                         <button th:disabled="${almaExportRun.numberHomeSapData} == 0" class="btn btn-primary" th:text="#{files.download}"></button>
                     </a>
                 </p>
