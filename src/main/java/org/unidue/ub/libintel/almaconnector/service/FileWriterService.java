@@ -57,8 +57,8 @@ public class FileWriterService {
         if (almaExportRun.isDateSpecific())
             currentDate = dateformat.format(new Date());
         String checkFilename = String.format("Druck-sap_%s_%s_%s.txt", "home", currentDate, almaExportRun.getInvoiceOwner());
-        String sapFilename = String.format("Druck-sap_%s_%s_%s.txt", "home", currentDate, almaExportRun.getInvoiceOwner());
-        String foreignFilename = String.format("Druck-sap_%s_%s_%s.txt", "foreign", currentDate, almaExportRun.getInvoiceOwner());
+        String sapFilename = String.format("sap_%s_%s_%s.txt", "home", currentDate, almaExportRun.getInvoiceOwner());
+        String foreignFilename = String.format("sap_%s_%s_%s.txt", "foreign", currentDate, almaExportRun.getInvoiceOwner());
         initializeFiles(currentDate, checkFilename, sapFilename, foreignFilename);
 
         for (SapData sapData: almaExportRun.getSapData()) {
