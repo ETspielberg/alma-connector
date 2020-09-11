@@ -72,7 +72,7 @@ public class Utils {
                     // read the VAT code from the data.
                     try {
                         // get the vat code
-                        String invoiceLineVatCode = invoiceLine.getInvoiceLineVat().getVatCode().getValue();
+                        String invoiceLineVatCode = invoiceLine.getInvoiceLineVat().getVatCode().getDesc();
                         // set the value of the vat code to a value which is not empty
                         if (!"".equals(invoiceLineVatCode)) {
                             sapData.costType = invoiceLineVatCode;
