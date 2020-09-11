@@ -43,10 +43,10 @@ public class AlmaInvoiceServices {
         List<Invoice> invoices;
         if (almaExportRun.isDateSpecific()) {
             log.info("collecting invoices for date");
-            invoices = getOpenInvoicesForDate(almaExportRun.getDesiredDate());
+            invoices = getOpenInvoicesForDate(almaExportRun.getDesiredDate(), almaExportRun.getInvoiceOwner());
         } else {
             log.info("collecting all invoices");
-            invoices = getOpenInvoices();
+            invoices = getOpenInvoices(almaExportRun.getInvoiceOwner());
         }
         log.info("retrieved " + invoices.size() + " (filtered) invoices");
         almaExportRun.setInvoices(invoices);
@@ -60,13 +60,13 @@ public class AlmaInvoiceServices {
      * @return  a list of invoices
      */
     @Secured({ "ROLE_SYSTEM", "ROLE_SAP" })
-    public List<Invoice> getOpenInvoices() {
+    public List<Invoice> getOpenInvoices(String owner) {
         // initialize parameters
         int batchSize = 25;
         int offset = 0;
 
         // retrieve first list of po-lines.
-        Invoices invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "Waiting to be Sent", "", "", "", batchSize, offset, "");
+        Invoices invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "Waiting to be Sent", owner, "", "", batchSize, offset, "");
         List<Invoice> invoiceList = new ArrayList<>(invoices.getInvoice());
 
         log.info("retrieving " + invoices.getTotalRecordCount() + " invoices");
@@ -75,7 +75,7 @@ public class AlmaInvoiceServices {
         while (invoiceList.size() < invoices.getTotalRecordCount()) {
             offset += batchSize;
             log.info("collecting invoices from " + offset + " to " + (offset + batchSize));
-            invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "Waiting to be Sent", "", "", "", batchSize, offset, "");
+            invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "Waiting to be Sent", owner, "", "", batchSize, offset, "");
             invoiceList.addAll(invoices.getInvoice());
         }
         log.info(String.format("retrieved list of %d invoices", invoiceList.size()));
@@ -88,9 +88,9 @@ public class AlmaInvoiceServices {
      * @return a list of invoices
      */
     @Secured({ "ROLE_SYSTEM", "ROLE_SAP" })
-    public List<Invoice> getOpenInvoicesForDate(Date date) {
+    public List<Invoice> getOpenInvoicesForDate(Date date, String owner) {
         log.info("collecting invoices for date " + new SimpleDateFormat("dd.MM.yyyy").format(date));
-        return filterList(date, getOpenInvoices());
+        return filterList(date, getOpenInvoices(owner));
     }
 
     /**
