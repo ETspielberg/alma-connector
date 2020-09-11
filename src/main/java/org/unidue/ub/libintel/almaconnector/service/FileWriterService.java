@@ -53,7 +53,9 @@ public class FileWriterService {
      */
     @Secured({ "ROLE_SYSTEM", "ROLE_SAP" })
     public AlmaExportRun writeAlmaExport(AlmaExportRun almaExportRun) {
-        String currentDate = dateformat.format(new Date());
+        String currentDate = "all";
+        if (almaExportRun.isDateSpecific())
+            currentDate = dateformat.format(new Date());
         String checkFilename = String.format("Druck-sap_%s_%s_%s.txt", "home", currentDate, almaExportRun.getInvoiceOwner());
         String sapFilename = String.format("Druck-sap_%s_%s_%s.txt", "home", currentDate, almaExportRun.getInvoiceOwner());
         String foreignFilename = String.format("Druck-sap_%s_%s_%s.txt", "foreign", currentDate, almaExportRun.getInvoiceOwner());
