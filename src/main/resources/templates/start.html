@@ -16,10 +16,23 @@
                 <a th:href="@{/alma/sap}"><button type="button" class="btn btn-primary" th:text="#{sap.link}"></button></a>
             </div>
         </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-4">
+            <div class="tile">
+                <h3 style="height: 1.2em;" th:text="#{shibboleth}"></h3>
+                <p  style="height: 8em;" th:text="#{shibboleth.short}"></p>
+                <a th:href="@{/alma/shibboleth/start}"><button type="button" class="btn btn-primary" th:text="#{shibboleth.link}"></button></a>
+            </div>
+        </div>
+    </div>
+    <div class="ui-g">
+        <div class="ui-g-12 ui-md-12 ui-lg-12">
+            <div class="tile">
+                <a th:href="@{/start}">
+                    <button class="btn btn-primary">Zurück</button>
+                </a>
+            </div>
+        </div>
     </div>
 </div>
-
-<footer th:replace="general :: footer" />
-
 </body>
 </html>

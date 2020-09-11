@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="general :: generalHead"/>
+<body>
+
+<nav th:replace="general :: navbar"></nav>
+
+<div class="jumbotron">
+    <div class="container">
+        <h1>Shibboleth-Einstellugnen</h1>
+        <p>Konfigurationen, aus denen der Linksolver-Wrapper WAYFless URLs für Shibboleth-Zugänge erzeugen kann</p>
+        <p>
+            <a th:href="@{/shibboleth/edit}">
+                <button class="btn btn-success" th:text="#{shibboleth.new.provider}"></button>
+            </a>
+        </p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="ui-g">
+    <div class="tile">
+
+            <div class="ui-g-12">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th th:test="#{shibboleth.provider.name}">Plattform</th>
+                        <th th:test="#{shibboleth.provider.wayfless}">SP-side WAYFless?</th>
+                        <th th:test="#{actions}">Aktionen</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="data:${shibbolethData}">
+                        <th>
+                            <span th:text="${data.host}"></span>
+                        </th>
+                        <td>
+                            <span th:text="${data.spSideWayfless}"></span>
+                        </td>
+                        <td>
+                            <a th:href="@{alma/shibboleth/edit(platform=${data.host})}">
+                                <button class="btn btn-primary" th:text="#{edit}">Bearbeiten</button>
+                            </a>
+                            <a th:href="@{alma/shibboleth/confirmDelete(platform=${data.host})}">
+                                <button class="btn btn-danger" th:text="#{delete}">Löschen</button>
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="ui-g">
+        <div class="ui-g-12 ui-md-12 ui-lg-12">
+            <div class="tile">
+                <a th:href="@{/alma/start}">
+                    <button class="btn btn-primary">Zurück</button>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

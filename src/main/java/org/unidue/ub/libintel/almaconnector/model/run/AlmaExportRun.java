@@ -20,6 +20,9 @@ public class AlmaExportRun {
     @Column(name="date_specific")
     private boolean dateSpecific = false;
 
+    @Column(name="invoice_owner")
+    private String invoiceOwner;
+
     @Column(name="desired_date")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -81,13 +84,15 @@ public class AlmaExportRun {
     public AlmaExportRun() {
         this.desiredDate = new Date();
         this.runIndex = 0;
-        this.identifier = dateformat.format(desiredDate) + "-" + this.runIndex;
+        this.invoiceOwner = "";
+        this.identifier = String.format("%s - %s - %s", dateformat.format(desiredDate), invoiceOwner, this.runIndex);
     }
 
     public AlmaExportRun(Date desiredDate) {
         this.desiredDate = desiredDate;
         this.runIndex = 0;
-        this.identifier = dateformat.format(desiredDate);
+        this.invoiceOwner = "";
+        this.identifier = String.format("%s - %s - %s", dateformat.format(desiredDate), invoiceOwner, this.runIndex);
     }
 
     public AlmaExportRun withSpecificDate(Date desiredDate) {
@@ -96,9 +101,15 @@ public class AlmaExportRun {
         return this;
     }
 
+    public AlmaExportRun withInvoiceOwner(String invoiceOwner) {
+        this.invoiceOwner = invoiceOwner;
+        this.identifier = String.format("%s - %s - %s", dateformat.format(desiredDate), invoiceOwner, this.runIndex);
+        return this;
+    }
+
     public AlmaExportRun withRunIndex(long runIndex) {
         this.runIndex = runIndex;
-        this.identifier = dateformat.format(desiredDate) + "-" + this.runIndex;
+        this.identifier = String.format("%s - %s - %s", dateformat.format(desiredDate), invoiceOwner, this.runIndex);
         return this;
     }
 
@@ -108,6 +119,14 @@ public class AlmaExportRun {
 
     public void setIdentifier(String identifier) {
         this.identifier = identifier;
+    }
+
+    public String getInvoiceOwner() {
+        return invoiceOwner;
+    }
+
+    public void setInvoiceOwner(String invoiceOwner) {
+        this.invoiceOwner = invoiceOwner;
     }
 
     public boolean isDateSpecific() {
@@ -248,6 +267,7 @@ public class AlmaExportRun {
 
     public void setInvoices(List<Invoice> invoices) {
         this.invoices = invoices;
+        this.invoices.removeIf(invoice -> !invoice.getOwner().getValue().equals(this.invoiceOwner));
         this.numberInvoices = invoices.size();
         for (Invoice invoice: this.invoices) {
             if (invoice.getInvoiceLines() != null && invoice.getInvoiceLines().getInvoiceLine() != null)
@@ -323,12 +343,12 @@ public class AlmaExportRun {
     }
 
     public String log() {
-        String logString = "runID: %s, date: %s, runIndex: %d dateSpecific: %s, numberInvoices; %s, numberSapData: %s";
-        return String.format(logString, this.identifier, this.desiredDate, this.runIndex, this.dateSpecific, this.invoices.size(),
+        String logString = "runID: %s, date: %s, runIndex: %d, invoiceOwner %s, dateSpecific: %s, numberInvoices; %s, numberSapData: %s";
+        return String.format(logString, this.identifier, this.desiredDate, this.runIndex, this.invoiceOwner, this.dateSpecific, this.invoices.size(),
                 this.sapData.size());
     }
 
     public void updateIdentifier() {
-        this.identifier = dateformat.format(this.desiredDate) + "-" + this.runIndex;
+        this.identifier = String.format("%s - %s - %s", dateformat.format(desiredDate), invoiceOwner, this.runIndex);
     }
 }

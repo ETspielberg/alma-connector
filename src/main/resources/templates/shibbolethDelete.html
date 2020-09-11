@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="general :: generalHead"/>
+<body>
+
+<nav th:replace="general :: navbar"></nav>
+
+<div class="jumbotron">
+    <div class="container">
+        <h1>Shibboleth-Einstellugnen</h1>
+        <p>Konfigurationen, aus denen der Linksolver-Wrapper WAYFless URLs für Shibboleth-Zugänge erzeugen kann</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="ui-g">
+        <div class="ui-g-12 ui-md-12 ui-lg-12">
+            <div class="tile">
+                <div class="ui-g">
+                    <div class="ui-g-3">
+                        <img th:src="@{/img/warning.svg}" alt="WARNING" style="width:90%;">
+                    </div>
+                    <div class="ui-g-9">
+                        <h1>Are you sure?</h1>
+                        <p>Do you really want to delete the plattform <span th:text="${platformToDelete}"></span></p>
+                        <div class="ui-g">
+                            <div class="ui-g-6">
+                                <a href="/shibboleth/start">
+                                    <button class="btn btn-primary">Back to platform overview</button>
+                                </a>
+                            </div>
+                            <div class="ui-g-6">
+                                <form method="post" th:action="@{/alma/shibboleth/delete}">
+                                    <input hidden th:value="${platformToDelete}" name="platformToDelete">
+                                    <input type="submit" class="btn btn-danger" value="Confirm">
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

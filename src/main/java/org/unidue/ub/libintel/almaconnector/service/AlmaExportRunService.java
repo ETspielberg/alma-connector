@@ -34,16 +34,16 @@ public class AlmaExportRunService {
      * @param date the identifier for the alma export run
      * @return the alma export run object
      */
-    public AlmaExportRun getAlmaExportRun(Date date) {
-        log.debug("collecting AlmaExportRun from database for date " + dateformat.format(date));
-        List<AlmaExportRun> savedRuns =  this.almaExportRunRepository.findByIdentifierStartsWithOrderByRunIndex(dateformat.format(date));
+    public AlmaExportRun getAlmaExportRun(Date date, String owner) {
+        log.debug(String.format("collecting AlmaExportRun from database for date %s and owner %s",dateformat.format(date), owner));
+        List<AlmaExportRun> savedRuns =  this.almaExportRunRepository.findByIdentifierStartsWithOrderByRunIndex(dateformat.format(date) + "-" + owner);
         if (savedRuns == null || savedRuns.size() == 0) {
             log.debug("no results from alma run repository: " + savedRuns.size());
-            return new AlmaExportRun(date).withRunIndex(0);
+            return new AlmaExportRun(date).withRunIndex(0).withInvoiceOwner(owner);
 
         } else {
             log.debug(String.format("found %d results in repositoy.", savedRuns.size()));
-            AlmaExportRun almaExportRun = new AlmaExportRun(date).withRunIndex(savedRuns.size());
+            AlmaExportRun almaExportRun = new AlmaExportRun(date).withRunIndex(savedRuns.size()).withInvoiceOwner(owner);
             log.debug(almaExportRun.log());
             return almaExportRun;
         }

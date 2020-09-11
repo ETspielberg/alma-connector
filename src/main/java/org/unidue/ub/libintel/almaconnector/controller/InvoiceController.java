@@ -68,15 +68,15 @@ public class InvoiceController {
      */
     @GetMapping("/sap")
     public String getSapPage(Model model) {
-        AlmaExportRun almaExportRun = this.almaExportRunService.getAlmaExportRun(new Date());
+        AlmaExportRun almaExportRun = this.almaExportRunService.getAlmaExportRun(new Date(), "E0001");
         model.addAttribute("almaExportRun", almaExportRun);
         return "sap";
     }
 
     @PostMapping("/collectInvoices")
     public String collectInvoices(@ModelAttribute("almaExportRun") AlmaExportRun almaExportRun, Model model) {
-        log.debug(String.format("collecting invoices for %s", dateformat.format(almaExportRun.getDesiredDate())));
-        AlmaExportRun almaExportRunNew = this.almaExportRunService.getAlmaExportRun(almaExportRun.getDesiredDate());
+        log.debug(String.format("collecting invoices for %s at %s", dateformat.format(almaExportRun.getDesiredDate()), almaExportRun.getInvoiceOwner()));
+        AlmaExportRun almaExportRunNew = this.almaExportRunService.getAlmaExportRun(almaExportRun.getDesiredDate(), almaExportRun.getInvoiceOwner());
         almaExportRunNew.setDateSpecific(almaExportRun.isDateSpecific());
         log.info(almaExportRunNew.log());
         this.almaExportRunService.saveAlmaExportRun(almaExportRunNew);

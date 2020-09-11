@@ -20,6 +20,11 @@ body {
 
 }
 
+.bg-dark {
+  background-color: black !important;
+  color: #efe4bf;
+}
+
 .button-link {
   position: absolute;
   bottom: 0px;
