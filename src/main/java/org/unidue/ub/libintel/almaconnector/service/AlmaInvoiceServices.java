@@ -66,7 +66,7 @@ public class AlmaInvoiceServices {
         int offset = 0;
 
         // retrieve first list of po-lines.
-        Invoices invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "Ready to be Paid", "", "", "", batchSize, offset, "");
+        Invoices invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "Waiting to be Sent", "", "", "", batchSize, offset, "");
         List<Invoice> invoiceList = new ArrayList<>(invoices.getInvoice());
 
         log.info("retrieving " + invoices.getTotalRecordCount() + " invoices");
@@ -75,7 +75,7 @@ public class AlmaInvoiceServices {
         while (invoiceList.size() < invoices.getTotalRecordCount()) {
             offset += batchSize;
             log.info("collecting invoices from " + offset + " to " + (offset + batchSize));
-            invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "Ready to be Paid", "", "", "", batchSize, offset, "");
+            invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "Waiting to be Sent", "", "", "", batchSize, offset, "");
             invoiceList.addAll(invoices.getInvoice());
         }
         log.info(String.format("retrieved list of %d invoices", invoiceList.size()));
@@ -118,7 +118,7 @@ public class AlmaInvoiceServices {
         }
         for (Map.Entry<String, List<SapResponse>> entry : sapResponsesPerInvoice.entrySet()) {
             String searchQuery = "invoice_number~" + entry.getKey();
-            Invoices invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "Ready to be Paid", "", "", searchQuery, 20, 0, "");
+            Invoices invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "Waiting to be Sent", "", "", searchQuery, 20, 0, "");
             if (invoices.getTotalRecordCount() == 1) {
                 Invoice invoice = invoices.getInvoice().get(0);
                 List<SapResponse> indiviudalResponses = entry.getValue();
