@@ -62,6 +62,7 @@ public class FileWriterService {
         initializeFiles(currentDate, checkFilename, sapFilename, foreignFilename);
 
         for (SapData sapData: almaExportRun.getSapData()) {
+            log.info(generateComment(sapData).toCsv());
             try {
                 addLineToFile(checkFilename, sapData.toFixedLengthLine());
             } catch (IOException ex) {
