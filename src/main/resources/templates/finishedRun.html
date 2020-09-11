@@ -11,13 +11,15 @@
             <div class="ui-g-12 ui-md-12 ui-lg-10 ui-lg-offset-1">
                 <div class="tile">
                     <h3 style="height:1.2em;" th:text="#{sap.run.result}"></h3>
-                    <p>Lauf vom <span th:text="${#dates.format(almaExportRun.lastRun, 'dd.MM.yyyy')}"></span> for the
+                    <p>Lauf vom <span th:text="${#dates.format(almaExportRun.lastRun, 'dd.MM.yyyy')}"></span>
+                        für den Campus <span th:text="${almaExportRun.invoiceOwner}"></span> vom
                         <span th:text="${#dates.format(almaExportRun.desiredDate, 'dd.MM.yyyy')}"></span>, Nummer <span
                                 th:text="${almaExportRun.runIndex}"></span></p>
                     <input type="hidden" th:field="*{dateSpecific}">
                     <input type="hidden" th:field="*{desiredDate}">
                     <input type="hidden" th:field="*{numberForeignSapData}">
                     <input type="hidden" th:field="*{numberHomeSapData}">
+                    <input type="hidden" th:field="*{invoiceOwner}">
                     <table class="table table-borderless text-left">
                         <tr>
                             <th th:text="#{sap.result.number.invoices}"></th>

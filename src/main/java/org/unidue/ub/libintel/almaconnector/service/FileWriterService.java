@@ -53,20 +53,10 @@ public class FileWriterService {
      */
     @Secured({ "ROLE_SYSTEM", "ROLE_SAP" })
     public AlmaExportRun writeAlmaExport(AlmaExportRun almaExportRun) {
-        String checkFilename;
-        String sapFilename;
-        String foreignFilename;
         String currentDate = dateformat.format(new Date());
-        if (almaExportRun.isDateSpecific()) {
-            // initialize failure counter, print file and csv-file
-            checkFilename = "Druck_sap-" + dateformat.format(almaExportRun.getDesiredDate()) + ".txt";
-            sapFilename = "sap-" + dateformat.format(almaExportRun.getDesiredDate()) + ".txt";
-            foreignFilename = "foreign-sap-" + dateformat.format(almaExportRun.getDesiredDate()) + ".txt";
-        } else {
-            checkFilename = "Druck_sap.txt";
-            sapFilename = "sap.txt";
-            foreignFilename = "foreign-sap.txt";
-        }
+        String checkFilename = String.format("Druck-sap_%s_%s_%s.txt", "home", currentDate, almaExportRun.getInvoiceOwner());
+        String sapFilename = String.format("Druck-sap_%s_%s_%s.txt", "home", currentDate, almaExportRun.getInvoiceOwner());
+        String foreignFilename = String.format("Druck-sap_%s_%s_%s.txt", "foreign", currentDate, almaExportRun.getInvoiceOwner());
         initializeFiles(currentDate, checkFilename, sapFilename, foreignFilename);
 
         for (SapData sapData: almaExportRun.getSapData()) {
@@ -117,36 +107,6 @@ public class FileWriterService {
     }
 
     /**
-     * writes the list of sapData to the two output files.
-     * @param sapDataList a list of sapData
-     * @return the number of sap data which could not be written
-     */
-    @Secured({ "ROLE_SYSTEM", "ROLE_SAP" })
-    public int writeLines(List<SapData> sapDataList, String currentDate) {
-        // initialize failure counter, print file and csv-file
-        int failures = 0;
-        String checkFilename = "Druck_sap-" + currentDate + ".txt";
-        String sapFilename = "sap-" + currentDate + ".txt";
-        String foreignFilename = "foreign-sap-" + currentDate + ".txt";
-        initializeFiles(currentDate, checkFilename, sapFilename, foreignFilename);
-        for (SapData sapData: sapDataList) {
-            try (BufferedWriter bw = new BufferedWriter(new FileWriter(this.file + checkFilename, true))) {
-                addLine(bw, sapData.toFixedLengthLine());
-            } catch(IOException ex) {
-                failures++;
-                log.warn("could not write line: " + sapData.toFixedLengthLine());
-            }
-            try (BufferedWriter bw = new BufferedWriter(new FileWriter(this.file + sapFilename, true))) {
-                addLine(bw, generateComment(sapData).toCsv());
-            } catch(IOException ex) {
-                failures++;
-                log.warn("could not write line: " + sapData.toCsv());
-            }
-        }
-        return failures;
-    }
-
-    /**
      * adds a line to the output file
      * @param bw the buffered writer for the file
      * @param line the line to be added
@@ -191,19 +151,8 @@ public class FileWriterService {
      * @throws FileNotFoundException thrown if the file could not be loaded
      */
     @Secured({ "ROLE_SYSTEM", "ROLE_SAP" })
-    public Resource loadFiles(String date, String type) throws FileNotFoundException {
-        String filename;
-        if ("all".equals(date)) {
-            if ("sap".equals(type))
-                filename = "sap.txt";
-            else
-                filename = "foreign-sap.txt";
-        } else {
-            if ("sap".equals(type))
-                filename = "sap-" + date + ".txt";
-            else
-                filename = "foreign-sap-" + date + ".txt";
-        }
+    public Resource loadFiles(String date, String type, String owner) throws FileNotFoundException {
+        String filename = String.format("sap_%s_%s_%s.txt", type, date, owner);
         Path file =Paths.get(this.file + filename);
         try {
             Resource resource = new UrlResource(file.toUri());

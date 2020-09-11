@@ -128,9 +128,9 @@ public class InvoiceController {
         return "showImportFiles";
     }
 
-    @GetMapping("/downloadFile/{type}/{date}")
-    public ResponseEntity<Resource> serveFile(@PathVariable String type, @PathVariable String date) throws FileNotFoundException {
-        Resource file = fileWriterService.loadFiles(date, type);
+    @GetMapping("/downloadFile/{type}/{owner}/{date}")
+    public ResponseEntity<Resource> serveFile(@PathVariable String type, @PathVariable String date, @PathVariable String owner) throws FileNotFoundException {
+        Resource file = fileWriterService.loadFiles(date, type, owner);
         return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=\"" + file.getFilename() + "\"").body(file);
     }
