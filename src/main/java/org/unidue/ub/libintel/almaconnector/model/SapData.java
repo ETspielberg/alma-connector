@@ -114,7 +114,10 @@ public class SapData implements Comparable<SapData> {
             string += ";";
         string += sapDateFormatter.format(this.commitmentDate) + ";";
         string += sapDateFormatter.format(this.invoiceDate) + ";";
-        string += this.costType + ";";
+        if (this.costType != null)
+            string += this.costType + ";";
+        else
+            string += ";";
         string += this.currency + ";";
         string += this.invoiceAmount + ";";
         string += this.invoiceNumber + ";";

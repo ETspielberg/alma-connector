@@ -76,7 +76,7 @@ public class AlmaExportRun {
     private List<Invoice> invoices= new ArrayList<>();
 
     @Transient
-    private List<SapData> sapData= new ArrayList<>();
+    private List<SapData> homeSapData = new ArrayList<>();
 
     @Transient
     private List<SapData> foreignSapData= new ArrayList<>();
@@ -147,7 +147,7 @@ public class AlmaExportRun {
     }
 
     public Date getLastRun() {
-        return lastRun;
+        return this.lastRun;
     }
 
     public void setLastRun(Date lastRun) {
@@ -155,7 +155,7 @@ public class AlmaExportRun {
     }
 
     public Set<String> getFilesCreated() {
-        return filesCreated;
+        return this.filesCreated;
     }
 
     public void setFilesCreated(Set<String> filesCreated) {
@@ -163,7 +163,7 @@ public class AlmaExportRun {
     }
 
     public long getNumberInvoices() {
-        return numberInvoices;
+        return this.numberInvoices;
     }
 
     public void setNumberInvoices(long numberInvoices) {
@@ -189,7 +189,7 @@ public class AlmaExportRun {
     public void increaseSuccessfullSapData() { this.successfullSapData++; }
 
     public long getMissedSapData() {
-        return missedSapData;
+        return this.missedSapData;
     }
 
     public void setMissedSapData(long missedSapData) {
@@ -213,7 +213,7 @@ public class AlmaExportRun {
     }
 
     public Set<String> getEmptyInvoices() {
-        return emptyInvoices;
+        return this.emptyInvoices;
     }
 
     public void setEmptyInvoices(Set<String> emptyInvoices) {
@@ -221,11 +221,11 @@ public class AlmaExportRun {
     }
 
     public List<Invoice> getInvoices() {
-        return invoices;
+        return this.invoices;
     }
 
-    public List<SapData> getSapData() {
-        return sapData;
+    public List<SapData> getHomeSapData() {
+        return this.homeSapData;
     }
 
     public void addMissedSapData(SapData sapData) {
@@ -233,7 +233,7 @@ public class AlmaExportRun {
     }
 
     public long getNumberHomeSapData() {
-        return numberHomeSapData;
+        return this.numberHomeSapData;
     }
 
     public void setNumberHomeSapData(long numberHomeSapData) {
@@ -257,7 +257,7 @@ public class AlmaExportRun {
     }
 
     public List<SapData> getForeignSapData() {
-        return foreignSapData;
+        return this.foreignSapData;
     }
 
     public void setForeignSapData(List<SapData> foreignSapData) {
@@ -277,14 +277,14 @@ public class AlmaExportRun {
         }
     }
 
-    public void setSapData(List<SapData> sapData) {
-        this.sapData = sapData;
-        this.numberHomeSapData = sapData.size();
+    public void setHomeSapData(List<SapData> homeSapData) {
+        this.homeSapData = homeSapData;
+        this.numberHomeSapData = homeSapData.size();
     }
 
     public void addSapData(SapData sapData) {
         if (("H9".equals(sapData.costType) || "H8".equals(sapData.costType)) && "EUR".equals(sapData.currency)) {
-            this.sapData.add(sapData);
+            this.homeSapData.add(sapData);
             this.numberHomeSapData++;
         } else {
             this.foreignSapData.add(sapData);
@@ -298,8 +298,12 @@ public class AlmaExportRun {
     }
 
     public void sortSapData(){
-        Collections.sort(this.sapData);
+        Collections.sort(this.homeSapData);
         Collections.sort(this.foreignSapData);
+    }
+
+    public long getTotalSapData() {
+        return this.homeSapData.size() + this.foreignSapData.size();
     }
 
     public List<SapData> getMissedSapDataList() {
@@ -331,7 +335,7 @@ public class AlmaExportRun {
     }
 
     public void newRun() {
-        this.sapData = new ArrayList<>();
+        this.homeSapData = new ArrayList<>();
         this.invoices = new ArrayList<>();
         this.filesCreated = new HashSet<>();
         this.numberInvoiceLines = 0;
@@ -345,7 +349,7 @@ public class AlmaExportRun {
     public String log() {
         String logString = "runID: %s, date: %s, runIndex: %d, invoiceOwner %s, dateSpecific: %s, numberInvoices; %s, numberSapData: %s";
         return String.format(logString, this.identifier, this.desiredDate, this.runIndex, this.invoiceOwner, this.dateSpecific, this.invoices.size(),
-                this.sapData.size());
+                this.homeSapData.size());
     }
 
     public void updateIdentifier() {

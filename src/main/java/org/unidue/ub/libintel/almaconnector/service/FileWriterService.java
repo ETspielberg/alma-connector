@@ -53,27 +53,38 @@ public class FileWriterService {
      */
     @Secured({ "ROLE_SYSTEM", "ROLE_SAP" })
     public AlmaExportRun writeAlmaExport(AlmaExportRun almaExportRun) {
-        String currentDate = "all";
+        String dateString;
         if (almaExportRun.isDateSpecific())
-            currentDate = dateformat.format(new Date());
-        String checkFilename = String.format("Druck-sap_%s_%s_%s.txt", "home", currentDate, almaExportRun.getInvoiceOwner());
-        String sapFilename = String.format("sap_%s_%s_%s.txt", "home", currentDate, almaExportRun.getInvoiceOwner());
-        String foreignFilename = String.format("sap_%s_%s_%s.txt", "foreign", currentDate, almaExportRun.getInvoiceOwner());
-        initializeFiles(currentDate, checkFilename, sapFilename, foreignFilename);
+            dateString = dateformat.format(almaExportRun.getDesiredDate());
+        else
+            dateString = dateformat.format(new Date());
+        String checkFilename = String.format("Druck-sap_%s_%s_%s.txt", "all", dateString, almaExportRun.getInvoiceOwner());
+        String homeFilename = String.format("home_%s_%s_%s.txt", "home", dateString, almaExportRun.getInvoiceOwner());
+        String foreignFilename = String.format("sap_%s_%s_%s.txt", "foreign", dateString, almaExportRun.getInvoiceOwner());
+        initializeFiles(dateString, checkFilename, homeFilename, foreignFilename);
 
-        for (SapData sapData: almaExportRun.getSapData()) {
-            log.info(generateComment(sapData).toCsv());
+        for (SapData sapData: almaExportRun.getHomeSapData()) {
             try {
                 addLineToFile(checkFilename, sapData.toFixedLengthLine());
             } catch (IOException ex) {
                 log.warn("could not write line: " + sapData.toFixedLengthLine());
             }
             try {
-                if (("H9".equals(sapData.costType) || "H8".equals(sapData.costType)) && "EUR".equals(sapData.currency))
-                    addLineToFile(sapFilename, generateComment(sapData).toCsv());
-                else
-                    addLineToFile(foreignFilename, generateComment(sapData).toCsv());
-                almaExportRun.increaseSuccessfullSapData();
+                addLineToFile(homeFilename, generateComment(sapData).toCsv());
+            } catch (IOException ex) {
+                almaExportRun.increaseMissedSapData();
+                almaExportRun.addMissedSapData(sapData);
+                log.warn("could not write line: " + sapData.toFixedLengthLine());
+            }
+        }
+        for (SapData sapData: almaExportRun.getForeignSapData()) {
+            try {
+                addLineToFile(checkFilename, sapData.toFixedLengthLine());
+            } catch (IOException ex) {
+                log.warn("could not write line: " + sapData.toFixedLengthLine());
+            }
+            try {
+                addLineToFile(foreignFilename, generateComment(sapData).toCsv());
             } catch (IOException ex) {
                 almaExportRun.increaseMissedSapData();
                 almaExportRun.addMissedSapData(sapData);
@@ -85,6 +96,7 @@ public class FileWriterService {
     }
 
     private void addLineToFile(String filename, String line) throws IOException {
+        log.info("writing line \n" + line);
         BufferedWriter bw = new BufferedWriter(new FileWriter(this.file + filename, true));
         bw.write(line);
         bw.newLine();

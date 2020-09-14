@@ -25,7 +25,7 @@
                             <th th:text="#{sap.result.number.invoices}"></th>
                             <td th:text="${almaExportRun.numberInvoices}"></td>
                             <th th:text="#{sap.result.number.created.sapdata}"></th>
-                            <td th:text="${almaExportRun.sapData.size()}"></td>
+                            <td th:text="${almaExportRun.homeSapData.size()}"></td>
                             <th style="text-align: center;"><span style="font-size: larger; font-weight: bold;"
                                       th:text="#{sap.result.number.missedsapdata}"></span>:
                             </th>
@@ -63,7 +63,7 @@
                             <th th:text="#{sap.result.date.to}"></th>
                             <th th:text="#{sap.result.checked}"></th>
                         </tr>
-                        <tr th:each="sapDatum : ${almaExportRun.sapData}">
+                        <tr th:each="sapDatum : ${almaExportRun.homeSapData}">
                             <td th:text="${sapDatum.vendorCode}"></td>
                             <td th:text="${sapDatum.creditor}"></td>
                             <td th:text="${#dates.format(sapDatum.invoiceDate, 'dd.MM.yyyy')}"></td>

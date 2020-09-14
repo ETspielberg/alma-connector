@@ -87,7 +87,10 @@ public class InvoiceController {
             List<SapData> sapDataList = convertInvoiceToSapData(invoice, vendor);
             log.debug(String.format("adding %d SAP data to the list", sapDataList.size()));
             almaExportRunNew.addSapDataList(sapDataList);
-            log.debug(String.format("list contains now %d entries",almaExportRunNew.getSapData().size() ));
+            log.debug(String.format("run contains now %d entries: %d home and %d foreign",
+                    almaExportRunNew.getTotalSapData(),
+                    almaExportRunNew.getHomeSapData().size(),
+                    almaExportRunNew.getForeignSapData().size() ));
         }
         almaExportRunNew.sortSapData();
         log.info(almaExportRunNew.log());
