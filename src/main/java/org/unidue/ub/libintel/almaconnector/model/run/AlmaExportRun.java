@@ -283,7 +283,7 @@ public class AlmaExportRun {
     }
 
     public void addSapData(SapData sapData) {
-        if (("H9".equals(sapData.costType) || "H8".equals(sapData.costType)) && "EUR".equals(sapData.currency)) {
+        if (("H9".equals(sapData.costType) || "H8".equals(sapData.costType) || "C8".equals(sapData.costType) || "C9".equals(sapData.costType)) && "EUR".equals(sapData.currency)) {
             this.homeSapData.add(sapData);
             this.numberHomeSapData++;
         } else {
