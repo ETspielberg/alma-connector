@@ -283,7 +283,8 @@ public class AlmaExportRun {
     }
 
     public void addSapData(SapData sapData) {
-        if (("H9".equals(sapData.costType) || "H8".equals(sapData.costType) || "C8".equals(sapData.costType) || "C9".equals(sapData.costType)) && "EUR".equals(sapData.currency)) {
+        String taxKey = sapData.costType.substring(0,2);
+        if (("H9".equals(taxKey) || "H8".equals(taxKey) || "C8".equals(taxKey) || "C9".equals(taxKey)) && "EUR".equals(sapData.currency)) {
             this.homeSapData.add(sapData);
             this.numberHomeSapData++;
         } else {
