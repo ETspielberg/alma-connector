@@ -282,14 +282,14 @@ public class AlmaExportRun {
         this.numberHomeSapData = homeSapData.size();
     }
 
-    public void addSapData(SapData sapData) {
+    public void addSapData(SapData sapData, List<String> homeTaxKeys) {
         String taxKey;
         try {
             taxKey = sapData.costType.substring(0, 2);
         } catch (Exception e) {
             taxKey = "";
         }
-        if (("H9".equals(taxKey) || "H8".equals(taxKey) || "C8".equals(taxKey) || "C9".equals(taxKey)) && "EUR".equals(sapData.currency)) {
+        if (homeTaxKeys.contains(taxKey) && "EUR".equals(sapData.currency)) {
             this.homeSapData.add(sapData);
             this.numberHomeSapData++;
         } else {
@@ -298,9 +298,9 @@ public class AlmaExportRun {
         }
     }
 
-    public void addSapDataList(List<SapData> sapDataList) {
+    public void addSapDataList(List<SapData> sapDataList, List<String> homeTaxKeys) {
         for (SapData sapData: sapDataList)
-            addSapData(sapData);
+            addSapData(sapData, homeTaxKeys);
     }
 
     public void sortSapData(){

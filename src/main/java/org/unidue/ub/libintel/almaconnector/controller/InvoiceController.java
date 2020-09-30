@@ -4,6 +4,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +43,9 @@ public class InvoiceController {
     private final FileWriterService fileWriterService;
 
     private final AlmaExportRunService almaExportRunService;
+
+    @Value("${sap.home.tax.keys}")
+    private List<String> homeTaxKeys;
 
     private final static Logger log = LoggerFactory.getLogger(InvoiceController.class);
 
@@ -86,7 +90,7 @@ public class InvoiceController {
             Vendor vendor = this.vendorService.getVendorAccount(invoice.getVendor().getValue());
             List<SapData> sapDataList = convertInvoiceToSapData(invoice, vendor);
             log.debug(String.format("adding %d SAP data to the list", sapDataList.size()));
-            almaExportRunNew.addSapDataList(sapDataList);
+            almaExportRunNew.addSapDataList(sapDataList, homeTaxKeys);
             log.debug(String.format("run contains now %d entries: %d home and %d foreign",
                     almaExportRunNew.getTotalSapData(),
                     almaExportRunNew.getHomeSapData().size(),

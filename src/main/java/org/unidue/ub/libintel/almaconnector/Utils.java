@@ -73,6 +73,8 @@ public class Utils {
                     try {
                         // get the vat code
                         String invoiceLineVatCode = invoiceLine.getInvoiceLineVat().getVatCode().getDesc();
+                        if (invoiceLineVatCode.length() > 2)
+                            invoiceLineVatCode = invoiceLineVatCode.substring(0,2);
                         // set the value of the vat code to a value which is not empty
                         if (!"".equals(invoiceLineVatCode)) {
                             sapData.costType = invoiceLineVatCode;
@@ -81,6 +83,8 @@ public class Utils {
                         // if no vat code is set on the invoice line take the one from the invoice
                         else {
                             String invoiceVatCode = invoice.getInvoiceVat().getVatCode().getValue();
+                            if (invoiceVatCode.length() > 2)
+                                invoiceVatCode = invoiceVatCode.substring(0,2);
                             if (!"".equals(invoiceVatCode)) {
                                 sapData.costType = invoiceLineVatCode;
                                 log.info("set VAT code to " + invoiceVatCode);
