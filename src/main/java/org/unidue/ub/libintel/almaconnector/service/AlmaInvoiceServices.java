@@ -38,7 +38,7 @@ public class AlmaInvoiceServices {
      * @param almaExportRun the alma export run object containing the data for the invoices to collect
      * @return the alma export run object holding the list of invoices
      */
-    @Secured({ "ROLE_SYSTEM", "ROLE_SAP" })
+    @Secured({ "ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Purchasing Operator Extended" })
     public AlmaExportRun getInvoices(AlmaExportRun almaExportRun) {
         List<Invoice> invoices;
         if (almaExportRun.isDateSpecific()) {
@@ -59,7 +59,7 @@ public class AlmaInvoiceServices {
      * retrieves the open invoices from the Alma API.
      * @return  a list of invoices
      */
-    @Secured({ "ROLE_SYSTEM", "ROLE_SAP" })
+    @Secured({ "ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Purchasing Operator Extended" })
     public List<Invoice> getOpenInvoices(String owner) {
         // initialize parameters
         int batchSize = 25;
@@ -87,7 +87,7 @@ public class AlmaInvoiceServices {
      * @param date the date invoices should be returned for
      * @return a list of invoices
      */
-    @Secured({ "ROLE_SYSTEM", "ROLE_SAP" })
+    @Secured({ "ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Purchasing Operator Extended" })
     public List<Invoice> getOpenInvoicesForDate(Date date, String owner) {
         log.info("collecting invoices for date " + new SimpleDateFormat("dd.MM.yyyy").format(date));
         return filterList(date, getOpenInvoices(owner));
@@ -98,7 +98,7 @@ public class AlmaInvoiceServices {
      * @param container an SAP container object holding a list of SAP response object
      * @return the SAP container objects the number of missed entries
      */
-    @Secured({ "ROLE_SYSTEM", "ROLE_SAP" })
+    @Secured({ "ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Purchasing Operator Extended" })
     public SapResponseRun updateInvoiceWithErpData(SapResponseRun container) {
         List<SapResponse> sapResponses = container.getResponses();
         log.debug("got " + sapResponses.size() + "SAP responses");

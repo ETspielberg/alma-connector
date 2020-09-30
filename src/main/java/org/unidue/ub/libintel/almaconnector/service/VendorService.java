@@ -30,7 +30,7 @@ public class VendorService {
      * @return a vendor object
      */
     @Cacheable("vendors")
-    @Secured({ "ROLE_SYSTEM", "ROLE_SAP" })
+    @Secured({ "ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Purchasing Operator Extended" })
     public Vendor getVendorAccount(String vendorAccountCode) {
         try {
             Vendor vendor = this.almaVendorApiClient.getVendorsVendorCode("application/json", vendorAccountCode);
