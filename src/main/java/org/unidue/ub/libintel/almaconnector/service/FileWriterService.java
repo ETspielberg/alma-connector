@@ -51,7 +51,7 @@ public class FileWriterService {
      * @param almaExportRun the AlmaExportRun object holding a list of SAP data
      * @return the AlmaExportRun object updated with the files created and the number of failed entries to be written
      */
-    @Secured({ "ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Purchasing Operator Extended"})
+    @Secured({ "ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Invoice Operator Extended"})
     public AlmaExportRun writeAlmaExport(AlmaExportRun almaExportRun) {
         String dateString;
         if (almaExportRun.isDateSpecific())
@@ -104,7 +104,7 @@ public class FileWriterService {
         bw.close();
     }
 
-    @Secured({ "ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Purchasing Operator Extended" })
+    @Secured({ "ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Invoice Operator Extended" })
     public List<String> getFiles(@Value("${ub.statistics.data.dir}") String dataDir) {
         Path rootLocation = Paths.get(dataDir);
         try {
@@ -165,7 +165,7 @@ public class FileWriterService {
      * @return the file as Resource object
      * @throws FileNotFoundException thrown if the file could not be loaded
      */
-    @Secured({ "ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Purchasing Operator Extended" })
+    @Secured({ "ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Invoice Operator Extended" })
     public Resource loadFiles(String date, String type, String owner) throws FileNotFoundException {
         String filename = String.format("sap_%s_%s_%s.txt", type, date, owner);
         Path file =Paths.get(this.file + filename);
