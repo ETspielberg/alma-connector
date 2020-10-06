@@ -15,11 +15,11 @@
                         für den Campus <span th:text="${almaExportRun.invoiceOwner}"></span> vom
                         <span th:text="${#dates.format(almaExportRun.desiredDate, 'dd.MM.yyyy')}"></span>, Nummer <span
                                 th:text="${almaExportRun.runIndex}"></span></p>
-                    <input type="hidden" th:field="*{dateSpecific}">
-                    <input type="hidden" th:field="*{desiredDate}">
-                    <input type="hidden" th:field="*{numberForeignSapData}">
-                    <input type="hidden" th:field="*{numberHomeSapData}">
-                    <input type="hidden" th:field="*{invoiceOwner}">
+                    <input hidden th:field="*{dateSpecific}">
+                    <input hidden th:field="*{desiredDate}">
+                    <input hidden th:field="*{numberForeignSapData}">
+                    <input hidden th:field="*{numberHomeSapData}">
+                    <input hidden th:field="*{invoiceOwner}">
                     <table class="table table-borderless text-left">
                         <tr>
                             <th th:text="#{sap.result.number.invoices}"></th>
@@ -27,7 +27,7 @@
                             <th th:text="#{sap.result.number.created.sapdata}"></th>
                             <td th:text="${almaExportRun.homeSapData.size()}"></td>
                             <th style="text-align: center;"><span style="font-size: larger; font-weight: bold;"
-                                      th:text="#{sap.result.number.missedsapdata}"></span>:
+                                                                  th:text="#{sap.result.number.missedsapdata}"></span>:
                             </th>
                         </tr>
                         <tr>
@@ -35,8 +35,9 @@
                             <td th:text="${almaExportRun.numberInvoiceLines}"></td>
                             <th th:text="#{sap.result.number.successful.sapdata}"></th>
                             <td th:text="${almaExportRun.successfullSapData}"></td>
-                            <td style="text-align: center;"><span style="color: darkred; font-size: larger; font-weight: bold;"
-                                      th:text="${almaExportRun.missedSapData}"></span></td>
+                            <td style="text-align: center;"><span
+                                    style="color: darkred; font-size: larger; font-weight: bold;"
+                                    th:text="${almaExportRun.missedSapData}"></span></td>
                         </tr>
                     </table>
                 </div>
@@ -63,7 +64,8 @@
                             <th th:text="#{sap.result.date.to}"></th>
                             <th th:text="#{sap.result.checked}"></th>
                         </tr>
-                        <tr th:each="sapDatum : ${almaExportRun.homeSapData}">
+                        <tr th:each="sapDatum, itemStat : *{homeSapData}">
+
                             <td th:text="${sapDatum.vendorCode}"></td>
                             <td th:text="${sapDatum.creditor}"></td>
                             <td th:text="${#dates.format(sapDatum.invoiceDate, 'dd.MM.yyyy')}"></td>
@@ -77,7 +79,25 @@
                             <td th:text="${sapDatum.sapAccountData.getImportCheckString()}"></td>
                             <td th:text="${#dates.format(sapDatum.fromDate, 'dd.MM.yyyy')}"></td>
                             <td th:text="${#dates.format(sapDatum.toDate, 'dd.MM.yyyy')}"></td>
-                            <td><input type="checkbox" required></td>
+                            <td>
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].vendorCode}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].sapAccountData.costCentre}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].sapAccountData.fonds}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].sapAccountData.ledgerAccount}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].sapAccountData.pspElement}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].creditor}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].invoiceDate}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].commitmentDate}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].costType}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].invoiceAmount}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].currency}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].invoiceNumber}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].positionalNumber}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].fromDate}">
+                                <input hidden th:value="*{homeSapData[__${itemStat.index}__].toDate}">
+                                <input th:field="*{homeSapData[__${itemStat.index}__].isChecked}"
+                                       th:checked="*{homeSapData[__${itemStat.index}__].isChecked}" type="checkbox">
+                            </td>
                         </tr>
                     </table>
                 </div>
@@ -102,7 +122,7 @@
                             <th th:text="#{sap.result.date.to}"></th>
                             <th th:text="#{sap.result.checked}"></th>
                         </tr>
-                        <tr th:each="sapDatum : ${almaExportRun.foreignSapData}">
+                        <tr th:each="sapDatum, itemStat : *{foreignSapData}">
                             <td th:text="${sapDatum.vendorCode}"></td>
                             <td th:text="${sapDatum.creditor}"></td>
                             <td th:text="${#dates.format(sapDatum.invoiceDate, 'dd.MM.yyyy')}"></td>
@@ -116,7 +136,25 @@
                             <td th:text="${sapDatum.sapAccountData.getImportCheckString()}"></td>
                             <td th:text="${#dates.format(sapDatum.fromDate, 'dd.MM.yyyy')}"></td>
                             <td th:text="${#dates.format(sapDatum.toDate, 'dd.MM.yyyy')}"></td>
-                            <td><input type="checkbox" required></td>
+                            <td>
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].vendorCode}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].sapAccountData.costCentre}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].sapAccountData.fonds}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].sapAccountData.ledgerAccount}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].sapAccountData.pspElement}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].creditor}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].invoiceDate}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].commitmentDate}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].costType}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].invoiceAmount}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].currency}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].invoiceNumber}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].positionalNumber}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].fromDate}">
+                                <input hidden th:value="*{homeSapData[__${itemStat.index}__].toDate}">
+                                <input th:field="*{homeSapData[__${itemStat.index}__].isChecked}"
+                                       th:checked="*{homeSapData[__${itemStat.index}__].isChecked}" type="checkbox">
+                            </td>
                         </tr>
                     </table>
                 </div>

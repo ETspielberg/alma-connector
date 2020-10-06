@@ -352,6 +352,24 @@ public class AlmaExportRun {
         this.numberHomeSapData = 0;
     }
 
+    public long getNumberHomeDataSelected() {
+        int number = 0;
+        for (SapData sapData: this.homeSapData) {
+            if (sapData.isChecked)
+                number++;
+        }
+        return number;
+    }
+
+    public long getNumberForeignDataSelected() {
+        int number = 0;
+        for (SapData sapData: this.foreignSapData) {
+            if (sapData.isChecked)
+                number++;
+        }
+        return number;
+    }
+
     public String log() {
         String logString = "runID: %s, date: %s, runIndex: %d, invoiceOwner %s, dateSpecific: %s, numberInvoices; %s, numberSapData: %s";
         return String.format(logString, this.identifier, this.desiredDate, this.runIndex, this.invoiceOwner, this.dateSpecific, this.invoices.size(),

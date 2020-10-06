@@ -1,5 +1,7 @@
 package org.unidue.ub.libintel.almaconnector.model;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -16,8 +18,10 @@ public class SapData implements Comparable<SapData> {
 
     public String creditor;
 
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     public Date commitmentDate;
 
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     public Date invoiceDate;
 
     public String costType;
@@ -32,11 +36,15 @@ public class SapData implements Comparable<SapData> {
 
     public SapAccountData sapAccountData;
 
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     public Date fromDate;
 
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     public Date toDate;
 
     public String comment;
+
+    public boolean isChecked = false;
 
     public SapData() {
     }
@@ -104,6 +112,126 @@ public class SapData implements Comparable<SapData> {
     public SapData withComment(String comment) {
         this.comment = comment;
         return this;
+    }
+
+    public boolean getIsChecked() {
+        return isChecked;
+    }
+
+    public void setIsChecked(boolean checked) {
+        isChecked = checked;
+    }
+
+    public String getVendorCode() {
+        return vendorCode;
+    }
+
+    public void setVendorCode(String vendorCode) {
+        this.vendorCode = vendorCode;
+    }
+
+    public String getCreditor() {
+        return creditor;
+    }
+
+    public void setCreditor(String creditor) {
+        this.creditor = creditor;
+    }
+
+    public Date getCommitmentDate() {
+        return commitmentDate;
+    }
+
+    public void setCommitmentDate(Date commitmentDate) {
+        this.commitmentDate = commitmentDate;
+    }
+
+    public Date getInvoiceDate() {
+        return invoiceDate;
+    }
+
+    public void setInvoiceDate(Date invoiceDate) {
+        this.invoiceDate = invoiceDate;
+    }
+
+    public String getCostType() {
+        return costType;
+    }
+
+    public void setCostType(String costType) {
+        this.costType = costType;
+    }
+
+    public double getInvoiceAmount() {
+        return invoiceAmount;
+    }
+
+    public void setInvoiceAmount(double invoiceAmount) {
+        this.invoiceAmount = invoiceAmount;
+    }
+
+    public String getInvoiceNumber() {
+        return invoiceNumber;
+    }
+
+    public void setInvoiceNumber(String invoiceNumber) {
+        this.invoiceNumber = invoiceNumber;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+
+    public String getPositionalNumber() {
+        return positionalNumber;
+    }
+
+    public void setPositionalNumber(String positionalNumber) {
+        this.positionalNumber = positionalNumber;
+    }
+
+    public SapAccountData getSapAccountData() {
+        return sapAccountData;
+    }
+
+    public void setSapAccountData(SapAccountData sapAccountData) {
+        this.sapAccountData = sapAccountData;
+    }
+
+    public Date getFromDate() {
+        return fromDate;
+    }
+
+    public void setFromDate(Date fromDate) {
+        this.fromDate = fromDate;
+    }
+
+    public Date getToDate() {
+        return toDate;
+    }
+
+    public void setToDate(Date toDate) {
+        this.toDate = toDate;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    public boolean isChecked() {
+        return isChecked;
+    }
+
+    public void setChecked(boolean checked) {
+        isChecked = checked;
     }
 
     public String toCsv() {

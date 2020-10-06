@@ -13,10 +13,10 @@
             <div class="tile">
                 <h3 style="height:1.2em;" th:text="#{files.heading.home}"></h3>
                 <p style="height:8em;" th:text="#{files.home.short}"></p>
-                <p><span th:text="${almaExportRun.numberHomeSapData}"></span> <span th:text="#{files.entries}"></span></p>
+                <p><span th:text="${almaExportRun.numberHomeDataSelected}"></span> <span th:text="#{files.entries}"></span></p>
                 <p>
                     <a target="_blank" th:href="@{/alma/downloadFile/home/{owner}/{date}(owner=${almaExportRun.invoiceOwner},date=${#dates.format(almaExportRun.desiredDate, 'yyyy-MM-dd')})}">
-                        <button th:disabled="${almaExportRun.numberHomeSapData} == 0" class="btn btn-primary" th:text="#{files.download}"></button>
+                        <button th:disabled="${almaExportRun.numberHomeDataSelected} == 0" class="btn btn-primary" th:text="#{files.download}"></button>
                     </a>
                 </p>
             </div>
@@ -25,11 +25,11 @@
             <div class="tile">
                 <h3 style="height:1.2em;" th:text="#{files.heading.foreign}"></h3>
                 <p style="height:8em;" th:text="#{files.foreign.short}"></p>
-                <p><span th:text="${almaExportRun.numberForeignSapData}"></span> <span th:text="#{files.entries}"></span></p>
+                <p><span th:text="${almaExportRun.numberForeignDataSelected}"></span> <span th:text="#{files.entries}"></span></p>
 
                 <p>
                     <a target="_blank" th:href="@{/alma/downloadFile/foreign/{owner}/{date}(owner=${almaExportRun.invoiceOwner},date=${#dates.format(almaExportRun.desiredDate, 'yyyy-MM-dd')})}">
-                        <button th:disabled="${almaExportRun.numberForeignSapData} == 0" class="btn btn-primary" th:text="#{files.download}"></button>
+                        <button th:disabled="${almaExportRun.numberForeignDataSelected} == 0" class="btn btn-primary" th:text="#{files.download}"></button>
                     </a>
                 </p>
             </div>

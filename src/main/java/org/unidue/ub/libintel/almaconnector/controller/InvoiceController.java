@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -129,8 +130,11 @@ public class InvoiceController {
     }
 
     @PostMapping("/showImportFiles")
+    @DateTimeFormat(pattern = "E MMM dd HH:mm:ss z yyyy")
     public String getImportFiles(@ModelAttribute("almaExportRun") AlmaExportRun almaExportRun, Model model) {
-        log.info(String.format("showing files for %s : %s ", dateformat.format(almaExportRun.getDesiredDate()), almaExportRun.isDateSpecific()));
+        log.info(String.format("showing files for %s : %s; %d selected ", dateformat.format(almaExportRun.getDesiredDate()), almaExportRun.isDateSpecific(), almaExportRun.getNumberHomeDataSelected()));
+        log.info(String.valueOf(almaExportRun.getHomeSapData().get(0).creditor));
+        almaExportRun = this.fileWriterService.writeAlmaExport(almaExportRun);
         model.addAttribute("almaExportRun", almaExportRun);
         return "showImportFiles";
     }
