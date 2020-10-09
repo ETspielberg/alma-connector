@@ -68,11 +68,12 @@ public class AlmaInvoiceServices {
         // retrieve first list of po-lines.
         Invoices invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "Waiting to be Sent", owner, "", "", batchSize, offset, "");
         List<Invoice> invoiceList = new ArrayList<>(invoices.getInvoice());
+        log.info(String.valueOf(invoiceList.size()));
 
         log.info("retrieving " + invoices.getTotalRecordCount() + " invoices");
 
         // as long as not all data are being collected, collect further
-        while (invoiceList.size() < invoices.getTotalRecordCount()) {
+        while (offset < invoices.getTotalRecordCount()) {
             offset += batchSize;
             log.info("collecting invoices from " + offset + " to " + (offset + batchSize));
             invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "Waiting to be Sent", owner, "", "", batchSize, offset, "");

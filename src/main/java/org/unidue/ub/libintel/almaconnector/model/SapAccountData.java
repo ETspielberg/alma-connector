@@ -41,9 +41,9 @@ public class SapAccountData {
     public String getImportCheckString() {
         if (this.ledgerAccount != "") {
             if (!this.pspElement.isEmpty())
-                return this.ledgerAccount + "P" + this.pspElement;
+                return this.ledgerAccount + this.fonds + "P" + this.pspElement;
             else
-                return this.ledgerAccount + "K" + costCentre;
+                return this.ledgerAccount + this.fonds + "K" + costCentre;
         } else {
             return "";
         }

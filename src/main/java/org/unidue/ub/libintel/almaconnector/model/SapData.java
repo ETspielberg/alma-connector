@@ -311,7 +311,7 @@ public class SapData implements Comparable<SapData> {
             if (sapData.creditor == null || sapData.creditor.isEmpty())
                 return this.vendorCode.compareTo(sapData.vendorCode);
             else
-                return 100000000;
+                return 10000;
         }
         else {
             return this.vendorCode.compareTo(sapData.vendorCode);

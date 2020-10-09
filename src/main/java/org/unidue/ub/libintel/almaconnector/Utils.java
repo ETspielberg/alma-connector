@@ -69,6 +69,10 @@ public class Utils {
                             .withSapAccountData(sapAccountData)
                             .withInvoiceNumber(invoice.getNumber())
                             .withComment(invoiceLine.getNote());
+                    if ("EXCLUSIVE".equals(invoice.getInvoiceVat().getType().getValue())) {
+                        double amount = invoiceLine.getPrice() * fundDistribution.getPercent() / 100;
+                        sapData.setInvoiceAmount(amount);
+                    }
                     // read the VAT code from the data.
                     try {
                         // get the vat code
