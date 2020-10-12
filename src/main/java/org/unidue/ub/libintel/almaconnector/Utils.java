@@ -197,8 +197,9 @@ public class Utils {
      * @return a container object holding the number of errors upon reading individual lines and the list of read SAP
      * response objects
      */
-    public static SapResponseRun getFromExcel(XSSFSheet worksheet) {
+    public static SapResponseRun getFromExcel(XSSFSheet worksheet, String filename) {
         SapResponseRun container = new SapResponseRun();
+        container.setFilename(filename);
         // go through all lines except the first one (the headers) and the last one (summary of all invoices).
         for (int i = 1; i < worksheet.getPhysicalNumberOfRows() - 1; i++) {
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
@@ -228,6 +229,7 @@ public class Utils {
             }
             container.addSapResponse(sapResponse);
         }
+        log.info(container.logString());
         return container;
     }
 }

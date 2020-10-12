@@ -118,7 +118,7 @@ public class InvoiceController {
         XSSFSheet worksheet = workbook.getSheetAt(0);
 
         //convert the excel sheet to a SapResponseRun holding the individual responses
-        SapResponseRun container = getFromExcel(worksheet);
+        SapResponseRun container = getFromExcel(worksheet, sapReturnFile.getOriginalFilename());
         container = this.almaInvoiceServices.updateInvoiceWithErpData(container);
         model.addAttribute("container", container);
         return "invoicesUpdate";

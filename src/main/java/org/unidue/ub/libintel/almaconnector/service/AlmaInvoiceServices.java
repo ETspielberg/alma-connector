@@ -120,6 +120,7 @@ public class AlmaInvoiceServices {
         for (Map.Entry<String, List<SapResponse>> entry : sapResponsesPerInvoice.entrySet()) {
             String searchQuery = "invoice_number~" + entry.getKey();
             Invoices invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "Waiting to be Sent", "", "", searchQuery, 20, 0, "");
+            log.debug(String.format( "found %d invoices for invoice number %s", invoices.getTotalRecordCount(), entry.getKey()));
             if (invoices.getTotalRecordCount() == 1) {
                 Invoice invoice = invoices.getInvoice().get(0);
                 List<SapResponse> indiviudalResponses = entry.getValue();
@@ -130,19 +131,21 @@ public class AlmaInvoiceServices {
                     for (SapResponse individualResponse: indiviudalResponses) {
                         totalAmount += individualResponse.getAmount();
                     }
+                    payment.setVoucherNumber(indiviudalResponses.get(0).getVoucherNumber());
+                    payment.setVoucherAmount(String.valueOf(totalAmount));
+                    payment.setVoucherCurrency(new PaymentVoucherCurrency().value(indiviudalResponses.get(0).getCurrency()));
+                    payment.setPaymentStatus(new PaymentPaymentStatus().value("PAID").desc("bezahlt"));
+                    payment.setVoucherDate(new Date());
                     InvoiceUpdate invoiceUpdate = new InvoiceUpdate(payment);
                     try {
                         this.almaInvoicesApiClient.postInvoicesInvoiceIdToUpdate(invoiceUpdate, "application/json", invoice.getId(), "paid");
                     } catch (Exception e) {
                         container.increaseNumberOfErrors();
                     }
-                    payment.setVoucherNumber(indiviudalResponses.get(0).getVoucherNumber());
-                    payment.setVoucherAmount(String.valueOf(totalAmount));
-                    payment.setVoucherCurrency(new PaymentVoucherCurrency().value(indiviudalResponses.get(0).getCurrency()));
-                    payment.setPaymentStatus(new PaymentPaymentStatus().value("PAID").desc("bezahlt"));
                 }
             }
         }
+        log.info(container.logString());
         return container;
     }
 

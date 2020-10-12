@@ -14,6 +14,8 @@ public class SapResponseRun {
 
     private int numberOfReadErrors = 0;
 
+    private String filename;
+
     private List<SapResponse> responses = new ArrayList<>();
 
     public SapResponseRun() {}
@@ -46,6 +48,18 @@ public class SapResponseRun {
         this.responses.add(sapResponse);
     }
 
+    public String getFilename() {
+        return filename;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
+
+    public long getNumberOfResponses() {
+        return responses.size();
+    }
+
     public long increaseNumberOfErrors() {
         this.numberOfErrors++;
         return this.numberOfErrors;
@@ -54,5 +68,10 @@ public class SapResponseRun {
     public long increaseNumberOfReadErrors() {
         this.numberOfReadErrors++;
         return this.numberOfReadErrors;
+    }
+
+    public String logString() {
+        String logString = "filename: %s, numberOfResponses: %d, numberOfErrors: %d, numberOfReadErrors %d";
+        return String.format(logString, filename, getNumberOfResponses(), numberOfErrors, numberOfReadErrors);
     }
 }
