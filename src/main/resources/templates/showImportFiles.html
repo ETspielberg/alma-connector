@@ -38,7 +38,7 @@
             <div class="tile">
                 <h3 style="height:1.2em;" th:text="#{upload.excel}"></h3>
                 <p style="height:6em;" th:text="#{upload.excel.short}"></p>
-                <form th:action="@{alma/invoicesByDate}" method="post">
+                <form th:action="@{alma/invoicesUpdate}" method="post">
                     <div>
                         <label for="excelUpload" th:text="#{upload.excel.choose}"></label>
                         <input id="excelUpload" type="file" th:name="file">

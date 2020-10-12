@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="general :: generalHead"/>
+<body>
+
+<nav th:replace="general :: navbar"></nav>
+
+<div th:replace="general :: jumbotron" />
+
+<div class="container">
+    <div class="ui-g">
+        <div class="ui-g-12 ui-md-12 ui-lg-12">
+            <div class="tile">
+                <h3 style="height:1.2em;" th:text="#{invoices.update.home}"></h3>
+                <p style="height:8em;" th:text="#{invoices.update.short}"></p>
+                <p th:if="${container.numberOfReadErrors} > 0"><span th:text="#{invoices.update.read.errors}"></span></p>
+                <p th:if="${container.numberOfErrors} > 0"><span th:text="#{invoices.update.errors}"></span></p>
+                <p>
+                    <span th:text="#{invoices.update.success}"></span> <span th:text="${container.responses.size()}"></span>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="ui-g">
+        <div class="ui-g-12 ui-md-12 ui-lg-12">
+            <div class="tile">
+                <a th:href="@{/alma/start}">
+                    <button class="btn btn-primary">Zurück</button>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
