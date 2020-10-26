@@ -306,15 +306,51 @@ public class SapData implements Comparable<SapData> {
     }
 
     @Override
-    public int compareTo(SapData sapData) {
+    public int compareTo(SapData other) {
         if (this.creditor == null || this.creditor.isEmpty()) {
-            if (sapData.creditor == null || sapData.creditor.isEmpty())
-                return this.vendorCode.compareTo(sapData.vendorCode);
+            if (other.creditor == null || other.creditor.isEmpty())
+                return compareVendorCodes(other);
             else
-                return 10000;
+                return 10;
         }
         else {
-            return this.vendorCode.compareTo(sapData.vendorCode);
+            if (other.invoiceNumber == null || other.invoiceNumber.isEmpty()) {
+                return -1;
+            } else {
+                return compareVendorCodes(other);
+            }
+        }
+    }
+
+    private int compareVendorCodes(SapData other) {
+        if (this.vendorCode == null || this.vendorCode.isEmpty()) {
+            if (other.vendorCode == null || other.vendorCode.isEmpty()) {
+                return compareInvoiceNumber(other);
+            } else {
+                return 1;
+            }
+        } else {
+            if (other.invoiceNumber == null || other.invoiceNumber.isEmpty()) {
+                return -1;
+            } else {
+                return this.vendorCode.compareTo(other.vendorCode);
+            }
+        }
+    }
+
+    private int compareInvoiceNumber(SapData other) {
+        if (this.invoiceNumber == null || this.invoiceNumber.isEmpty()) {
+            if (other.invoiceNumber == null || other.invoiceNumber.isEmpty()) {
+                return 0;
+            } else {
+                return 1;
+            }
+        } else {
+            if (other.invoiceNumber == null || other.invoiceNumber.isEmpty()) {
+                return -1;
+            } else {
+                return this.invoiceNumber.compareTo(other.invoiceNumber);
+            }
         }
     }
 }
