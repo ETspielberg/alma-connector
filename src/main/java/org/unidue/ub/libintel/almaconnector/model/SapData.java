@@ -314,8 +314,8 @@ public class SapData implements Comparable<SapData> {
                 return 10;
         }
         else {
-            if (other.invoiceNumber == null || other.invoiceNumber.isEmpty()) {
-                return -1;
+            if (other.creditor == null || other.creditor.isEmpty()) {
+                return -10;
             } else {
                 return compareVendorCodes(other);
             }
@@ -330,7 +330,7 @@ public class SapData implements Comparable<SapData> {
                 return 1;
             }
         } else {
-            if (other.invoiceNumber == null || other.invoiceNumber.isEmpty()) {
+            if (other.vendorCode == null || other.vendorCode.isEmpty()) {
                 return -1;
             } else {
                 return this.vendorCode.compareTo(other.vendorCode);
