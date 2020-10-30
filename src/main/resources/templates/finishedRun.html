@@ -137,23 +137,23 @@
                             <td th:text="${#dates.format(sapDatum.fromDate, 'dd.MM.yyyy')}"></td>
                             <td th:text="${#dates.format(sapDatum.toDate, 'dd.MM.yyyy')}"></td>
                             <td>
-                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].vendorCode}">
-                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].sapAccountData.costCentre}">
-                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].sapAccountData.fonds}">
-                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].sapAccountData.ledgerAccount}">
-                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].sapAccountData.pspElement}">
-                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].creditor}">
-                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].invoiceDate}">
-                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].commitmentDate}">
-                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].costType}">
-                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].invoiceAmount}">
-                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].currency}">
-                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].invoiceNumber}">
-                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].positionalNumber}">
-                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].fromDate}">
-                                <input hidden th:value="*{homeSapData[__${itemStat.index}__].toDate}">
-                                <input th:field="*{homeSapData[__${itemStat.index}__].isChecked}"
-                                       th:checked="*{homeSapData[__${itemStat.index}__].isChecked}" type="checkbox">
+                                <input hidden th:field="*{foreignSapData[__${itemStat.index}__].vendorCode}">
+                                <input hidden th:field="*{foreignSapData[__${itemStat.index}__].sapAccountData.costCentre}">
+                                <input hidden th:field="*{foreignSapData[__${itemStat.index}__].sapAccountData.fonds}">
+                                <input hidden th:field="*{foreignSapData[__${itemStat.index}__].sapAccountData.ledgerAccount}">
+                                <input hidden th:field="*{foreignSapData[__${itemStat.index}__].sapAccountData.pspElement}">
+                                <input hidden th:field="*{foreignSapData[__${itemStat.index}__].creditor}">
+                                <input hidden th:field="*{foreignSapData[__${itemStat.index}__].invoiceDate}">
+                                <input hidden th:field="*{foreignSapData[__${itemStat.index}__].commitmentDate}">
+                                <input hidden th:field="*{foreignSapData[__${itemStat.index}__].costType}">
+                                <input hidden th:field="*{foreignSapData[__${itemStat.index}__].invoiceAmount}">
+                                <input hidden th:field="*{foreignSapData[__${itemStat.index}__].currency}">
+                                <input hidden th:field="*{foreignSapData[__${itemStat.index}__].invoiceNumber}">
+                                <input hidden th:field="*{foreignSapData[__${itemStat.index}__].positionalNumber}">
+                                <input hidden th:field="*{foreignSapData[__${itemStat.index}__].fromDate}">
+                                <input hidden th:value="*{foreignSapData[__${itemStat.index}__].toDate}">
+                                <input th:field="*{foreignSapData[__${itemStat.index}__].isChecked}"
+                                       th:checked="*{foreignSapData[__${itemStat.index}__].isChecked}" type="checkbox">
                             </td>
                         </tr>
                     </table>
