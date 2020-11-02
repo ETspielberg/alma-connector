@@ -34,7 +34,7 @@ public class VendorService {
     public Vendor getVendorAccount(String vendorAccountCode) {
         try {
             Vendor vendor = this.almaVendorApiClient.getVendorsVendorCode("application/json", vendorAccountCode);
-            log.info("retrieved vendor " + vendor.getCode());
+            log.debug("retrieved vendor " + vendor.getCode());
             return vendor;
         } catch (FeignException fe) {
             log.warn("could not retrieve vendor " + vendorAccountCode, fe);

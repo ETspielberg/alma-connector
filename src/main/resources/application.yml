@@ -14,18 +14,3 @@ feign:
         readTimeout: 600000
 server:
   port: ${server_port:11889}
-logging:
-  level:
-    org:
-      unidue:
-        ub:
-          libintel:
-            almaconnector:
-              clients:
-                acquisition:
-                  AlmaPoLinesApiClient: INFO
-                  AlmaInvoicesApiClient: INFO
-              service:
-                AlmaInvoiceService: DEBUG
-                AlmaExportRunService: DEBUG
-              Utils: DEBUG

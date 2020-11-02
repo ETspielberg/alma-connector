@@ -96,7 +96,7 @@ public class Utils {
                         // set the value of the vat code to a value which is not empty
                         if (!"".equals(invoiceLineVatCode)) {
                             sapData.costType = invoiceLineVatCode;
-                            log.info("set VAT code ot " + invoiceLineVatCode);
+                            log.debug("set VAT code ot " + invoiceLineVatCode);
                         }
                         // if no vat code is set on the invoice line take the one from the invoice
                         else {
@@ -105,7 +105,7 @@ public class Utils {
                                 invoiceVatCode = invoiceVatCode.substring(0,2);
                             if (!"".equals(invoiceVatCode)) {
                                 sapData.costType = invoiceLineVatCode;
-                                log.info("set VAT code to " + invoiceVatCode);
+                                log.debug("set VAT code to " + invoiceVatCode);
                             }
                             else {
                                 log.warn("no vat code given for invoice line " + invoiceLine.getId());
