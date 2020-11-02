@@ -205,10 +205,30 @@ public class Utils {
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
             //read the row and get all the data from it.
             XSSFRow row = worksheet.getRow(i);
-            String runId = row.getCell(0).getStringCellValue();
-            String creditor = row.getCell(1).getStringCellValue();
-            String invoiceId = row.getCell(2).getStringCellValue();
-            String currency = row.getCell(3).getStringCellValue();
+            String runId;
+            try {
+                runId = row.getCell(0).getStringCellValue();
+            } catch (IllegalStateException ise) {
+                runId = String.valueOf( row.getCell(0).getNumericCellValue());
+            }
+            String creditor;
+            try {
+                creditor =row.getCell(1).getStringCellValue();
+            } catch (IllegalStateException ise) {
+                creditor = String.valueOf( row.getCell(1).getNumericCellValue());
+            }
+            String invoiceId;
+            try {
+                invoiceId = row.getCell(2).getStringCellValue();
+            } catch (IllegalStateException ise) {
+                invoiceId = String.valueOf( row.getCell(2).getNumericCellValue());
+            }
+            String currency;
+            try {
+                currency = row.getCell(3).getStringCellValue();
+            } catch (IllegalStateException ise) {
+                currency = String.valueOf( row.getCell(3).getNumericCellValue());
+            }
             double amount = 0.0;
             try {
                 amount = row.getCell(4).getNumericCellValue();
