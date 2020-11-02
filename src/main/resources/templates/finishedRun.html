@@ -24,7 +24,7 @@
                         <tr>
                             <th th:text="#{sap.result.number.invoices}"></th>
                             <td th:text="${almaExportRun.numberInvoices}"></td>
-                            <th th:text="#{sap.result.number.created.sapdata}"></th>
+                            <th th:text="#{sap.result.number.created.sapdata.home}"></th>
                             <td th:text="${almaExportRun.homeSapData.size()}"></td>
                             <th style="text-align: center;"><span style="font-size: larger; font-weight: bold;"
                                                                   th:text="#{sap.result.number.missedsapdata}"></span>:
@@ -33,8 +33,8 @@
                         <tr>
                             <th th:text="#{sap.result.number.invoicelines}"></th>
                             <td th:text="${almaExportRun.numberInvoiceLines}"></td>
-                            <th th:text="#{sap.result.number.successful.sapdata}"></th>
-                            <td th:text="${almaExportRun.successfullSapData}"></td>
+                            <th th:text="#{sap.result.number.created.sapdata.foreign}"></th>
+                            <td th:text="${almaExportRun.foreignSapData.size()}"></td>
                             <td style="text-align: center;"><span
                                     style="color: darkred; font-size: larger; font-weight: bold;"
                                     th:text="${almaExportRun.missedSapData}"></span></td>
