@@ -99,7 +99,7 @@ public class InvoiceController {
         }
         almaExportRunNew.sortSapData();
         log.info(almaExportRunNew.log());
-        almaExportRunNew = this.fileWriterService.writeAlmaExport(almaExportRunNew);
+        // almaExportRunNew = this.fileWriterService.writeAlmaExport(almaExportRunNew);
         model.addAttribute("almaExportRun", almaExportRunNew);
         return "finishedRun";
     }
