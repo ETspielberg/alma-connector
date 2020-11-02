@@ -16,6 +16,7 @@ import org.unidue.ub.libintel.almaconnector.model.run.SapResponseRun;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -42,6 +43,7 @@ public class Utils {
             // go through the invoices
             for (InvoiceLine invoiceLine : invoice.getInvoiceLines().getInvoiceLine()) {
                 log.debug("processing invoice line " + invoiceLine.getId());
+                boolean existsFunddistribution = invoiceLine.getFundDistribution().size() > 1;
                 //go through the individual funds to create a single entry for each of the funds to be allocated
                 for (FundDistribution fundDistribution : invoiceLine.getFundDistribution()) {
                     // read the fund code
@@ -69,6 +71,7 @@ public class Utils {
                             .withSapAccountData(sapAccountData)
                             .withInvoiceNumber(invoice.getNumber())
                             .withComment(invoiceLine.getNote());
+
                     if ("EXCLUSIVE".equals(invoice.getInvoiceVat().getType().getValue())) {
                         double amount = invoiceLine.getPrice() * fundDistribution.getPercent() / 100;
                         sapData.setInvoiceAmount(amount);
@@ -237,16 +240,32 @@ public class Utils {
                 log.warn("could not parse amount" + row.getCell(4).getStringCellValue(), ise);
             }
             String voucherId = row.getCell(5).getStringCellValue();
-            String fromString = row.getCell(6).getStringCellValue();
-            String toString = row.getCell(7).getStringCellValue();
-            // create the sap response object
             SapResponse sapResponse = new SapResponse(runId, creditor, invoiceId, amount, currency, voucherId);
-            // try to read in the dates. If none are present, let the date be null
+            Date from;
             try {
-                sapResponse.withInvoiceFrom(format.parse(fromString)).withInvoiceTo(format.parse(toString));
-            } catch (ParseException e) {
-                log.debug("no dates given");
+                from = row.getCell(6).getDateCellValue();
+                sapResponse.setInvoiceFrom(from);
+            } catch (IllegalStateException ise) {
+                try {
+                    from = format.parse(row.getCell(6).getStringCellValue());
+                    sapResponse.setInvoiceFrom(from);
+                } catch (ParseException pe) {
+                    log.debug("no from date given in invoice " + invoiceId);
+                }
             }
+            Date to;
+            try {
+                to = row.getCell(7).getDateCellValue();
+                sapResponse.setInvoiceFrom(to);
+            } catch (IllegalStateException ise) {
+                try {
+                    to = format.parse(row.getCell(7).getStringCellValue());
+                    sapResponse.setInvoiceFrom(to);
+                } catch (ParseException pe) {
+                    log.debug("no to date given in invoice " + invoiceId);
+                }
+            }
+            // create the sap response object
             container.addSapResponse(sapResponse);
         }
         log.info(container.logString());
