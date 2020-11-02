@@ -128,7 +128,6 @@ public class InvoiceController {
     @DateTimeFormat(pattern = "E MMM dd HH:mm:ss z yyyy")
     public String getImportFiles(@ModelAttribute("almaExportRun") AlmaExportRun almaExportRun, Model model) {
         log.info(String.format("showing files for %s : %s; %d selected ", dateformat.format(almaExportRun.getDesiredDate()), almaExportRun.isDateSpecific(), almaExportRun.getNumberHomeDataSelected()));
-        log.info(String.valueOf(almaExportRun.getHomeSapData().get(0).creditor));
         almaExportRun = this.fileWriterService.writeAlmaExport(almaExportRun);
         model.addAttribute("almaExportRun", almaExportRun);
         return "showImportFiles";
