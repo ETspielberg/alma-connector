@@ -94,7 +94,7 @@
                                 <input hidden th:field="*{homeSapData[__${itemStat.index}__].invoiceNumber}">
                                 <input hidden th:field="*{homeSapData[__${itemStat.index}__].positionalNumber}">
                                 <input hidden th:field="*{homeSapData[__${itemStat.index}__].fromDate}">
-                                <input hidden th:value="*{homeSapData[__${itemStat.index}__].toDate}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].toDate}">
                                 <input th:field="*{homeSapData[__${itemStat.index}__].isChecked}"
                                        th:checked="*{homeSapData[__${itemStat.index}__].isChecked}" type="checkbox">
                             </td>
@@ -151,7 +151,7 @@
                                 <input hidden th:field="*{foreignSapData[__${itemStat.index}__].invoiceNumber}">
                                 <input hidden th:field="*{foreignSapData[__${itemStat.index}__].positionalNumber}">
                                 <input hidden th:field="*{foreignSapData[__${itemStat.index}__].fromDate}">
-                                <input hidden th:value="*{foreignSapData[__${itemStat.index}__].toDate}">
+                                <input hidden th:field="*{foreignSapData[__${itemStat.index}__].toDate}">
                                 <input th:field="*{foreignSapData[__${itemStat.index}__].isChecked}"
                                        th:checked="*{foreignSapData[__${itemStat.index}__].isChecked}" type="checkbox">
                             </td>
