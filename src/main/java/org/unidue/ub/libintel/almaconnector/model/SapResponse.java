@@ -134,4 +134,8 @@ public class SapResponse {
     public void setCurrency(String currency) {
         this.currency = currency;
     }
+
+    public void addAmount(double amount) {
+        this.amount += amount;
+    }
 }

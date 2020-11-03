@@ -17,6 +17,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -209,6 +210,7 @@ public class Utils {
     public static SapResponseRun getFromExcel(XSSFSheet worksheet, String filename) {
         SapResponseRun container = new SapResponseRun();
         container.setFilename(filename);
+        HashMap<String, SapResponse> sapResponses = new HashMap<>();
         // go through all lines except the first one (the headers) and the last one (summary of all invoices).
         for (int i = 1; i < worksheet.getPhysicalNumberOfRows() - 1; i++) {
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
@@ -246,34 +248,42 @@ public class Utils {
                 log.warn("could not parse amount" + row.getCell(4).getStringCellValue(), ise);
             }
             String voucherId = row.getCell(5).getStringCellValue();
-            SapResponse sapResponse = new SapResponse(runId, creditor, invoiceId, amount, currency, voucherId);
-            Date from;
-            try {
-                from = row.getCell(6).getDateCellValue();
-                sapResponse.setInvoiceFrom(from);
-            } catch (IllegalStateException ise) {
+
+            if (sapResponses.containsKey(invoiceId)) {
+                sapResponses.get(invoiceId).addAmount(amount);
+            } else {
+                SapResponse sapResponse = new SapResponse(runId, creditor, invoiceId, amount, currency, voucherId);
+                Date from;
                 try {
-                    from = format.parse(row.getCell(6).getStringCellValue());
+                    from = row.getCell(6).getDateCellValue();
                     sapResponse.setInvoiceFrom(from);
-                } catch (ParseException pe) {
-                    log.debug("no from date given in invoice " + invoiceId);
+                } catch (IllegalStateException ise) {
+                    try {
+                        from = format.parse(row.getCell(6).getStringCellValue());
+                        sapResponse.setInvoiceFrom(from);
+                    } catch (ParseException pe) {
+                        log.debug("no from date given in invoice " + invoiceId);
+                    }
                 }
-            }
-            Date to;
-            try {
-                to = row.getCell(7).getDateCellValue();
-                sapResponse.setInvoiceFrom(to);
-            } catch (IllegalStateException ise) {
+                Date to;
                 try {
-                    to = format.parse(row.getCell(7).getStringCellValue());
+                    to = row.getCell(7).getDateCellValue();
                     sapResponse.setInvoiceFrom(to);
-                } catch (ParseException pe) {
-                    log.debug("no to date given in invoice " + invoiceId);
+                } catch (IllegalStateException ise) {
+                    try {
+                        to = format.parse(row.getCell(7).getStringCellValue());
+                        sapResponse.setInvoiceFrom(to);
+                    } catch (ParseException pe) {
+                        log.debug("no to date given in invoice " + invoiceId);
+                    }
                 }
+                sapResponses.put(invoiceId, sapResponse);
             }
             // create the sap response object
-            container.addSapResponse(sapResponse);
+
         }
+        for (SapResponse sapResponse : sapResponses.values())
+            container.addSapResponse(sapResponse);
         log.info(container.logString());
         return container;
     }
