@@ -19,6 +19,10 @@ import java.util.Locale;
 @Configuration
 public class WebConfiguration implements WebMvcConfigurer {
 
+    /**
+     * registers the locale interceptor to allow for localization via the messages_xx.properties
+     * @param registry
+     */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(localeChangeInterceptor());

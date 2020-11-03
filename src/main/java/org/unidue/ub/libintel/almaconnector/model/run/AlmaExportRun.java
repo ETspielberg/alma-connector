@@ -10,6 +10,9 @@ import java.util.*;
 
 import static org.unidue.ub.libintel.almaconnector.Utils.dateformat;
 
+/**
+ * container object to hold all information about a download of the sap data from Alma
+ */
 @Entity
 @Table(name="alma_export_run")
 public class AlmaExportRun {

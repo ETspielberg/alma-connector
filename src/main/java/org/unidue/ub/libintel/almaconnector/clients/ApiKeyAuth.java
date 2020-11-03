@@ -3,6 +3,9 @@ package org.unidue.ub.libintel.almaconnector.clients;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 
+/**
+ * intercepts each sent request and adds the authentication via api key
+ */
 public class ApiKeyAuth implements RequestInterceptor {
     private final String location;
     private final String paramName;
@@ -19,18 +22,10 @@ public class ApiKeyAuth implements RequestInterceptor {
         this.paramName = paramName;
     }
 
-    public String getLocation() {
-        return location;
-    }
-
-    public String getParamName() {
-        return paramName;
-    }
-
-    public String getApiKey() {
-        return apiKey;
-    }
-
+    /**
+     * sets the api key for the API used
+     * @param apiKey the api key
+     */
     public void setApiKey(String apiKey) {
         this.apiKey = apiKey;
     }

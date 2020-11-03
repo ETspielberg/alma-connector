@@ -78,6 +78,12 @@ public class InvoiceController {
         return "sap";
     }
 
+    /**
+     * collects the invoices from the Alma API and transforms them into <code>SapData</code> objects and renders the results into the finshedRun.html
+     * @param almaExportRun the container object for this particular run
+     * @param model the model object holding the data for the rendered web page
+     * @return the finishedRun html page
+     */
     @PostMapping("/collectInvoices")
     public String collectInvoices(@ModelAttribute("almaExportRun") AlmaExportRun almaExportRun, Model model) {
         log.debug(String.format("collecting invoices for %s at %s", dateformat.format(almaExportRun.getDesiredDate()), almaExportRun.getInvoiceOwner()));
@@ -124,6 +130,12 @@ public class InvoiceController {
         return "invoicesUpdate";
     }
 
+    /**
+     * displays download buttons for the files containing the selected <code>SapData</code> objects
+     * @param almaExportRun the container object for this particular run
+     * @param model the model object holding the data for the rendered web page
+     * @return the showImportFiles html page
+     */
     @PostMapping("/showImportFiles")
     @DateTimeFormat(pattern = "E MMM dd HH:mm:ss z yyyy")
     public String getImportFiles(@ModelAttribute("almaExportRun") AlmaExportRun almaExportRun, Model model) {
@@ -133,6 +145,14 @@ public class InvoiceController {
         return "showImportFiles";
     }
 
+    /**
+     * retrieves a file containing the sap import data
+     * @param type the type of data to be retrieved (home or foreign)
+     * @param date the date of the run
+     * @param owner the owner of the invoices
+     * @return the file loaded from disc
+     * @throws FileNotFoundException thrown if the desired file does not exist.
+     */
     @GetMapping("/downloadFile/{type}/{owner}/{date}")
     public ResponseEntity<Resource> serveFile(@PathVariable String type, @PathVariable String date, @PathVariable String owner) throws FileNotFoundException {
         Resource file = fileWriterService.loadFiles(date, type, owner);

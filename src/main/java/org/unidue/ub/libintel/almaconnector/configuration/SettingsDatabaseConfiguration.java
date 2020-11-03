@@ -16,6 +16,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
+/**
+ * Data base configuration for storing the individual collection run parameters
+ */
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
@@ -23,6 +26,10 @@ import javax.sql.DataSource;
 )
 public class SettingsDatabaseConfiguration {
 
+    /**
+     * registers the datasource bean for the settings repository
+     * @return the datasource bean
+     */
     @Primary
     @Bean
     @ConfigurationProperties(prefix = "spring.datasource.settings")
@@ -30,6 +37,12 @@ public class SettingsDatabaseConfiguration {
         return DataSourceBuilder.create().build();
     }
 
+    /**
+     * registers the local entity manager factory bean
+     * @param builder the factory builder for entity managers
+     * @param dataSource the datasource bean
+     * @return the entity manager factory bean
+     */
     @Primary
     @Bean
     public LocalContainerEntityManagerFactoryBean
@@ -40,6 +53,11 @@ public class SettingsDatabaseConfiguration {
                 .build();
     }
 
+    /**
+     * registers the transaction manager bean
+     * @param entityManagerFactory the the local entity manager factory bean
+     * @return the platform transaction manager
+     */
     @Primary
     @Bean
     public PlatformTransactionManager transactionManager(@Qualifier("entityManagerFactory") EntityManagerFactory entityManagerFactory) {

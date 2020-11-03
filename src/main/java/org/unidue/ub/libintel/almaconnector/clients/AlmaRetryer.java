@@ -48,6 +48,9 @@ public class AlmaRetryer implements Retryer {
         }
     }
 
+    /**
+     * @return a duplicated <code>AlmaRetryer</code> object
+     */
     @Override
     public Retryer clone() {
         return new AlmaRetryer(backoff, maxAttempts);
