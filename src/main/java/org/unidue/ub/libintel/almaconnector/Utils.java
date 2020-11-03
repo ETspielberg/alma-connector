@@ -41,15 +41,15 @@ public class Utils {
         if (invoice.getInvoiceLines() != null) {
             log.debug("processing invoice " + invoice.getId());
             // go through the invoices
+
+            int positionalNumber = 1;
             for (InvoiceLine invoiceLine : invoice.getInvoiceLines().getInvoiceLine()) {
                 log.debug("processing invoice line " + invoiceLine.getId());
 
                 log.debug(String.format("found %d funds", invoiceLine.getFundDistribution().size()));
-                boolean existsFunddistribution = invoiceLine.getFundDistribution().size() > 1;
 
                 //go through the individual funds to create a single entry for each of the funds to be allocated
-                for (int i = 0; i < invoiceLine.getFundDistribution().size(); i++) {
-                    FundDistribution fundDistribution = invoiceLine.getFundDistribution().get(i);
+                for (FundDistribution fundDistribution : invoiceLine.getFundDistribution()) {
                     // read the fund code
                     String fundCode = fundDistribution.getFundCode().getValue();
                     // convert the fund code into the corresponding SAP account data
@@ -70,18 +70,13 @@ public class Utils {
                             .withCreditor(vendor.getFinancialSysCode())
                             .withToDate(invoiceLine.getSubscriptionToDate())
                             .withFromDate(invoiceLine.getSubscriptionFromDate())
+                            .withPositionalNumber(String.valueOf(positionalNumber))
                             .withCommitmentDate(invoice.getPayment().getVoucherDate())
                             .withCurrency(invoice.getCurrency().getValue())
                             .withSapAccountData(sapAccountData)
                             .withInvoiceNumber(invoice.getNumber())
                             .withComment(invoiceLine.getNote());
-                    if (existsFunddistribution) {
-                        int positionalNumber = Integer.parseInt(invoiceLine.getNumber());
-                        positionalNumber+= (i+1) *1000;
-                        sapData.setPositionalNumber(String.valueOf(positionalNumber));
-                    } else {
-                        sapData.setPositionalNumber(invoiceLine.getNumber());
-                    }
+                    positionalNumber++;
 
                     if ("EXCLUSIVE".equals(invoice.getInvoiceVat().getType().getValue())) {
                         double amount = invoiceLine.getPrice() * fundDistribution.getPercent() / 100;
