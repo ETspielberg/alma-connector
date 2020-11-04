@@ -41,14 +41,16 @@
             <div class="tile">
                 <h3 style="height:1.2em;" th:text="#{upload.excel}"></h3>
                 <p style="height:6em;" th:text="#{upload.excel.short}"></p>
-                <form th:action="@{alma/invoicesUpdate}" method="post" enctype="multipart/form-data">
-                    <div>
-                        <label for="excelUpload" th:text="#{upload.excel.choose}"></label>
-                        <input id="excelUpload" type="file" th:name="file">
-                    </div>
+                <div id="dropzone">
+                    <form th:action="@{alma/invoicesUpdate}" class="dropzone needsclick" method="post" enctype="multipart/form-data" id="file-upload">
 
-                    <input class="btn btn-primary" th:type="submit" value="Import"/>
-                </form>
+                        <div class="dz-message needsclick">
+                            <button type="button" class="dz-button" th:text="#{upload.excel.choose}">Drop files here or click to upload.</button>
+                            <br/>
+                        </div>
+
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -62,5 +64,22 @@
         </div>
     </div>
 </div>
+
+<script>
+    Dropzone.autoDiscover = false;
+
+    $("#file-upload").dropzone({
+        success : function(file, response) {
+            toastr.options.timeout = 0;
+            if (response.numberOfErrors === 0) {
+                toastr.success('Datei ' + file.name + ' erfolgreich hochgeladen. ' + response.numberOfResponses + ' Rechnungsdaten wurden erfolgreich importiert.');
+            } else if (response.numberOfErrors === 1) {
+                toastr.warning('Beim Hochladen der Datei ' + file.name + ' ist ' + response.numberOfErrors + ' Fehler aufgetreten.');
+            } else {
+                toastr.warning('Beim Hochladen der Datei ' + file.name + ' sind ' + response.numberOfErrors + ' Fehler aufgetreten.');
+            }
+        }
+    });
+</script>
 </body>
 </html>

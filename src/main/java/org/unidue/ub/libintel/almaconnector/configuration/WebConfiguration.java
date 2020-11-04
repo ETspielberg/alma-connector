@@ -1,5 +1,6 @@
 package org.unidue.ub.libintel.almaconnector.configuration;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +19,9 @@ import java.util.Locale;
  */
 @Configuration
 public class WebConfiguration implements WebMvcConfigurer {
+
+    @Value("${libintel.alma.path:/alma}")
+    private String almaConnectorPath;
 
     /**
      * registers the locale interceptor to allow for localization via the messages_xx.properties

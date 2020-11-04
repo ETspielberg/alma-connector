@@ -208,38 +208,54 @@ public class Utils {
      * response objects
      */
     public static SapResponseRun getFromExcel(XSSFSheet worksheet, String filename) {
+        // prepare the sap response run container object
         SapResponseRun container = new SapResponseRun();
+
+        // add the filename information to the container
         container.setFilename(filename);
+
+        //initialize the hashmap to collect the lines for each invoice
         HashMap<String, SapResponse> sapResponses = new HashMap<>();
+
         // go through all lines except the first one (the headers) and the last one (summary of all invoices).
         for (int i = 1; i < worksheet.getPhysicalNumberOfRows() - 1; i++) {
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
             //read the row and get all the data from it.
             XSSFRow row = worksheet.getRow(i);
+
+            // read the runId
             String runId;
             try {
                 runId = row.getCell(0).getStringCellValue();
             } catch (IllegalStateException ise) {
                 runId = String.valueOf( row.getCell(0).getNumericCellValue());
             }
+
+            // read the creditor
             String creditor;
             try {
                 creditor =row.getCell(1).getStringCellValue();
             } catch (IllegalStateException ise) {
                 creditor = String.valueOf( row.getCell(1).getNumericCellValue());
             }
+
+            // read the invoice ID
             String invoiceId;
             try {
                 invoiceId = row.getCell(2).getStringCellValue();
             } catch (IllegalStateException ise) {
                 invoiceId = String.valueOf( row.getCell(2).getNumericCellValue());
             }
+
+            // read the currency
             String currency;
             try {
                 currency = row.getCell(3).getStringCellValue();
             } catch (IllegalStateException ise) {
                 currency = String.valueOf( row.getCell(3).getNumericCellValue());
             }
+
+            // read the amount
             double amount = 0.0;
             try {
                 amount = row.getCell(4).getNumericCellValue();
@@ -247,12 +263,23 @@ public class Utils {
                 container.increaseNumberOfReadErrors();
                 log.warn("could not parse amount" + row.getCell(4).getStringCellValue(), ise);
             }
-            String voucherId = row.getCell(5).getStringCellValue();
 
+            // read the voucher ID
+            String voucherId;
+            try {
+                voucherId = row.getCell(5).getStringCellValue();
+            } catch (IllegalStateException ise) {
+                voucherId = String.valueOf( row.getCell(5).getNumericCellValue());
+            }
+
+            // if the invoice is already in the hashmap just add the corresponding amount
             if (sapResponses.containsKey(invoiceId)) {
                 sapResponses.get(invoiceId).addAmount(amount);
             } else {
+                // create a new SAP response object
                 SapResponse sapResponse = new SapResponse(runId, creditor, invoiceId, amount, currency, voucherId);
+
+                // read in the from date if given
                 Date from;
                 try {
                     from = row.getCell(6).getDateCellValue();
@@ -265,6 +292,8 @@ public class Utils {
                         log.debug("no from date given in invoice " + invoiceId);
                     }
                 }
+
+                // read in the to date if given
                 Date to;
                 try {
                     to = row.getCell(7).getDateCellValue();
@@ -277,11 +306,11 @@ public class Utils {
                         log.debug("no to date given in invoice " + invoiceId);
                     }
                 }
+                // add the invoice to the hashmap
                 sapResponses.put(invoiceId, sapResponse);
             }
-            // create the sap response object
-
         }
+        // add the sap response objects to the response run container
         for (SapResponse sapResponse : sapResponses.values())
             container.addSapResponse(sapResponse);
         log.info(container.logString());

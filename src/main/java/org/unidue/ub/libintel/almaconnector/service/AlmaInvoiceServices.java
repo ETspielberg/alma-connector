@@ -6,10 +6,10 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.*;
 import org.unidue.ub.libintel.almaconnector.clients.acquisition.AlmaInvoicesApiClient;
-import org.unidue.ub.libintel.almaconnector.model.run.SapResponseRun;
-import org.unidue.ub.libintel.almaconnector.model.run.AlmaExportRun;
 import org.unidue.ub.libintel.almaconnector.model.InvoiceUpdate;
 import org.unidue.ub.libintel.almaconnector.model.SapResponse;
+import org.unidue.ub.libintel.almaconnector.model.run.AlmaExportRun;
+import org.unidue.ub.libintel.almaconnector.model.run.SapResponseRun;
 import org.unidue.ub.libintel.almaconnector.repository.AlmaExportRunRepository;
 
 import java.text.SimpleDateFormat;
@@ -26,6 +26,7 @@ public class AlmaInvoiceServices {
 
     /**
      * constructor based autowiring of the Feign client
+     *
      * @param almaInvoicesApiClient the Feign client for the Alma Invoice API
      */
     AlmaInvoiceServices(AlmaInvoicesApiClient almaInvoicesApiClient, AlmaExportRunRepository almaExportRunRepository) {
@@ -35,10 +36,11 @@ public class AlmaInvoiceServices {
 
     /**
      * collects the invoices from alma and saves them to the alma export run object
+     *
      * @param almaExportRun the alma export run object containing the data for the invoices to collect
      * @return the alma export run object holding the list of invoices
      */
-    @Secured({ "ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Invoice Operator Extended" })
+    @Secured({"ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Invoice Operator Extended"})
     public AlmaExportRun getInvoices(AlmaExportRun almaExportRun) {
         List<Invoice> invoices;
         if (almaExportRun.isDateSpecific()) {
@@ -57,15 +59,16 @@ public class AlmaInvoiceServices {
 
     /**
      * retrieves the open invoices from the Alma API.
-     * @return  a list of invoices
+     *
+     * @return a list of invoices
      */
-    @Secured({ "ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Invoice Operator Extended" })
+    @Secured({"ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Invoice Operator Extended"})
     public List<Invoice> getOpenInvoices(String owner) {
         // initialize parameters
         int batchSize = 25;
         int offset = 0;
 
-        // retrieve first list of po-lines.
+        // retrieve first list of invocies.
         Invoices invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "Waiting to be Sent", owner, "", "", batchSize, offset, "");
         List<Invoice> invoiceList = new ArrayList<>(invoices.getInvoice());
 
@@ -84,10 +87,11 @@ public class AlmaInvoiceServices {
 
     /**
      * returns a list of open invoices for a given date
+     *
      * @param date the date invoices should be returned for
      * @return a list of invoices
      */
-    @Secured({ "ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Invoice Operator Extended" })
+    @Secured({"ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Invoice Operator Extended"})
     public List<Invoice> getOpenInvoicesForDate(Date date, String owner) {
         log.info("collecting invoices for date " + new SimpleDateFormat("dd.MM.yyyy").format(date));
         return filterList(date, getOpenInvoices(owner));
@@ -95,53 +99,56 @@ public class AlmaInvoiceServices {
 
     /**
      * updates the Invoices in Alma with the results of the SAP import
+     *
      * @param container an SAP container object holding a list of SAP response object
      * @return the SAP container objects the number of missed entries
      */
-    @Secured({ "ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Invoice Operator Extended" })
+    @Secured({"ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Invoice Operator Extended"})
     public SapResponseRun updateInvoiceWithErpData(SapResponseRun container) {
-        List<SapResponse> sapResponses = container.getResponses();
-        log.debug("got " + sapResponses.size() + "SAP responses");
-        Map<String, List<SapResponse>> sapResponsesPerInvoice = new HashMap<>();
+        for (SapResponse sapResponse : container.getResponses()) {
+            // get the number of the invoice (is not the ID!)
+            String invoiceId = sapResponse.getInvoiceNumber();
 
-        // first order all items in a hashmap to collect the individual responses grouped together to rebuild the
-        // invoices from the invoice lines.
-        for (SapResponse sapResponse : sapResponses) {
-            String invoiceNumber = sapResponse.getInvoiceNumber();
-            if (sapResponsesPerInvoice.containsKey(invoiceNumber)) {
-                log.debug("invoice number already in map, adding sap response to list");
-                sapResponsesPerInvoice.get(invoiceNumber).add(sapResponse);
-            } else {
-                sapResponsesPerInvoice.put(invoiceNumber, new ArrayList<>(Collections.singletonList(sapResponse)));
-                log.debug("invoice number not in map, creating new entry");
-            }
-        }
-        for (Map.Entry<String, List<SapResponse>> entry : sapResponsesPerInvoice.entrySet()) {
-            String searchQuery = "invoice_number~" + entry.getKey();
-            Invoices invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "Waiting to be Sent", "", "", searchQuery, 20, 0, "");
-            log.debug(String.format( "found %d invoices for invoice number %s", invoices.getTotalRecordCount(), entry.getKey()));
+            // search the invoices for the invoice number
+            String searchQuery = "invoice_number~" + invoiceId;
+            Invoices invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE",
+                    "Waiting to be Sent", "", "", searchQuery, 20, 0, "");
+
+            log.debug(String.format("found %d invoices for invoice number %s", invoices.getTotalRecordCount(), invoiceId));
+            // process only if there is only one invoice found. Otherwise increase number of errors and log the error
             if (invoices.getTotalRecordCount() == 1) {
                 Invoice invoice = invoices.getInvoice().get(0);
-                List<SapResponse> indiviudalResponses = entry.getValue();
-                log.info("Invoice " + entry.getKey() + ": got " + indiviudalResponses.size() + " + vouchers for " + invoice.getInvoiceLines().getInvoiceLine().size() + " invoices lines");
-                if (invoice.getInvoiceLines().getInvoiceLine().size() == indiviudalResponses.size()) {
-                    Payment payment = invoice.getPayment();
-                    double totalAmount = 0.0;
-                    for (SapResponse individualResponse: indiviudalResponses) {
-                        totalAmount += individualResponse.getAmount();
-                    }
-                    payment.setVoucherNumber(indiviudalResponses.get(0).getVoucherNumber());
-                    payment.setVoucherAmount(String.valueOf(totalAmount));
-                    payment.setVoucherCurrency(new PaymentVoucherCurrency().value(indiviudalResponses.get(0).getCurrency()));
-                    payment.setPaymentStatus(new PaymentPaymentStatus().value("PAID").desc("bezahlt"));
-                    payment.setVoucherDate(new Date());
-                    InvoiceUpdate invoiceUpdate = new InvoiceUpdate(payment);
-                    try {
+                log.info("processing SAP responce for Invoice " + invoiceId);
+
+                // prepare the payment for the update
+                Payment payment = invoice.getPayment();
+                payment.setVoucherNumber(sapResponse.getVoucherNumber());
+                payment.setVoucherAmount(String.valueOf(sapResponse.getAmount()));
+                payment.setVoucherCurrency(new PaymentVoucherCurrency().value(sapResponse.getCurrency()));
+                payment.setVoucherDate(new Date());
+
+                // try to update the invoice.
+                try {
+                    // if the sum is the same as on the invoice, mark the invoice as paid and close the invoice
+                    if (sapResponse.getAmount() == invoice.getTotalAmount()) {
+                        payment.setPaymentStatus(new PaymentPaymentStatus().value("PAID").desc("bezahlt"));
+                        InvoiceUpdate invoiceUpdate = new InvoiceUpdate(payment);
                         this.almaInvoicesApiClient.postInvoicesInvoiceIdToUpdate(invoiceUpdate, "application/json", invoice.getId(), "paid");
-                    } catch (Exception e) {
-                        container.increaseNumberOfErrors();
+
+                    // otherwise just add the payment
+                    } else {
+                        InvoiceUpdate invoiceUpdate = new InvoiceUpdate(payment);
+                        this.almaInvoicesApiClient.postInvoicesInvoiceIdToUpdate(invoiceUpdate, "application/json", invoice.getId(), "");
                     }
+                } catch (Exception e) {
+                    // if an Exception occurs (e.g. when trying to update the invoice), log the message and increase the number of errors.
+                    log.error(String.format("could not update invoice %s", invoiceId));
+                    container.increaseNumberOfErrors();
                 }
+            } else {
+                // if none or more than one invoice is found log the message and increase the number of errors
+                log.warn(String.format("found %d invoices for invoice number %s", invoices.getTotalRecordCount(), invoiceId));
+                container.increaseNumberOfErrors();
             }
         }
         log.info(container.logString());
@@ -150,7 +157,8 @@ public class AlmaInvoiceServices {
 
     /**
      * filters a list of Invoices according a given voucher date
-     * @param date the date of the voucher date to be returned
+     *
+     * @param date     the date of the voucher date to be returned
      * @param invoices the list of invoices to be filtered
      * @return the filtered list of invoices
      */

@@ -117,7 +117,7 @@ public class InvoiceController {
      * @throws IOException thrown if the file could not be read
      */
     @PostMapping("/invoicesUpdate")
-    public String updateInvoicesWithSapData(@RequestParam("file") MultipartFile sapReturnFile, Model model) throws IOException {
+    public ResponseEntity<SapResponseRun> updateInvoicesWithSapData(@RequestParam("file") MultipartFile sapReturnFile) throws IOException {
         // read the excel spreadsheet from the request
         XSSFWorkbook workbook = new XSSFWorkbook(sapReturnFile.getInputStream());
         // retrieve first sheet
@@ -126,8 +126,7 @@ public class InvoiceController {
         //convert the excel sheet to a SapResponseRun holding the individual responses
         SapResponseRun container = getFromExcel(worksheet, sapReturnFile.getOriginalFilename());
         container = this.almaInvoiceServices.updateInvoiceWithErpData(container);
-        model.addAttribute("container", container);
-        return "invoicesUpdate";
+        return ResponseEntity.ok(container);
     }
 
     /**
