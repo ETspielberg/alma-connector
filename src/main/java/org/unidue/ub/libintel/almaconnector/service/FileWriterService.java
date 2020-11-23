@@ -80,6 +80,8 @@ public class FileWriterService {
             }
         }
         for (SapData sapData: almaExportRun.getForeignSapData()) {
+            if (!sapData.isChecked)
+                continue;
             try {
                 addLineToFile(checkFilename, sapData.toFixedLengthLine());
             } catch (IOException ex) {
