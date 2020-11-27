@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="general :: generalHead"/>
+<body>
+
+<nav th:replace="general :: navbar"></nav>
+
+<div th:replace="general :: jumbotron"/>
+
+<div class="container">
+    <div class="ui-g">
+        <div class="ui-g-12 ui-md-6 ui-lg-4">
+            <div class="tile">
+                <h3 style="height: 1.2em;" th:text="#{bubi.outbox}"></h3>
+                <p style="height: 3em;" th:text="#{bubi.outbox.short}"></p>
+                <div style="padding:10px; text-align: left;">
+                <a th:href="@{/alma/bubi/newBubiOrder}">
+                    <button type="button" class="btn btn-primary" th:text="#{bubi.new.order}"></button>
+                </a>
+                </div>
+                <div style="padding:10px; text-align: left;">
+                <a th:href="@{/alma/bubi/printBubiOrder}">
+                    <button type="button" class="btn btn-primary" th:text="#{bubi.print.order}"></button>
+                </a>
+                </div>
+            </div>
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-4">
+            <div class="tile">
+                <h3 style="height: 1.2em;" th:text="#{bubi.inbox}"></h3>
+                <p style="height: 3em;" th:text="#{bubi.inbox.short}"></p>
+                <div style="padding:10px; text-align: left;">
+                <a th:href="@{/alma/bubi/inbox}">
+                    <button type="button" class="btn btn-primary" th:text="#{bubi.inbox}"></button>
+                </a>
+                </div>
+            </div>
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-4">
+            <div class="tile">
+                <h3 style="height: 1.2em;" th:text="#{bubi.search}"></h3>
+                <p style="height: 3em;" th:text="#{bubi.search.short}"></p>
+                <div style="padding:10px; text-align: left;">
+                    <a th:href="@{/alma/bubi/search/signature}">
+                        <button type="button" class="btn btn-primary" th:text="#{bubi.search.signature}"></button>
+                    </a>
+                </div>
+                <div style="padding:10px; text-align: left;">
+                    <a th:href="@{/alma/bubi/search/openComplaints}">
+                        <button type="button" class="btn btn-primary" th:text="#{bubi.search.open.complaints}"></button>
+                    </a>
+                </div>
+                <div style="padding:10px; text-align: left;">
+                    <a th:href="@{/alma/bubi/search/bubiOrderNumber}">
+                        <button type="button" class="btn btn-primary" th:text="#{bubi.search.order.number}"></button>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-4">
+            <div class="tile">
+                <h3 style="height: 1.2em;" th:text="#{bubi.coredata}"></h3>
+                <p style="height: 3em;" th:text="#{bubi.coredata.short}"></p>
+                <div style="padding:10px; text-align: left;">
+                <a th:href="@{/alma/bubi/coredata/change}">
+                    <button type="button" class="btn btn-primary" th:text="#{bubi.coredata.change}"></button>
+                </a>
+                </div>
+            </div>
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-4">
+            <div class="tile">
+                <h3 style="height: 1.2em;" th:text="#{bubi.statistics}"></h3>
+                <p style="height: 3em;" th:text="#{bubi.statistics.short}"></p>
+                <div style="padding:10px; text-align: left;">
+                <a th:href="@{/alma/alma/bubi/statistics}">
+                    <button type="button" class="btn btn-primary" th:text="#{bubi.statistics.order}"></button>
+                </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="ui-g">
+        <div class="ui-g-12 ui-md-12 ui-lg-12">
+            <div class="tile">
+                <a th:href="@{/start}">
+                    <button class="btn btn-primary">Zurück</button>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
