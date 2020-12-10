@@ -14,14 +14,14 @@
                 <h3 style="height: 1.2em;" th:text="#{bubi.outbox}"></h3>
                 <p style="height: 3em;" th:text="#{bubi.outbox.short}"></p>
                 <div style="padding:10px; text-align: left;">
-                <a th:href="@{/alma/bubi/newBubiOrder}">
-                    <button type="button" class="btn btn-primary" th:text="#{bubi.new.order}"></button>
-                </a>
+                    <a th:href="@{/alma/bubi/bubiOrderLineNew}">
+                        <button type="button" class="btn btn-primary" th:text="#{bubi.new.order}"></button>
+                    </a>
                 </div>
                 <div style="padding:10px; text-align: left;">
-                <a th:href="@{/alma/bubi/printBubiOrder}">
-                    <button type="button" class="btn btn-primary" th:text="#{bubi.print.order}"></button>
-                </a>
+                    <a th:href="@{/alma/bubi/printBubiOrder}">
+                        <button type="button" class="btn btn-primary" th:text="#{bubi.print.order}"></button>
+                    </a>
                 </div>
             </div>
         </div>
@@ -30,9 +30,9 @@
                 <h3 style="height: 1.2em;" th:text="#{bubi.inbox}"></h3>
                 <p style="height: 3em;" th:text="#{bubi.inbox.short}"></p>
                 <div style="padding:10px; text-align: left;">
-                <a th:href="@{/alma/bubi/inbox}">
-                    <button type="button" class="btn btn-primary" th:text="#{bubi.inbox}"></button>
-                </a>
+                    <a th:href="@{/alma/bubi/inbox}">
+                        <button type="button" class="btn btn-primary" th:text="#{bubi.inbox}"></button>
+                    </a>
                 </div>
             </div>
         </div>
@@ -62,9 +62,22 @@
                 <h3 style="height: 1.2em;" th:text="#{bubi.coredata}"></h3>
                 <p style="height: 3em;" th:text="#{bubi.coredata.short}"></p>
                 <div style="padding:10px; text-align: left;">
-                <a th:href="@{/alma/bubi/coredata/change}">
-                    <button type="button" class="btn btn-primary" th:text="#{bubi.coredata.change}"></button>
-                </a>
+                    <a th:href="@{/alma/bubi/coredata/change}">
+                        <button type="button" class="btn btn-primary" th:text="#{bubi.coredata.change}"></button>
+                    </a>
+                </div>
+                <div id="dropzone">
+                    <form th:action="@{alma/bubi/coredataImport}" class="dropzone needsclick" method="post"
+                          enctype="multipart/form-data" id="file-upload">
+
+                        <div class="dz-message needsclick">
+                            <button type="button" class="dz-button" th:text="#{upload.excel.choose}">Drop files here or
+                                click to upload.
+                            </button>
+                            <br/>
+                        </div>
+
+                    </form>
                 </div>
             </div>
         </div>
@@ -73,9 +86,9 @@
                 <h3 style="height: 1.2em;" th:text="#{bubi.statistics}"></h3>
                 <p style="height: 3em;" th:text="#{bubi.statistics.short}"></p>
                 <div style="padding:10px; text-align: left;">
-                <a th:href="@{/alma/alma/bubi/statistics}">
-                    <button type="button" class="btn btn-primary" th:text="#{bubi.statistics.order}"></button>
-                </a>
+                    <a th:href="@{/alma/alma/bubi/statistics}">
+                        <button type="button" class="btn btn-primary" th:text="#{bubi.statistics.order}"></button>
+                    </a>
                 </div>
             </div>
         </div>
@@ -90,5 +103,21 @@
         </div>
     </div>
 </div>
+<script>
+    Dropzone.autoDiscover = false;
+
+    $("#file-upload").dropzone({
+        success : function(file, response) {
+            toastr.options.timeout = 0;
+            if (response.numberOfErrors === 0) {
+                toastr.success('Datei ' + file.name + ' erfolgreich hochgeladen. ' + response.numberOfResponses + ' Rechnungsdaten wurden erfolgreich importiert.');
+            } else if (response.numberOfErrors === 1) {
+                toastr.warning('Beim Hochladen der Datei ' + file.name + ' ist ' + response.numberOfErrors + ' Fehler aufgetreten.');
+            } else {
+                toastr.warning('Beim Hochladen der Datei ' + file.name + ' sind ' + response.numberOfErrors + ' Fehler aufgetreten.');
+            }
+        }
+    });
+</script>
 </body>
 </html>

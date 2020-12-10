@@ -4,13 +4,11 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unidue.ub.alma.shared.acq.FundDistribution;
-import org.unidue.ub.alma.shared.acq.Invoice;
-import org.unidue.ub.alma.shared.acq.InvoiceLine;
-import org.unidue.ub.alma.shared.acq.Vendor;
+import org.unidue.ub.alma.shared.acq.*;
 import org.unidue.ub.libintel.almaconnector.model.SapAccountData;
 import org.unidue.ub.libintel.almaconnector.model.SapData;
 import org.unidue.ub.libintel.almaconnector.model.SapResponse;
+import org.unidue.ub.libintel.almaconnector.model.bubi.BubiOrderLine;
 import org.unidue.ub.libintel.almaconnector.model.run.SapResponseRun;
 
 import java.text.ParseException;
@@ -31,8 +29,9 @@ public class Utils {
 
     /**
      * converts an Alma invoice and the corresponding vendor information into a set of SAP data
+     *
      * @param invoice the Alma Invoice object to be converted
-     * @param vendor the Alma Vendor object for the invoice
+     * @param vendor  the Alma Vendor object for the invoice
      * @return a List of SapData, one for each fund to be used
      */
     public static List<SapData> convertInvoiceToSapData(Invoice invoice, Vendor vendor) {
@@ -88,7 +87,7 @@ public class Utils {
                         // get the vat code
                         String invoiceLineVatCode = invoiceLine.getInvoiceLineVat().getVatCode().getDesc();
                         if (invoiceLineVatCode.length() > 2)
-                            invoiceLineVatCode = invoiceLineVatCode.substring(0,2);
+                            invoiceLineVatCode = invoiceLineVatCode.substring(0, 2);
                         // set the value of the vat code to a value which is not empty
                         if (!"".equals(invoiceLineVatCode)) {
                             sapData.costType = invoiceLineVatCode;
@@ -98,12 +97,11 @@ public class Utils {
                         else {
                             String invoiceVatCode = invoice.getInvoiceVat().getVatCode().getValue();
                             if (invoiceVatCode.length() > 2)
-                                invoiceVatCode = invoiceVatCode.substring(0,2);
+                                invoiceVatCode = invoiceVatCode.substring(0, 2);
                             if (!"".equals(invoiceVatCode)) {
                                 sapData.costType = invoiceLineVatCode;
                                 log.debug("set VAT code to " + invoiceVatCode);
-                            }
-                            else {
+                            } else {
                                 log.warn("no vat code given for invoice line " + invoiceLine.getId());
                                 sapData.costType = "";
                             }
@@ -121,6 +119,7 @@ public class Utils {
 
     /**
      * converts the fund code into a set of SAP-Data
+     *
      * @param fundCode the fund code to be converted
      * @return a SapAccountData object holding the individual SAP data
      */
@@ -144,7 +143,7 @@ public class Utils {
                         .withCostCentre(parts[1])
                         .withFonds(parts[2]);
 
-            // if a psp element is given (second part is 14 fields long)
+                // if a psp element is given (second part is 14 fields long)
             else if (parts[1].length() == 14)
                 // set psp element and fonds
                 sapAccountData
@@ -157,7 +156,7 @@ public class Utils {
             else
                 sapAccountData.setLedgerAccount(parts[3]);
 
-        // second case: Berufungsmittel (starting with 1)
+            // second case: Berufungsmittel (starting with 1)
         } else if (parts[0].startsWith("1")) {
             log.debug("Berufungsmittel");
             sapAccountData
@@ -165,7 +164,7 @@ public class Utils {
                     .withPspElement("555100000" + "9" + parts[0])
                     .withLedgerAccount("6810" + parts[2]);
 
-        // third case: Haushaltsmittel (starting with 0)
+            // third case: Haushaltsmittel (starting with 0)
         } else if (parts[0].startsWith("0")) {
             log.debug("Haushalt");
             sapAccountData
@@ -173,7 +172,7 @@ public class Utils {
                     .withLedgerAccount("6810" + parts[1])
                     .withPspElement("555100000" + "9" + parts[0]);
 
-        // fourth case: QVM (starting with 50)
+            // fourth case: QVM (starting with 50)
         } else if (parts[0].startsWith("50")) {
             log.debug("QVM");
             sapAccountData
@@ -181,7 +180,7 @@ public class Utils {
                     .withLedgerAccount("6810" + parts[1])
                     .withPspElement("555100000" + "9" + parts[0]);
 
-        // fifth case: Allgemeinmittel (starting with 55
+            // fifth case: Allgemeinmittel (starting with 55
         } else if (parts[0].startsWith("55")) {
             if (parts[1].equals("0")) {
                 log.debug("Allgemeinmittel");
@@ -203,6 +202,7 @@ public class Utils {
     /**
      * calculates a container holding the list of SAP response objects and the number of unsuccessful readings from an
      * excel file
+     *
      * @param worksheet a XSSFSheet object of a sheet in an excel file
      * @return a container object holding the number of errors upon reading individual lines and the list of read SAP
      * response objects
@@ -228,15 +228,15 @@ public class Utils {
             try {
                 runId = row.getCell(0).getStringCellValue();
             } catch (IllegalStateException ise) {
-                runId = String.valueOf( row.getCell(0).getNumericCellValue());
+                runId = String.valueOf(row.getCell(0).getNumericCellValue());
             }
 
             // read the creditor
             String creditor;
             try {
-                creditor =row.getCell(1).getStringCellValue();
+                creditor = row.getCell(1).getStringCellValue();
             } catch (IllegalStateException ise) {
-                creditor = String.valueOf( row.getCell(1).getNumericCellValue());
+                creditor = String.valueOf(row.getCell(1).getNumericCellValue());
             }
 
             // read the invoice ID
@@ -244,7 +244,7 @@ public class Utils {
             try {
                 invoiceId = row.getCell(2).getStringCellValue();
             } catch (IllegalStateException ise) {
-                invoiceId = String.valueOf( row.getCell(2).getNumericCellValue());
+                invoiceId = String.valueOf(row.getCell(2).getNumericCellValue());
             }
 
             // read the currency
@@ -252,7 +252,7 @@ public class Utils {
             try {
                 currency = row.getCell(3).getStringCellValue();
             } catch (IllegalStateException ise) {
-                currency = String.valueOf( row.getCell(3).getNumericCellValue());
+                currency = String.valueOf(row.getCell(3).getNumericCellValue());
             }
 
             // read the amount
@@ -269,7 +269,7 @@ public class Utils {
             try {
                 voucherId = row.getCell(5).getStringCellValue();
             } catch (IllegalStateException ise) {
-                voucherId = String.valueOf( row.getCell(5).getNumericCellValue());
+                voucherId = String.valueOf(row.getCell(5).getNumericCellValue());
             }
 
             // if the invoice is already in the hashmap just add the corresponding amount
@@ -315,5 +315,29 @@ public class Utils {
             container.addSapResponse(sapResponse);
         log.info(container.logString());
         return container;
+    }
+
+    public static PoLine buildPoLine(BubiOrderLine bubiOrderLine, Account account) {
+        PoLineOwner poLineOwner;
+        if (bubiOrderLine.getCollection().startsWith("D"))
+            poLineOwner = new PoLineOwner().value("D0001");
+        else if (bubiOrderLine.getCollection().startsWith("E5"))
+            poLineOwner = new PoLineOwner().value("E0023");
+        else
+            poLineOwner = new PoLineOwner().value("E0001");
+        FundDistribution fundDistribution = new FundDistribution()
+                .fundCode(new FundDistributionFundCode().value(bubiOrderLine.getFund()))
+                .amount(bubiOrderLine.getPrice());
+        List<FundDistribution> fundList = new ArrayList<>();
+        fundList.add(fundDistribution);
+        return new PoLine()
+                .vendorReferenceNumber(bubiOrderLine.getBubiOrderLineid())
+                .sourceType(new PoLineSourceType().value("MANUALENTRY"))
+                .type(new PoLineType().value("OTHER_SERVICES_OT"))
+                .status(new PoLineStatus().value("INREVIEW"))
+                .acquisitionMethod(new PoLineAcquisitionMethod().value("VENDOR_SYSTEM"))
+                .owner(poLineOwner)
+                .vendorAccount(account.getCode())
+                .fundDistribution(fundList);
     }
 }

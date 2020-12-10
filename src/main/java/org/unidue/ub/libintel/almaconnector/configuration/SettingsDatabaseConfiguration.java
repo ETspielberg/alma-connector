@@ -49,7 +49,7 @@ public class SettingsDatabaseConfiguration {
     entityManagerFactory(EntityManagerFactoryBuilder builder, @Qualifier("dataSource") DataSource dataSource) {
         return builder
                 .dataSource(dataSource)
-                .packages("org.unidue.ub.libintel.almaconnector.model.run")
+                .packages("org.unidue.ub.libintel.almaconnector.model.run","org.unidue.ub.libintel.almaconnector.model.bubi")
                 .build();
     }
 

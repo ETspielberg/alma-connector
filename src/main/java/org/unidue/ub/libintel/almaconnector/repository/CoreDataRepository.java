@@ -4,4 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.unidue.ub.libintel.almaconnector.model.bubi.CoreData;
 
 public interface CoreDataRepository  extends JpaRepository<CoreData, String> {
+
+    CoreData findAllByCollectionAndShelfmark(String collection, String shelfmark);
 }

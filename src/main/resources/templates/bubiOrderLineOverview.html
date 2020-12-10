@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="general :: generalHead"/>
+<body>
+
+<nav th:replace="general :: navbar"></nav>
+
+<div th:replace="general :: jumbotron"/>
+
+<div class="container">
+    <form th:action="@{/alma/bubi/saveBubiOrderLine}" th:object="${bubiOrderLine}" method="post">
+        <div class="ui-g">
+            <div class="ui-g-12 ui-md-12 ui-lg-12">
+                <div class="tile">
+                    <h2 th:text="#{bubi.order.line.overview}"></h2>
+                    <p th:text="#{bubi.order.line.overview.short}"></p>
+                </div>
+            </div>
+        </div>
+        <div class="ui-g">
+            <div class="ui-g-12 ui-md-6 ui-lg-4">
+                <div class="tile">
+                    <h2 style="height:1.2em;" th:text="#{bubi.order.line.overview.core.data}"></h2>
+
+                    <div class="form-group">
+                        <label for="shelfmark" th:text="#{shelfmark}"></label>
+                        <input id="shelfmark" type="text" th:field="*{shelfmark}">
+                    </div>
+                    <div class="form-group">
+                        <label for="collection" th:text="#{collection}"></label>
+                        <input id="collection" type="text" th:field="*{collection}">
+                    </div>
+                    <div class="form-group">
+                        <label for="vendorId" th:text="#{bubi.order.line.vendorId}"></label>
+                        <input id="vendorId" type="text" th:field="*{vendorId}">
+                    </div>
+                </div>
+            </div>
+            <div class="ui-g-12 ui-md-6 ui-lg-4">
+                <div class="tile">
+                    <h3 style="height:1.2em;" th:text="#{bubi.order.line.overview.volume.data}"></h3>
+                    <div class="form-group">
+                        <label for="bubiOrderId" th:text="#{bubi.order.line.Id}"></label>
+                        <input id="bubiOrderId" type="text" th:field="*{bubiOrderLineId}">
+                    </div>
+                    <div class="form-group">
+                        <label for="volume" th:text="#{volume}"></label>
+                        <input id="volume" type="text" th:field="*{volume}">
+                    </div>
+                    <div class="form-group">
+                        <label for="part" th:text="#{part}"></label>
+                        <input id="part" type="text" th:field="*{part}">
+                    </div>
+                    <div class="form-group">
+                        <label for="year" th:text="#{year}"></label>
+                        <input id="year" type="text" th:field="*{year}">
+                    </div>
+                    <div class="form-group">
+                        <label for="bindingsFollow" th:text="#{bubi.order.line.bindingsFollow}"></label>
+                        <input id="bindingsFollow" type="text" th:field="*{bindingsFollow}">
+                    </div>
+
+                </div>
+            </div>
+            <div class="ui-g-12 ui-md-6 ui-lg-4">
+                <div class="tile">
+                    <h3 style="height:1.2em;" th:text="#{bubi.order.line.overview.appearance}"></h3>
+                    <div class="form-group">
+                        <label for="color" th:text="#{color}"></label>
+                        <input id="color" type="text" th:field="*{color}">
+                    </div>
+                    <div class="form-group">
+                        <label for="minting" th:text="#{minting}"></label>
+                        <input id="minting" type="text" th:field="*{minting}">
+                    </div>
+                    <div class="form-group">
+                        <label for="comment" th:text="#{comment}"></label>
+                        <input id="comment" type="text" th:field="*{comment}">
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+        <div class="ui-g">
+            <div class="ui-g-12 ui-md-12 ui-lg-12">
+                <div class="tile">
+                    <input type="submit" class="btn btn-primary" th:value="#{save}"/>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="ui-g">
+        <div class="ui-g-12 ui-md-12 ui-lg-12">
+            <div class="tile">
+                <a th:href="@{/start}">
+                    <button class="btn btn-primary">Zurück</button>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

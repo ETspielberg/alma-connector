@@ -16,7 +16,10 @@ public class BubiOrder {
     @Column(name="bubi_order_id")
     private String bubiOrderId;
 
-    @OneToMany(mappedBy = "bubi_order_lines")
+    @Column(name="alma_order_id")
+    private String almaOrderId;
+
+    @OneToMany(mappedBy = "bubiOrder")
     private List<BubiOrderLine> bubiOrderLines;
 
     @Column(name="bubi_status")

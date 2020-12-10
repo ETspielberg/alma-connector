@@ -4,7 +4,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name="core_data")
-public class CoreData {
+public class CoreData implements Cloneable {
 
     @Id
     @Column(name="core_data_id")
@@ -19,9 +19,11 @@ public class CoreData {
     @Column(name="title")
     private String title;
 
+    // noch notwendig?
     @Column(name="precessor")
     private String precessor;
 
+    // noch notwendig?
     @Column(name="successor")
     private String successor;
 
@@ -37,6 +39,9 @@ public class CoreData {
     @Column(name="part_description")
     private String partDescription;
 
+    @Column(name="volume")
+    private String volume;
+
     @Column(name="cover")
     private String cover;
 
@@ -50,7 +55,7 @@ public class CoreData {
     private String issue;
 
     @Column(name="year")
-    private int year;
+    private String year;
 
     @Column(name="part")
     private String part;
@@ -64,6 +69,11 @@ public class CoreData {
     @Column(name="bindings_follow")
     private String bindingsFollow;
 
+    @Column(name="alma_mms_id")
+    private String almaMmsId;
+
+    @Column(name="alma_holding_id")
+    private String almaHoldingId;
 
     @Column(name="bubi_data")
     private String bubiData;
@@ -183,11 +193,11 @@ public class CoreData {
         this.issue = issue;
     }
 
-    public int getYear() {
+    public String getYear() {
         return year;
     }
 
-    public void setYear(int year) {
+    public void setYear(String year) {
         this.year = year;
     }
 
@@ -197,6 +207,14 @@ public class CoreData {
 
     public void setPart(String part) {
         this.part = part;
+    }
+
+    public String getVolume() {
+        return volume;
+    }
+
+    public void setVolume(String volume) {
+        this.volume = volume;
     }
 
     public String getComment() {
@@ -229,5 +247,58 @@ public class CoreData {
 
     public void setAlternativeBubiData(String alternativeBubiData) {
         this.alternativeBubiData = alternativeBubiData;
+    }
+
+    public String getCoreDataId() {
+        return coreDataId;
+    }
+
+    public void setCoreDataId(String coreDataId) {
+        this.coreDataId = coreDataId;
+    }
+
+    public String getAlmaMmsId() {
+        return almaMmsId;
+    }
+
+    public void setAlmaMmsId(String almaMmsId) {
+        this.almaMmsId = almaMmsId;
+    }
+
+    public String getAlmaHoldingId() {
+        return almaHoldingId;
+    }
+
+    public void setAlmaHoldingId(String almaHoldingId) {
+        this.almaHoldingId = almaHoldingId;
+    }
+
+    @Override
+    protected CoreData clone() {
+        CoreData clone = new CoreData();
+        clone.setAlternativeBubiData(this.alternativeBubiData);
+        clone.setBubiData(this.bubiData);
+        clone.setBinding(this.binding);
+        clone.setBindingsFollow(this.bindingsFollow);
+        clone.setCollection(this.collection);
+        clone.setColor(this.color);
+        clone.setComment(this.comment);
+        clone.setCover(this.cover);
+        clone.setEdition(this.edition);
+        clone.setFf(this.isFf);
+        clone.setVolume(this.volume);
+        clone.setIssue(this.issue);
+        clone.setMinting(this.minting);
+        clone.setPart(this.part);
+        clone.setPartDescription(this.partDescription);
+        clone.setPartTitle(this.partTitle);
+        clone.setPrecessor(this.precessor);
+        clone.setSuccessor(this.successor);
+        clone.setTitle(this.title);
+        clone.setYear(this.year);
+        clone.setShelfmark(this.shelfmark);
+        clone.setAlmaHoldingId(this.almaHoldingId);
+        clone.setAlmaMmsId(this.almaMmsId);
+        return clone;
     }
 }

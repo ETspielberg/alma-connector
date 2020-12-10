@@ -44,4 +44,13 @@ public class AlmaPoLineService {
         }
         return poLineList;
     }
+
+    /**
+     * retrieves the active po-lines.
+     * @return a list of po-lines
+     */
+    @Secured({ "ROLE_SYSTEM", "ROLE_ALMA" })
+    public PoLine savePoLine(PoLine poLine) {
+        return this.almaPoLinesApiClient.postAcqPoLines(poLine, "application/json", "");
+    }
 }
