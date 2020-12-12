@@ -10,7 +10,7 @@ import java.util.Date;
 @Entity
 @IdClass(BubiOrderLineId.class)
 @Table(name = "bubi_order_line")
-public class BubiOrderLine implements Cloneable {
+public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
 
     @Id
     @Column(name = "collection")
@@ -35,21 +35,20 @@ public class BubiOrderLine implements Cloneable {
     @Column(name = "alma_vendor_id")
     private String vendorId;
 
+    @Column(name = "alma_poline_id")
+    private String almaPoLineId;
+
     @Column(name = "fund")
     private String fund;
 
     @Column(name = "price")
-    private double price;
+    private Double price;
 
     @Column(name= "alma_mms_id")
     private String almaMmsId;
 
     @Column(name= "alma_holding_id")
     private String almaHoldingId;
-
-    @ManyToOne
-    @JoinColumn(name = "core_data_id")
-    public CoreData coreData;
 
     @Column(name = "title")
     private String title;
@@ -117,6 +116,14 @@ public class BubiOrderLine implements Cloneable {
         this.created = new Date();
     }
 
+    public BubiOrderLine(String collection, String shelfmark, long counter) {
+        this.shelfmark = shelfmark;
+        this.collection = collection;
+        this.counter = counter;
+        this.lastChange = new Date();
+        this.created = new Date();
+    }
+
     public void addCoreData(CoreData coredata) {
         this.lastChange = new Date();
         this.binding = coredata.getBinding();
@@ -126,18 +133,19 @@ public class BubiOrderLine implements Cloneable {
         this.comment = coredata.getComment();
         this.cover = coredata.getCover();
         this.edition = coredata.getEdition();
-        this.isFf = coredata.isFf();
+        this.isFf = coredata.getIsFf();
         this.minting = coredata.getMinting();
         this.issue = coredata.getIssue();
         this.part = coredata.getPart();
         this.partDescription = coredata.getPartDescription();
-        this.precessor = coredata.getPrecessor();
-        this.successor = coredata.getSuccessor();
         this.shelfmark = coredata.getShelfmark();
         this.year = coredata.getYear();
         this.volume = coredata.getVolume();
         this.title = coredata.getTitle();
         this.partTitle = coredata.getPartTitle();
+        this.vendorId = coredata.getBubiData();
+        this.almaMmsId = coredata.getAlmaMmsId();
+        this.almaHoldingId = coredata.getAlmaHoldingId();
     }
 
     public String getShelfmark() {
@@ -164,6 +172,14 @@ public class BubiOrderLine implements Cloneable {
         this.counter = counter;
     }
 
+    public String getAlmaPoLineId() {
+        return almaPoLineId;
+    }
+
+    public void setAlmaPoLineId(String almaPoLineId) {
+        this.almaPoLineId = almaPoLineId;
+    }
+
     public String getVendorId() {
         return vendorId;
     }
@@ -180,20 +196,12 @@ public class BubiOrderLine implements Cloneable {
         this.fund = fund;
     }
 
-    public double getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(Double price) {
         this.price = price;
-    }
-
-    public CoreData getCoreData() {
-        return coreData;
-    }
-
-    public void setCoreData(CoreData coreData) {
-        this.coreData = coreData;
     }
 
     public String getTitle() {
@@ -381,4 +389,8 @@ public class BubiOrderLine implements Cloneable {
     }
 
 
+    @Override
+    public int compareTo(BubiOrderLine other) {
+        return (int) (other.counter - this.counter);
+    }
 }

@@ -6,9 +6,11 @@ public class AlmaJournalData {
 
     public String holdingId = "";
 
-    public String collection = "";
+    public String collection;
 
-    public String shelfmark = "";
+    public String shelfmark;
+
+    public String title = "";
 
     public AlmaJournalData(String collection, String shelfmark) {
         this.collection = collection;
@@ -25,9 +27,14 @@ public class AlmaJournalData {
         return this;
     }
 
+    public AlmaJournalData withTitle(String title) {
+        this.title = title;
+        return this;
+    }
+
     public AlmaJournalData clone() {
         AlmaJournalData clone = new AlmaJournalData(this.collection, this.shelfmark)
-                .withHoldingId(this.holdingId).withMmsId(this.mmsId);
+                .withHoldingId(this.holdingId).withMmsId(this.mmsId).withTitle(title);
         return clone;
     }
 }

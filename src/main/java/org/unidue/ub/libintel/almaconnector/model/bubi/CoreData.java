@@ -4,28 +4,19 @@ import javax.persistence.*;
 
 @Entity
 @Table(name="core_data")
+@IdClass(CoreDataId.class)
 public class CoreData implements Cloneable {
 
     @Id
-    @Column(name="core_data_id")
-    private String coreDataId;
-
     @Column(name="collection")
     private String collection;
 
+    @Id
     @Column(name="shelfmark")
     private String shelfmark;
 
     @Column(name="title")
     private String title;
-
-    // noch notwendig?
-    @Column(name="precessor")
-    private String precessor;
-
-    // noch notwendig?
-    @Column(name="successor")
-    private String successor;
 
     @Column(name="minting")
     private String minting;
@@ -75,6 +66,9 @@ public class CoreData implements Cloneable {
     @Column(name="alma_holding_id")
     private String almaHoldingId;
 
+    @Column(name="active")
+    private boolean active = true;
+
     @Column(name="bubi_data")
     private String bubiData;
 
@@ -97,28 +91,20 @@ public class CoreData implements Cloneable {
         this.shelfmark = shelfmark;
     }
 
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
     public String getTitle() {
         return title;
     }
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public String getPrecessor() {
-        return precessor;
-    }
-
-    public void setPrecessor(String precessor) {
-        this.precessor = precessor;
-    }
-
-    public String getSuccessor() {
-        return successor;
-    }
-
-    public void setSuccessor(String successor) {
-        this.successor = successor;
     }
 
     public String getMinting() {
@@ -225,11 +211,11 @@ public class CoreData implements Cloneable {
         this.comment = comment;
     }
 
-    public boolean isFf() {
+    public boolean getIsFf() {
         return isFf;
     }
 
-    public void setFf(boolean ff) {
+    public void setIsFf(boolean ff) {
         isFf = ff;
     }
 
@@ -247,14 +233,6 @@ public class CoreData implements Cloneable {
 
     public void setAlternativeBubiData(String alternativeBubiData) {
         this.alternativeBubiData = alternativeBubiData;
-    }
-
-    public String getCoreDataId() {
-        return coreDataId;
-    }
-
-    public void setCoreDataId(String coreDataId) {
-        this.coreDataId = coreDataId;
     }
 
     public String getAlmaMmsId() {
@@ -285,15 +263,13 @@ public class CoreData implements Cloneable {
         clone.setComment(this.comment);
         clone.setCover(this.cover);
         clone.setEdition(this.edition);
-        clone.setFf(this.isFf);
+        clone.setIsFf(this.isFf);
         clone.setVolume(this.volume);
         clone.setIssue(this.issue);
         clone.setMinting(this.minting);
         clone.setPart(this.part);
         clone.setPartDescription(this.partDescription);
         clone.setPartTitle(this.partTitle);
-        clone.setPrecessor(this.precessor);
-        clone.setSuccessor(this.successor);
         clone.setTitle(this.title);
         clone.setYear(this.year);
         clone.setShelfmark(this.shelfmark);

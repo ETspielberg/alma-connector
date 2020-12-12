@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+</body>
+</html><!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="general :: generalHead"/>
+<body>
+
+<nav th:replace="general :: navbar"></nav>
+
+<div class="container-fluid">
+    <div class="ui-g">
+        <div class="ui-g-12 ui-md-12 ui-lg-12">
+            <div class="tile">
+                <h1 style="height:1.2em;" th:text="#{edit.success}"></h1>
+                <p th:text="#{bubi.order.line.edit.success}"></p>
+                <p th:text="${bubiOrderLine.almaPoLineId}"></p>
+            </div>
+        </div>
+    </div>
+    <div class="ui-g">
+        <div class="ui-g-12 ui-md-12 ui-lg-12">
+            <div class="tile">
+                <a th:href="@{/alma/bubi/start}">
+                    <button class="btn btn-primary">Zurück</button>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

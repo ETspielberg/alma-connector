@@ -317,7 +317,7 @@ public class Utils {
         return container;
     }
 
-    public static PoLine buildPoLine(BubiOrderLine bubiOrderLine, Account account) {
+    public static PoLine buildPoLine(BubiOrderLine bubiOrderLine, Vendor vendor) {
         PoLineOwner poLineOwner;
         if (bubiOrderLine.getCollection().startsWith("D"))
             poLineOwner = new PoLineOwner().value("D0001");
@@ -325,19 +325,28 @@ public class Utils {
             poLineOwner = new PoLineOwner().value("E0023");
         else
             poLineOwner = new PoLineOwner().value("E0001");
-        FundDistribution fundDistribution = new FundDistribution()
+        Amount amount = new Amount().sum(String.valueOf(bubiOrderLine.getPrice()))
+                .currency(new AmountCurrency().value("EUR"));
+        FundDistributionPoLine fundDistribution = new FundDistributionPoLine()
                 .fundCode(new FundDistributionFundCode().value(bubiOrderLine.getFund()))
-                .amount(bubiOrderLine.getPrice());
-        List<FundDistribution> fundList = new ArrayList<>();
+                .amount(amount);
+        List<FundDistributionPoLine> fundList = new ArrayList<>();
+
         fundList.add(fundDistribution);
+        ResourceMetadata resourceMetadata = new ResourceMetadata()
+                .mmsId(new ResourceMetadataMmsId().value(bubiOrderLine.getAlmaMmsId()))
+                .title(bubiOrderLine.getTitle());
         return new PoLine()
                 .vendorReferenceNumber(bubiOrderLine.getBubiOrderLineid())
                 .sourceType(new PoLineSourceType().value("MANUALENTRY"))
                 .type(new PoLineType().value("OTHER_SERVICES_OT"))
                 .status(new PoLineStatus().value("INREVIEW"))
-                .acquisitionMethod(new PoLineAcquisitionMethod().value("VENDOR_SYSTEM"))
+                .price(amount)
+                .baseStatus(PoLine.BaseStatusEnum.ACTIVE)
                 .owner(poLineOwner)
-                .vendorAccount(account.getCode())
+                .resourceMetadata(resourceMetadata)
+                .vendor(new PoLineVendor().value(vendor.getCode()))
+                .vendorAccount(vendor.getAccount().get(0).getCode())
                 .fundDistribution(fundList);
     }
 }

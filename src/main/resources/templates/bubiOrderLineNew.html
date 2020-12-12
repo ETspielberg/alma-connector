@@ -5,24 +5,18 @@
 
 <nav th:replace="general :: navbar"></nav>
 
-<div class="container">
+<div class="container-fluid">
     <div class="ui-g">
         <div class="ui-g-12 ui-md-12 ui-lg-12">
             <div class="tile">
                 <h3 style="height:1.2em;" th:text="#{bubi.order.line.new}"></h3>
                 <p th:text="#{bubi.order.line.new.short}"></p>
-                <form th:action="@{/alma/bubi/newBubiOrderLine}" th:object="${bubiOrderLine}" method="post">
+                <form th:action="@{/alma/bubi/newBubiOrderLine}" method="get">
                     <div class="ui-g">
-                        <div class="ui-g-4">
+                        <div class="ui-g-8">
                             <div class="form-group">
-                                <label for="shelfmark" th:text="#{shelfmark}"></label>
-                                <input id="shelfmark" type="text" th:field="*{shelfmark}">
-                            </div>
-                        </div>
-                        <div class="ui-g-4">
-                            <div class="form-group">
-                                <label for="collection" th:text="#{collection}"></label>
-                                <input id="collection" type="text" th:field="*{collection}">
+                                <label for="collection" th:text="#{collection}"></label>: <label for="shelfmark" th:text="#{shelfmark}"></label>
+                                <input id="collection" type="text" style="width: 45px" name="collection"> <input id="shelfmark" type="text"  style="width: 200px"  name="shelfmark">
                             </div>
                         </div>
                         <div class="ui-g-4">
@@ -32,7 +26,7 @@
                 </form>
                 <form th:action="@{/alma/bubi/newBubiOrderLineForBarcode}" method="post">
                 <div class="ui-g">
-                    <div class="ui-g-4">
+                    <div class="ui-g-8">
                         <div class="form-group">
                             <label for="barcode" th:text="#{barcode}"></label>
                             <input id="barcode" name="barcode" type="text" >

@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.unidue.ub.libintel.almaconnector.model.bubi.AlmaJournalData;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,46 +28,57 @@ public class PrimoService {
     @Value("${alma.api.acq.key}")
     private String primoApiKey;
 
-    private final static String PRIMO_BASE_URL = "https://api-eu.hosted.exlibrisgroup.com/primo/v1?q=%s&vid=%s";
+    private final static String PRIMO_BASE_URL = "https://api-eu.hosted.exlibrisgroup.com/primo/v1/search?q=%s&vid=%s&apikey=%s";
 
     private final Logger log = LoggerFactory.getLogger(PrimoService.class);
 
     public List<AlmaJournalData> getPrimoResponse(AlmaJournalData almaJournalData) {
-        String response = getResponseForJson(almaJournalData.shelfmark);
-        List<AlmaJournalData> foundJournals = new ArrayList<>();
-        if (!"".equals(response)) {
-            DocumentContext jsonContext = JsonPath.parse(response);
-            List<Object> documents = jsonContext.read("$['docs'][*]");
-            log.debug("found " + documents.size() + " documents");
-            int numberOfDocs = documents.size();
-            for (int i = 0; i < numberOfDocs; i++) {
-                String basePath = "$['docs'][" + i + "]";
-                try {
-                    String location = jsonContext.read(basePath + "['delivery']['bestlocation'][subLocationCode]");
-                    if (!almaJournalData.collection.equals(location))
-                        continue;
-                    String shelfmark = jsonContext.read(basePath + "['delivery']['bestlocation'][callNumber]");
-                    if (!shelfmark.contains(almaJournalData.shelfmark))
-                        continue;
-                    AlmaJournalData newJournalData = almaJournalData.clone()
-                            .withHoldingId(jsonContext.read(basePath + "['delivery']['bestlocation'][holdId]"))
-                            .withMmsId(jsonContext.read(basePath + "['delivery']['bestlocation'][ilsApiId]"));
+        try {
+            String response = getResponseForJson(almaJournalData.shelfmark);
+            List<AlmaJournalData> foundJournals = new ArrayList<>();
+            if (!"".equals(response)) {
+                log.debug(String.format("checking for %s: %s",almaJournalData.collection, almaJournalData.shelfmark));
+                DocumentContext jsonContext = JsonPath.parse(response);
+                List<Object> documents = jsonContext.read("$['docs'][*]");
+                log.debug("found " + documents.size() + " documents");
+                int numberOfDocs = documents.size();
+                for (int i = 0; i < numberOfDocs; i++) {
+                    String basePath = "$['docs'][" + i + "]";
+                    try {
+                        String location = jsonContext.read(basePath + "['delivery']['bestlocation']['subLocationCode']");
+                        log.debug("found location: " + location);
+                        if (!almaJournalData.collection.equals(location))
+                            continue;
+                        String shelfmark = jsonContext.read(basePath + "['delivery']['bestlocation']['callNumber']");
+                        log.debug("found shelfmark: " + shelfmark);
+                        if (!shelfmark.contains(almaJournalData.shelfmark))
+                            continue;
+                        log.info("found match");
+                        AlmaJournalData newJournalData = almaJournalData.clone()
+                                .withHoldingId(jsonContext.read(basePath + "['delivery']['bestlocation']['holdId']"))
+                                .withMmsId(jsonContext.read(basePath + "['delivery']['bestlocation']['ilsApiId']"));
 
-                    foundJournals.add(newJournalData);
-                } catch (PathNotFoundException pnfe) {
-                    log.debug("no url given");
+                        foundJournals.add(newJournalData);
+                    } catch (PathNotFoundException pnfe) {
+                        log.debug("no url given");
+                    }
                 }
             }
+            log.info("found " + foundJournals.size() + " matches in Primo");
+            return foundJournals;
+        } catch (Exception e) {
+            log.error("error occured", e);
+            return new ArrayList<>();
         }
-        return foundJournals;
     }
 
-    private String getResponseForJson(String shelfmark) {
+    private String getResponseForJson(String shelfmark) throws UnsupportedEncodingException {
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.getMessageConverters()
                 .add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
+        shelfmark = URLEncoder.encode(shelfmark, "utf-8");
         String query = "holding_call_number,contains," + shelfmark;
-        String resourceUrl = String.format(PRIMO_BASE_URL, query, primoApiKey);
+        String resourceUrl = String.format(PRIMO_BASE_URL, query, primoVid, primoApiKey);
         log.info("querying Primo API with " + resourceUrl);
         ResponseEntity<String> response = restTemplate.getForEntity(resourceUrl, String.class);
         if (response.getStatusCode().equals(HttpStatus.OK))

@@ -2,6 +2,8 @@ package org.unidue.ub.libintel.almaconnector.controller;
 
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,6 +15,7 @@ import org.unidue.ub.libintel.almaconnector.clients.acquisition.AlmaPoLinesApiCl
 import org.unidue.ub.libintel.almaconnector.clients.acquisition.AlmaVendorApiClient;
 import org.unidue.ub.libintel.almaconnector.model.bubi.AlmaJournalData;
 import org.unidue.ub.libintel.almaconnector.model.bubi.BubiOrderLine;
+import org.unidue.ub.libintel.almaconnector.model.bubi.CoreData;
 import org.unidue.ub.libintel.almaconnector.model.bubi.CoreDataImportRun;
 import org.unidue.ub.libintel.almaconnector.model.run.SapResponseRun;
 import org.unidue.ub.libintel.almaconnector.service.AlmaPoLineService;
@@ -37,6 +40,8 @@ public class BubiController {
     private final VendorService vendorService;
 
     private final AlmaPoLineService almaPoLineService;
+
+    private final Logger log = LoggerFactory.getLogger(BubiController.class);
 
     BubiController(BubiService bubiService,
                    AlmaPoLineService almaPoLineService,
@@ -69,6 +74,13 @@ public class BubiController {
     @PostMapping("/newBubiOrderLine")
     public String createNewBubiOrderLine(@ModelAttribute("bubiOrderLine") BubiOrderLine bubiOrderLine, Model model) {
         model.addAttribute("bubiOrderLine", this.bubiService.expandBubiOrderLine(bubiOrderLine));
+        return "bubiOrderLineEdit";
+    }
+
+    @GetMapping("/newBubiOrderLine")
+    public String createNewBubiOrderLine(Model model, String collection, String shelfmark) {
+        model.addAttribute("bubiOrderLine", this.bubiService.expandBubiOrderLine(collection, shelfmark));
+        log.info("rendering new bubi order");
         return "bubiOrderLineOverview";
     }
 
@@ -76,11 +88,11 @@ public class BubiController {
     public String saveBubiOrderLine(@ModelAttribute("bubiOrderLine") BubiOrderLine bubiOrderLine, Model model) {
         bubiOrderLine = this.bubiService.saveBubiOrderLine(bubiOrderLine);
         Vendor vendor = this.vendorService.getVendorAccount(bubiOrderLine.getVendorId());
-        PoLine poLine = buildPoLine(bubiOrderLine, vendor.getAccount().get(0));
+        PoLine poLine = buildPoLine(bubiOrderLine, vendor);
         poLine = almaPoLineService.savePoLine(poLine);
-        model.addAttribute("poLine", poLine);
+        bubiOrderLine.setAlmaPoLineId(poLine.getPoNumber());
         model.addAttribute("bubiOrderLine", bubiOrderLine);
-        return "savedBubiOrderLine";
+        return "bubiOrderLineEditSuccess";
     }
 
     @GetMapping("/getJournalData")
@@ -103,5 +115,28 @@ public class BubiController {
         CoreDataImportRun coreDataImportRun = new CoreDataImportRun();
         coreDataImportRun = this.bubiService.readCoreDataFromExcelSheet(coreDataImportRun, workbook);
         return ResponseEntity.ok(coreDataImportRun);
+    }
+
+    /**
+     * receives the bubi core data  as xlsx file and saves them to the database
+     * @param model the model object
+     * @return returns a status of 200 if the import was successful
+     */
+    @GetMapping("/coredataOverview")
+    public String showCoreData(Model model) {
+        model.addAttribute("coredataList", this.bubiService.getAllCoreData());
+        return "bubiCoredataOverview";
+    }
+
+    @GetMapping("/coredataEdit")
+    public String editCoreData(Model model, String collection, String shelfmark) {
+        model.addAttribute("coredata", this.bubiService.getCoreData(collection, shelfmark));
+        return "bubiCoredataEdit";
+    }
+
+    @PostMapping("/coredataEdit")
+    public String saveCoreData(@ModelAttribute("coredata") CoreData coredata, Model model) {
+        model.addAttribute("coredata", this.bubiService.saveCoreData(coredata));
+        return "bubiCoredataEditSuccess";
     }
 }

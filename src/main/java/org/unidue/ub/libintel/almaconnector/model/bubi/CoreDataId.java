@@ -2,21 +2,18 @@ package org.unidue.ub.libintel.almaconnector.model.bubi;
 
 import java.io.Serializable;
 
-public class BubiOrderLineId implements Serializable{
+public class CoreDataId implements Serializable {
 
     private String collection;
 
     private String shelfmark;
 
-    private long counter=1;
-
-    public BubiOrderLineId() {
+    public CoreDataId() {
     }
 
-    public BubiOrderLineId(String collection, String shelfmark, long counter) {
+    public CoreDataId(String collection, String shelfmark) {
         this.collection = collection;
         this.shelfmark = shelfmark;
-        this.counter = counter;
     }
 
     public String getCollection() {
@@ -33,13 +30,5 @@ public class BubiOrderLineId implements Serializable{
 
     public void setShelfmark(String shelfmark) {
         this.shelfmark = shelfmark;
-    }
-
-    public long getCounter() {
-        return counter;
-    }
-
-    public void setCounter(long counter) {
-        this.counter = counter;
     }
 }

@@ -6,15 +6,12 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.unidue.ub.alma.shared.acq.PoLine;
 import org.unidue.ub.libintel.almaconnector.model.bubi.*;
 import org.unidue.ub.libintel.almaconnector.repository.BubiOrderLineRepository;
 import org.unidue.ub.libintel.almaconnector.repository.BubiOrderRepository;
 import org.unidue.ub.libintel.almaconnector.repository.CoreDataRepository;
 
 import java.util.List;
-
-import static org.unidue.ub.libintel.almaconnector.Utils.buildPoLine;
 
 @Service
 public class BubiService {
@@ -26,15 +23,19 @@ public class BubiService {
 
     private final CoreDataRepository coreDataRepository;
 
+    private final PrimoService primoService;
+
     private final Logger log = LoggerFactory.getLogger(BubiService.class);
 
     public BubiService(
             BubiOrderRepository bubiOrderRepository,
             BubiOrderLineRepository bubiOrderLineRepository,
-            CoreDataRepository coreDataRepository) {
+            CoreDataRepository coreDataRepository,
+            PrimoService primoService) {
         this.bubiOrderLineRepository = bubiOrderLineRepository;
         this.bubiOrderRepository = bubiOrderRepository;
         this.coreDataRepository = coreDataRepository;
+        this.primoService = primoService;
     }
 
     public BubiOrder getBubiOrders(String orderNumber) {
@@ -45,8 +46,8 @@ public class BubiService {
         return this.coreDataRepository.findAll();
     }
 
-    public CoreData getCoreData(String id) {
-        return this.coreDataRepository.getOne(id);
+    public CoreData getCoreData(String collection, String shelfmark) {
+        return this.coreDataRepository.findAllByCollectionAndShelfmark(collection, shelfmark);
     }
 
     public CoreData saveCoreData(CoreData coreData) {
@@ -54,16 +55,29 @@ public class BubiService {
     }
 
     public BubiOrderLine expandBubiOrderLine(BubiOrderLine bubiOrderLine) {
-        if (bubiOrderLine.getShelfmark() != null ||bubiOrderLine.getCollection() != null) {
-            return this.bubiOrderLineRepository.getOne(new BubiOrderLineId(bubiOrderLine.getShelfmark(), bubiOrderLine.getCollection(), bubiOrderLine.getCounter()));
-        } else {
+        if (bubiOrderLine.getShelfmark() != null || bubiOrderLine.getCollection() != null) {
+            long counter = this.bubiOrderLineRepository.countAllByShelfmarkAndCollection(bubiOrderLine.getShelfmark(), bubiOrderLine.getCollection());
+            bubiOrderLine.setCounter(counter);
             log.info(String.format("retrieving core data for collection %s and shelfmark %s", bubiOrderLine.getCollection(), bubiOrderLine.getShelfmark()));
             CoreData coredata = this.coreDataRepository.findAllByCollectionAndShelfmark(bubiOrderLine.getCollection(),
                     bubiOrderLine.getShelfmark());
-            log.info(coredata.getCoreDataId());
-            bubiOrderLine.addCoreData(coredata);
+            if (coredata != null)
+                bubiOrderLine.addCoreData(coredata);
+        }
+        return bubiOrderLine;
+    }
+
+    public BubiOrderLine expandBubiOrderLine(String collection, String shelfmark) {
+        if (shelfmark != null || collection != null) {
+            long counter = this.bubiOrderLineRepository.countAllByShelfmarkAndCollection(shelfmark, collection);
+            BubiOrderLine bubiOrderLine = new BubiOrderLine(collection, shelfmark, counter);
+            log.info(String.format("retrieving core data for collection %s and shelfmark %s", bubiOrderLine.getCollection(), bubiOrderLine.getShelfmark()));
+            CoreData coredata = this.coreDataRepository.findAllByCollectionAndShelfmark(collection,shelfmark);
+            if (coredata != null)
+                bubiOrderLine.addCoreData(coredata);
             return bubiOrderLine;
         }
+        return null;
     }
 
     public BubiOrderLine saveBubiOrderLine(BubiOrderLine bubiOrderLine) {
@@ -76,27 +90,18 @@ public class BubiService {
         for (int i = 1; i < worksheet.getPhysicalNumberOfRows() - 1; i++) {
             XSSFRow row = worksheet.getRow(i);
             CoreData coreData = new CoreData();
-            if (row.getCell(1) == null || row.getCell(0)  == null)
+            if (row.getCell(1) == null || row.getCell(0) == null)
                 continue;
             String collection = row.getCell(0).getStringCellValue();
             String shelfmark = row.getCell(1).getStringCellValue();
+            if (!shelfmark.contains(" Z "))
+                shelfmark = shelfmark.replace("Z", " Z ");
             coreData.setCollection(collection);
             coreData.setShelfmark(shelfmark);
-            coreData.setCoreDataId(collection + "/" + shelfmark);
             try {
                 coreData.setTitle(row.getCell(2).getStringCellValue());
             } catch (Exception e) {
                 coreData.setTitle("");
-            }
-            try {
-                coreData.setPrecessor(row.getCell(3).getStringCellValue());
-            } catch (Exception e) {
-                coreData.setPrecessor("");
-            }
-            try {
-                coreData.setSuccessor(row.getCell(4).getStringCellValue());
-            } catch (Exception e) {
-                coreData.setSuccessor("");
             }
             try {
                 coreData.setMinting(row.getCell(5).getStringCellValue());
@@ -149,9 +154,9 @@ public class BubiService {
                 coreData.setComment("");
             }
             try {
-                coreData.setFf("j".equals(row.getCell(43).getStringCellValue()));
+                coreData.setIsFf("j".equals(row.getCell(43).getStringCellValue()));
             } catch (Exception e) {
-                coreData.setFf(false);
+                coreData.setIsFf(false);
             }
             try {
                 coreData.setBindingsFollow(row.getCell(44).getStringCellValue());
@@ -164,6 +169,21 @@ public class BubiService {
                 coreData.setAlternativeBubiData("");
             }
             coreDataImportRun.addCoreData(coreData);
+            AlmaJournalData almaJournalData = new AlmaJournalData(coreData.getCollection(), coreData.getShelfmark());
+            List<AlmaJournalData> foundData = this.primoService.getPrimoResponse(almaJournalData);
+            if (foundData.size() == 1) {
+                coreData.setAlmaMmsId(foundData.get(0).mmsId);
+                coreData.setAlmaHoldingId(foundData.get(0).holdingId);
+            } else if (foundData.size() > 1) {
+                for (AlmaJournalData foundDatum: foundData) {
+                    if (coreData.getTitle().equals(foundDatum.title)) {
+                        coreData.setAlmaMmsId(foundData.get(0).mmsId);
+                        coreData.setAlmaHoldingId(foundData.get(0).holdingId);
+                    }
+
+                }
+            }
+
             this.coreDataRepository.save(coreData);
         }
         return coreDataImportRun;
