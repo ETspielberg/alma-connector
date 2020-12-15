@@ -27,20 +27,20 @@ public class ShibbolethController {
     @GetMapping("edit")
     public String editPlatform(String platform, Model model) {
         model.addAttribute("platform", shibbolethDataService.getDataForPlatform(platform));
-        return "shibbolethEdit";
+        return "shibboleth/edit";
     }
 
 
     @GetMapping("/start")
     public String getStartPage(Model model) {
         model.addAttribute("shibbolethData", this.shibbolethDataService.getAllShibbolethData());
-        return "shibbolethStart";
+        return "shibboleth/start";
     }
 
     @GetMapping("/confirmDelete")
     public String confirmDeletion(String platform, Model model) {
         model.addAttribute("platformToDelete", platform);
-        return "shibbolethDelete";
+        return "shibboleth/delete";
     }
 
     @PostMapping("/delete")

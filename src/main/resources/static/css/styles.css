@@ -16,11 +16,14 @@ body {
   padding: 15px;
   vertical-align: middle;
   position: relative;
+  text-align: left;
 }
 
+/*
 .tile-centered {
   text-align:center;
 }
+ */
 
 .bg-dark {
   background-color: black !important;

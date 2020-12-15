@@ -41,7 +41,7 @@
                         <td th:text="*{datum.almaHoldingId}"></td>
                         <td th:text="*{datum.bubiData}"></td>
                         <td>
-                            <a th:href="@{/alma/bubi/coredataEdit(collection=*{datum.collection}, shelfmark=*{datum.shelfmark})}"><button class="btn btn-warning" th:text="#{edit}"></button></a>
+                            <a th:href="@{/alma/bubi/coredata/edit(collection=*{datum.collection}, shelfmark=*{datum.shelfmark})}"><button class="btn btn-warning" th:text="#{edit}"></button></a>
                         </td>
                     </tr>
                     </tbody>
@@ -53,7 +53,7 @@
     <div class="ui-g">
         <div class="ui-g-12 ui-md-12 ui-lg-12">
             <div class="tile">
-                <a th:href="@{/bubi/start}">
+                <a th:href="@{/alma/bubi/start}">
                     <button class="btn btn-primary">Zurück</button>
                 </a>
             </div>

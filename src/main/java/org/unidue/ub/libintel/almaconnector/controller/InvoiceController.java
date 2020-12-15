@@ -75,7 +75,7 @@ public class InvoiceController {
     public String getSapPage(Model model) {
         AlmaExportRun almaExportRun = this.almaExportRunService.getAlmaExportRun(new Date(), "E0001");
         model.addAttribute("almaExportRun", almaExportRun);
-        return "sap";
+        return "sap/start";
     }
 
     /**
@@ -107,7 +107,7 @@ public class InvoiceController {
         log.info(almaExportRunNew.log());
         // almaExportRunNew = this.fileWriterService.writeAlmaExport(almaExportRunNew);
         model.addAttribute("almaExportRun", almaExportRunNew);
-        return "finishedRun";
+        return "sap/finishedRun";
     }
 
     /**
@@ -141,7 +141,7 @@ public class InvoiceController {
         log.info(String.format("showing files for %s : %s; %d selected ", dateformat.format(almaExportRun.getDesiredDate()), almaExportRun.isDateSpecific(), almaExportRun.getNumberHomeDataSelected()));
         almaExportRun = this.fileWriterService.writeAlmaExport(almaExportRun);
         model.addAttribute("almaExportRun", almaExportRun);
-        return "showImportFiles";
+        return "sap/showImportFiles";
     }
 
     /**
