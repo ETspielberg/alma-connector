@@ -9,23 +9,33 @@
 
 <div class="container">
     <div class="ui-g">
-        <div class="ui-g-12 ui-md-6 ui-lg-4">
+        <div class="ui-g-12 ui-md-6 ui-lg-6">
             <div class="tile">
                 <h3 style="height: 1.2em;" th:text="#{bubi.outbox}"></h3>
                 <p style="height: 3em;" th:text="#{bubi.outbox.short}"></p>
-                <div style="padding:10px; text-align: left;">
-                    <a th:href="@{/alma/bubi/bubiOrderLineNew}">
+                <div style="padding:10px;">
+                    <a th:href="@{/alma/bubi/orderline/new}">
+                        <button type="button" class="btn btn-primary" th:text="#{bubi.order.line.new}"></button>
+                    </a>
+                </div>
+                <div style="padding:10px;">
+                    <a th:href="@{/alma/bubi/orderline/overview}">
                         <button type="button" class="btn btn-primary" th:text="#{bubi.new.order}"></button>
                     </a>
                 </div>
-                <div style="padding:10px; text-align: left;">
+                <div style="padding:10px;">
+                    <a th:href="@{/alma/bubi/orderline/overview(status=NEW)}">
+                        <button type="button" class="btn btn-primary" th:text="#{bubi.new.order.open}"></button>
+                    </a>
+                </div>
+                <div style="padding:10px;">
                     <a th:href="@{/alma/bubi/printBubiOrder}">
                         <button type="button" class="btn btn-primary" th:text="#{bubi.print.order}"></button>
                     </a>
                 </div>
             </div>
         </div>
-        <div class="ui-g-12 ui-md-6 ui-lg-4">
+        <div class="ui-g-12 ui-md-6 ui-lg-6">
             <div class="tile">
                 <h3 style="height: 1.2em;" th:text="#{bubi.inbox}"></h3>
                 <p style="height: 3em;" th:text="#{bubi.inbox.short}"></p>
@@ -36,7 +46,53 @@
                 </div>
             </div>
         </div>
-        <div class="ui-g-12 ui-md-6 ui-lg-4">
+
+        <div class="ui-g-12 ui-md-6 ui-lg-6">
+            <div class="tile">
+                <h3 style="height: 1.2em;" th:text="#{bubi.coredata}"></h3>
+                <p style="height: 3em;" th:text="#{bubi.coredata.short}"></p>
+                <div style="padding:10px; text-align: left;">
+                    <a th:href="@{/alma/bubi/coredata}">
+                        <button type="button" class="btn btn-primary" th:text="#{bubi.coredata.overview}"></button>
+                    </a>
+                </div>
+                <div id="dropzone">
+                    <form th:action="@{alma/bubi/coredata/import}" class="dropzone needsclick" method="post"
+                          enctype="multipart/form-data" id="file-upload">
+
+                        <div class="dz-message needsclick">
+                            <button type="button" class="dz-button" th:text="#{upload.excel.choose}">Drop files here or
+                                click to upload.
+                            </button>
+                            <br/>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-6">
+            <div class="tile">
+                <h3 style="height: 1.2em;" th:text="#{bubi.data}"></h3>
+                <p style="height: 3em;" th:text="#{bubi.data.edit.short}"></p>
+                <div style="padding:10px;">
+                    <a th:href="@{/alma/bubi/bubiData}">
+                        <button type="button" class="btn btn-primary" th:text="#{bubi.data.overview}"></button>
+                    </a>
+                </div>
+                <div style="padding:10px;">
+                    <a th:href="@{/alma/bubi/bubiData}">
+                        <button type="button" class="btn btn-primary" th:text="#{bubi.data.overview}"></button>
+                    </a>
+                </div>
+                <div style="padding:10px; text-align: left;">
+                    <a th:href="@{/alma/bubi/newBubiData}">
+                        <button type="button" class="btn btn-primary" th:text="#{bubi.data.new}"></button>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-6">
             <div class="tile">
                 <h3 style="height: 1.2em;" th:text="#{bubi.search}"></h3>
                 <p style="height: 3em;" th:text="#{bubi.search.short}"></p>
@@ -57,31 +113,7 @@
                 </div>
             </div>
         </div>
-        <div class="ui-g-12 ui-md-6 ui-lg-4">
-            <div class="tile">
-                <h3 style="height: 1.2em;" th:text="#{bubi.coredata}"></h3>
-                <p style="height: 3em;" th:text="#{bubi.coredata.short}"></p>
-                <div style="padding:10px; text-align: left;">
-                    <a th:href="@{/alma/bubi/coredataOverview}">
-                        <button type="button" class="btn btn-primary" th:text="#{bubi.coredata.overview}"></button>
-                    </a>
-                </div>
-                <div id="dropzone">
-                    <form th:action="@{alma/bubi/coredataImport}" class="dropzone needsclick" method="post"
-                          enctype="multipart/form-data" id="file-upload">
-
-                        <div class="dz-message needsclick">
-                            <button type="button" class="dz-button" th:text="#{upload.excel.choose}">Drop files here or
-                                click to upload.
-                            </button>
-                            <br/>
-                        </div>
-
-                    </form>
-                </div>
-            </div>
-        </div>
-        <div class="ui-g-12 ui-md-6 ui-lg-4">
+        <div class="ui-g-12 ui-md-6 ui-lg-6">
             <div class="tile">
                 <h3 style="height: 1.2em;" th:text="#{bubi.statistics}"></h3>
                 <p style="height: 3em;" th:text="#{bubi.statistics.short}"></p>

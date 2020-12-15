@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="general :: generalHead"/>
+<body>
+
+<nav th:replace="general :: navbar"></nav>
+
+<div class="container">
+    <div class="ui-g">
+        <div class="ui-g-12 ui-md-12 ui-lg-12">
+            <div class="tile" style="text-align: left;">
+                <h2 style="height:1.2em;" th:text="#{bubi.order.line.new}"></h2>
+                <p th:text="#{bubi.order.line.new.short}"></p>
+                <h3 th:text="#{bubi.order.line.new.from.collection}"></h3>
+                <form th:action="@{/alma/bubi/orderline/new}" method="get">
+                    <div class="ui-g">
+                        <div class="ui-g-2">
+                            <label for="collection" th:text="#{collection}"></label>: <label for="shelfmark"
+                                                                                             th:text="#{shelfmark}"></label>
+                        </div>
+                        <div class="ui-g-6">
+                            <input id="collection" type="text" style="width: 45px" name="collection"> <input
+                                id="shelfmark" type="text" style="width: 200px" name="shelfmark">
+                        </div>
+                        <div class="ui-g-4">
+                            <input type="submit" class="btn btn-primary" th:value="#{bubi.order.line.new.build}"/>
+                        </div>
+                    </div>
+                </form>
+                <h3 th:text="#{bubi.order.line.new.from.barcode}"></h3>
+                <form th:action="@{/alma/bubi/orderline/fromBarcode}" method="get">
+                    <div class="ui-g">
+                        <div class="ui-g-2">
+                            <label for="barcode" th:text="#{barcode}"></label>
+                        </div>
+                        <div class="ui-g-6">
+                            <input id="barcode" name="barcode" type="text">
+                        </div>
+                        <div class="ui-g-4">
+                            <input type="submit" class="btn btn-primary" th:value="#{bubi.order.line.new.build}"/>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="ui-g">
+        <div class="ui-g-12 ui-md-12 ui-lg-12">
+            <div class="tile">
+                <a th:href="@{/start}">
+                    <button class="btn btn-primary">Zurück</button>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

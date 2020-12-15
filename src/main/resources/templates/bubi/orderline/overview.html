@@ -8,7 +8,7 @@
 <div th:replace="general :: jumbotron"/>
 
 <div class="container">
-    <form th:action="@{/alma/bubi/saveBubiOrderLine}" th:object="${bubiOrderLine}" method="post">
+    <form th:action="@{/alma/bubi/orderline/save}" th:object="${orderline}" method="post">
         <div class="ui-g">
             <div class="ui-g-12 ui-md-12 ui-lg-12">
                 <div class="tile">
@@ -21,6 +21,8 @@
             <div class="ui-g-12">
                 <div class="tile">
                     <h2 style="height:1.2em;" th:text="#{bubi.order.line.overview.core.data}"></h2>
+                    <p th:text="*{title}"></p>
+                    <input hidden th:field="*{title}">
                     <div class="ui-g">
                         <div class="ui-g-4">
                             <div class="ui-g">

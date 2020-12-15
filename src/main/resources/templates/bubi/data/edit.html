@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+</body>
+</html><!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="general :: generalHead"/>
+<body>
+
+<nav th:replace="general :: navbar"></nav>
+
+<div class="jumbotron">
+    <div class="container">
+        <h1 th:text="#{bubi.data.edit}">Buchbinderdaten bearbeiten</h1>
+    </div>
+</div>
+
+<div class="container">
+    <div class="ui-g">
+        <div class="ui-g-12 ui-md-12 ui-lg-12">
+            <div class="tile" style="text-align: left;">
+                <form th:action="@{/alma/bubi/bubiData}" th:object="${bubiData}" method="post">
+                    <div class="ui-g" >
+                        <div class="ui-g-2">
+                            <label for="vendorId" th:text="#{bubi.vendor.id}"></label>
+                        </div>
+                        <div class="ui-g-4">
+                            <input id="vendorId" type="text" th:field="*{vendorId}" required>
+                        </div>
+                        <div class="ui-g-2">
+                            <label for="vendorAccount" th:text="#{bubi.vendor.account}"></label>
+                        </div>
+                        <div class="ui-g-4">
+                            <input id="vendorAccount" type="text" th:field="*{vendorAccount}" required>
+                        </div>
+                    </div>
+
+                    <div class="ui-g">
+                        <div class="ui-g-2">
+                            <label for="name" th:text="#{bubi.name}"></label>
+                        </div>
+                        <div class="ui-g-4">
+                            <input id="name" type="text" th:field="*{name}">
+                        </div>
+                        <div class="ui-g-2">
+                            <label for="shortName" th:text="#{bubi.name.short}"></label>
+                        </div>
+                        <div class="ui-g-4">
+                            <input id="shortName" type="text" th:field="*{shortName}">
+                        </div>
+                    </div>
+                    <div class="ui-g">
+                        <div class="ui-g-2">
+                            <label for="standardPriceMonograph"
+                                   th:text="#{bubi.standard.price.monograph}"></label>
+                        </div>
+                        <div class="ui-g-4">
+                            <input id="standardPriceMonograph" type="number"
+                                   th:field="*{standardPriceMonograph}">
+                        </div>
+                        <div class="ui-g-2">
+                            <label for="standardPriceJournal"
+                                   th:text="#{bubi.standard.price.journal}"></label>
+                        </div>
+                        <div class="ui-g-4">
+                            <input id="standardPriceJournal" type="number"
+                                   th:field="*{standardPriceJournal}">
+                        </div>
+                    </div>
+                    <div class="ui-g">
+                        <div class="ui-g-1">
+                            <label for="active" th:text="#{active}"></label>
+                        </div>
+                        <div class="ui-g-1">
+                            <input id="active" type="checkbox" name="active" th:field="*{active}">
+                        </div>
+                        <div class="ui-g-2">
+                            <label for="campus" th:text="#{campus}"></label>
+                        </div>
+                        <div class="ui-g-4">
+                            <select id="campus" type="text" th:field="*{campus}" required>
+                                <option value="D0001">Duisburg</option>
+                                <option value="E0001">Essen</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="ui-g">
+                        <div class="ui-g-12">
+                            <input type="submit" class="btn btn-primary" th:value="#{save}"/>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="ui-g">
+        <div class="ui-g-12 ui-md-12 ui-lg-12">
+            <div class="tile">
+                <a th:href="@{/alma/bubi/bubiData}">
+                    <button class="btn btn-primary">Zurück</button>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

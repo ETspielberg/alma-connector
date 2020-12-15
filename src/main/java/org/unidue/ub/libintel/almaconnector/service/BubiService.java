@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.libintel.almaconnector.model.bubi.*;
+import org.unidue.ub.libintel.almaconnector.repository.BubiDataRepository;
 import org.unidue.ub.libintel.almaconnector.repository.BubiOrderLineRepository;
 import org.unidue.ub.libintel.almaconnector.repository.BubiOrderRepository;
 import org.unidue.ub.libintel.almaconnector.repository.CoreDataRepository;
@@ -25,21 +26,29 @@ public class BubiService {
 
     private final PrimoService primoService;
 
+    private final BubiDataRepository bubiDataRepository;
+
     private final Logger log = LoggerFactory.getLogger(BubiService.class);
 
     public BubiService(
             BubiOrderRepository bubiOrderRepository,
             BubiOrderLineRepository bubiOrderLineRepository,
             CoreDataRepository coreDataRepository,
+            BubiDataRepository bubiDataRepository,
             PrimoService primoService) {
         this.bubiOrderLineRepository = bubiOrderLineRepository;
         this.bubiOrderRepository = bubiOrderRepository;
         this.coreDataRepository = coreDataRepository;
+        this.bubiDataRepository = bubiDataRepository;
         this.primoService = primoService;
     }
 
     public BubiOrder getBubiOrders(String orderNumber) {
         return this.bubiOrderRepository.getOne(orderNumber);
+    }
+
+    public List<BubiOrderLine> getAllBubiOrderLines() {
+        return this.bubiOrderLineRepository.findAll();
     }
 
     public List<CoreData> getAllCoreData() {
@@ -174,18 +183,40 @@ public class BubiService {
             if (foundData.size() == 1) {
                 coreData.setAlmaMmsId(foundData.get(0).mmsId);
                 coreData.setAlmaHoldingId(foundData.get(0).holdingId);
+                coreData.setTitle(foundData.get(0).title);
             } else if (foundData.size() > 1) {
                 for (AlmaJournalData foundDatum: foundData) {
                     if (coreData.getTitle().equals(foundDatum.title)) {
                         coreData.setAlmaMmsId(foundData.get(0).mmsId);
                         coreData.setAlmaHoldingId(foundData.get(0).holdingId);
+                        coreData.setTitle(foundData.get(0).title);
                     }
-
                 }
             }
-
             this.coreDataRepository.save(coreData);
         }
         return coreDataImportRun;
+    }
+
+    public List<BubiData> listAllBubiData() {
+        return this.bubiDataRepository.findAll();
+    }
+
+    public BubiData getbubiData(String vendorId, String vendorAccount) {
+        return this.bubiDataRepository.getOne(new BubiDataId(vendorId, vendorAccount));
+    }
+
+    public BubiData getBubiDataForString(String accountInfo) {
+        String vendorId = accountInfo.split(" - ")[0];
+        String vendorAccount = accountInfo.split(" - ")[1];
+        return this.getbubiData(vendorId, vendorAccount);
+    }
+
+    public void deleteBubiData(BubiData bubiData) {
+        this.bubiDataRepository.delete(bubiData);
+    }
+
+    public BubiData saveBubiData(BubiData bubiData) {
+        return this.bubiDataRepository.save(bubiData);
     }
 }

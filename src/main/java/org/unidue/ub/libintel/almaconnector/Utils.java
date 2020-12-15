@@ -8,6 +8,7 @@ import org.unidue.ub.alma.shared.acq.*;
 import org.unidue.ub.libintel.almaconnector.model.SapAccountData;
 import org.unidue.ub.libintel.almaconnector.model.SapData;
 import org.unidue.ub.libintel.almaconnector.model.SapResponse;
+import org.unidue.ub.libintel.almaconnector.model.bubi.BubiData;
 import org.unidue.ub.libintel.almaconnector.model.bubi.BubiOrderLine;
 import org.unidue.ub.libintel.almaconnector.model.run.SapResponseRun;
 
@@ -317,7 +318,7 @@ public class Utils {
         return container;
     }
 
-    public static PoLine buildPoLine(BubiOrderLine bubiOrderLine, Vendor vendor) {
+    public static PoLine buildPoLine(BubiOrderLine bubiOrderLine, BubiData bubiData) {
         PoLineOwner poLineOwner;
         if (bubiOrderLine.getCollection().startsWith("D"))
             poLineOwner = new PoLineOwner().value("D0001");
@@ -336,6 +337,9 @@ public class Utils {
         ResourceMetadata resourceMetadata = new ResourceMetadata()
                 .mmsId(new ResourceMetadataMmsId().value(bubiOrderLine.getAlmaMmsId()))
                 .title(bubiOrderLine.getTitle());
+        log.info(bubiOrderLine.getAlmaMmsId());
+        log.info(bubiOrderLine.getTitle());
+        log.info(resourceMetadata.toString());
         return new PoLine()
                 .vendorReferenceNumber(bubiOrderLine.getBubiOrderLineid())
                 .sourceType(new PoLineSourceType().value("MANUALENTRY"))
@@ -345,8 +349,8 @@ public class Utils {
                 .baseStatus(PoLine.BaseStatusEnum.ACTIVE)
                 .owner(poLineOwner)
                 .resourceMetadata(resourceMetadata)
-                .vendor(new PoLineVendor().value(vendor.getCode()))
-                .vendorAccount(vendor.getAccount().get(0).getCode())
+                .vendor(new PoLineVendor().value(bubiData.getVendorId()))
+                .vendorAccount(bubiData.getVendorAccount())
                 .fundDistribution(fundList);
     }
 }

@@ -45,6 +45,7 @@ public class PrimoService {
                 for (int i = 0; i < numberOfDocs; i++) {
                     String basePath = "$['docs'][" + i + "]";
                     try {
+                        String title = jsonContext.read(basePath + "['pnx']['display']['title'][0]");
                         String location = jsonContext.read(basePath + "['delivery']['bestlocation']['subLocationCode']");
                         log.debug("found location: " + location);
                         if (!almaJournalData.collection.equals(location))
@@ -56,8 +57,8 @@ public class PrimoService {
                         log.info("found match");
                         AlmaJournalData newJournalData = almaJournalData.clone()
                                 .withHoldingId(jsonContext.read(basePath + "['delivery']['bestlocation']['holdId']"))
-                                .withMmsId(jsonContext.read(basePath + "['delivery']['bestlocation']['ilsApiId']"));
-
+                                .withMmsId(jsonContext.read(basePath + "['delivery']['bestlocation']['ilsApiId']"))
+                                .withTitle(title);
                         foundJournals.add(newJournalData);
                     } catch (PathNotFoundException pnfe) {
                         log.debug("no url given");
