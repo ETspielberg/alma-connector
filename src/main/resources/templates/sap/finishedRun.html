@@ -9,7 +9,7 @@
     <form th:action="@{/alma/showImportFiles}" method="post" th:object="${almaExportRun}">
         <div class="ui-g">
             <div class="ui-g-12 ui-md-12 ui-lg-10 ui-lg-offset-1">
-                <div class="tile">
+                <div class="tile centered">
                     <h3 style="height:1.2em;" th:text="#{sap.run.result}"></h3>
                     <p>Lauf vom <span th:text="${#dates.format(almaExportRun.lastRun, 'dd.MM.yyyy')}"></span>
                         für den Campus <span th:text="${almaExportRun.invoiceOwner}"></span> vom
@@ -45,7 +45,7 @@
         </div>
         <div class="ui-g">
             <div class="ui-g-12 ui-md-12 ui-lg-12">
-                <div class="tile">
+                <div class="tile centered">
                     <h2 th:text="#{sap.title.home}"></h2>
                     <table class="table table-striped text-left">
                         <tr>
@@ -103,7 +103,7 @@
                 </div>
             </div>
             <div class="ui-g-12 ui-md-12 ui-lg-12">
-                <div class="tile">
+                <div class="tile centered">
                     <h2 th:text="#{sap.title.foreign}"></h2>
                     <table class="table table-striped text-left">
                         <tr>
@@ -161,7 +161,7 @@
             </div>
         </div>
         <div class="ui-g-12 ui-md-12 ui-lg-12">
-            <div style="margin: auto;" class="tile">
+            <div style="margin: auto;" class="tile centered">
                 <input type="submit" class="btn btn-primary" th:value="#{invoices.collect.open}"/>
             </div>
         </div>

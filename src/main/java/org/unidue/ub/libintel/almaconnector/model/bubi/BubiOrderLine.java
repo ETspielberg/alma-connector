@@ -3,6 +3,7 @@ package org.unidue.ub.libintel.almaconnector.model.bubi;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.checkerframework.common.aliasing.qual.Unique;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.NumberFormat;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -35,12 +36,16 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
     @Column(name = "alma_vendor_id")
     private String vendorId;
 
+    @Column(name= "alma_vendor_account")
+    private String vendorAccount;
+
     @Column(name = "alma_poline_id")
     private String almaPoLineId;
 
     @Column(name = "fund")
     private String fund;
 
+    @NumberFormat(style = NumberFormat.Style.NUMBER, pattern = "#,##")
     @Column(name = "price")
     private Double price;
 
@@ -111,12 +116,17 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date lastChange;
 
+    @Column(name="status")
+    private BubiStatus status;
+
     public BubiOrderLine() {
+        this.status = BubiStatus.NEW;
         this.lastChange = new Date();
         this.created = new Date();
     }
 
     public BubiOrderLine(String collection, String shelfmark, long counter) {
+        this.status = BubiStatus.NEW;
         this.shelfmark = shelfmark;
         this.collection = collection;
         this.counter = counter;
@@ -141,9 +151,12 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         this.shelfmark = coredata.getShelfmark();
         this.year = coredata.getYear();
         this.volume = coredata.getVolume();
-        this.title = coredata.getTitle();
+        if (coredata.getTitle() != null)
+            this.title = coredata.getTitle();
+        else
+            this.title = coredata.getMinting();
         this.partTitle = coredata.getPartTitle();
-        this.vendorId = coredata.getBubiData();
+        this.vendorId = coredata.getVendorId();
         this.almaMmsId = coredata.getAlmaMmsId();
         this.almaHoldingId = coredata.getAlmaHoldingId();
     }
@@ -178,6 +191,14 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
 
     public void setAlmaPoLineId(String almaPoLineId) {
         this.almaPoLineId = almaPoLineId;
+    }
+
+    public BubiStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(BubiStatus status) {
+        this.status = status;
     }
 
     public String getVendorId() {
@@ -388,6 +409,13 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         this.lastChange = lastChange;
     }
 
+    public String getVendorAccount() {
+        return vendorAccount;
+    }
+
+    public void setVendorAccount(String vendorAccount) {
+        this.vendorAccount = vendorAccount;
+    }
 
     @Override
     public int compareTo(BubiOrderLine other) {

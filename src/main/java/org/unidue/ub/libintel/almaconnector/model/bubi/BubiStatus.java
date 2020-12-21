@@ -4,5 +4,6 @@ public enum BubiStatus {
     SENT,
     COMPLAINT,
     DONE,
-    WAITING
+    WAITING,
+    NEW
 }

@@ -318,7 +318,7 @@ public class Utils {
         return container;
     }
 
-    public static PoLine buildPoLine(BubiOrderLine bubiOrderLine, BubiData bubiData) {
+    public static PoLine buildPoLine(BubiOrderLine bubiOrderLine) {
         PoLineOwner poLineOwner;
         if (bubiOrderLine.getCollection().startsWith("D"))
             poLineOwner = new PoLineOwner().value("D0001");
@@ -349,8 +349,8 @@ public class Utils {
                 .baseStatus(PoLine.BaseStatusEnum.ACTIVE)
                 .owner(poLineOwner)
                 .resourceMetadata(resourceMetadata)
-                .vendor(new PoLineVendor().value(bubiData.getVendorId()))
-                .vendorAccount(bubiData.getVendorAccount())
+                .vendor(new PoLineVendor().value(bubiOrderLine.getVendorId()))
+                .vendorAccount(bubiOrderLine.getVendorAccount())
                 .fundDistribution(fundList);
     }
 }

@@ -10,30 +10,33 @@
 <div class="container">
     <div class="ui-g">
         <div class="ui-g-12 ui-md-6 ui-lg-4">
-            <div class="tile">
-                <h3 style="height: 1.2em;" th:text="#{sap}"></h3>
-                <p  style="height: 8em;" th:text="#{sap.short}"></p>
-                <a th:href="@{/alma/sap}"><button type="button" class="btn btn-primary" th:text="#{sap.link}"></button></a>
-            </div>
+            <a th:href="@{/alma/sap/start}">
+                <div class="tile clickable centered" style="cursor:pointer;">
+                    <h3 style="height:2.4em;" th:text="#{sap}">></h3>
+                    <p style="height:4em;" th:text="#{sap.short}"></p>
+                </div>
+            </a>
         </div>
         <div class="ui-g-12 ui-md-6 ui-lg-4">
-            <div class="tile">
+            <a th:href="@{/alma/shibboleth/start}">
+                <div class="tile clickable centered">
                 <h3 style="height: 1.2em;" th:text="#{shibboleth}"></h3>
                 <p  style="height: 8em;" th:text="#{shibboleth.short}"></p>
-                <a th:href="@{/alma/shibboleth/start}"><button type="button" class="btn btn-primary" th:text="#{shibboleth.link}"></button></a>
             </div>
+            </a>
         </div>
         <div class="ui-g-12 ui-md-6 ui-lg-4">
-            <div class="tile">
+            <a th:href="@{/alma/bubi/start}">
+            <div class="tile clickable centered">
                 <h3 style="height: 1.2em;" th:text="#{bubi}"></h3>
                 <p  style="height: 8em;" th:text="#{bubi.short}"></p>
-                <a th:href="@{/alma/bubi/start}"><button type="button" class="btn btn-primary" th:text="#{bubi.link}"></button></a>
             </div>
+            </a>
         </div>
     </div>
     <div class="ui-g">
         <div class="ui-g-12 ui-md-12 ui-lg-12">
-            <div class="tile">
+            <div class="tile centered">
                 <a th:href="@{/start}">
                     <button class="btn btn-primary">Zurück</button>
                 </a>

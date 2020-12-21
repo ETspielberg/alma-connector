@@ -23,7 +23,7 @@
 <div class="container">
     <div class="ui-g">
         <div class="ui-g-12 ui-md-12 ui-lg-12">
-            <div class="tile" style="text-align: left;">
+            <div class="tile">
                 <form th:action="@{/alma/bubi/coredata}" th:object="${coredata}" method="post">
                     <h2 th:text="#{bubi.coredata.for.item}"></h2>
                     <div class="ui-g">
@@ -71,6 +71,14 @@
                         </div>
                         <div class="ui-g-10">
                             <input id="minting" style="width: 50em;" type="text" th:field="*{minting}">
+                        </div>
+                    </div>
+                    <div class="ui-g">
+                        <div class="ui-g-2">
+                            <label for="title" th:text="#{title}"></label>
+                        </div>
+                        <div class="ui-g-10">
+                            <input id="title" style="width: 50em;" type="text" th:field="*{title}">
                         </div>
                     </div>
                     <div class="ui-g">
@@ -140,10 +148,9 @@
                             <label for="bubiData" th:text="#{bubi}"></label>
                         </div>
                         <div class="ui-g-4">
-                            <select id="bubiData" type="text" th:field="*{bubiData}">
-                                <option th:each="bubi: ${bubiList}" th:value="${bubi.vendorId} + ' - ' + ${bubi.vendorAccount}" th:text="${bubi.name} + ' (' + ${bubi.campus} + ')'"></option>
+                            <select id="bubiData" type="text" th:field="*{vendorId}">
+                                <option th:each="bubi: ${bubiList}" th:value="${bubi.vendorId}" th:text="${bubi.name}"></option>
                             </select>
-                            <input >
                         </div>
                     </div>
                     <div class="ui-g">
@@ -165,7 +172,7 @@
     </div>
     <div class="ui-g">
         <div class="ui-g-12 ui-md-12 ui-lg-12">
-            <div class="tile">
+            <div class="tile centered">
                 <a th:href="@{/alma/bubi/coredata}">
                     <button class="btn btn-primary">Zurück</button>
                 </a>

@@ -22,6 +22,7 @@
                         <th th:text="#{alma.mms.id}">MMS ID</th>
                         <th th:text="#{alma.holding.id}">Holding ID</th>
                         <th th:text="#{bubi}">Buchbinder</th>
+                        <th th:text="#{bubi.order.line.new}"></th>
                         <th></th>
                     </tr>
                     </thead>
@@ -39,9 +40,12 @@
                         <td th:text="*{datum.color}"></td>
                         <td th:text="*{datum.almaMmsId}"></td>
                         <td th:text="*{datum.almaHoldingId}"></td>
-                        <td th:text="*{datum.bubiData}"></td>
+                        <td th:text="*{datum.vendorId}"></td>
                         <td>
                             <a th:href="@{/alma/bubi/coredata/edit(collection=*{datum.collection}, shelfmark=*{datum.shelfmark})}"><button class="btn btn-warning" th:text="#{edit}"></button></a>
+                        </td>
+                        <td>
+                            <a th:href="@{/alma/bubi/orderline/fromShelfmark(collection=*{datum.collection}, shelfmark=*{datum.shelfmark})}"><button class="btn btn-success" th:text="#{bubi.new.order}"></button></a>
                         </td>
                     </tr>
                     </tbody>
@@ -52,7 +56,7 @@
     </div>
     <div class="ui-g">
         <div class="ui-g-12 ui-md-12 ui-lg-12">
-            <div class="tile">
+            <div class="tile centered">
                 <a th:href="@{/alma/bubi/start}">
                     <button class="btn btn-primary">Zurück</button>
                 </a>

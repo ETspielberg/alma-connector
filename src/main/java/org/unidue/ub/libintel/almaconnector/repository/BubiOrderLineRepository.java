@@ -12,4 +12,12 @@ public interface BubiOrderLineRepository  extends JpaRepository<BubiOrderLine, B
 
     long countAllByShelfmarkAndCollection(String collection, String shelfmark);
 
+    List<BubiOrderLine> findAllByVendorId(String vendorId);
+
+    List<BubiOrderLine> findAllByVendorIdAndVendorAccount(String vendorId, String vendorAccount);
+
+    BubiOrderLine getBubiOrderLineByAlmaPoLineId(String almaPoLineId);
+
+    List<BubiOrderLine> findAllByStatus(String Status);
+
 }

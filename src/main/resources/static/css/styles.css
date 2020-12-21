@@ -5,7 +5,7 @@ body {
   background-attachment: fixed;
 }
 
-.tile .tile-centered{
+.tile {
   background-color: #dfe4f2;
   float: left;
   opacity: 0.9;
@@ -19,11 +19,13 @@ body {
   text-align: left;
 }
 
-/*
-.tile-centered {
+.centered {
   text-align:center;
 }
- */
+
+.tile-left {
+  text-align:left;
+}
 
 .bg-dark {
   background-color: black !important;

@@ -11,7 +11,7 @@
     <div class="ui-g">
 
         <div class="ui-g-12 ui-md-6 ui-lg-4">
-            <div class="tile">
+            <div class="tile centered">
                 <h3 style="height:1.2em;" th:text="#{sap.collect.open}"></h3>
                 <p style="height:6em;" th:text="#{sap.collect.open.short}"></p>
                 <form th:action="@{/alma/collectInvoices}" th:object="${almaExportRun}" method="post">
@@ -38,7 +38,7 @@
         </div>
 
         <div class="ui-g-12 ui-md-6 ui-lg-4">
-            <div class="tile">
+            <div class="tile centered">
                 <h3 style="height:1.2em;" th:text="#{upload.excel}"></h3>
                 <p style="height:6em;" th:text="#{upload.excel.short}"></p>
                 <div id="dropzone">
@@ -56,7 +56,7 @@
     </div>
     <div class="ui-g">
         <div class="ui-g-12 ui-md-12 ui-lg-12">
-            <div class="tile">
+            <div class="tile centered">
                 <a th:href="@{/alma/start}">
                     <button class="btn btn-primary">Zurück</button>
                 </a>

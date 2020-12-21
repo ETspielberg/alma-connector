@@ -34,6 +34,9 @@ public class PrimoService {
 
     public List<AlmaJournalData> getPrimoResponse(AlmaJournalData almaJournalData) {
         try {
+            String mediaType = "book";
+            if (almaJournalData.shelfmark.contains(" Z "))
+                mediaType = "journal";
             String response = getResponseForJson(almaJournalData.shelfmark);
             List<AlmaJournalData> foundJournals = new ArrayList<>();
             if (!"".equals(response)) {
@@ -44,7 +47,10 @@ public class PrimoService {
                 int numberOfDocs = documents.size();
                 for (int i = 0; i < numberOfDocs; i++) {
                     String basePath = "$['docs'][" + i + "]";
+
                     try {
+                        if (!mediaType.equals(jsonContext.read(basePath + "['pnx']['display']['type'][0]")))
+                            continue;
                         String title = jsonContext.read(basePath + "['pnx']['display']['title'][0]");
                         String location = jsonContext.read(basePath + "['delivery']['bestlocation']['subLocationCode']");
                         log.debug("found location: " + location);

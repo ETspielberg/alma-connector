@@ -23,6 +23,7 @@
                         <th th:text="#{bubi.standard.price.journal}">Standardpreis Zeitschrift</th>
                         <th th:text="#{campus}">Campus</th>
                         <th></th>
+                        <th th:text="#{delete}"></th>
                     </tr>
                     </thead>
                     <tbody>
@@ -42,6 +43,14 @@
                         <td th:text="*{bubiData.campus}"></td>
                         <td>
                             <a th:href="@{/alma/bubi/bubiData/edit(vendorId=*{bubiData.vendorId}, vendorAccount=*{bubiData.vendorAccount})}"><button class="btn btn-warning" th:text="#{edit}"></button></a>
+                            <a th:href="@{/alma/bubi/orderline(vendorId=*{bubiData.vendorId}, vendorAccount=*{bubiData.vendorAccount})}">
+                                <button type="button" class="btn btn-primary" th:text="#{bubi.order.line.overview}"></button>
+                            </a>
+                        </td>
+                        <td>
+                            <form th:action="@{/alma/bubi/bubiData/delete(vendorId=*{bubiData.vendorId}, vendorAccount=*{bubiData.vendorAccount})}" method="post">
+                                <input type="submit" class="btn btn-danger" th:value="#{delete}"/>
+                            </form>
                         </td>
                     </tr>
                     </tbody>
@@ -52,7 +61,7 @@
     </div>
     <div class="ui-g">
         <div class="ui-g-12 ui-md-12 ui-lg-12">
-            <div class="tile">
+            <div class="tile centered">
                 <a th:href="@{/alma/bubi/start}">
                     <button class="btn btn-primary">Zurück</button>
                 </a>

@@ -69,8 +69,8 @@ public class CoreData implements Cloneable {
     @Column(name="active")
     private boolean active = true;
 
-    @Column(name="bubi_data")
-    private String bubiData;
+    @Column(name="vendor_id")
+    private String vendorId;
 
     @Column(name="alternative_bubi_data")
     private String alternativeBubiData;
@@ -147,12 +147,12 @@ public class CoreData implements Cloneable {
         this.cover = cover;
     }
 
-    public String getBubiData() {
-        return bubiData;
+    public String getVendorId() {
+        return vendorId;
     }
 
-    public void setBubiData(String bubiData) {
-        this.bubiData = bubiData;
+    public void setVendorId(String bubiData) {
+        this.vendorId = bubiData;
     }
 
     public String getPartTitle() {
@@ -251,11 +251,16 @@ public class CoreData implements Cloneable {
         this.almaHoldingId = almaHoldingId;
     }
 
+
+    public void setFf(boolean ff) {
+        isFf = ff;
+    }
+
     @Override
     protected CoreData clone() {
         CoreData clone = new CoreData();
         clone.setAlternativeBubiData(this.alternativeBubiData);
-        clone.setBubiData(this.bubiData);
+        clone.setVendorId(this.vendorId);
         clone.setBinding(this.binding);
         clone.setBindingsFollow(this.bindingsFollow);
         clone.setCollection(this.collection);
@@ -275,6 +280,7 @@ public class CoreData implements Cloneable {
         clone.setShelfmark(this.shelfmark);
         clone.setAlmaHoldingId(this.almaHoldingId);
         clone.setAlmaMmsId(this.almaMmsId);
+        clone.setIsFf(this.isFf);
         return clone;
     }
 }

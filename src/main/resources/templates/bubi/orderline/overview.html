@@ -7,293 +7,69 @@
 
 <div th:replace="general :: jumbotron"/>
 
-<div class="container">
-    <form th:action="@{/alma/bubi/orderline/save}" th:object="${orderline}" method="post">
-        <div class="ui-g">
-            <div class="ui-g-12 ui-md-12 ui-lg-12">
-                <div class="tile">
-                    <h2 th:text="#{bubi.order.line.overview}"></h2>
-                    <p th:text="#{bubi.order.line.overview.short}"></p>
-                </div>
-            </div>
-        </div>
-        <div class="ui-g">
-            <div class="ui-g-12">
-                <div class="tile">
-                    <h2 style="height:1.2em;" th:text="#{bubi.order.line.overview.core.data}"></h2>
-                    <p th:text="*{title}"></p>
-                    <input hidden th:field="*{title}">
-                    <div class="ui-g">
-                        <div class="ui-g-4">
-                            <div class="ui-g">
-                                <div class="ui-g-3">
-                                    <span style="font-weight: bold;" th:text="#{collection}"></span>
-                                </div>
-                                <div class="ui-g-9">
-                                    <span th:text="*{collection}"></span>
-                                    <input hidden th:field="*{collection}">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="ui-g-4">
-                            <div class="ui-g">
-                                <div class="ui-g-3">
-                                    <span style="font-weight: bold;" th:text="#{shelfmark}"></span>
-                                </div>
-                                <div class="ui-g-9">
-                                    <span th:text="*{shelfmark}"></span>
-                                    <input hidden th:field="*{shelfmark}">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="ui-g-4">
-                            <div class="ui-g">
-                                <div class="ui-g-3">
-                                    <span style="font-weight: bold;" th:text="#{bubi.order.line.counter}"></span>
-                                </div>
-                                <div class="ui-g-9">
-                                    <span th:text="*{counter}"></span>
-                                    <input hidden th:field="*{counter}">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="ui-g-6">
-                            <div class="ui-g">
-                                <div class="ui-g-3">
-                                    <span style="font-weight: bold;" th:text="#{alma.mms.id}"></span>
-                                </div>
-                                <div class="ui-g-9">
-                                    <span th:text="*{almaMmsId}"></span>
-                                    <input hidden th:field="*{almaMmsId}">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="ui-g-6">
-                            <div class="ui-g">
-                                <div class="ui-g-3">
-                                    <span style="font-weight: bold;" th:text="#{alma.holding.id}"></span>
-                                </div>
-                                <div class="ui-g-9">
-                                    <span th:text="*{almaHoldingId}"></span>
-                                    <input hidden th:field="*{almaHoldingId}">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="ui-g-6">
-                            <div class="form-group">
-                                <div class="ui-g">
-                                    <div class="ui-g-1">
-                                        <label for="vendorId" th:text="#{bubi.order.line.vendorId}"></label>
-                                    </div>
-                                    <div class="ui-g-11">
-                                        <input id="vendorId" type="text" th:field="*{vendorId}">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="ui-g-6">
-                            <div class="form-group">
-                                <div class="ui-g">
-                                    <div class="ui-g-1">
-                                        <label for="price" th:text="#{bubi.order.line.price}"></label>
-                                    </div>
-                                    <div class="ui-g-11">
-                                        <input id="price"type="number" th:field="*{price}" required>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="ui-g-6">
-                            <div class="form-group">
-                                <div class="ui-g">
-                                    <div class="ui-g-1">
-                                        <label for="fund" th:text="#{bubi.order.line.fund}"></label>
-                                    </div>
-                                    <div class="ui-g-11">
-                                        <input id="fund"type="text" th:field="*{fund}" required>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="ui-g">
-            <div class="ui-g-12">
-                <div class="tile">
-                    <h3 style="height:1.2em;" th:text="#{bubi.order.line.overview.volume.data}"></h3>
-                    <div class="ui-g-4">
-                        <div class="form-group">
-                            <div class="ui-g">
-                                <div class="ui-g-3">
-                                    <label for="year" th:text="#{year}"></label>
-                                </div>
-                                <div class="ui-g-9">
-                                    <input id="year" type="text" th:field="*{year}">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="ui-g-4">
-                        <div class="form-group">
-                            <div class="ui-g">
-                                <div class="ui-g-3">
-                                    <label for="volume" th:text="#{volume}"></label>
-                                </div>
-                                <div class="ui-g-9">
-                                    <input id="volume" type="text" th:field="*{volume}">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="ui-g-4">
-                        <div class="form-group">
-                            <div class="ui-g">
-                                <div class="ui-g-3">
-                                    <label for="issue" th:text="#{issue}"></label>
-                                </div>
-                                <div class="ui-g-9">
-                                    <input id="issue" type="text" th:field="*{issue}">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="ui-g-4">
-                        <div class="form-group">
-                            <div class="ui-g">
-                                <div class="ui-g-3">
-                                    <label for="edition" th:text="#{edition}"></label>
-                                </div>
-                                <div class="ui-g-9">
-                                    <input id="edition" type="text" th:field="*{edition}">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="ui-g-4">
-                        <div class="form-group">
-                            <div class="ui-g">
-                                <div class="ui-g-3">
-                                    <label for="part" th:text="#{part}"></label>
-                                </div>
-                                <div class="ui-g-9">
-                                    <input id="part" type="text" th:field="*{part}">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="ui-g-4">
-                        <div class="form-group">
-                            <div class="ui-g">
-                                <div class="ui-g-3">
-                                    <label for="bindingsFollow" th:text="#{bubi.order.line.bindingsFollow}"></label>
-                                </div>
-                                <div class="ui-g-9">
-                                    <input id="bindingsFollow" type="text" th:field="*{bindingsFollow}">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="ui-g">
-            <div class="ui-g-12">
-                <div class="tile" style="text-align: left">
-                    <h3 style="height:1.2em;" th:text="#{bubi.order.line.overview.appearance}"></h3>
-                    <div class="ui-g-4">
-                        <div class="form-group">
-                            <div class="ui-g">
-                                <div class="ui-g-3">
-                                    <label for="cover" th:text="#{cover}"></label>
-                                </div>
-                                <div class="ui-g-9">
-                                    <select id="cover" type="text" th:field="*{cover}" required>
-                                        <option th:text="#{bubi.cover.gw}" value="GW"></option>
-                                        <option th:text="#{bubi.cover.gwed}" value="GW   ED"></option>
-                                        <option th:text="#{bubi.cover.stmpr}" value="StmPr"></option>
-                                        <option th:text="#{bubi.cover.stopr}" value="StoPr"></option>
-                                        <option th:text="#{bubi.cover.stopr.av}" value="StoPr  Dbl.a.V"></option>
-                                        <option th:text="#{bubi.cover.stopr.uf}" value="StoPr  Dbl.u.F"></option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="ui-g-4">
-                        <div class="form-group">
-                            <div class="ui-g">
-                                <div class="ui-g-3">
-                                    <label for="color" th:text="#{color}"></label>
-                                </div>
-                                <div class="ui-g-9">
-                                    <input id="color" type="text" th:field="*{color}">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="ui-g-4">
-                        <div class="form-group">
-                            <div class="ui-g">
-                                <div class="ui-g-3">
-                                    <label for="binding" th:text="#{binding}"></label>
-                                </div>
-                                <div class="ui-g-9">
-                                    <select id="binding" type="text" th:field="*{binding}">
-                                        <option th:text="#{bubi.binding.none}" value=""></option>
-                                        <option th:text="#{bubi.binding.k}" value="K"></option>
-                                        <option th:text="#{bubi.binding.f}" value="F"></option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="ui-g-12">
-                        <div class="form-group">
-                            <div class="ui-g">
-                                <div class="ui-g-1">
-                                    <label for="minting" th:text="#{minting}"></label>
-                                </div>
-                                <div class="ui-g-11">
-                                    <input id="minting" style="width: 50em;" type="text" th:field="*{minting}">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="ui-g-12">
-                        <div class="form-group">
-                            <div class="ui-g">
-                                <div class="ui-g-1">
-                                    <label for="comment" th:text="#{comment}"></label>
-                                </div>
-                                <div class="ui-g-11">
-                                    <textarea cols="80" rows="3" id="comment" type="text"
-                                              th:field="*{comment}"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="ui-g">
-            <div class="ui-g-12 ui-md-12 ui-lg-12">
-                <div class="tile">
-                    <input type="submit" class="btn btn-primary" th:value="#{save}"/>
-                </div>
-            </div>
-        </div>
-    </form>
+<div class="container-fluid">
     <div class="ui-g">
         <div class="ui-g-12 ui-md-12 ui-lg-12">
             <div class="tile">
-                <a th:href="@{/start}">
+                <h2 th:text="#{bubi.order.line.overview}"></h2>
+                <p th:text="#{bubi.order.line.overview.short}"></p>
+            </div>
+        </div>
+    </div>
+    <form th:action="@{/alma/bubi/orderline/pack}" method="post">
+    <div class="ui-g">
+        <div class="ui-g-12">
+            <div class="tile">
+                <h2 style="height:1.2em;" th:text="#{bubi.order.line.overview.core.data}"></h2>
+
+                    <table id="overview" class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th th:text="#{pack}">Packen</th>
+                            <th th:text="#{bubi.order.line.Id}">Auftrags-ID</th>
+                            <th th:text="#{status}">Status</th>
+                            <th th:text="#{bubi.order.line.bubi}">Buchbinder</th>
+                            <th th:text="#{bubi.order.line.fund}"> Etat</th>
+                            <th th:text="#{bubi.order.line.price}">Preis</th>
+                            <th th:text="#{alma.po.line.id}">Alma-Bestellposten-ID</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+
+                        <tr th:each="orderline: ${orderlines}">
+                            <th>
+                                <input type="checkbox" name="cers"
+                                       th:value="*{orderline.almaPoLineId}"/>
+                            </th>
+                            <th th:text="*{orderline.collection} + ': ' + *{orderline.shelfmark} + ' (' + *{orderline.counter} + ')'"></th>
+                            <td th:text="*{orderline.status}"></td>
+                            <td th:text="*{orderline.vendorId}"></td>
+                            <td th:text="*{orderline.fund}"></td>
+                            <td th:text="*{#numbers.formatDecimal(orderline.price, 0, 'POINT', 2, 'COMMA') + ' EUR'}"></td>
+                            <td th:text="*{orderline.almaPoLineId}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <input type="submit" class="btn btn-primary" th:value="#{pack}"/>
+
+            </div>
+        </div>
+    </div>
+    </form>
+    <div class="ui-g">
+        <div class="ui-g-12 ui-md-12 ui-lg-12">
+            <div class="tile centered">
+                <a th:href="@{/alma/bubi/start}">
                     <button class="btn btn-primary">Zurück</button>
                 </a>
             </div>
         </div>
     </div>
 </div>
+<script>
+    $(document).ready(function() {
+        $('#overview').DataTable();
+    } );
+</script>
 </body>
 </html>

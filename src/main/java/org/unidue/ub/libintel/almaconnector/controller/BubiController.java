@@ -15,6 +15,7 @@ import org.unidue.ub.libintel.almaconnector.service.BubiService;
 import org.unidue.ub.libintel.almaconnector.service.PrimoService;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.unidue.ub.libintel.almaconnector.Utils.buildPoLine;
@@ -65,10 +66,16 @@ public class BubiController {
         return "bubi/data/editSuccess";
     }
 
-    @GetMapping("/newBubiData")
+    @GetMapping("/bubiData/new")
     public String createNewBubiData(Model model) {
         model.addAttribute("bubiData", new BubiData());
         return "bubi/data/edit";
+    }
+
+    @PostMapping("/bubiData/delete")
+    public String deletebubiData(String vendorId, String vendorAccount) {
+        this.bubiService.deleteBubiData(vendorId, vendorAccount);
+        return "bubi/data/deleteSuccess";
     }
 
     // ---------------------- Core data endpoints ----------------------
@@ -120,8 +127,21 @@ public class BubiController {
     }
 
     @GetMapping("/orderline")
-    public String getAllOrderlines(Model model) {
-        model.addAttribute("orderlines", this.bubiService.getAllBubiOrderLines());
+    public String getAllOrderlines(Model model,
+                                   @RequestParam(value = "vendorId", required = false) String vendorId,
+                                   @RequestParam(value = "vendorAccount", required = false) String vendorAccount,
+                                   @RequestParam(value = "status", required = false) String status
+                                   ) {
+        List<BubiOrderLine> orderlines;
+        if (vendorId != null) {
+            if (vendorAccount != null)
+                orderlines = this.bubiService.getAllBubiOrderLinesForVendorAccoutn(vendorId, vendorAccount);
+            else
+                orderlines = this.bubiService.getAllBubiOrderLinesForBubi(vendorId);
+        }
+        else
+            orderlines = this.bubiService.getAllBubiOrderLines();
+        model.addAttribute("orderlines",orderlines);
         return "bubi/orderline/overview";
     }
 
@@ -133,7 +153,7 @@ public class BubiController {
 
     @GetMapping("/orderline/fromShelfmark")
     public String createBubiOrderLineFromShelfmark(Model model, String collection, String shelfmark) {
-        model.addAttribute("orderline", this.bubiService.expandBubiOrderLine(collection, shelfmark));
+        model.addAttribute("orderline", this.bubiService.expandBubiOrderLine(collection.strip(), shelfmark.strip()));
         log.info("rendering new bubi order");
         return "bubi/orderline/edit";
     }
@@ -146,15 +166,30 @@ public class BubiController {
 
     @PostMapping("/orderline/save")
     public String saveBubiOrderLine(@ModelAttribute("orderline") BubiOrderLine bubiOrderLine, Model model) {
+        String vendoraccount = this.bubiService.getVendorAccount(bubiOrderLine.getVendorId(), bubiOrderLine.getCollection()).getVendorAccount();
+        bubiOrderLine.setVendorAccount(vendoraccount);
         bubiOrderLine = this.bubiService.saveBubiOrderLine(bubiOrderLine);
-        BubiData bubiData = this.bubiService.getBubiDataForString(bubiOrderLine.getVendorId());
-        PoLine poLine = buildPoLine(bubiOrderLine, bubiData);
+        PoLine poLine = buildPoLine(bubiOrderLine);
         log.info(poLine.toString());
         poLine = almaPoLineService.savePoLine(poLine);
         bubiOrderLine.setAlmaPoLineId(poLine.getNumber());
         bubiOrderLine = bubiService.saveBubiOrderLine(bubiOrderLine);
         model.addAttribute("bubiOrderLine", bubiOrderLine);
-        return "bubi/orderline/orderline";
+        return "bubi/orderline/editSuccess";
+    }
+
+    @PostMapping("/orderline/pack")
+    public String packOrders( @RequestParam(value = "cers" , required = false) String[] almaPoLineIds, Model model) {
+        List<BubiOrderLine> allOrderLines = new ArrayList<>();
+        if(almaPoLineIds != null) {
+            for (String almaPoLineId : almaPoLineIds)
+                allOrderLines.add(bubiService.getBubiOrderLineByAlmaPoLineId(almaPoLineId));
+        }
+        BubiOrder bubiOrder = new BubiOrder();
+        bubiOrder.setBubiOrderLines(allOrderLines);
+        bubiOrder.setComment("new");
+        model.addAttribute("bubiOrder", bubiOrder);
+        return "bubi/orderline/packSuccess";
     }
 
     // ---------------------- primo data endpoints ----------------------

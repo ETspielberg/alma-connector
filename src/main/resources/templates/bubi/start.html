@@ -19,12 +19,12 @@
                     </a>
                 </div>
                 <div style="padding:10px;">
-                    <a th:href="@{/alma/bubi/orderline/overview}">
-                        <button type="button" class="btn btn-primary" th:text="#{bubi.new.order}"></button>
+                    <a th:href="@{/alma/bubi/orderline}">
+                        <button type="button" class="btn btn-primary" th:text="#{bubi.order.line.overview}"></button>
                     </a>
                 </div>
                 <div style="padding:10px;">
-                    <a th:href="@{/alma/bubi/orderline/overview(status=NEW)}">
+                    <a th:href="@{/alma/bubi/orderline(status=NEW)}">
                         <button type="button" class="btn btn-primary" th:text="#{bubi.new.order.open}"></button>
                     </a>
                 </div>
@@ -39,7 +39,7 @@
             <div class="tile">
                 <h3 style="height: 1.2em;" th:text="#{bubi.inbox}"></h3>
                 <p style="height: 3em;" th:text="#{bubi.inbox.short}"></p>
-                <div style="padding:10px; text-align: left;">
+                <div style="padding:10px;">
                     <a th:href="@{/alma/bubi/inbox}">
                         <button type="button" class="btn btn-primary" th:text="#{bubi.inbox}"></button>
                     </a>
@@ -51,7 +51,7 @@
             <div class="tile">
                 <h3 style="height: 1.2em;" th:text="#{bubi.coredata}"></h3>
                 <p style="height: 3em;" th:text="#{bubi.coredata.short}"></p>
-                <div style="padding:10px; text-align: left;">
+                <div style="padding:10px;">
                     <a th:href="@{/alma/bubi/coredata}">
                         <button type="button" class="btn btn-primary" th:text="#{bubi.coredata.overview}"></button>
                     </a>
@@ -85,7 +85,7 @@
                         <button type="button" class="btn btn-primary" th:text="#{bubi.data.overview}"></button>
                     </a>
                 </div>
-                <div style="padding:10px; text-align: left;">
+                <div style="padding:10px;">
                     <a th:href="@{/alma/bubi/newBubiData}">
                         <button type="button" class="btn btn-primary" th:text="#{bubi.data.new}"></button>
                     </a>
@@ -96,17 +96,17 @@
             <div class="tile">
                 <h3 style="height: 1.2em;" th:text="#{bubi.search}"></h3>
                 <p style="height: 3em;" th:text="#{bubi.search.short}"></p>
-                <div style="padding:10px; text-align: left;">
+                <div style="padding:10px;">
                     <a th:href="@{/alma/bubi/search/signature}">
                         <button type="button" class="btn btn-primary" th:text="#{bubi.search.signature}"></button>
                     </a>
                 </div>
-                <div style="padding:10px; text-align: left;">
+                <div style="padding:10px;">
                     <a th:href="@{/alma/bubi/search/openComplaints}">
                         <button type="button" class="btn btn-primary" th:text="#{bubi.search.open.complaints}"></button>
                     </a>
                 </div>
-                <div style="padding:10px; text-align: left;">
+                <div style="padding:10px;">
                     <a th:href="@{/alma/bubi/search/bubiOrderNumber}">
                         <button type="button" class="btn btn-primary" th:text="#{bubi.search.order.number}"></button>
                     </a>
@@ -117,7 +117,7 @@
             <div class="tile">
                 <h3 style="height: 1.2em;" th:text="#{bubi.statistics}"></h3>
                 <p style="height: 3em;" th:text="#{bubi.statistics.short}"></p>
-                <div style="padding:10px; text-align: left;">
+                <div style="padding:10px;">
                     <a th:href="@{/alma/alma/bubi/statistics}">
                         <button type="button" class="btn btn-primary" th:text="#{bubi.statistics.order}"></button>
                     </a>
@@ -127,8 +127,8 @@
     </div>
     <div class="ui-g">
         <div class="ui-g-12 ui-md-12 ui-lg-12">
-            <div class="tile">
-                <a th:href="@{/start}">
+            <div class="tile centered">
+                <a th:href="@{/alma/start}">
                     <button class="btn btn-primary">Zurück</button>
                 </a>
             </div>

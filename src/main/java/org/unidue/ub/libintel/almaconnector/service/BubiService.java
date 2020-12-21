@@ -12,6 +12,7 @@ import org.unidue.ub.libintel.almaconnector.repository.BubiOrderLineRepository;
 import org.unidue.ub.libintel.almaconnector.repository.BubiOrderRepository;
 import org.unidue.ub.libintel.almaconnector.repository.CoreDataRepository;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -51,7 +52,16 @@ public class BubiService {
         return this.bubiOrderLineRepository.findAll();
     }
 
-    public List<CoreData> getAllCoreData() {
+    public List<BubiOrderLine> getAllBubiOrderLinesForBubi(String vendorId) {
+        return this.bubiOrderLineRepository.findAllByVendorId(vendorId);
+    }
+
+    public List<BubiOrderLine> getAllBubiOrderLinesForVendorAccoutn(String vendorId, String vendorAccount) {
+        return this.bubiOrderLineRepository.findAllByVendorIdAndVendorAccount(vendorId, vendorAccount);
+    }
+
+
+        public List<CoreData> getAllCoreData() {
         return this.coreDataRepository.findAll();
     }
 
@@ -90,6 +100,7 @@ public class BubiService {
     }
 
     public BubiOrderLine saveBubiOrderLine(BubiOrderLine bubiOrderLine) {
+        bubiOrderLine.setLastChange(new Date());
         return this.bubiOrderLineRepository.save(bubiOrderLine);
     }
 
@@ -138,9 +149,9 @@ public class BubiService {
                 coreData.setBinding("");
             }
             try {
-                coreData.setBubiData(row.getCell(11).getStringCellValue());
+                coreData.setVendorId(row.getCell(11).getStringCellValue());
             } catch (Exception e) {
-                coreData.setBubiData("");
+                coreData.setVendorId("");
             }
             try {
                 coreData.setVolume(row.getCell(13).getStringCellValue());
@@ -206,17 +217,24 @@ public class BubiService {
         return this.bubiDataRepository.getOne(new BubiDataId(vendorId, vendorAccount));
     }
 
-    public BubiData getBubiDataForString(String accountInfo) {
-        String vendorId = accountInfo.split(" - ")[0];
-        String vendorAccount = accountInfo.split(" - ")[1];
-        return this.getbubiData(vendorId, vendorAccount);
+    public BubiData getVendorAccount(String vendorID, String collection) {
+        String campus = collection.startsWith("E") ? "E0001" : "D0001";
+        List<BubiData> bubiData = this.bubiDataRepository.findByVendorIdAndCampus(vendorID, campus);
+        if (bubiData.size() ==0)
+            return new BubiData();
+        else
+            return bubiData.get(0);
     }
 
-    public void deleteBubiData(BubiData bubiData) {
-        this.bubiDataRepository.delete(bubiData);
+    public void deleteBubiData(String vendorId, String vendorAccount) {
+        this.bubiDataRepository.deleteById(new BubiDataId(vendorId, vendorAccount));
     }
 
     public BubiData saveBubiData(BubiData bubiData) {
         return this.bubiDataRepository.save(bubiData);
+    }
+
+    public BubiOrderLine getBubiOrderLineByAlmaPoLineId(String almaPoLineId) {
+        return this.bubiOrderLineRepository.getBubiOrderLineByAlmaPoLineId(almaPoLineId);
     }
 }
