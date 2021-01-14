@@ -8,7 +8,7 @@ import org.unidue.ub.alma.shared.acq.*;
 import org.unidue.ub.libintel.almaconnector.model.SapAccountData;
 import org.unidue.ub.libintel.almaconnector.model.SapData;
 import org.unidue.ub.libintel.almaconnector.model.SapResponse;
-import org.unidue.ub.libintel.almaconnector.model.bubi.BubiData;
+import org.unidue.ub.libintel.almaconnector.model.bubi.BubiOrder;
 import org.unidue.ub.libintel.almaconnector.model.bubi.BubiOrderLine;
 import org.unidue.ub.libintel.almaconnector.model.run.SapResponseRun;
 
@@ -340,11 +340,14 @@ public class Utils {
         log.info(bubiOrderLine.getAlmaMmsId());
         log.info(bubiOrderLine.getTitle());
         log.info(resourceMetadata.toString());
+        PoLineStatus status = new PoLineStatus().value("AUTO_PACKAGING").desc("Auto Packaging");
         return new PoLine()
-                .vendorReferenceNumber(bubiOrderLine.getBubiOrderLineid())
+                .vendorReferenceNumber(String.format("%s - %S:%s)", bubiOrderLine.getFund(),
+                        bubiOrderLine.getCollection(),
+                        bubiOrderLine.getShelfmark()))
                 .sourceType(new PoLineSourceType().value("MANUALENTRY"))
                 .type(new PoLineType().value("OTHER_SERVICES_OT"))
-                .status(new PoLineStatus().value("INREVIEW"))
+                .status(status)
                 .price(amount)
                 .baseStatus(PoLine.BaseStatusEnum.ACTIVE)
                 .owner(poLineOwner)
@@ -352,5 +355,31 @@ public class Utils {
                 .vendor(new PoLineVendor().value(bubiOrderLine.getVendorId()))
                 .vendorAccount(bubiOrderLine.getVendorAccount())
                 .fundDistribution(fundList);
+    }
+
+    public static Invoice getInvoiceForBubiOrder(BubiOrder bubiOrder) {
+        Invoice invoice = new Invoice();
+        invoice.vendor(new InvoiceVendor().value(bubiOrder.getBubiOrderId()));
+        InvoiceLines invoiceLines = new InvoiceLines();
+        invoice.totalAmount(bubiOrder.getTotalAmount());
+        invoice.paymentMethod(new InvoicePaymentMethod().value("ACCOUNTINGDEPARTMENT"));
+        invoice.invoiceStatus(new InvoiceInvoiceStatus().value("ACTIVE"));
+        invoice.invoiceWorkflowStatus(new InvoiceInvoiceWorkflowStatus().value("Waiting to be Sent"));
+        invoice.invoiceVat(new InvoiceVat().vatPerInvoiceLine(true).type(new InvoiceVatType().value("INCLUSIVE")));
+
+        for (int i = 0; i< bubiOrder.getBubiOrderLines().size(); i++) {
+            BubiOrderLine bubiOrderLine = bubiOrder.getBubiOrderLines().get(i);
+            InvoiceLineVat invoiceLineVat = new InvoiceLineVat().vatCode(new InvoiceLineVatVatCode().value("H8"));
+            FundDistributionFundCode fundDistributionFundCode = new FundDistributionFundCode().value(bubiOrderLine.getFund());
+            InvoiceLine invoiceLine = new InvoiceLine()
+                    .poLine(bubiOrderLine.getAlmaPoLineId())
+                    .fullyInvoiced(true)
+                    .totalPrice(bubiOrderLine.getPrice())
+                    .invoiceLineVat(invoiceLineVat);
+
+            invoiceLines.addInvoiceLineItem(invoiceLine);
+        }
+        invoice.invoiceLines(invoiceLines);
+        return invoice;
     }
 }
