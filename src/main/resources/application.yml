@@ -3,13 +3,13 @@ feign:
     disableSslValidation: true
   client:
     config:
-      settings-backend:
+      default:
         connectTimeout: 5000
         readTimeout: 5000
-      blacklist-backend:
-        connectTimeout: 5000
-        readTimeout: 5000
-      getter:
+      items:
+        connectTimeout: 600000
+        readTimeout: 600000
+      invoices:
         connectTimeout: 600000
         readTimeout: 600000
 server:
