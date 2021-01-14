@@ -4,7 +4,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,7 +19,7 @@ import java.util.List;
 
 import static org.unidue.ub.libintel.almaconnector.Utils.buildPoLine;
 
-@Controller
+@RestController
 @RequestMapping("/bubi")
 public class BubiController {
 
@@ -40,68 +39,18 @@ public class BubiController {
         this.primoService = primoService;
     }
 
-    @GetMapping("/start")
-    public String getStartPage() {
-        return "bubi/start";
-    }
-
     // ---------------------- Bubi data endpoints ----------------------
 
-    @GetMapping("/bubiData")
-    public String getAllBubiData(Model model) {
-        model.addAttribute("bubiDataList", this.bubiService.listAllBubiData());
-        return "bubi/data/overview";
-    }
-
-    @GetMapping("/bubiData/edit")
-    public String getAllBubiData(Model model, String vendorId, String vendorAccount) {
-        model.addAttribute("bubiData", this.bubiService.getbubiData(vendorId, vendorAccount));
-        return "bubi/data/edit";
-    }
-
-    @PostMapping("/bubiData")
-    public String saveBubiData(@ModelAttribute("bubiData") BubiData bubiData, Model model) {
-        bubiData = this.bubiService.saveBubiData(bubiData);
-        model.addAttribute("bubiData", bubiData);
-        return "bubi/data/editSuccess";
-    }
-
-    @GetMapping("/bubiData/new")
-    public String createNewBubiData(Model model) {
-        model.addAttribute("bubiData", new BubiData());
-        return "bubi/data/edit";
-    }
-
-    @PostMapping("/bubiData/delete")
-    public String deletebubiData(String vendorId, String vendorAccount) {
-        this.bubiService.deleteBubiData(vendorId, vendorAccount);
-        return "bubi/data/deleteSuccess";
+    @GetMapping("/bubidata/all")
+    private ResponseEntity<List<BubiData>> getAllbubiData() {
+        return ResponseEntity.ok(this.bubiService.listAllBubiData());
     }
 
     // ---------------------- Core data endpoints ----------------------
 
-    /**
-     * receives the bubi core data  as xlsx file and saves them to the database
-     * @param model the model object
-     * @return returns a status of 200 if the import was successful
-     */
-    @GetMapping("/coredata")
-    public String showCoreData(Model model) {
-        model.addAttribute("coredataList", this.bubiService.getAllCoreData());
-        return "bubi/coredata/overview";
-    }
-
-    @GetMapping("/coredata/edit")
-    public String editCoreData(Model model, String collection, String shelfmark) {
-        model.addAttribute("coredata", this.bubiService.getCoreData(collection, shelfmark));
-        model.addAttribute("bubiList", this.bubiService.listAllBubiData());
-        return "bubi/coredata/edit";
-    }
-
-    @PostMapping("/coredata")
-    public String saveCoreData(@ModelAttribute("coredata") CoreData coredata, Model model) {
-        model.addAttribute("coredata", this.bubiService.saveCoreData(coredata));
-        return "bubi/coredata/editSuccess";
+    @GetMapping("/coredata/all")
+    private ResponseEntity<List<CoreData>> getAllCoreData() {
+        return ResponseEntity.ok(this.bubiService.getAllCoreData());
     }
 
     /**
@@ -121,88 +70,77 @@ public class BubiController {
 
     // ---------------------- bubi order line endpoints ----------------------
 
-    @GetMapping("/orderline/new")
-    public String getNewBubiOrderLinePage(Model model) {
-        return "bubi/orderline/new";
-    }
-
-    @GetMapping("/orderline")
-    public String getAllOrderlines(Model model,
-                                   @RequestParam(value = "vendorId", required = false) String vendorId,
-                                   @RequestParam(value = "vendorAccount", required = false) String vendorAccount,
-                                   @RequestParam(value = "status", required = false) String status
-                                   ) {
-        List<BubiOrderLine> orderlines;
-        if (vendorId != null) {
-            if (vendorAccount != null)
-                orderlines = this.bubiService.getAllBubiOrderLinesForVendorAccoutn(vendorId, vendorAccount);
-            else
-                orderlines = this.bubiService.getAllBubiOrderLinesForBubi(vendorId);
-        }
-        else
-            orderlines = this.bubiService.getAllBubiOrderLines();
-        model.addAttribute("orderlines",orderlines);
-        return "bubi/orderline/overview";
-    }
-
-    @PostMapping("/orderLine")
-    public String createNewBubiOrderLine(@ModelAttribute("orderline") BubiOrderLine bubiOrderLine, Model model) {
-        model.addAttribute("orderline", this.bubiService.expandBubiOrderLine(bubiOrderLine));
-        return "bubi/orderline/edit";
-    }
-
-    @GetMapping("/orderline/fromShelfmark")
-    public String createBubiOrderLineFromShelfmark(Model model, String collection, String shelfmark) {
-        model.addAttribute("orderline", this.bubiService.expandBubiOrderLine(collection.strip(), shelfmark.strip()));
-        log.info("rendering new bubi order");
-        return "bubi/orderline/edit";
-    }
-
-    @GetMapping("/orderline/fromBarcode")
-    public String createBubiOrderLinePageFromBarcode(Model model, String barcode) {
-        model.addAttribute("orderline", new BubiOrderLine());
-        return "bubi/orderline/edit";
-    }
-
     @PostMapping("/orderline/save")
-    public String saveBubiOrderLine(@ModelAttribute("orderline") BubiOrderLine bubiOrderLine, Model model) {
+    public ResponseEntity<BubiOrderLine> saveBubiOrderLine(@RequestBody BubiOrderLine bubiOrderLine) {
         String vendoraccount = this.bubiService.getVendorAccount(bubiOrderLine.getVendorId(), bubiOrderLine.getCollection()).getVendorAccount();
         bubiOrderLine.setVendorAccount(vendoraccount);
         bubiOrderLine = this.bubiService.saveBubiOrderLine(bubiOrderLine);
-        PoLine poLine = buildPoLine(bubiOrderLine);
-        log.info(poLine.toString());
-        poLine = almaPoLineService.savePoLine(poLine);
-        bubiOrderLine.setAlmaPoLineId(poLine.getNumber());
-        bubiOrderLine = bubiService.saveBubiOrderLine(bubiOrderLine);
-        model.addAttribute("bubiOrderLine", bubiOrderLine);
-        return "bubi/orderline/editSuccess";
+        return ResponseEntity.ok(bubiOrderLine);
     }
 
-    @PostMapping("/orderline/pack")
-    public String packOrders( @RequestParam(value = "cers" , required = false) String[] almaPoLineIds, Model model) {
-        List<BubiOrderLine> allOrderLines = new ArrayList<>();
-        if(almaPoLineIds != null) {
-            for (String almaPoLineId : almaPoLineIds)
-                allOrderLines.add(bubiService.getBubiOrderLineByAlmaPoLineId(almaPoLineId));
-        }
-        BubiOrder bubiOrder = new BubiOrder();
-        bubiOrder.setBubiOrderLines(allOrderLines);
-        bubiOrder.setComment("new");
-        model.addAttribute("bubiOrder", bubiOrder);
-        return "bubi/orderline/packSuccess";
+    @GetMapping("/orderline/fromShelfmark")
+    public ResponseEntity<BubiOrderLine> getForShelfmark(String shelfmark, String collection) {
+        return ResponseEntity.ok(this.bubiService.expandBubiOrderLineFromShelfmark(collection, shelfmark));
+    }
+
+    @GetMapping("/orderline/fromBarcode")
+    public ResponseEntity<BubiOrderLine> getForBarcode(String barcode) {
+        return ResponseEntity.ok(this.bubiService.expandBubiOrderLineFromBarcode(barcode));
+    }
+
+    @GetMapping("/orderline/active")
+    public ResponseEntity<List<BubiOrderLine>> getAllActiveOrderlines() {
+        return ResponseEntity.ok(this.bubiService.getActiveOrderlines());
+    }
+
+    @GetMapping("/orderline/waiting")
+    public ResponseEntity<List<BubiOrderLine>> getAllWaitingOrderlines() {
+        return ResponseEntity.ok(this.bubiService.getWatingOrderlines());
+    }
+
+    @GetMapping("/orderline/sent")
+    public ResponseEntity<List<BubiOrderLine>> getAllSentOrderlines() {
+        return ResponseEntity.ok(this.bubiService.getSentOrderlines());
+    }
+
+    @GetMapping("/orderline/all")
+    public ResponseEntity<List<BubiOrderLine>> getAllOrderlines() {
+        return ResponseEntity.ok(this.bubiService.getAllOrderlines());
+    }
+
+    @GetMapping("/orderline/bubi/{vendorId}")
+    public ResponseEntity<List<BubiOrderLine>> getAllOrderlines(@PathVariable String vendorId) {
+        return ResponseEntity.ok(this.bubiService.getAllBubiOrderLinesForBubi(vendorId));
+    }
+
+    // ---------------------- bubi order endpoints ----------------------
+
+    @GetMapping("/order/all")
+    public ResponseEntity<List<BubiOrder>> getAllOrders() {
+        return ResponseEntity.ok(this.bubiService.getAllBubiOrder());
+    }
+
+    @GetMapping("/order/active")
+    public ResponseEntity<List<BubiOrder>> getActiveOrders() {
+        return ResponseEntity.ok(this.bubiService.getActiveBubiOrder());
+    }
+
+
+    @PostMapping("/order/save")
+    public ResponseEntity<List<BubiOrder>> packOrders( @RequestBody BubiOrder bubiOrder) {
+        return ResponseEntity.ok(this.bubiService.packBubiOrder(bubiOrder));
+    }
+
+    @PostMapping("/order/pay")
+    public ResponseEntity<BubiOrder> payOrder( @RequestBody BubiOrder bubiOrder) {
+        return ResponseEntity.ok(this.bubiService.payBubiOrder(bubiOrder));
     }
 
     // ---------------------- primo data endpoints ----------------------
 
     @GetMapping("/getJournalData")
-    public ResponseEntity<List<AlmaJournalData>> getJournalData(String collection, String shelfmark) {
-        AlmaJournalData almaJournalData = new AlmaJournalData(collection, shelfmark);
-        return ResponseEntity.ok(this.primoService.getPrimoResponse(almaJournalData));
+    public ResponseEntity<List<AlmaItemData>> getJournalData(String collection, String shelfmark) {
+        AlmaItemData almaItemData = new AlmaItemData(collection, shelfmark);
+        return ResponseEntity.ok(this.primoService.getPrimoResponse(almaItemData));
     }
-
-
-
-
-
-
 }
