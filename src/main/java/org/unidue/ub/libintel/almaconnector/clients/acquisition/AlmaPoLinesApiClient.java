@@ -21,7 +21,7 @@ public interface AlmaPoLinesApiClient {
      * @param bib          Method for handling standalone Bib record: retain, delete or suppress. Optional. By default: retain. (optional, default to &quot;retain&quot;)
      */
     @RequestMapping(method = RequestMethod.DELETE, value = "po-lines/{poLineId}?reason={reason}&comment={comment}&inform_vendor={informVendor}&override={override}&bib={bib}")
-    void deletePoLinesPoLineId(@PathVariable("po_line_id") String poLineId, @RequestHeader("Accept") String accept, @RequestParam("reason") String reason, @RequestParam("comment") String comment, @RequestParam("inform_vendor") Boolean informVendor, @RequestParam("override") Boolean override, @RequestParam("bib") String bib);
+    void deletePoLinesPoLineId(@PathVariable("poLineId") String poLineId, @RequestHeader("Accept") String accept, @RequestParam("reason") String reason, @RequestParam("comment") String comment, @RequestParam("inform_vendor") Boolean informVendor, @RequestParam("override") Boolean override, @RequestParam("bib") String bib);
 
     /**
      * Retrieve PO-Lines
@@ -51,7 +51,7 @@ public interface AlmaPoLinesApiClient {
      * @return PoLine
      */
     @RequestMapping(method = RequestMethod.GET, value="/{poLineId}")
-    PoLine getPoLinesPoLineId(@RequestHeader("Accept") String accept, @PathVariable("po_line_id") String poLineId);
+    PoLine getPoLinesPoLineId(@RequestHeader("Accept") String accept, @PathVariable("poLineId") String poLineId);
 
     /**
      * Get PO-Line Items
@@ -61,7 +61,7 @@ public interface AlmaPoLinesApiClient {
      * @return Items
      */
     @RequestMapping(method=RequestMethod.GET, value="/{poLineId}/items")
-    Items getPoLinesPoLineIdItems(@RequestHeader("Accept") String accept, @PathVariable("po_line_id") String poLineId);
+    Items getPoLinesPoLineIdItems(@RequestHeader("Accept") String accept, @PathVariable("poLineId") String poLineId);
 
     /**
      * Create PO-Line
@@ -86,7 +86,7 @@ public interface AlmaPoLinesApiClient {
      * @return Item
      */
     @RequestMapping(method=RequestMethod.POST, value="/{poLineId}/items")
-    Item postPoLinesPoLineIdItems(@RequestBody Item body, @RequestHeader("Accept") String accept, @PathVariable("po_line_id") String poLineId, @RequestParam("receive_date") String receiveDate, @RequestParam("department") String department, @RequestParam("department_library") String departmentLibrary);
+    Item postPoLinesPoLineIdItems(@RequestBody Item body, @RequestHeader("Accept") String accept, @PathVariable("poLineId") String poLineId, @RequestParam("receive_date") String receiveDate, @RequestParam("department") String department, @RequestParam("department_library") String departmentLibrary);
 
     /**
      * Receive an Existing Item
@@ -113,7 +113,7 @@ public interface AlmaPoLinesApiClient {
      * @param updateInventory Flag for updating the PO Line&#39;s inventory. Options: true, false. Default: true. (optional, default to &quot;true&quot;)
      * @return PoLine
      */
-    @RequestMapping(method=RequestMethod.POST, value="/{poLineId}")
+    @RequestMapping(method=RequestMethod.PUT, value="/{poLineId}")
     PoLine putPoLinesPoLineId(@RequestBody PoLine body, @RequestHeader("Accept") String accept, @PathVariable("poLineId") String poLineId, @RequestParam("update_inventory") String updateInventory);
 
 }
