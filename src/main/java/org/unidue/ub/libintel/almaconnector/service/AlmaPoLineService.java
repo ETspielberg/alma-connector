@@ -49,8 +49,19 @@ public class AlmaPoLineService {
      * retrieves the active po-lines.
      * @return a list of po-lines
      */
-    @Secured({ "ROLE_SYSTEM", "ROLE_ALMA" })
+    @Secured({ "ROLE_SYSTEM", "ROLE_ALMA" , "ROLE_ALMA_Physical_Inventory_Operator"})
     public PoLine savePoLine(PoLine poLine) {
         return this.almaPoLinesApiClient.postAcqPoLines(poLine, "application/json", "");
     }
+
+    @Secured({ "ROLE_SYSTEM", "ROLE_ALMA" , "ROLE_ALMA_Physical_Inventory_Operator"})
+    public PoLine updatePoLine(PoLine poLine) {
+        return this.almaPoLinesApiClient.putPoLinesPoLineId(poLine, "application/json", poLine.getNumber(),"" );
+    }
+
+    @Secured({ "ROLE_SYSTEM", "ROLE_ALMA" , "ROLE_ALMA_Physical_Inventory_Operator"})
+    public PoLine getPoLine(String poLineId) {
+        return this.almaPoLinesApiClient.getPoLinesPoLineId("application/json", poLineId);
+    }
+
 }
