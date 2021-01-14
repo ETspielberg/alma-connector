@@ -1,7 +1,6 @@
 package org.unidue.ub.libintel.almaconnector.model.bubi;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import org.checkerframework.common.aliasing.qual.Unique;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.NumberFormat;
 
@@ -12,6 +11,9 @@ import java.util.Date;
 @IdClass(BubiOrderLineId.class)
 @Table(name = "bubi_order_line")
 public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
+
+    @Column(name = "bubi_order_line_id")
+    private String bubiOrderLineId;
 
     @Id
     @Column(name = "collection")
@@ -25,11 +27,7 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
     @Column(name = "counter")
     private long counter;
 
-    @Column(name="bubi_order_line_id")
-    @Unique
-    private String bubiOrderLineid;
-
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "bubi_order_id")
     private BubiOrder bubiOrder;
 
@@ -117,7 +115,11 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
     private Date lastChange;
 
     @Column(name="status")
+    @Enumerated(EnumType.STRING)
     private BubiStatus status;
+
+    @Column(name="positional_number")
+    private long positionalNumber = -1L;
 
     public BubiOrderLine() {
         this.status = BubiStatus.NEW;
@@ -132,6 +134,7 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         this.counter = counter;
         this.lastChange = new Date();
         this.created = new Date();
+        this.updateBubiOrderLineId();
     }
 
     public void addCoreData(CoreData coredata) {
@@ -161,12 +164,20 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         this.almaHoldingId = coredata.getAlmaHoldingId();
     }
 
+    public void addAlmaItemData(AlmaItemData almaItemData) {
+        this.lastChange = new Date();
+        this.title = almaItemData.title;
+        this.almaMmsId = almaItemData.mmsId;
+        this.almaHoldingId = almaItemData.holdingId;
+    }
+
     public String getShelfmark() {
         return shelfmark;
     }
 
     public void setShelfmark(String shelfmark) {
         this.shelfmark = shelfmark;
+        this.updateBubiOrderLineId();
     }
 
     public String getCollection() {
@@ -175,6 +186,7 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
 
     public void setCollection(String collection) {
         this.collection = collection;
+        this.updateBubiOrderLineId();
     }
 
     public long getCounter() {
@@ -183,6 +195,15 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
 
     public void setCounter(long counter) {
         this.counter = counter;
+        this.updateBubiOrderLineId();
+    }
+
+    public long getPositionalNumber() {
+        return positionalNumber;
+    }
+
+    public void setPositionalNumber(long positionalNumber) {
+        this.positionalNumber = positionalNumber;
     }
 
     public String getAlmaPoLineId() {
@@ -263,14 +284,6 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
 
     public void setVolume(String volume) {
         this.volume = volume;
-    }
-
-    public String getBubiOrderLineid() {
-        return bubiOrderLineid;
-    }
-
-    public void setBubiOrderLineid(String bubiOrderLineid) {
-        this.bubiOrderLineid = bubiOrderLineid;
     }
 
     public String getColor() {
@@ -415,6 +428,18 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
 
     public void setVendorAccount(String vendorAccount) {
         this.vendorAccount = vendorAccount;
+    }
+
+    public String getBubiOrderLineId() {
+        return bubiOrderLineId;
+    }
+
+    public void setBubiOrderLineId(String bubiOrderLineId) {
+        this.bubiOrderLineId = bubiOrderLineId;
+    }
+
+    public void updateBubiOrderLineId() {
+        this.bubiOrderLineId = String.format("%s-%s-%d", this.collection, this.shelfmark, this.counter);
     }
 
     @Override
