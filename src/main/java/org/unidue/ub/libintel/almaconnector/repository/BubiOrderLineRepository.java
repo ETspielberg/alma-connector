@@ -1,11 +1,14 @@
 package org.unidue.ub.libintel.almaconnector.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.unidue.ub.libintel.almaconnector.model.bubi.BubiOrderLine;
 import org.unidue.ub.libintel.almaconnector.model.bubi.BubiOrderLineId;
+import org.unidue.ub.libintel.almaconnector.model.bubi.BubiStatus;
 
 import java.util.List;
 
+@RepositoryRestResource(collectionResourceRel = "bubiOrderLine", path = "bubiOrderLine")
 public interface BubiOrderLineRepository  extends JpaRepository<BubiOrderLine, BubiOrderLineId> {
 
     List<BubiOrderLine> findAllByCollectionAndShelfmark(String collection, String shelfmark);
@@ -18,6 +21,6 @@ public interface BubiOrderLineRepository  extends JpaRepository<BubiOrderLine, B
 
     BubiOrderLine getBubiOrderLineByAlmaPoLineId(String almaPoLineId);
 
-    List<BubiOrderLine> findAllByStatus(String Status);
+    List<BubiOrderLine> findAllByStatus(BubiStatus status);
 
 }
