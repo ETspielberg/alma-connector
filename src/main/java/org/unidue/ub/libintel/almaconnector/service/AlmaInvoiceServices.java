@@ -155,6 +155,10 @@ public class AlmaInvoiceServices {
         return container;
     }
 
+    public Invoice saveInvoice(Invoice invoice) {
+        return this.almaInvoicesApiClient.postAcqInvoices(invoice, "application/json");
+    }
+
     /**
      * filters a list of Invoices according a given voucher date
      *
