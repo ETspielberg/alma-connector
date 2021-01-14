@@ -1,6 +1,6 @@
 package org.unidue.ub.libintel.almaconnector.model.bubi;
 
-public class AlmaJournalData {
+public class AlmaItemData {
 
     public String mmsId = "";
 
@@ -12,28 +12,28 @@ public class AlmaJournalData {
 
     public String title = "";
 
-    public AlmaJournalData(String collection, String shelfmark) {
+    public AlmaItemData(String collection, String shelfmark) {
         this.collection = collection;
         this.shelfmark = shelfmark;
     }
 
-    public AlmaJournalData withHoldingId(String holdingId) {
+    public AlmaItemData withHoldingId(String holdingId) {
         this.holdingId = holdingId;
         return this;
     }
 
-    public AlmaJournalData withMmsId(String mmsId) {
+    public AlmaItemData withMmsId(String mmsId) {
         this.mmsId = mmsId;
         return this;
     }
 
-    public AlmaJournalData withTitle(String title) {
+    public AlmaItemData withTitle(String title) {
         this.title = title;
         return this;
     }
 
-    public AlmaJournalData clone() {
-        AlmaJournalData clone = new AlmaJournalData(this.collection, this.shelfmark)
+    public AlmaItemData clone() {
+        AlmaItemData clone = new AlmaItemData(this.collection, this.shelfmark)
                 .withHoldingId(this.holdingId).withMmsId(this.mmsId).withTitle(title);
         return clone;
     }

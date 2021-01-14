@@ -11,9 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.unidue.ub.libintel.almaconnector.model.bubi.AlmaJournalData;
+import org.unidue.ub.libintel.almaconnector.model.bubi.AlmaItemData;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -32,15 +31,16 @@ public class PrimoService {
 
     private final Logger log = LoggerFactory.getLogger(PrimoService.class);
 
-    public List<AlmaJournalData> getPrimoResponse(AlmaJournalData almaJournalData) {
+    public List<AlmaItemData> getPrimoResponse(AlmaItemData almaItemData) {
         try {
             String mediaType = "book";
-            if (almaJournalData.shelfmark.contains(" Z "))
+            if (almaItemData.shelfmark.contains(" Z "))
                 mediaType = "journal";
-            String response = getResponseForJson(almaJournalData.shelfmark);
-            List<AlmaJournalData> foundJournals = new ArrayList<>();
+            String response = getResponseForJson(almaItemData.shelfmark);
+            List<AlmaItemData> foundJournals = new ArrayList<>();
             if (!"".equals(response)) {
-                log.debug(String.format("checking for %s: %s",almaJournalData.collection, almaJournalData.shelfmark));
+                log.debug(String.format("checking for %s: %s", almaItemData.collection, almaItemData.shelfmark));
+                log.debug(response);
                 DocumentContext jsonContext = JsonPath.parse(response);
                 List<Object> documents = jsonContext.read("$['docs'][*]");
                 log.debug("found " + documents.size() + " documents");
@@ -49,25 +49,26 @@ public class PrimoService {
                     String basePath = "$['docs'][" + i + "]";
 
                     try {
+                        log.debug(jsonContext.read(basePath + "['pnx']['display']['type'][0]"));
                         if (!mediaType.equals(jsonContext.read(basePath + "['pnx']['display']['type'][0]")))
                             continue;
                         String title = jsonContext.read(basePath + "['pnx']['display']['title'][0]");
                         String location = jsonContext.read(basePath + "['delivery']['bestlocation']['subLocationCode']");
                         log.debug("found location: " + location);
-                        if (!almaJournalData.collection.equals(location))
+                        if (!almaItemData.collection.equals(location))
                             continue;
                         String shelfmark = jsonContext.read(basePath + "['delivery']['bestlocation']['callNumber']");
                         log.debug("found shelfmark: " + shelfmark);
-                        if (!shelfmark.contains(almaJournalData.shelfmark))
+                        if (!shelfmark.contains(almaItemData.shelfmark))
                             continue;
                         log.info("found match");
-                        AlmaJournalData newJournalData = almaJournalData.clone()
+                        AlmaItemData newJournalData = almaItemData.clone()
                                 .withHoldingId(jsonContext.read(basePath + "['delivery']['bestlocation']['holdId']"))
                                 .withMmsId(jsonContext.read(basePath + "['delivery']['bestlocation']['ilsApiId']"))
                                 .withTitle(title);
                         foundJournals.add(newJournalData);
                     } catch (PathNotFoundException pnfe) {
-                        log.debug("no url given");
+                        log.warn("no url given");
                     }
                 }
             }
@@ -79,11 +80,13 @@ public class PrimoService {
         }
     }
 
-    private String getResponseForJson(String shelfmark) throws UnsupportedEncodingException {
+    private String getResponseForJson(String shelfmark) {
+        if (shelfmark.contains("#"))
+            shelfmark = shelfmark.replace("#", "*");
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.getMessageConverters()
                 .add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
-        shelfmark = URLEncoder.encode(shelfmark, "utf-8");
+        shelfmark = URLEncoder.encode(shelfmark, StandardCharsets.UTF_8);
         String query = "holding_call_number,contains," + shelfmark;
         String resourceUrl = String.format(PRIMO_BASE_URL, query, primoVid, primoApiKey);
         log.info("querying Primo API with " + resourceUrl);
