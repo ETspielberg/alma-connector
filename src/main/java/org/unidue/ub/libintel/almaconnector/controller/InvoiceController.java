@@ -71,7 +71,7 @@ public class InvoiceController {
      * the overview page of the
      * @return the string sap for to use the sap.html template
      */
-    @GetMapping("/sap")
+    @GetMapping("/sap/start")
     public String getSapPage(Model model) {
         AlmaExportRun almaExportRun = this.almaExportRunService.getAlmaExportRun(new Date(), "E0001");
         model.addAttribute("almaExportRun", almaExportRun);
