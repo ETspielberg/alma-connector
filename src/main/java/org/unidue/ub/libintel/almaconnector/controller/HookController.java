@@ -19,12 +19,24 @@ public class HookController {
     private final static Logger log = LoggerFactory.getLogger(HookController.class);
 
     @GetMapping("/jobListener")
-    public ResponseEntity<Challenge> answerChallenge(String challenge) {
+    public ResponseEntity<Challenge> answerJobChallenge(String challenge) {
         return ResponseEntity.ok(new Challenge(challenge));
     }
 
     @PostMapping("/jobListener")
-    public ResponseEntity<?> receiveHook(@RequestBody String hookContent, @RequestHeader("X-Exl-Signature") String signature) {
+    public ResponseEntity<?> receiveJobHook(@RequestBody String hookContent, @RequestHeader("X-Exl-Signature") String signature) {
+        log.info(signature);
+        log.info(hookContent);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/loanListener")
+    public ResponseEntity<Challenge> answerLoanChallenge(String challenge) {
+        return ResponseEntity.ok(new Challenge(challenge));
+    }
+
+    @PostMapping("/loanListener")
+    public ResponseEntity<?> receiveLoanHook(@RequestBody String hookContent, @RequestHeader("X-Exl-Signature") String signature) {
         log.info(signature);
         log.info(hookContent);
         return ResponseEntity.ok().build();
