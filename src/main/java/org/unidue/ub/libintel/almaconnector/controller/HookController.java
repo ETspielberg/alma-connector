@@ -13,7 +13,7 @@ import org.unidue.ub.libintel.almaconnector.model.hook.Challenge;
 @RequestMapping("/hooks")
 public class HookController {
 
-    @Value("${libintel.alma.jobs.id.packaging}")
+    @Value("${libintel.alma.jobs.id.packaging:123456789}")
     private String packagingJobId;
 
     private final static Logger log = LoggerFactory.getLogger(HookController.class);
