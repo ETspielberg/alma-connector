@@ -65,6 +65,11 @@ public class HookService {
                                 item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("D0001"));
                                 break;
                             }
+                            case "E0023": {
+                                item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("MSA"));
+                                item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("E0023"));
+                                break;
+                            }
                         }
                         log.debug(String.format("retrieved item from library %s", library));
                     } else if ("LOAN_RETURNED".equals(hook.getEvent().getValue())) {
