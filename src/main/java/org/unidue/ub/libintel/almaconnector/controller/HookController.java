@@ -37,6 +37,18 @@ public class HookController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/requestsListener")
+    public ResponseEntity<Challenge> answerRequestChallenge(String challenge) {
+        return ResponseEntity.ok(new Challenge(challenge));
+    }
+
+    @PostMapping("/requestsListener")
+    public ResponseEntity<?> receiveRequestHook(@RequestBody String hookContent, @RequestHeader("X-Exl-Signature") String signature) {
+        log.info(signature);
+        log.info(hookContent);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/loanListener")
     public ResponseEntity<Challenge> answerLoanChallenge(String challenge) {
         return ResponseEntity.ok(new Challenge(challenge));

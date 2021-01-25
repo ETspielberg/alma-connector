@@ -12,6 +12,7 @@ import org.unidue.ub.alma.shared.user.Address;
 import org.unidue.ub.alma.shared.user.AlmaUser;
 import org.unidue.ub.libintel.almaconnector.clients.acquisition.AlmaItemsApiClient;
 import org.unidue.ub.libintel.almaconnector.model.hook.LoanHook;
+import org.unidue.ub.libintel.almaconnector.model.hook.RequestHook;
 
 @Service
 public class HookService {
@@ -26,6 +27,11 @@ public class HookService {
                 AlmaItemsApiClient almaItemsApiClient) {
         this.almaUserService = almaUserService;
         this.almaItemsApiClient = almaItemsApiClient;
+    }
+
+    @Async("threadPoolTaskExecutor")
+    public void processLoanHook(RequestHook hook) {
+
     }
 
     @Async("threadPoolTaskExecutor")
