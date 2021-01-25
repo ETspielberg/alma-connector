@@ -18,7 +18,7 @@ public interface AlmaUserApiClient {
      * @param userIdType The type of identifier that is being searched. Optional. If this is not provided, all unique identifier types are used. The values that can be used are any of the values in UserIdentifierTypes code table. (optional, default to &quot;all_unique&quot;)
      */
     @RequestMapping(method=RequestMethod.DELETE, value="/{userId}")
-    void deleteAlmawsV1UsersUserId(@RequestParam("Accept") String accept, @PathVariable("userId") String userId, @RequestParam("user_id_type") String userIdType);
+    void deleteAlmaUsersUserId(@RequestParam("Accept") String accept, @PathVariable("userId") String userId, @RequestParam("user_id_type") String userIdType);
 
     /**
      * Retrieve users
@@ -32,7 +32,7 @@ public interface AlmaUserApiClient {
      * @return List<AlmaUser>
      */
     @RequestMapping(method=RequestMethod.GET, value="")
-    List<AlmaUser> getAlmawsV1Users(@RequestParam("Accept") String accept, @RequestParam("limit") Integer limit, @RequestParam("offset") Integer offset, @RequestParam("q") String q, @RequestParam("order_by") String orderBy, @RequestParam("source_institution_code") String sourceInstitutionCode, @RequestParam("source_user_id") String sourceUserId);
+    List<AlmaUser> getAlmaUsers(@RequestParam("Accept") String accept, @RequestParam("limit") Integer limit, @RequestParam("offset") Integer offset, @RequestParam("q") String q, @RequestParam("order_by") String orderBy, @RequestParam("source_institution_code") String sourceInstitutionCode, @RequestParam("source_user_id") String sourceUserId);
 
     /**
      * Get user details
@@ -40,12 +40,15 @@ public interface AlmaUserApiClient {
      * @param userId A unique identifier for the user (required)
      * @param userIdType The type of identifier that is being searched. Optional. If this is not provided, all unique identifier types are used. The values that can be used are any of the values in UserIdentifierTypes code table. The value may also be linking_id.  To search for users which have linked accounts in other institutions according to the linking_id use user_id_type&#x3D;linking_id. (optional, default to &quot;all_unique&quot;)
      * @param view Special view of User object. Optional. Possible values: full - full User object will be returned. brief - only user&#39;s core information, emails, identifiers and statistics are returned. By default, the full User object will be returned. (optional, default to &quot;full&quot;)
-     * @param expand This parameter allows for expanding on some user information. Three options are available: loans-Include the total number of loans; requests-Include the total number of requests; fees-Include the balance of fees. To have more than one option, use a comma separator. (optional, default to &quot;none&quot;)
+     * @param expand This parameter allo for expanding on some user information. Three options are available: loans-Include the total number of loans; requests-Include the total number of requests; fees-Include the balance of fees. To have more than one option, use a comma separator. (optional, default to &quot;none&quot;)
      * @param sourceInstitutionCode The source institution Code. Optional. When used the user_id is used to locate a copied user (linked account) based on source_link_id. (optional, default to &quot;&quot;)
      * @return AlmaUser
      */
     @RequestMapping(method=RequestMethod.GET, value="/{userId}")
-    AlmaUser getAlmawsV1UsersUserId(@RequestParam("Accept") String accept, @PathVariable("userId") String userId, @RequestParam("user_id_type") String userIdType, @RequestParam("view") String view, @RequestParam("expand") String expand, @RequestParam("source_institution_code") String sourceInstitutionCode);
+    AlmaUser getAlmaUsersUserId(@RequestParam("Accept") String accept, @PathVariable("userId") String userId, @RequestParam("user_id_type") String userIdType, @RequestParam("view") String view, @RequestParam("expand") String expand, @RequestParam("source_institution_code") String sourceInstitutionCode);
+
+    @RequestMapping(method=RequestMethod.GET, value="/{userId}")
+    AlmaUser getAlmaUser(@RequestParam("Accept") String accept, @PathVariable("userId") String userId, @RequestParam("view") String view);
 
     /**
      * Create user
@@ -58,7 +61,7 @@ public interface AlmaUserApiClient {
      * @return AlmaUser
      */
     @RequestMapping(method=RequestMethod.POST, value="")
-    AlmaUser postAlmawsV1Users(@RequestBody AlmaUser body, @RequestParam("Accept") String accept, @RequestParam("social_authentication") String socialAuthentication, @RequestParam("send_pin_number_letter") String sendPinNumberLetter, @RequestParam("source_institution_code") String sourceInstitutionCode, @RequestParam("source_user_id") String sourceUserId);
+    AlmaUser postAlmaUsers(@RequestBody AlmaUser body, @RequestParam("Accept") String accept, @RequestParam("social_authentication") String socialAuthentication, @RequestParam("send_pin_number_letter") String sendPinNumberLetter, @RequestParam("source_institution_code") String sourceInstitutionCode, @RequestParam("source_user_id") String sourceUserId);
 
     /**
      * Authenticate or refresh user
@@ -70,7 +73,7 @@ public interface AlmaUserApiClient {
      * @return AlmaUser
      */
     @RequestMapping(method=RequestMethod.POST, value="/{userId}")
-    AlmaUser postAlmawsV1UsersUserId(@RequestParam("Accept") String accept, @PathVariable("userId") String userId, @RequestParam("password") String password, @RequestParam("user_id_type") String userIdType, @RequestParam("op") String op);
+    AlmaUser postAlmaUsersUserId(@RequestParam("Accept") String accept, @PathVariable("userId") String userId, @RequestParam("password") String password, @RequestParam("user_id_type") String userIdType, @RequestParam("op") String op);
 
     /**
      * Update User Details
@@ -83,5 +86,5 @@ public interface AlmaUserApiClient {
      * @return AlmaUser
      */
     @RequestMapping(method=RequestMethod.PUT, value="/{userId}")
-    AlmaUser putAlmawsV1UsersUserId(@RequestBody AlmaUser body, @RequestParam("Accept") String accept, @PathVariable("userId") String userId, @RequestParam("user_id_type") String userIdType, @RequestParam("override") String override, @RequestParam("send_pin_number_letter") String sendPinNumberLetter);
+    AlmaUser putAlmaUsersUserId(@RequestBody AlmaUser body, @RequestParam("Accept") String accept, @PathVariable("userId") String userId, @RequestParam("user_id_type") String userIdType, @RequestParam("override") String override, @RequestParam("send_pin_number_letter") String sendPinNumberLetter);
 }

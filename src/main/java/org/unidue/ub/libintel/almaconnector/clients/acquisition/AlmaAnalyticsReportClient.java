@@ -22,7 +22,7 @@ import java.io.StringWriter;
 @Service
 public class AlmaAnalyticsReportClient {
 
-    @Value("${alma.api.acq.key}")
+    @Value("${alma.api.key}")
     private String almaAcqApiKey;
 
     private Logger log = LoggerFactory.getLogger(AlmaAnalyticsReportClient.class);

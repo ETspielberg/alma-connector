@@ -24,7 +24,7 @@ public class PrimoService {
     @Value("${primo.vid}")
     String primoVid;
 
-    @Value("${alma.api.acq.key}")
+    @Value("${alma.api.key}")
     private String primoApiKey;
 
     private final static String PRIMO_BASE_URL = "https://api-eu.hosted.exlibrisgroup.com/primo/v1/search?q=%s&vid=%s&apikey=%s";

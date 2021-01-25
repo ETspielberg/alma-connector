@@ -15,7 +15,7 @@ import org.unidue.ub.libintel.almaconnector.clients.ApiKeyAuth;
  */
 public class UsersFeignConfiguration {
 
-    @Value("${alma.api.users.key}")
+    @Value("${alma.api.key}")
     private String almaUsersApiKey;
 
     private static final Logger log = LoggerFactory.getLogger(UsersFeignConfiguration.class);
