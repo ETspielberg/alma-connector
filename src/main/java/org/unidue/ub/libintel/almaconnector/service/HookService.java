@@ -58,11 +58,12 @@ public class HookService {
                             case "E0001": {
                                 item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("ESA"));
                                 item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("E0001"));
-
+                                break;
                             }
                             case "D0001": {
                                 item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("DSA"));
                                 item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("D0001"));
+                                break;
                             }
                         }
                         log.debug(String.format("retrieved item from library %s", library));
