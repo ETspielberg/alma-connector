@@ -4,8 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.unidue.ub.alma.shared.bibs.HookItemLoan;
-import org.unidue.ub.alma.shared.bibs.UserRequest;
+import org.unidue.ub.alma.shared.bibs.HookUserRequest;
 import org.unidue.ub.alma.shared.conf.GeneralInstitution;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -41,7 +40,7 @@ public class RequestHook {
 
     public static final String JSON_PROPERTY_ITEM_LOAN = "user_request";
     @XmlElement(name = "user_request")
-    private UserRequest userRequest;
+    private HookUserRequest userRequest;
 
     @JsonProperty(JSON_PROPERTY_ID)
     @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -79,11 +78,11 @@ public class RequestHook {
     @JsonProperty(JSON_PROPERTY_ITEM_LOAN)
     @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
     @JacksonXmlProperty(localName = "item_loan")
-    public UserRequest getUserRequest() {
+    public HookUserRequest getUserRequest() {
         return this.userRequest;
     }
 
-    public void setItemLoan(UserRequest userRequest) {
+    public void setItemLoan(HookUserRequest userRequest) {
         this.userRequest = userRequest;
     }
 

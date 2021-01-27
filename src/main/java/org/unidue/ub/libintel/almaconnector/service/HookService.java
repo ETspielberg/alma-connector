@@ -4,13 +4,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.unidue.ub.alma.shared.bibs.HoldingDataTempLibrary;
-import org.unidue.ub.alma.shared.bibs.HoldingDataTempLocation;
-import org.unidue.ub.alma.shared.bibs.HookItemLoan;
-import org.unidue.ub.alma.shared.bibs.Item;
+import org.unidue.ub.alma.shared.bibs.*;
 import org.unidue.ub.alma.shared.user.Address;
 import org.unidue.ub.alma.shared.user.AlmaUser;
 import org.unidue.ub.libintel.almaconnector.clients.acquisition.AlmaItemsApiClient;
+import org.unidue.ub.libintel.almaconnector.model.bubi.BubiOrderLine;
 import org.unidue.ub.libintel.almaconnector.model.hook.LoanHook;
 import org.unidue.ub.libintel.almaconnector.model.hook.RequestHook;
 
@@ -21,17 +19,29 @@ public class HookService {
 
     private final AlmaItemsApiClient almaItemsApiClient;
 
+    private final BubiService bubiService;
+
     private final Logger log = LoggerFactory.getLogger(HookService.class);
 
     HookService(AlmaUserService almaUserService,
-                AlmaItemsApiClient almaItemsApiClient) {
+                AlmaItemsApiClient almaItemsApiClient,
+                BubiService bubiService) {
         this.almaUserService = almaUserService;
         this.almaItemsApiClient = almaItemsApiClient;
+        this.bubiService = bubiService;
     }
 
     @Async("threadPoolTaskExecutor")
-    public void processLoanHook(RequestHook hook) {
-
+    public void processRequestHook(RequestHook hook) {
+        HookUserRequest userRequest = hook.getUserRequest();
+        log.debug(String.format("retrieving barcode %s", userRequest.getBarcode()));
+        if ("WORK_ORDER".equals(userRequest.getRequestType()) && "Buchbinder".equals(userRequest.getRequestSubType().getValue())) {
+            if ("BOOK".equals(userRequest.getMaterialType().getValue())) {
+                BubiOrderLine bubiOrderLine = this.bubiService.expandBubiOrderLineFromBarcode(userRequest.getBarcode());
+                this.bubiService.saveBubiOrderLine(bubiOrderLine);
+                log.info(String.format("created new bubi order line %s for %s: %s", bubiOrderLine.getBubiOrderLineId(), bubiOrderLine.getCollection(), bubiOrderLine.getShelfmark()));
+            }
+        }
     }
 
     @Async("threadPoolTaskExecutor")
