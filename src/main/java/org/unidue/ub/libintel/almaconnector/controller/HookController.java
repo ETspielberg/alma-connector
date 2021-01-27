@@ -57,10 +57,11 @@ public class HookController {
     }
 
     @PostMapping("/requestsListener")
-    public ResponseEntity<?> receiveRequestHook(@RequestBody RequestHook hookContent, @RequestHeader("X-Exl-Signature") String signature) {
-        log.info(String.format("revceived hook of type %s", hookContent.getAction()));
-        log.info(hookContent.getUserRequest().toString());
-        this.hookService.processRequestHook(hookContent);
+    public ResponseEntity<?> receiveRequestHook(@RequestBody String hookContent, @RequestHeader("X-Exl-Signature") String signature) {
+        //log.info(String.format("revceived hook of type %s", hookContent.getAction()));
+        log.info(hookContent);
+        //log.info(hookContent.getUserRequest().toString());
+        //this.hookService.processRequestHook(hookContent);
         return ResponseEntity.ok().build();
     }
 
