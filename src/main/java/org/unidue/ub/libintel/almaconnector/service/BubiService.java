@@ -177,6 +177,10 @@ public class BubiService {
         return this.bubiOrderLineRepository.findAllByStatus(BubiStatus.WAITING);
     }
 
+    public BubiOrderLine getBubiOrderLineFromIdentifier(String identifier) {
+        return this.bubiOrderLineRepository.getBubiOrderLineByBubiOrderLineId(identifier);
+    }
+
     public List<BubiOrderLine> getSentOrderlines() {
         return this.bubiOrderLineRepository.findAllByStatus(BubiStatus.SENT);
     }

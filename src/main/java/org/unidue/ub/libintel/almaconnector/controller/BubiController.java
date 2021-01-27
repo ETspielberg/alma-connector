@@ -88,6 +88,11 @@ public class BubiController {
         return ResponseEntity.ok(this.bubiService.expandBubiOrderLineFromBarcode(barcode));
     }
 
+    @GetMapping("/orderline/fromIdentifier")
+    public ResponseEntity<BubiOrderLine> getForIdentifier(String identifier) {
+        return ResponseEntity.ok(this.bubiService.getBubiOrderLineFromIdentifier(identifier));
+    }
+
     @GetMapping("/orderline/active")
     public ResponseEntity<List<BubiOrderLine>> getAllActiveOrderlines() {
         return ResponseEntity.ok(this.bubiService.getActiveOrderlines());

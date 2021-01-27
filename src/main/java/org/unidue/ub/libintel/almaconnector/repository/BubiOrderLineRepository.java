@@ -21,6 +21,8 @@ public interface BubiOrderLineRepository  extends JpaRepository<BubiOrderLine, B
 
     BubiOrderLine getBubiOrderLineByAlmaPoLineId(String almaPoLineId);
 
+    BubiOrderLine getBubiOrderLineByBubiOrderLineId(String bubiOrderLineId);
+
     List<BubiOrderLine> findAllByStatus(BubiStatus status);
 
 }
