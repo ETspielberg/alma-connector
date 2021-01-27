@@ -6,8 +6,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.unidue.ub.alma.shared.bibs.HookUserRequest;
 import org.unidue.ub.libintel.almaconnector.model.hook.Challenge;
 import org.unidue.ub.libintel.almaconnector.model.hook.LoanHook;
+import org.unidue.ub.libintel.almaconnector.model.hook.RequestHook;
 import org.unidue.ub.libintel.almaconnector.service.HookService;
 
 @Controller
@@ -37,15 +39,27 @@ public class HookController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/itemListener")
+    public ResponseEntity<Challenge> answerItemChallenge(String challenge) {
+        return ResponseEntity.ok(new Challenge(challenge));
+    }
+
+    @PostMapping("/itemListener")
+    public ResponseEntity<?> receiveItemHook(@RequestBody String hookContent, @RequestHeader("X-Exl-Signature") String signature) {
+        log.info(signature);
+        log.info(hookContent);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/requestsListener")
     public ResponseEntity<Challenge> answerRequestChallenge(String challenge) {
         return ResponseEntity.ok(new Challenge(challenge));
     }
 
     @PostMapping("/requestsListener")
-    public ResponseEntity<?> receiveRequestHook(@RequestBody String hookContent, @RequestHeader("X-Exl-Signature") String signature) {
+    public ResponseEntity<?> receiveRequestHook(@RequestBody RequestHook hookContent, @RequestHeader("X-Exl-Signature") String signature) {
         log.info(signature);
-        log.info(hookContent);
+        this.hookService.processRequestHook(hookContent);
         return ResponseEntity.ok().build();
     }
 
