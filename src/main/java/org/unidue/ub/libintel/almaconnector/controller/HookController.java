@@ -58,7 +58,7 @@ public class HookController {
 
     @PostMapping("/requestsListener")
     public ResponseEntity<?> receiveRequestHook(@RequestBody RequestHook hookContent, @RequestHeader("X-Exl-Signature") String signature) {
-        log.info(signature);
+        log.info(String.format("revceived hook of type %s", hookContent.getAction()));
         this.hookService.processRequestHook(hookContent);
         return ResponseEntity.ok().build();
     }
@@ -70,7 +70,7 @@ public class HookController {
 
     @PostMapping("/loanListener")
     public ResponseEntity<?> receiveLoanHook(@RequestBody LoanHook hookContent, @RequestHeader("X-Exl-Signature") String signature) {
-        log.info(signature);
+        log.info(String.format("revceived hook of type %s", hookContent.getAction()));
         this.hookService.processLoanHook(hookContent);
         return ResponseEntity.ok().build();
     }
