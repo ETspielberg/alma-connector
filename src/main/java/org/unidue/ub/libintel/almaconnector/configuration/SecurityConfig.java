@@ -15,13 +15,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.httpBasic()
-                .and()
+        http.httpBasic().disable()
+                .cors().disable()
+                .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/start", "/hooks/**")
                 .permitAll()
-                .anyRequest().authenticated()
-                .and()
-                .csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).ignoringAntMatchers("/hooks/**");
+                .anyRequest().authenticated();
     }
 }
