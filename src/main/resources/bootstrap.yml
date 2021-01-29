@@ -7,7 +7,7 @@ spring:
       name: client, files, settings-datasource, sap, service-provider
       username: ${libintel_config_username:dalek}
       password: ${libintel_config_password:3l1m1nat3}
-      label: ${libintel.profile:dev}
+      label: ${lrmetibintel.profile:dev}
   main:
     allow-bean-definition-overriding: true
   security:
@@ -18,3 +18,8 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
