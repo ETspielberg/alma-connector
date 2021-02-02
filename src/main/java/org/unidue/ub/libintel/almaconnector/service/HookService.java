@@ -34,10 +34,16 @@ public class HookService {
     @Async("threadPoolTaskExecutor")
     public void processRequestHook(RequestHook hook) {
         HookUserRequest userRequest = hook.getUserRequest();
-        log.debug(String.format("retrieving barcode %s", userRequest.getBarcode()));
         if ("WORK_ORDER".equals(userRequest.getRequestType()) && "Buchbinder".equals(userRequest.getRequestSubType().getValue())) {
             if ("BOOK".equals(userRequest.getMaterialType().getValue())) {
+                log.debug(String.format("retrieving barcode %s", userRequest.getBarcode()));
                 BubiOrderLine bubiOrderLine = this.bubiService.expandBubiOrderLineFromBarcode(userRequest.getBarcode());
+                this.bubiService.saveBubiOrderLine(bubiOrderLine);
+                log.info(String.format("created new bubi order line %s for %s: %s", bubiOrderLine.getBubiOrderLineId(), bubiOrderLine.getCollection(), bubiOrderLine.getShelfmark()));
+            }
+            else if ("ISSBD".equals(userRequest.getMaterialType().getValue())) {
+                log.debug(String.format("retrieving mms and item id %s, %s", userRequest.getMmsId(), userRequest.getItemId()));
+                BubiOrderLine bubiOrderLine = this.bubiService.expandBubiOrderLineFromMmsAndItemId(userRequest.getMmsId(), userRequest.getItemId());
                 this.bubiService.saveBubiOrderLine(bubiOrderLine);
                 log.info(String.format("created new bubi order line %s for %s: %s", bubiOrderLine.getBubiOrderLineId(), bubiOrderLine.getCollection(), bubiOrderLine.getShelfmark()));
             }

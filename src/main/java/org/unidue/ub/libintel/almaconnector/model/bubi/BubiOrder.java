@@ -143,8 +143,8 @@ public class BubiOrder {
 
     public void setBubiOrderLines(List<BubiOrderLine> bubiOrderLines) {
         this.bubiOrderLines = bubiOrderLines;
-        for (BubiOrderLine bubiOrderLine: bubiOrderLines)
-            this.totalAmount += bubiOrderLine.getPrice();
+        //for (BubiOrderLine bubiOrderLine: bubiOrderLines)
+        //    this.totalAmount += bubiOrderLine.getPrice();
     }
 
     public void addBubiOrderLine(BubiOrderLine bubiOrderLine) {
@@ -238,5 +238,12 @@ public class BubiOrder {
 
     public void setTotalAmount(Double totalAmount) {
         this.totalAmount = totalAmount;
+    }
+
+    public double calculateTotalPrice() {
+        for (BubiOrderLine bubiOrderLine: bubiOrderLines) {
+            this.totalAmount += bubiOrderLine.getPrice();
+        }
+        return this.totalAmount;
     }
 }

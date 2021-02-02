@@ -1,6 +1,9 @@
 package org.unidue.ub.libintel.almaconnector.model.bubi;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.NumberFormat;
 
@@ -29,6 +32,7 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "bubi_order_id")
+    @JsonIgnore
     private BubiOrder bubiOrder;
 
     @Column(name = "alma_vendor_id")
@@ -99,6 +103,7 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
     private String comment;
 
     @Column(name = "is_ff")
+    @JsonProperty("isFf")
     private boolean isFf;
 
     @Column(name = "bindings_follow")
@@ -366,7 +371,7 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         this.comment = comment;
     }
 
-    public boolean isFf() {
+    public boolean getIsFf() {
         return isFf;
     }
 

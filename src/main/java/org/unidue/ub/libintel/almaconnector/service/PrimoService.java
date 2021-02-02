@@ -40,7 +40,7 @@ public class PrimoService {
             List<AlmaItemData> foundJournals = new ArrayList<>();
             if (!"".equals(response)) {
                 log.debug(String.format("checking for %s: %s", almaItemData.collection, almaItemData.shelfmark));
-                log.debug(response);
+                //log.debug(response);
                 DocumentContext jsonContext = JsonPath.parse(response);
                 List<Object> documents = jsonContext.read("$['docs'][*]");
                 log.debug("found " + documents.size() + " documents");
