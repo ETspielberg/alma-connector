@@ -144,7 +144,9 @@ public class BubiService {
 
     public BubiOrderLine expandBubiOrderLineFromItem(Item item) {
         String campus = item.getItemData().getLibrary().getValue().toUpperCase(Locale.ROOT);
-        String material = item.getItemData().getPhysicalMaterialType().getValue();
+        String material = "book";
+        if ("ISSBD".equals(item.getItemData().getPhysicalMaterialType().getValue()))
+            material = "journal";
         String collection = item.getItemData().getLocation().getDesc().toUpperCase(Locale.ROOT);
         String shelfmark = item.getHoldingData().getCallNumber().toUpperCase(Locale.ROOT);
         long counter = this.bubiOrderLineRepository.countAllByShelfmarkAndCollection(shelfmark, collection);
