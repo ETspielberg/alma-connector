@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.Invoice;
 import org.unidue.ub.alma.shared.acq.PoLine;
 import org.unidue.ub.alma.shared.bibs.Item;
-import org.unidue.ub.alma.shared.bibs.UserRequest;
 import org.unidue.ub.libintel.almaconnector.clients.conf.AlmaJobsApiClient;
 import org.unidue.ub.libintel.almaconnector.model.bubi.*;
 import org.unidue.ub.libintel.almaconnector.repository.BubiDataRepository;
@@ -153,9 +152,14 @@ public class BubiService {
         log.info(String.format("retrieving core data for collection %s and shelfmark %s", bubiOrderLine.getCollection(), bubiOrderLine.getShelfmark()));
         CoreData coredata = this.coreDataRepository.findAllByCollectionAndShelfmark(collection, shelfmark);
         if (coredata == null) {
+            log.info(String.format("no core data available - applying standard values for campus %s and material type %s", campus, material));
             coredata = this.coreDataRepository.findCoreDataByActiveAndShelfmarkAndMediaType(true, "STANDARD_" + campus, material);
+            bubiOrderLine.setTitle(item.getBibData().getTitle());
+            bubiOrderLine.setAlmaMmsId(item.getBibData().getMmsId());
+            bubiOrderLine.setAlmaHoldingId(item.getHoldingData().getHoldingId());
             bubiOrderLine.addCoreData(coredata, true);
         } else {
+            log.info("found core data");
             bubiOrderLine.addCoreData(coredata, false);
         }
         setFundAndPrice(bubiOrderLine);
