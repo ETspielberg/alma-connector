@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.Invoice;
 import org.unidue.ub.alma.shared.acq.PoLine;
-import org.unidue.ub.alma.shared.acq.PoLineStatus;
 import org.unidue.ub.alma.shared.bibs.Item;
 import org.unidue.ub.libintel.almaconnector.clients.conf.AlmaJobsApiClient;
 import org.unidue.ub.libintel.almaconnector.model.bubi.*;
@@ -257,9 +256,12 @@ public class BubiService {
                 coreData.setComment("");
             }
             try {
-                coreData.setIsFf("j".equals(row.getCell(43).getStringCellValue()));
+                if ("j".equals(row.getCell(43).getStringCellValue()))
+                    coreData.setMediaType("journal");
+                else
+                    coreData.setMediaType("book");
             } catch (Exception e) {
-                coreData.setIsFf(false);
+                coreData.setMediaType("journal");
             }
             try {
                 coreData.setBindingsFollow(row.getCell(44).getStringCellValue());
@@ -337,7 +339,7 @@ public class BubiService {
         if (bubiOrderline.getShelfmark().contains(" Z ")) {
             bubiOrderline.setFund(journalFund);
             bubiOrderline.setPrice(bubiData.getStandardPriceJournal());
-        } else if (bubiOrderline.getIsFf()) {
+        } else if (bubiOrderline.getStandard()) {
             bubiOrderline.setFund(journalFund);
             bubiOrderline.setPrice(bubiData.getStandardPriceMonograph());
         } else {

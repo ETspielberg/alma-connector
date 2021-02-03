@@ -54,8 +54,8 @@ public class CoreData implements Cloneable {
     @Column(name="comment", columnDefinition = "TEXT")
     private String comment;
 
-    @Column(name="is_ff")
-    private boolean isFf;
+    @Column(name="media_type")
+    private String mediaType;
 
     @Column(name="bindings_follow")
     private String bindingsFollow;
@@ -211,12 +211,12 @@ public class CoreData implements Cloneable {
         this.comment = comment;
     }
 
-    public boolean getIsFf() {
-        return isFf;
+    public String getMediaType() {
+        return mediaType;
     }
 
-    public void setIsFf(boolean ff) {
-        isFf = ff;
+    public void setMediaType(String mediaType) {
+        this.mediaType = mediaType;
     }
 
     public String getBindingsFollow() {
@@ -251,11 +251,6 @@ public class CoreData implements Cloneable {
         this.almaHoldingId = almaHoldingId;
     }
 
-
-    public void setFf(boolean ff) {
-        isFf = ff;
-    }
-
     @Override
     protected CoreData clone() {
         CoreData clone = new CoreData();
@@ -268,7 +263,7 @@ public class CoreData implements Cloneable {
         clone.setComment(this.comment);
         clone.setCover(this.cover);
         clone.setEdition(this.edition);
-        clone.setIsFf(this.isFf);
+        clone.setMediaType(this.mediaType);
         clone.setVolume(this.volume);
         clone.setIssue(this.issue);
         clone.setMinting(this.minting);
@@ -280,7 +275,6 @@ public class CoreData implements Cloneable {
         clone.setShelfmark(this.shelfmark);
         clone.setAlmaHoldingId(this.almaHoldingId);
         clone.setAlmaMmsId(this.almaMmsId);
-        clone.setIsFf(this.isFf);
         return clone;
     }
 }

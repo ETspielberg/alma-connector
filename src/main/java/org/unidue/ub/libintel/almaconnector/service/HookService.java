@@ -34,18 +34,30 @@ public class HookService {
     @Async("threadPoolTaskExecutor")
     public void processRequestHook(RequestHook hook) {
         HookUserRequest userRequest = hook.getUserRequest();
-        if ("WORK_ORDER".equals(userRequest.getRequestType()) && "Buchbinder".equals(userRequest.getRequestSubType().getValue())) {
-            if ("BOOK".equals(userRequest.getMaterialType().getValue())) {
-                log.debug(String.format("retrieving barcode %s", userRequest.getBarcode()));
-                BubiOrderLine bubiOrderLine = this.bubiService.expandBubiOrderLineFromBarcode(userRequest.getBarcode());
-                this.bubiService.saveBubiOrderLine(bubiOrderLine);
-                log.info(String.format("created new bubi order line %s for %s: %s", bubiOrderLine.getBubiOrderLineId(), bubiOrderLine.getCollection(), bubiOrderLine.getShelfmark()));
-            }
-            else if ("ISSBD".equals(userRequest.getMaterialType().getValue())) {
-                log.debug(String.format("retrieving mms and item id %s, %s", userRequest.getMmsId(), userRequest.getItemId()));
-                BubiOrderLine bubiOrderLine = this.bubiService.expandBubiOrderLineFromMmsAndItemId(userRequest.getMmsId(), userRequest.getItemId());
-                this.bubiService.saveBubiOrderLine(bubiOrderLine);
-                log.info(String.format("created new bubi order line %s for %s: %s", bubiOrderLine.getBubiOrderLineId(), bubiOrderLine.getCollection(), bubiOrderLine.getShelfmark()));
+        if ("WORK_ORDER".equals(userRequest.getRequestType()) && "Int".equals(userRequest.getRequestSubType().getValue())) {
+            switch (userRequest.getTargetDestination().getValue()) {
+                case "Buchbinder": {
+                    if ("BOOK".equals(userRequest.getMaterialType().getValue())) {
+                        log.debug(String.format("retrieving barcode %s", userRequest.getBarcode()));
+                        BubiOrderLine bubiOrderLine = this.bubiService.expandBubiOrderLineFromBarcode(userRequest.getBarcode());
+                        this.bubiService.saveBubiOrderLine(bubiOrderLine);
+                        log.info(String.format("created new bubi order line %s for %s: %s", bubiOrderLine.getBubiOrderLineId(), bubiOrderLine.getCollection(), bubiOrderLine.getShelfmark()));
+                    } else if ("ISSBD".equals(userRequest.getMaterialType().getValue())) {
+                        log.debug(String.format("retrieving mms and item id %s, %s", userRequest.getMmsId(), userRequest.getItemId()));
+                        BubiOrderLine bubiOrderLine = this.bubiService.expandBubiOrderLineFromMmsAndItemId(userRequest.getMmsId(), userRequest.getItemId());
+                        this.bubiService.saveBubiOrderLine(bubiOrderLine);
+                        log.info(String.format("created new bubi order line %s for %s: %s", bubiOrderLine.getBubiOrderLineId(), bubiOrderLine.getCollection(), bubiOrderLine.getShelfmark()));
+                    }
+                    break;
+                }
+                case "Aussonderung" :{
+                    log.info("retrieved internal work order for Aussonderung");
+                    break;
+                }
+                case "Umarbeitung" : {
+                    log.info("retrieved internal work order for Umarbeitung");
+                    break;
+                }
             }
         }
     }

@@ -3,7 +3,6 @@ package org.unidue.ub.libintel.almaconnector.model.bubi;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.NumberFormat;
 
@@ -102,9 +101,12 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
     @Column(name = "comment", columnDefinition = "TEXT")
     private String comment;
 
-    @Column(name = "is_ff")
-    @JsonProperty("isFf")
-    private boolean isFf;
+    @Column(name = "media_type")
+    private String mediaType;
+
+    @Column(name = "standard")
+    @JsonProperty("standard")
+    private boolean standard;
 
     @Column(name = "bindings_follow")
     private String bindingsFollow;
@@ -151,7 +153,8 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         this.comment = coredata.getComment();
         this.cover = coredata.getCover();
         this.edition = coredata.getEdition();
-        this.isFf = coredata.getIsFf();
+        this.mediaType = coredata.getMediaType();
+        this.standard = "book".equals(this.mediaType);
         this.minting = coredata.getMinting();
         this.issue = coredata.getIssue();
         this.part = coredata.getPart();
@@ -371,12 +374,12 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         this.comment = comment;
     }
 
-    public boolean getIsFf() {
-        return isFf;
+    public boolean getStandard() {
+        return standard;
     }
 
-    public void setFf(boolean ff) {
-        isFf = ff;
+    public void setStandard(boolean ff) {
+        standard = ff;
     }
 
     public String getAlmaMmsId() {
@@ -445,6 +448,14 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
 
     public void updateBubiOrderLineId() {
         this.bubiOrderLineId = String.format("%s-%s-%d", this.collection, this.shelfmark, this.counter);
+    }
+
+    public String getMediaType() {
+        return mediaType;
+    }
+
+    public void setMediaType(String mediaType) {
+        this.mediaType = mediaType;
     }
 
     @Override

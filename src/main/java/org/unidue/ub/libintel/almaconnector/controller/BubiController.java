@@ -60,13 +60,20 @@ public class BubiController {
      * @throws IOException thrown if the file could not be read
      */
     @PostMapping("/coredata/import")
-    public ResponseEntity<CoreDataImportRun> updateInvoicesWithSapData(@RequestParam("file") MultipartFile bubiCoreDataFile) throws IOException {
+    public ResponseEntity<CoreDataImportRun> importCoredata(@RequestParam("file") MultipartFile bubiCoreDataFile) throws IOException {
         // read the excel spreadsheet from the request
         XSSFWorkbook workbook = new XSSFWorkbook(bubiCoreDataFile.getInputStream());
         CoreDataImportRun coreDataImportRun = new CoreDataImportRun();
         coreDataImportRun = this.bubiService.readCoreDataFromExcelSheet(coreDataImportRun, workbook);
         return ResponseEntity.ok(coreDataImportRun);
     }
+
+    @PostMapping("/coredata/save")
+    public ResponseEntity<CoreData> saveCoredata(@RequestBody CoreData coredata) {
+        log.info(coredata.getMediaType());
+        return ResponseEntity.ok(this.bubiService.saveCoreData(coredata));
+    }
+
 
     // ---------------------- bubi order line endpoints ----------------------
 
