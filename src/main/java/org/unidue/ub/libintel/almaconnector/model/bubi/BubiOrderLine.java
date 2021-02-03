@@ -150,28 +150,31 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         this.lastChange = new Date();
         this.binding = coredata.getBinding();
         this.bindingsFollow = coredata.getBindingsFollow();
-        this.collection = coredata.getCollection();
         this.color = coredata.getColor();
         this.comment = coredata.getComment();
         this.cover = coredata.getCover();
         this.edition = coredata.getEdition();
-        this.mediaType = coredata.getMediaType();
+        if (this.mediaType == null)
+            this.mediaType = coredata.getMediaType();
         this.standard = standard;
         this.minting = coredata.getMinting();
         this.issue = coredata.getIssue();
         this.part = coredata.getPart();
         this.partDescription = coredata.getPartDescription();
-        this.shelfmark = coredata.getShelfmark();
         this.year = coredata.getYear();
         this.volume = coredata.getVolume();
-        if (coredata.getTitle() != null)
-            this.title = coredata.getTitle();
-        else
-            this.title = coredata.getMinting();
+        if (this.title == null) {
+            if (coredata.getTitle() != null)
+                this.title = coredata.getTitle();
+            else
+                this.title = coredata.getMinting();
+        }
         this.partTitle = coredata.getPartTitle();
         this.vendorId = coredata.getVendorId();
-        this.almaMmsId = coredata.getAlmaMmsId();
-        this.almaHoldingId = coredata.getAlmaHoldingId();
+        if (this.almaMmsId == null)
+            this.almaMmsId = coredata.getAlmaMmsId();
+        if (this.almaHoldingId == null)
+            this.almaHoldingId = coredata.getAlmaHoldingId();
     }
 
     public void addAlmaItemData(AlmaItemData almaItemData) {
