@@ -143,12 +143,18 @@ public class BubiService {
     }
 
     public BubiOrderLine expandBubiOrderLineFromItem(Item item) {
-        String campus = item.getItemData().getLibrary().getValue().toUpperCase(Locale.ROOT);
+        String collection = item.getItemData().getLocation().getDesc().toUpperCase(Locale.ROOT);
+        String shelfmark = item.getHoldingData().getCallNumber().toUpperCase(Locale.ROOT);
+        String campus = "E0001";
+        try {
+            campus = item.getItemData().getLibrary().getValue().toUpperCase(Locale.ROOT);
+        } catch (Exception e) {
+            if (collection.startsWith("D"))
+                campus = "D0001";
+        }
         String material = "book";
         if ("ISSBD".equals(item.getItemData().getPhysicalMaterialType().getValue()))
             material = "journal";
-        String collection = item.getItemData().getLocation().getDesc().toUpperCase(Locale.ROOT);
-        String shelfmark = item.getHoldingData().getCallNumber().toUpperCase(Locale.ROOT);
         long counter = this.bubiOrderLineRepository.countAllByShelfmarkAndCollection(shelfmark, collection);
         BubiOrderLine bubiOrderLine = new BubiOrderLine(collection, shelfmark, counter);
         log.info(String.format("retrieving core data for collection %s and shelfmark %s", bubiOrderLine.getCollection(), bubiOrderLine.getShelfmark()));
