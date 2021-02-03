@@ -144,7 +144,7 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         this.updateBubiOrderLineId();
     }
 
-    public void addCoreData(CoreData coredata) {
+    public void addCoreData(CoreData coredata, boolean standard) {
         this.lastChange = new Date();
         this.binding = coredata.getBinding();
         this.bindingsFollow = coredata.getBindingsFollow();
@@ -154,7 +154,7 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         this.cover = coredata.getCover();
         this.edition = coredata.getEdition();
         this.mediaType = coredata.getMediaType();
-        this.standard = "book".equals(this.mediaType);
+        this.standard = standard;
         this.minting = coredata.getMinting();
         this.issue = coredata.getIssue();
         this.part = coredata.getPart();

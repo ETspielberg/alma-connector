@@ -12,4 +12,6 @@ public interface CoreDataRepository  extends JpaRepository<CoreData, String> {
     CoreData findAllByCollectionAndShelfmark(String collection, String shelfmark);
 
     List<CoreData> findAllByAlmaMmsId(String almaMmsId);
+
+    CoreData findCoreDataByActiveAndShelfmarkAndMediaType(Boolean active, String shelfmark, String mediaType);
 }
