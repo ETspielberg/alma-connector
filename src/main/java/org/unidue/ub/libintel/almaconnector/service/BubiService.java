@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.Invoice;
 import org.unidue.ub.alma.shared.acq.PoLine;
 import org.unidue.ub.alma.shared.bibs.Item;
+import org.unidue.ub.alma.shared.bibs.UserRequest;
 import org.unidue.ub.libintel.almaconnector.clients.conf.AlmaJobsApiClient;
 import org.unidue.ub.libintel.almaconnector.model.bubi.*;
 import org.unidue.ub.libintel.almaconnector.repository.BubiDataRepository;
@@ -17,10 +18,7 @@ import org.unidue.ub.libintel.almaconnector.repository.BubiOrderLineRepository;
 import org.unidue.ub.libintel.almaconnector.repository.BubiOrderRepository;
 import org.unidue.ub.libintel.almaconnector.repository.CoreDataRepository;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Hashtable;
-import java.util.List;
+import java.util.*;
 
 import static org.unidue.ub.libintel.almaconnector.Utils.buildPoLine;
 import static org.unidue.ub.libintel.almaconnector.Utils.getInvoiceForBubiOrder;
@@ -121,34 +119,6 @@ public class BubiService {
         return this.coreDataRepository.save(coreData);
     }
 
-    public BubiOrderLine expandBubiOrderLine(BubiOrderLine bubiOrderLine) {
-        if (bubiOrderLine.getShelfmark() != null || bubiOrderLine.getCollection() != null) {
-            long counter = this.bubiOrderLineRepository.countAllByShelfmarkAndCollection(bubiOrderLine.getShelfmark(), bubiOrderLine.getCollection());
-            bubiOrderLine.setCounter(counter);
-            log.info(String.format("retrieving core data for collection %s and shelfmark %s", bubiOrderLine.getCollection(), bubiOrderLine.getShelfmark()));
-            addCoreData(bubiOrderLine);
-        }
-        return bubiOrderLine;
-    }
-
-    public BubiOrderLine expandBubiOrderLineFromBarcode(String barcode) {
-        Item item = this.itemService.findItemByBarcode(barcode);
-        return expandBubiOrderLineFromItem(item);
-    }
-
-    public BubiOrderLine expandBubiOrderLineFromShelfmark(String collection, String shelfmark) {
-        if (shelfmark != null && collection != null) {
-            return retrieveBubiOrderLine(collection.toUpperCase(), shelfmark.toUpperCase(), "journal");
-        }
-        return null;
-    }
-
-    public BubiOrderLine expandBubiOrderLineFromItem(Item item) {
-        String collection = item.getItemData().getLocation().getDesc();
-        String shelfmark = item.getHoldingData().getCallNumber();
-        log.debug(String.format("expanding bubiOrder for item %s: %s", collection,shelfmark));
-        return retrieveBubiOrderLine(collection, shelfmark, "book");
-    }
 
     public BubiOrderLine expandBubiOrderLineFromMmsAndItemId(String mmsId, String itemId) {
         if (mmsId != null && itemId != null) {
@@ -156,6 +126,40 @@ public class BubiService {
             return expandBubiOrderLineFromItem(item);
         }
         return null;
+    }
+
+    public BubiOrderLine getBubiOrderLineFromBarcode(String barcode) {
+        if (barcode != null) {
+            Item item = this.itemService.findItemByBarcode(barcode);
+            return expandBubiOrderLineFromItem(item);
+        }
+        return null;
+    }
+
+    public BubiOrderLine expandBubiOrderLineFromShelfmark(String collection, String shelfmark) {
+        if (shelfmark != null && collection != null) {
+            return retrieveBubiOrderLine(collection.toUpperCase(), shelfmark.toUpperCase());
+        }
+        return null;
+    }
+
+    public BubiOrderLine expandBubiOrderLineFromItem(Item item) {
+        String campus = item.getItemData().getLibrary().getValue().toUpperCase(Locale.ROOT);
+        String material = item.getItemData().getPhysicalMaterialType().getValue();
+        String collection = item.getItemData().getLocation().getDesc().toUpperCase(Locale.ROOT);
+        String shelfmark = item.getHoldingData().getCallNumber().toUpperCase(Locale.ROOT);
+        long counter = this.bubiOrderLineRepository.countAllByShelfmarkAndCollection(shelfmark, collection);
+        BubiOrderLine bubiOrderLine = new BubiOrderLine(collection, shelfmark, counter);
+        log.info(String.format("retrieving core data for collection %s and shelfmark %s", bubiOrderLine.getCollection(), bubiOrderLine.getShelfmark()));
+        CoreData coredata = this.coreDataRepository.findAllByCollectionAndShelfmark(collection, shelfmark);
+        if (coredata == null) {
+            coredata = this.coreDataRepository.findCoreDataByActiveAndShelfmarkAndMediaType(true, "STANDARD_" + campus, material);
+            bubiOrderLine.addCoreData(coredata, true);
+        } else {
+            bubiOrderLine.addCoreData(coredata, false);
+        }
+        setFundAndPrice(bubiOrderLine);
+        return bubiOrderLine;
     }
 
     public BubiOrderLine saveBubiOrderLine(BubiOrderLine bubiOrderLine) {
@@ -393,7 +397,7 @@ public class BubiService {
         return bubiOrder;
     }
 
-    private BubiOrderLine retrieveBubiOrderLine(String collection, String shelfmark, String mediaType) {
+    private BubiOrderLine retrieveBubiOrderLine(String collection, String shelfmark) {
         long counter = this.bubiOrderLineRepository.countAllByShelfmarkAndCollection(shelfmark, collection);
         BubiOrderLine bubiOrderLine = new BubiOrderLine(collection, shelfmark, counter);
         log.info(String.format("retrieving core data for collection %s and shelfmark %s", bubiOrderLine.getCollection(), bubiOrderLine.getShelfmark()));
@@ -403,12 +407,6 @@ public class BubiService {
             List<AlmaItemData> foundAlmaItemData = this.primoService.getPrimoResponse(almaItemData);
             if (foundAlmaItemData.size() > 0) {
                 bubiOrderLine.addAlmaItemData(foundAlmaItemData.get(0));
-            }
-        } else {
-            if (collection.startsWith("E")) {
-                addDefaultCoreData(bubiOrderLine, "E0001", mediaType);
-            } else {
-                addDefaultCoreData(bubiOrderLine, "D0001", mediaType);
             }
         }
         setFundAndPrice(bubiOrderLine);

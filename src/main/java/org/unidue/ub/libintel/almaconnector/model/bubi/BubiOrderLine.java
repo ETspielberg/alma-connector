@@ -145,6 +145,8 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
     }
 
     public void addCoreData(CoreData coredata, boolean standard) {
+        if (coredata == null)
+            return;
         this.lastChange = new Date();
         this.binding = coredata.getBinding();
         this.bindingsFollow = coredata.getBindingsFollow();

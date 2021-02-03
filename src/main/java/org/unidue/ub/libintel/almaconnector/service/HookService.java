@@ -39,7 +39,7 @@ public class HookService {
                 case "Buchbinder": {
                     if ("BOOK".equals(userRequest.getMaterialType().getValue())) {
                         log.debug(String.format("retrieving barcode %s", userRequest.getBarcode()));
-                        BubiOrderLine bubiOrderLine = this.bubiService.expandBubiOrderLineFromBarcode(userRequest.getBarcode());
+                        BubiOrderLine bubiOrderLine = this.bubiService.getBubiOrderLineFromBarcode(userRequest.getBarcode());
                         this.bubiService.saveBubiOrderLine(bubiOrderLine);
                         log.info(String.format("created new bubi order line %s for %s: %s", bubiOrderLine.getBubiOrderLineId(), bubiOrderLine.getCollection(), bubiOrderLine.getShelfmark()));
                     } else if ("ISSBD".equals(userRequest.getMaterialType().getValue())) {

@@ -92,7 +92,7 @@ public class BubiController {
 
     @GetMapping("/orderline/fromBarcode")
     public ResponseEntity<BubiOrderLine> getForBarcode(String barcode) {
-        return ResponseEntity.ok(this.bubiService.expandBubiOrderLineFromBarcode(barcode));
+        return ResponseEntity.ok(this.bubiService.getBubiOrderLineFromBarcode(barcode));
     }
 
     @GetMapping("/orderline/fromIdentifier")

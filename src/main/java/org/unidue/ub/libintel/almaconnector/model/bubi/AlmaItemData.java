@@ -12,6 +12,10 @@ public class AlmaItemData {
 
     public String title = "";
 
+    public String campus = "";
+
+    public String mediaType = "";
+
     public AlmaItemData(String collection, String shelfmark) {
         this.collection = collection;
         this.shelfmark = shelfmark;
@@ -29,6 +33,16 @@ public class AlmaItemData {
 
     public AlmaItemData withTitle(String title) {
         this.title = title;
+        return this;
+    }
+
+    public AlmaItemData withMediaType(String mediaType) {
+        this.mediaType = mediaType;
+        return this;
+    }
+
+    public AlmaItemData withCampus(String campus) {
+        this.campus = campus;
         return this;
     }
 

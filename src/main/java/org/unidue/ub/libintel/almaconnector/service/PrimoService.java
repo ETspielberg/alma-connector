@@ -59,13 +59,16 @@ public class PrimoService {
                             continue;
                         String shelfmark = jsonContext.read(basePath + "['delivery']['bestlocation']['callNumber']");
                         log.debug("found shelfmark: " + shelfmark);
+                        String campus = jsonContext.read(basePath + "['delivery']['bestlocation']['libraryCode']");
+                        log.debug("found campus: " + campus);
+
                         if (!shelfmark.contains(almaItemData.shelfmark))
                             continue;
                         log.info("found match");
                         AlmaItemData newJournalData = almaItemData.clone()
                                 .withHoldingId(jsonContext.read(basePath + "['delivery']['bestlocation']['holdId']"))
                                 .withMmsId(jsonContext.read(basePath + "['delivery']['bestlocation']['ilsApiId']"))
-                                .withTitle(title);
+                                .withTitle(title).withMediaType(mediaType).withCampus(campus);
                         foundJournals.add(newJournalData);
                     } catch (PathNotFoundException pnfe) {
                         log.warn("no url given");
