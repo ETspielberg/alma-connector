@@ -2,6 +2,7 @@ package org.unidue.ub.libintel.almaconnector.clients.bib;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -149,7 +150,7 @@ public interface AlmaCatalogApiClient {
    * @return Object
    */
   @RequestMapping(method= RequestMethod.GET, value="/{mms_id}/holdings/{holding_id}/items/{item_pid}?view={view}&expand={expand}&user_id={user_id}")
-  Item getBibsMmsIdHoldingsHoldingIdItemsItemPid(@RequestParam("mms_id") String mmsId, @RequestParam("holding_id") String holdingId, @RequestParam("item_pid") String itemPid, @RequestParam("view") String view, @RequestParam("expand") String expand, @RequestParam("user_id") String userId);
+  Item getBibsMmsIdHoldingsHoldingIdItemsItemPid(@RequestHeader("Accept") String accept, @RequestParam("mms_id") String mmsId, @RequestParam("holding_id") String holdingId, @RequestParam("item_pid") String itemPid, @RequestParam("view") String view, @RequestParam("expand") String expand, @RequestParam("user_id") String userId);
 
 
   /**
