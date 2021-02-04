@@ -18,3 +18,11 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create
+logging:
+  level:
+    org:
+      unidue:
+        ub:
+          libintel:
+            almaconnector:
+              clients: debug
