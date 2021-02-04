@@ -6,8 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.MediaType;
 import org.unidue.ub.libintel.almaconnector.clients.AlmaRetryer;
 import org.unidue.ub.libintel.almaconnector.clients.ApiKeyAuth;
+import org.unidue.ub.libintel.almaconnector.clients.ContentTypeInterceptor;
 
 /**
  * configuration for the Feign clients to allow for basic authentication upon the requests to the settings backend
@@ -32,6 +34,15 @@ public class AcquisitionFeignConfiguration {
         //set the api key as defied in the properties
         apiKeyAuth.setApiKey(almaAcqApiKey);
         return apiKeyAuth;
+    }
+
+    /**
+     * appropriate request interceptor to add the content type information.
+     * @return the request interceptor
+     */
+    @Bean
+    public RequestInterceptor contentTypeInterceptor() {
+        return new ContentTypeInterceptor(MediaType.APPLICATION_JSON);
     }
 
     /**
