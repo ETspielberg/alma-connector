@@ -79,17 +79,11 @@ public class BubiOrder {
         this.vendorId = "";
     }
 
-    public BubiOrder(String vendorId, String vendorAccount, long counter) {
-        this.vendorId = vendorId;
-        this.vendorAccount = vendorAccount;
-        this.counter = counter;
-        this.bubiOrderLines = new ArrayList<>();
-    }
-
-    public BubiOrder(BubiOrderLine bubiOrderLine) {
+    public BubiOrder(long counter, BubiOrderLine bubiOrderLine) {
         this.vendorId = bubiOrderLine.getVendorId();
         this.vendorAccount = bubiOrderLine.getVendorAccount();
-        this.counter = 0;
+        this.counter = counter;
+        this.bubiOrderId = bubiOrderLine.getVendorId() + "-" + bubiOrderLine.getVendorAccount() + "-" + counter;
         this.bubiOrderLines = new ArrayList<>();
         this.bubiOrderLines.add(bubiOrderLine);
         this.bubiStatus = BubiStatus.NEW;
@@ -97,6 +91,19 @@ public class BubiOrder {
         this.created = new Date();
         this.lastChange = new Date();
         this.totalAmount = bubiOrderLine.getPrice();
+    }
+
+    public BubiOrder(String vendorId, String vendorAccount, long counter) {
+        this.bubiOrderId = vendorId + "-" + vendorAccount + "-" + counter;
+        this.counter = counter;
+        this.vendorId = vendorId;
+        this.vendorAccount = vendorAccount;
+        this.bubiStatus = BubiStatus.NEW;
+        this.paymentStatus = PaymentStatus.OPEN;
+        this.created = new Date();
+        this.lastChange = new Date();
+        this.totalAmount = 0.0;
+        this.bubiOrderLines = new ArrayList<>();
     }
 
     public BubiOrder withCounter(long counter) {

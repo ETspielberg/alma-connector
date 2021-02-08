@@ -18,6 +18,7 @@ import org.unidue.ub.libintel.almaconnector.repository.BubiOrderRepository;
 import org.unidue.ub.libintel.almaconnector.repository.CoreDataRepository;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 import static org.unidue.ub.libintel.almaconnector.Utils.buildPoLine;
 import static org.unidue.ub.libintel.almaconnector.Utils.getInvoiceForBubiOrder;
@@ -35,6 +36,8 @@ public class BubiService {
     private String monographFund;
 
     private final BubiOrderRepository bubiOrderRepository;
+
+    private final String journalRegEx = "\\d\\dZ\\d+.*";
 
     private final BubiOrderLineRepository bubiOrderLineRepository;
 
@@ -83,7 +86,9 @@ public class BubiService {
         return this.bubiOrderRepository.getOne(orderNumber);
     }
 
-    public List<BubiOrder> getAllBubiOrder() { return this.bubiOrderRepository.findAll(); }
+    public List<BubiOrder> getAllBubiOrder() {
+        return this.bubiOrderRepository.findAll();
+    }
 
     public List<BubiOrder> getActiveBubiOrder() {
         List<BubiOrder> activeOrders = new ArrayList<>();
@@ -91,7 +96,8 @@ public class BubiService {
         activeOrders.addAll(this.bubiOrderRepository.findAllByBubiStatus(BubiStatus.SENT));
         activeOrders.addAll(this.bubiOrderRepository.findAllByBubiStatus(BubiStatus.WAITING));
         activeOrders.addAll(this.bubiOrderRepository.findAllByBubiStatus(BubiStatus.COMPLAINT));
-        return this.bubiOrderRepository.findAll(); }
+        return this.bubiOrderRepository.findAll();
+    }
 
     public List<BubiOrderLine> getAllBubiOrderLines() {
         return this.bubiOrderLineRepository.findAll();
@@ -105,6 +111,9 @@ public class BubiService {
         return this.bubiOrderLineRepository.findAllByVendorIdAndVendorAccount(vendorId, vendorAccount);
     }
 
+    public List<CoreData> getActiveCoreData() {
+        return this.coreDataRepository.findAllByActive(true);
+    }
 
     public List<CoreData> getAllCoreData() {
         return this.coreDataRepository.findAll();
@@ -212,8 +221,12 @@ public class BubiService {
                 continue;
             String collection = row.getCell(0).getStringCellValue();
             String shelfmark = row.getCell(1).getStringCellValue();
-            if (!shelfmark.contains(" Z "))
+            log.info(shelfmark);
+            log.info(String.valueOf(Pattern.matches(journalRegEx, shelfmark)));
+            if (Pattern.matches(journalRegEx, shelfmark)) {
+                log.info("found journal shelfmark");
                 shelfmark = shelfmark.replace("Z", " Z ");
+            }
             coreData.setCollection(collection);
             coreData.setShelfmark(shelfmark);
             try {
@@ -267,7 +280,9 @@ public class BubiService {
                 coreData.setYear("");
             }
             try {
-                coreData.setComment(row.getCell(39).getStringCellValue());
+                String comment = row.getCell(39).getStringCellValue();
+                coreData.setComment(comment);
+                coreData.setActive(!comment.contains("abbest."));
             } catch (Exception e) {
                 coreData.setComment("");
             }
@@ -290,22 +305,24 @@ public class BubiService {
                 coreData.setAlternativeBubiData("");
             }
             coreDataImportRun.addCoreData(coreData);
-            AlmaItemData almaItemData = new AlmaItemData(coreData.getCollection(), coreData.getShelfmark());
-            List<AlmaItemData> foundData = this.primoService.getPrimoResponse(almaItemData);
-            if (foundData.size() == 1) {
-                coreData.setAlmaMmsId(foundData.get(0).mmsId);
-                coreData.setAlmaHoldingId(foundData.get(0).holdingId);
-                coreData.setTitle(foundData.get(0).title);
-            } else if (foundData.size() > 1) {
-                for (AlmaItemData foundDatum : foundData) {
-                    if (coreData.getTitle().equals(foundDatum.title)) {
-                        coreData.setAlmaMmsId(foundData.get(0).mmsId);
-                        coreData.setAlmaHoldingId(foundData.get(0).holdingId);
-                        coreData.setTitle(foundData.get(0).title);
+            if (coreData.isActive()) {
+                AlmaItemData almaItemData = new AlmaItemData(coreData.getCollection(), coreData.getShelfmark());
+                List<AlmaItemData> foundData = this.primoService.getPrimoResponse(almaItemData);
+                if (foundData.size() == 1) {
+                    coreData.setAlmaMmsId(foundData.get(0).mmsId);
+                    coreData.setAlmaHoldingId(foundData.get(0).holdingId);
+                    coreData.setTitle(foundData.get(0).title);
+                } else if (foundData.size() > 1) {
+                    for (AlmaItemData foundDatum : foundData) {
+                        if (coreData.getTitle().equals(foundDatum.title)) {
+                            coreData.setAlmaMmsId(foundData.get(0).mmsId);
+                            coreData.setAlmaHoldingId(foundData.get(0).holdingId);
+                            coreData.setTitle(foundData.get(0).title);
+                        }
                     }
-                }
-            } else
-                coreData.setActive(false);
+                } else
+                    coreData.setActive(false);
+            }
             this.coreDataRepository.save(coreData);
         }
         return coreDataImportRun;
@@ -375,29 +392,28 @@ public class BubiService {
 
     public List<BubiOrder> packBubiOrder(BubiOrder bubiOrder) {
         Hashtable<String, BubiOrder> bubiOrders = new Hashtable<>();
-        for (int i = 0; i< bubiOrder.getBubiOrderLines().size(); i++) {
+        for (int i = 0; i < bubiOrder.getBubiOrderLines().size(); i++) {
             BubiOrderLine bubiOrderLine = bubiOrder.getBubiOrderLines().get(i);
 
             PoLine poLine = buildPoLine(bubiOrderLine);
             poLine = almaPoLineService.savePoLine(poLine);
             bubiOrderLine.setAlmaPoLineId(poLine.getNumber());
-            bubiOrderLine.setPositionalNumber(i +1);
+            bubiOrderLine.setPositionalNumber(i + 1);
             bubiOrderLine.setStatus(BubiStatus.PACKED);
             bubiOrderLine.setLastChange(new Date());
             String key = bubiOrderLine.getVendorId() + "-" + bubiOrderLine.getVendorAccount();
+            BubiOrder bubiOrderInd;
             if (bubiOrders.containsKey(key)) {
-                bubiOrders.get(key).addBubiOrderLine(bubiOrderLine);
-                bubiOrders.get(key).calculateTotalPrice();
-                this.bubiOrderRepository.save(bubiOrder);
+                bubiOrderInd = bubiOrders.get(key);
             } else {
                 long counter = this.bubiOrderRepository.countAllByVendorIdAndVendorAccount(bubiOrderLine.getVendorId(), bubiOrderLine.getVendorAccount()) + 1;
-                String bubiOrderId = key +"-" + counter;
-                BubiOrder bubiOrderInd = new BubiOrder(bubiOrderLine);
-                bubiOrderInd.setBubiOrderId(bubiOrderId);
-                bubiOrderInd.calculateTotalPrice();
-                this.bubiOrderRepository.save(bubiOrderInd);
+                bubiOrderInd = new BubiOrder(bubiOrderLine.getVendorId(), bubiOrderLine.getVendorAccount(), counter);
                 bubiOrders.put(key, bubiOrderInd);
             }
+            bubiOrderInd.addBubiOrderLine(bubiOrderLine);
+            bubiOrderLine.setBubiOrder(bubiOrderInd);
+            bubiOrderInd.calculateTotalPrice();
+            this.bubiOrderRepository.save(bubiOrderInd);
             this.bubiOrderLineRepository.save(bubiOrderLine);
         }
         return new ArrayList<>(bubiOrders.values());
@@ -406,6 +422,7 @@ public class BubiService {
     public BubiOrder payBubiOrder(BubiOrder bubiOrder) {
         Invoice invoice = getInvoiceForBubiOrder(bubiOrder);
         this.almaInvoiceServices.saveInvoice(invoice);
+        bubiOrder.setPaymentStatus(PaymentStatus.PAID);
         return bubiOrder;
     }
 
