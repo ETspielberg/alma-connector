@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.bibs.*;
 import org.unidue.ub.alma.shared.user.Address;
 import org.unidue.ub.alma.shared.user.AlmaUser;
-import org.unidue.ub.libintel.almaconnector.clients.acquisition.AlmaItemsApiClient;
 import org.unidue.ub.libintel.almaconnector.model.bubi.BubiOrderLine;
 import org.unidue.ub.libintel.almaconnector.model.hook.LoanHook;
 import org.unidue.ub.libintel.almaconnector.model.hook.RequestHook;
@@ -17,18 +16,18 @@ public class HookService {
 
     private final AlmaUserService almaUserService;
 
-    private final AlmaItemsApiClient almaItemsApiClient;
-
     private final BubiService bubiService;
+
+    private final ItemService itemService;
 
     private final Logger log = LoggerFactory.getLogger(HookService.class);
 
     HookService(AlmaUserService almaUserService,
-                AlmaItemsApiClient almaItemsApiClient,
-                BubiService bubiService) {
+                BubiService bubiService,
+                ItemService itemService) {
         this.almaUserService = almaUserService;
-        this.almaItemsApiClient = almaItemsApiClient;
         this.bubiService = bubiService;
+        this.itemService = itemService;
     }
 
     @Async("threadPoolTaskExecutor")
@@ -37,17 +36,22 @@ public class HookService {
         if ("WORK_ORDER".equals(userRequest.getRequestType()) && "Int".equals(userRequest.getRequestSubType().getValue())) {
             switch (userRequest.getTargetDestination().getValue()) {
                 case "Buchbinder": {
+                    Item item;
                     if ("BOOK".equals(userRequest.getMaterialType().getValue())) {
                         log.debug(String.format("retrieving barcode %s", userRequest.getBarcode()));
-                        BubiOrderLine bubiOrderLine = this.bubiService.getBubiOrderLineFromBarcode(userRequest.getBarcode());
-                        this.bubiService.saveBubiOrderLine(bubiOrderLine);
-                        log.info(String.format("created new bubi order line %s for %s: %s", bubiOrderLine.getBubiOrderLineId(), bubiOrderLine.getCollection(), bubiOrderLine.getShelfmark()));
+                        item =this.itemService.findItemByBarcode(userRequest.getBarcode());
                     } else if ("ISSBD".equals(userRequest.getMaterialType().getValue())) {
                         log.debug(String.format("retrieving mms and item id %s, %s", userRequest.getMmsId(), userRequest.getItemId()));
-                        BubiOrderLine bubiOrderLine = this.bubiService.expandBubiOrderLineFromMmsAndItemId(userRequest.getMmsId(), userRequest.getItemId());
-                        this.bubiService.saveBubiOrderLine(bubiOrderLine);
-                        log.info(String.format("created new bubi order line %s for %s: %s", bubiOrderLine.getBubiOrderLineId(), bubiOrderLine.getCollection(), bubiOrderLine.getShelfmark()));
-                    }
+                        item = this.itemService.findItemByMmsAndItemId(userRequest.getMmsId(), userRequest.getItemId());
+                    } else
+                        break;
+                    BubiOrderLine bubiOrderLine = this.bubiService.expandBubiOrderLineFromItem(item);
+                    this.bubiService.saveBubiOrderLine(bubiOrderLine);
+                    if ("D0001".equals(item.getItemData().getLibrary().getValue()))
+                        item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("DES"));
+                    item.getItemData().setPublicNote("Einbandstelle");
+                    this.itemService.updateItem(item);
+                    log.info(String.format("created new bubi order line %s for %s: %s", bubiOrderLine.getBubiOrderLineId(), bubiOrderLine.getCollection(), bubiOrderLine.getShelfmark()));
                     break;
                 }
                 case "Aussonderung" :{
@@ -75,9 +79,8 @@ public class HookService {
                 if (address.getPreferred()) {
                     log.debug(String.format("retrieve item with barcode %s", itemLoan.getItemBarcode()));
                     String mmsId = itemLoan.getMmsId();
-                    String holdingId = itemLoan.getHoldingId();
                     String itemPid = itemLoan.getItemId();
-                    Item item = this.almaItemsApiClient.getItem("application/json", mmsId, holdingId, itemPid);
+                    Item item = this.itemService.findItemByMmsAndItemId(mmsId, itemPid);
                     log.debug(String.format("retrieved item:\n %s", item.toString()));
                     // setting bib data to null in order to avoid problems with network-number / network_numbers....
                     item.setBibData(null);
@@ -114,7 +117,7 @@ public class HookService {
                         item.getHoldingData().tempLibrary(null);
                     }
                     log.debug("saving item");
-                    this.almaItemsApiClient.updateItem("application/json", mmsId, holdingId, itemPid, item);
+                    this.itemService.updateItem(item);
                 }
         }
     }
