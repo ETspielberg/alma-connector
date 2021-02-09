@@ -4,7 +4,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.unidue.ub.libintel.almaconnector.model.bubi.*;
@@ -24,15 +23,11 @@ public class BubiController {
 
     private final PrimoService primoService;
 
-    private final AlmaPoLineService almaPoLineService;
-
     private final Logger log = LoggerFactory.getLogger(BubiController.class);
 
     BubiController(BubiService bubiService,
-                   AlmaPoLineService almaPoLineService,
                    PrimoService primoService) {
         this.bubiService = bubiService;
-        this.almaPoLineService = almaPoLineService;
         this.primoService = primoService;
     }
 
@@ -102,24 +97,10 @@ public class BubiController {
         return ResponseEntity.ok(this.bubiService.getBubiOrderLineFromIdentifier(identifier));
     }
 
-    @GetMapping("/orderline/active")
-    public ResponseEntity<List<BubiOrderLine>> getAllActiveOrderlines() {
-        return ResponseEntity.ok(this.bubiService.getActiveOrderlines());
-    }
+    @GetMapping("/orderline/retrieve")
+    public ResponseEntity<List<BubiOrderLine>> getAllActiveOrderlines(String mode) {
+        return ResponseEntity.ok(this.bubiService.getOrderLines(mode));
 
-    @GetMapping("/orderline/waiting")
-    public ResponseEntity<List<BubiOrderLine>> getAllWaitingOrderlines() {
-        return ResponseEntity.ok(this.bubiService.getWatingOrderlines());
-    }
-
-    @GetMapping("/orderline/sent")
-    public ResponseEntity<List<BubiOrderLine>> getAllSentOrderlines() {
-        return ResponseEntity.ok(this.bubiService.getSentOrderlines());
-    }
-
-    @GetMapping("/orderline/all")
-    public ResponseEntity<List<BubiOrderLine>> getAllOrderlines() {
-        return ResponseEntity.ok(this.bubiService.getAllOrderlines());
     }
 
     @GetMapping("/orderline/bubi/{vendorId}")
@@ -129,16 +110,10 @@ public class BubiController {
 
     // ---------------------- bubi order endpoints ----------------------
 
-    @GetMapping("/order/all")
-    public ResponseEntity<List<BubiOrder>> getAllOrders() {
-        return ResponseEntity.ok(this.bubiService.getAllBubiOrder());
+    @GetMapping("/order/retrieve")
+    public ResponseEntity<List<BubiOrder>> getOrders(String mode) {
+        return ResponseEntity.ok(this.bubiService.getBubiOrders(mode));
     }
-
-    @GetMapping("/order/active")
-    public ResponseEntity<List<BubiOrder>> getActiveOrders() {
-        return ResponseEntity.ok(this.bubiService.getActiveBubiOrder());
-    }
-
 
     @PostMapping("/order/save")
     public ResponseEntity<List<BubiOrder>> packOrders( @RequestBody BubiOrder bubiOrder) {

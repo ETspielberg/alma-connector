@@ -27,4 +27,8 @@ public class ItemService {
     public Item findItemByMmsAndItemId(String mmsId, String itemId) {
         return this.almaCatalogApiClient.getBibsMmsIdHoldingsHoldingIdItemsItemPid("application/json", mmsId, "ALL", itemId, "full", "", "");
     }
+
+    public Item updateItem(Item item) {
+        return this.almaItemsApiClient.updateItem("application/json", item.getBibData().getMmsId(), item.getHoldingData().getHoldingId(), item.getItemData().getPid(), item);
+    }
 }

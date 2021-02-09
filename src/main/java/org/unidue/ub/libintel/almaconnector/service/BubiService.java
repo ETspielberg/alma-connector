@@ -6,6 +6,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.Invoice;
 import org.unidue.ub.alma.shared.acq.PoLine;
@@ -82,21 +83,24 @@ public class BubiService {
         this.almaJobsApiClient = almaJobsApiClient;
     }
 
-    public BubiOrder getBubiOrders(String orderNumber) {
+    public BubiOrder getBubiOrder(String orderNumber) {
         return this.bubiOrderRepository.getOne(orderNumber);
     }
 
-    public List<BubiOrder> getAllBubiOrder() {
-        return this.bubiOrderRepository.findAll();
-    }
-
-    public List<BubiOrder> getActiveBubiOrder() {
-        List<BubiOrder> activeOrders = new ArrayList<>();
-        activeOrders.addAll(this.bubiOrderRepository.findAllByBubiStatus(BubiStatus.NEW));
-        activeOrders.addAll(this.bubiOrderRepository.findAllByBubiStatus(BubiStatus.SENT));
-        activeOrders.addAll(this.bubiOrderRepository.findAllByBubiStatus(BubiStatus.WAITING));
-        activeOrders.addAll(this.bubiOrderRepository.findAllByBubiStatus(BubiStatus.COMPLAINT));
-        return this.bubiOrderRepository.findAll();
+    public List<BubiOrder> getBubiOrders(String mode) {
+        switch (mode) {
+            case "all": return this.bubiOrderRepository.findAll();
+            case "sent": return this.bubiOrderRepository.findAllByBubiStatus(BubiStatus.SENT);
+            case "complaint": return this.bubiOrderRepository.findAllByBubiStatus(BubiStatus.COMPLAINT);
+            default: {
+                List<BubiOrder> activeOrders = new ArrayList<>();
+                activeOrders.addAll(this.bubiOrderRepository.findAllByBubiStatus(BubiStatus.NEW));
+                activeOrders.addAll(this.bubiOrderRepository.findAllByBubiStatus(BubiStatus.SENT));
+                activeOrders.addAll(this.bubiOrderRepository.findAllByBubiStatus(BubiStatus.WAITING));
+                activeOrders.addAll(this.bubiOrderRepository.findAllByBubiStatus(BubiStatus.COMPLAINT));
+                return activeOrders;
+            }
+        }
     }
 
     public List<BubiOrderLine> getAllBubiOrderLines() {
@@ -127,14 +131,6 @@ public class BubiService {
         return this.coreDataRepository.save(coreData);
     }
 
-
-    public BubiOrderLine expandBubiOrderLineFromMmsAndItemId(String mmsId, String itemId) {
-        if (mmsId != null && itemId != null) {
-            Item item = this.itemService.findItemByMmsAndItemId(mmsId, itemId);
-            return expandBubiOrderLineFromItem(item);
-        }
-        return null;
-    }
 
     public BubiOrderLine getBubiOrderLineFromBarcode(String barcode) {
         if (barcode != null) {
@@ -188,6 +184,16 @@ public class BubiService {
         return this.bubiOrderLineRepository.save(bubiOrderLine);
     }
 
+    public List<BubiOrderLine> getOrderLines(String mode) {
+        switch (mode) {
+            case "all": return this.bubiOrderLineRepository.findAll();
+            case "packed": return this.bubiOrderLineRepository.findAllByStatus(BubiStatus.PACKED);
+            case "sent": return this.bubiOrderLineRepository.findAllByStatus(BubiStatus.SENT);
+            case "waiting": return this.bubiOrderLineRepository.findAllByStatus(BubiStatus.WAITING);
+            default: return getActiveOrderlines();
+        }
+    }
+
     public List<BubiOrderLine> getActiveOrderlines() {
         List<BubiOrderLine> allOpenOrderlines = new ArrayList<>();
         allOpenOrderlines.addAll(this.bubiOrderLineRepository.findAllByStatus(BubiStatus.NEW));
@@ -195,36 +201,21 @@ public class BubiService {
         return allOpenOrderlines;
     }
 
-    public List<BubiOrderLine> getWatingOrderlines() {
-        return this.bubiOrderLineRepository.findAllByStatus(BubiStatus.WAITING);
-    }
-
     public BubiOrderLine getBubiOrderLineFromIdentifier(String identifier) {
         return this.bubiOrderLineRepository.getBubiOrderLineByBubiOrderLineId(identifier);
-    }
-
-    public List<BubiOrderLine> getSentOrderlines() {
-        return this.bubiOrderLineRepository.findAllByStatus(BubiStatus.SENT);
-    }
-
-    public List<BubiOrderLine> getAllOrderlines() {
-        return this.bubiOrderLineRepository.findAll();
     }
 
     public CoreDataImportRun readCoreDataFromExcelSheet(CoreDataImportRun coreDataImportRun, XSSFWorkbook workbook) {
         // retrieve first sheet
         XSSFSheet worksheet = workbook.getSheetAt(0);
-        for (int i = 1; i < worksheet.getPhysicalNumberOfRows() - 1; i++) {
+        for (int i = 1; i < worksheet.getPhysicalNumberOfRows(); i++) {
             XSSFRow row = worksheet.getRow(i);
             CoreData coreData = new CoreData();
             if (row.getCell(1) == null || row.getCell(0) == null)
                 continue;
             String collection = row.getCell(0).getStringCellValue();
             String shelfmark = row.getCell(1).getStringCellValue();
-            log.info(shelfmark);
-            log.info(String.valueOf(Pattern.matches(journalRegEx, shelfmark)));
             if (Pattern.matches(journalRegEx, shelfmark)) {
-                log.info("found journal shelfmark");
                 shelfmark = shelfmark.replace("Z", " Z ");
             }
             coreData.setCollection(collection);
