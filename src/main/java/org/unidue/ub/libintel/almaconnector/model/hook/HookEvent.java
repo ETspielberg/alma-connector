@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.*;
 @XmlRootElement(name = "event")
 @XmlAccessorType(XmlAccessType.FIELD)
 @JacksonXmlRootElement(localName = "event")
-public class HookLoanEvent {
+public class HookEvent {
 
     public static final String JSON_PROPERTY_VALUE = "value";
     @XmlAttribute(name = "value")

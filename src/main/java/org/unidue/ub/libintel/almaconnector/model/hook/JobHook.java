@@ -36,7 +36,7 @@ public class JobHook {
 
     public static final String JSON_PROPERTY_EVENT = "event";
     @XmlElement(name = "event")
-    private HookLoanEvent event;
+    private HookEvent event;
 
     public static final String JSON_PROPERTY_ITEM_LOAN = "job_instance";
     @XmlElement(name = "job_instance")
@@ -100,11 +100,11 @@ public class JobHook {
     @JsonProperty(JSON_PROPERTY_EVENT)
     @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
     @JacksonXmlProperty(localName = "event")
-    public HookLoanEvent getEvent() {
+    public HookEvent getEvent() {
         return event;
     }
 
-    public void setEvent(HookLoanEvent event) {
+    public void setEvent(HookEvent event) {
         this.event = event;
     }
 }
