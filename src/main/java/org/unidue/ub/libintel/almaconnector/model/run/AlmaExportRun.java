@@ -311,6 +311,10 @@ public class AlmaExportRun {
         Collections.sort(this.foreignSapData);
     }
 
+    public void addInvoice(Invoice invoice) {
+        this.invoices.add(invoice);
+    }
+
     public long getTotalSapData() {
         return this.homeSapData.size() + this.foreignSapData.size();
     }
