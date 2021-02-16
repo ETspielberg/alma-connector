@@ -4,9 +4,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 import org.unidue.ub.alma.shared.bibs.*;
-import org.unidue.ub.libintel.almaconnector.clients.acquisition.AcquisitionFeignConfiguration;
 
-import javax.ws.rs.core.MediaType;
+import org.springframework.http.MediaType;
 import java.util.List;
 
 @FeignClient(name = "invoices", url = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/bibs", configuration = CatalogFeignConfiguration.class)
@@ -283,7 +282,7 @@ public interface AlmaCatalogApiClient {
    * @param body This method takes a Holding object. See [here](/alma/apis/docs/xsd/rest_holding.xsd?tags&#x3D;PUT) (required)
    * @return Object
    */
-  @RequestMapping(method= RequestMethod.PUT, value="/{mmsId}/holdings/{holdingId}", consumes = MediaType.APPLICATION_XML)
+  @RequestMapping(method= RequestMethod.PUT, value="/{mmsId}/holdings/{holdingId}", consumes = MediaType.APPLICATION_XML_VALUE)
   Holding putBibsMmsIdHoldingsHoldingId(@PathVariable String mmsId, @PathVariable String holdingId, Object body);
 
   /**
@@ -295,7 +294,7 @@ public interface AlmaCatalogApiClient {
    * @param body This method takes an Item object. See [here](/alma/apis/docs/xsd/rest_item.xsd?tags&#x3D;PUT) (required)
    * @return Object
    */
-  @RequestMapping(method= RequestMethod.PUT, value="/{mmsId}/holdings/{holdingId}/items/{itemPid}", consumes = MediaType.APPLICATION_XML)
+  @RequestMapping(method= RequestMethod.PUT, value="/{mmsId}/holdings/{holdingId}/items/{itemPid}", consumes = MediaType.APPLICATION_XML_VALUE)
   Item putBibsMmsIdHoldingsHoldingIdItemsItemPid(@RequestParam("mms_id") String mmsId, @RequestParam("holding_id") String holdingId, @RequestParam("item_pid") String itemPid, Object body);
 
   /**
