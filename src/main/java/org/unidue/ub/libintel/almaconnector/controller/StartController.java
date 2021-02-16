@@ -3,7 +3,8 @@ package org.unidue.ub.libintel.almaconnector.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.unidue.ub.libintel.almaconnector.clients.acquisition.AlmaAnalyticsReportClient;
+import org.unidue.ub.libintel.almaconnector.clients.analytics.AlmaAnalyticsReportClient;
+import org.unidue.ub.libintel.almaconnector.model.ItemLoanedReport;
 
 import java.io.IOException;
 
@@ -13,13 +14,6 @@ import java.io.IOException;
 @Controller
 public class StartController {
 
-
-    private final AlmaAnalyticsReportClient almaAnalyticsReportClient;
-
-    StartController(AlmaAnalyticsReportClient almaAnalyticsReportClient) {
-        this.almaAnalyticsReportClient = almaAnalyticsReportClient;
-    }
-
     /**
      * displys the start page of the alma microservice
      * @return the start html page
@@ -27,10 +21,5 @@ public class StartController {
     @GetMapping("/start")
     public String getStartPage() {
         return "start";
-    }
-
-    @GetMapping("/itemLoanedReport")
-    public ResponseEntity<?> getItemLoanedReport() throws IOException {
-        return ResponseEntity.ok(this.almaAnalyticsReportClient.getReport());
     }
 }
