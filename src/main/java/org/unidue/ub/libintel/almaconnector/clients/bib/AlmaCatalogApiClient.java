@@ -2,16 +2,14 @@ package org.unidue.ub.libintel.almaconnector.clients.bib;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.unidue.ub.alma.shared.bibs.*;
 import org.unidue.ub.libintel.almaconnector.clients.acquisition.AcquisitionFeignConfiguration;
 
+import javax.ws.rs.core.MediaType;
 import java.util.List;
 
-@FeignClient(name = "invoices", url = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/bibs", configuration = AcquisitionFeignConfiguration.class)
+@FeignClient(name = "invoices", url = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/bibs", configuration = CatalogFeignConfiguration.class)
 @Service
 public interface AlmaCatalogApiClient {
 
@@ -107,7 +105,7 @@ public interface AlmaCatalogApiClient {
    * @return Object
    */
   @RequestMapping(method= RequestMethod.GET, value="/{mmsId}/holdings/{holdingId}")
-  HoldingData getBibsMmsIdHoldingsHoldingId(@RequestParam("mms_id") String mmsId, @RequestParam("holding_id") String holdingId);
+  HoldingWithRecord getBibsMmsIdHoldingsHoldingId(@PathVariable String mmsId, @PathVariable String holdingId);
 
   /**
    * Retrieve Items list
@@ -285,8 +283,8 @@ public interface AlmaCatalogApiClient {
    * @param body This method takes a Holding object. See [here](/alma/apis/docs/xsd/rest_holding.xsd?tags&#x3D;PUT) (required)
    * @return Object
    */
-  @RequestMapping(method= RequestMethod.PUT, value="/{mmsId}/holdings/{holdingId}")
-  HoldingData putBibsMmsIdHoldingsHoldingId(@RequestParam("mms_id") String mmsId, @RequestParam("holding_id") String holdingId, Object body);
+  @RequestMapping(method= RequestMethod.PUT, value="/{mmsId}/holdings/{holdingId}", consumes = MediaType.APPLICATION_XML)
+  Holding putBibsMmsIdHoldingsHoldingId(@PathVariable String mmsId, @PathVariable String holdingId, Object body);
 
   /**
    * Update Item information
@@ -297,7 +295,7 @@ public interface AlmaCatalogApiClient {
    * @param body This method takes an Item object. See [here](/alma/apis/docs/xsd/rest_item.xsd?tags&#x3D;PUT) (required)
    * @return Object
    */
-  @RequestMapping(method= RequestMethod.PUT, value="/{mmsId}/holdings/{holdingId}/items/{itemPid}")
+  @RequestMapping(method= RequestMethod.PUT, value="/{mmsId}/holdings/{holdingId}/items/{itemPid}", consumes = MediaType.APPLICATION_XML)
   Item putBibsMmsIdHoldingsHoldingIdItemsItemPid(@RequestParam("mms_id") String mmsId, @RequestParam("holding_id") String holdingId, @RequestParam("item_pid") String itemPid, Object body);
 
   /**
