@@ -8,10 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.unidue.ub.alma.shared.bibs.HookUserRequest;
 import org.unidue.ub.libintel.almaconnector.logging.JobLoggerService;
-import org.unidue.ub.libintel.almaconnector.model.hook.Challenge;
-import org.unidue.ub.libintel.almaconnector.model.hook.JobHook;
-import org.unidue.ub.libintel.almaconnector.model.hook.LoanHook;
-import org.unidue.ub.libintel.almaconnector.model.hook.RequestHook;
+import org.unidue.ub.libintel.almaconnector.model.hook.*;
 import org.unidue.ub.libintel.almaconnector.service.HookService;
 
 @Controller
@@ -51,9 +48,9 @@ public class HookController {
     }
 
     @PostMapping("/itemListener")
-    public ResponseEntity<?> receiveItemHook(@RequestBody String hookContent, @RequestHeader("X-Exl-Signature") String signature) {
+    public ResponseEntity<?> receiveItemHook(@RequestBody ItemHook hookContent, @RequestHeader("X-Exl-Signature") String signature) {
         log.info(signature);
-        log.info(hookContent);
+        this.hookService.procesItemHook(hookContent);
         return ResponseEntity.ok().build();
     }
 

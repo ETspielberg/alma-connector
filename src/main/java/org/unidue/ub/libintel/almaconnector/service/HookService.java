@@ -8,6 +8,7 @@ import org.unidue.ub.alma.shared.bibs.*;
 import org.unidue.ub.alma.shared.user.Address;
 import org.unidue.ub.alma.shared.user.AlmaUser;
 import org.unidue.ub.libintel.almaconnector.model.bubi.BubiOrderLine;
+import org.unidue.ub.libintel.almaconnector.model.hook.ItemHook;
 import org.unidue.ub.libintel.almaconnector.model.hook.LoanHook;
 import org.unidue.ub.libintel.almaconnector.model.hook.RequestHook;
 
@@ -20,14 +21,18 @@ public class HookService {
 
     private final ItemService itemService;
 
+    private final CatalogService catalogService;
+
     private final Logger log = LoggerFactory.getLogger(HookService.class);
 
     HookService(AlmaUserService almaUserService,
                 BubiService bubiService,
-                ItemService itemService) {
+                ItemService itemService,
+                CatalogService catalogService) {
         this.almaUserService = almaUserService;
         this.bubiService = bubiService;
         this.itemService = itemService;
+        this.catalogService = catalogService;
     }
 
     @Async("threadPoolTaskExecutor")
@@ -119,6 +124,21 @@ public class HookService {
                     log.debug("saving item");
                     this.itemService.updateItem(item);
                 }
+        }
+    }
+
+    @Async("threadPoolTaskExecutor")
+    public void procesItemHook(ItemHook hook) {
+        Item item = hook.getItem();
+        if (item.getHoldingData().getCallNumber().isEmpty()) {
+            String itemCallNo = hook.getItem().getItemData().getAlternativeCallNumber();
+            if (!itemCallNo.isEmpty()) {
+                String callNo = itemCallNo.replaceAll("\\(\\d+\\)", "");
+                item.getHoldingData().setCallNumber(callNo);
+                boolean success = this.catalogService.updateCallNoInHolding(item.getBibData().getMmsId(), item.getHoldingData().getHoldingId(), callNo);
+                if (success)
+                    log.info("successfully updated holding");
+            }
         }
     }
 }
