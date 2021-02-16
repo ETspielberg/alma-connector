@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Auftragsliste</title>
+    <head th:replace="general :: generalHead"/>
+</head>
+<body>
+
+<div style="text-align: left; margin: 0px;">
+    <p style="margin: 0px;">Universitätsbibliothek Duisburg-Essen</p>
+    <p style="margin: 0px;">Campus Essen</p>
+    <p style="margin: 0px;">Universitätsstraße 9</p>
+    <p style="margin: 0px;">45117 Essen</p>
+</div>
+
+<div style="text-align: right">
+    <p style="margin: 0px;">Blasberg Buchbinderei</p>
+    <p style="margin: 0px;">Leimstr. 15-17</p>
+    <p style="margin: 0px;">58135 Hagen</p>
+</div>
+
+<h1>
+    Auftragsliste
+</h1>
+<table style="text-align: left;">
+    <tr>
+        <th>
+            Auftragsnummer:
+        </th>
+        <td>1</td>
+    </tr>
+    <tr>
+        <th>
+            Eingangsdatum:
+        </th>
+        <td th:text="${#dates.format(order.returnedOn, 'dd-MM-yyyy')}">01.03.2021</td>
+    </tr>
+    <tr>
+        <th>
+            Ausgangsdatum:
+        </th>
+        <td th:text="${#dates.format(order.collectedOn, 'dd-MM-yyyy')}">01.01.2021</td>
+    </tr>
+</table>
+
+
+<table style="text-align: left;" class="table table-borderless">
+    <thead>
+    <tr>
+        <th>Position</th>
+        <th>Beschreibung</th>
+        <th>Anzahl</th>
+        <th>Preis</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="orderline: ${order.getBubiOrderLines()}">
+        <th th:text="*{orderline.positionalNumber}">
+            1
+        </th>
+        <td>
+            Beschreibung
+        </td>
+        <td>1</td>
+        <td th:text="*{orderline.price}">
+            10,00 €
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<p>Gesamtsumme: <span th:text="${order.totalAmount}"></span></p>
+</body>
+</html>
