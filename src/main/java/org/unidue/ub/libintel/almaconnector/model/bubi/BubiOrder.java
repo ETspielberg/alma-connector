@@ -37,6 +37,9 @@ public class BubiOrder {
     @Column(name="comment")
     private String comment;
 
+    @Column(name="invoice_number")
+    private String invoiceNumber;
+
     @Column(name="alma_po_line_number")
     private String almaPoLineNumber;
 
@@ -245,6 +248,14 @@ public class BubiOrder {
 
     public void setTotalAmount(Double totalAmount) {
         this.totalAmount = totalAmount;
+    }
+
+    public String getInvoiceNumber() {
+        return invoiceNumber;
+    }
+
+    public void setInvoiceNumber(String invoiceNumber) {
+        this.invoiceNumber = invoiceNumber;
     }
 
     public double calculateTotalPrice() {
