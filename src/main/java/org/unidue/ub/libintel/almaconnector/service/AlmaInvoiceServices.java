@@ -2,18 +2,26 @@ package org.unidue.ub.libintel.almaconnector.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.*;
 import org.unidue.ub.libintel.almaconnector.clients.acquisition.AlmaInvoicesApiClient;
+import org.unidue.ub.libintel.almaconnector.clients.analytics.AlmaAnalyticsReportClient;
 import org.unidue.ub.libintel.almaconnector.model.InvoiceUpdate;
+import org.unidue.ub.libintel.almaconnector.model.SapData;
 import org.unidue.ub.libintel.almaconnector.model.SapResponse;
+import org.unidue.ub.libintel.almaconnector.model.analytics.InvoiceForPayment;
+import org.unidue.ub.libintel.almaconnector.model.analytics.InvoicesForPaymentAnalyticsResult;
 import org.unidue.ub.libintel.almaconnector.model.run.AlmaExportRun;
 import org.unidue.ub.libintel.almaconnector.model.run.SapResponseRun;
 import org.unidue.ub.libintel.almaconnector.repository.AlmaExportRunRepository;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static org.unidue.ub.libintel.almaconnector.Utils.convertToSapData;
 
 @Service
 public class AlmaInvoiceServices {
@@ -22,6 +30,13 @@ public class AlmaInvoiceServices {
 
     private final AlmaExportRunRepository almaExportRunRepository;
 
+    private final AlmaAnalyticsReportClient almaAnalyticsReportClient;
+
+    @Value("${sap.home.tax.keys}")
+    private List<String> homeTaxKeys;
+
+    private final static String reportPath = "/shared/Universität Duisburg-Essen 49HBZ_UDE/Rechnungen zur Bezahlung";
+
     private final static Logger log = LoggerFactory.getLogger(AlmaInvoiceServices.class);
 
     /**
@@ -29,9 +44,12 @@ public class AlmaInvoiceServices {
      *
      * @param almaInvoicesApiClient the Feign client for the Alma Invoice API
      */
-    AlmaInvoiceServices(AlmaInvoicesApiClient almaInvoicesApiClient, AlmaExportRunRepository almaExportRunRepository) {
+    AlmaInvoiceServices(AlmaInvoicesApiClient almaInvoicesApiClient,
+                        AlmaExportRunRepository almaExportRunRepository,
+                        AlmaAnalyticsReportClient almaAnalyticsReportClient) {
         this.almaInvoicesApiClient = almaInvoicesApiClient;
         this.almaExportRunRepository = almaExportRunRepository;
+        this.almaAnalyticsReportClient = almaAnalyticsReportClient;
     }
 
     /**
@@ -55,6 +73,32 @@ public class AlmaInvoiceServices {
         almaExportRun.setLastRun(new Date());
         this.almaExportRunRepository.save(almaExportRun);
         return almaExportRun;
+    }
+
+    public List<Invoice> getOpenInvoicesFromAnalytics(AlmaExportRun almaExportRun) {
+        try {
+            InvoicesForPaymentAnalyticsResult result = this.almaAnalyticsReportClient.getReport(reportPath, InvoicesForPaymentAnalyticsResult.class);
+            List<Invoice> invoices = new ArrayList<>();
+            if (result.getRows() != null) {
+                for (InvoiceForPayment invoiceEntry: result.getRows()) {
+                    if (invoiceEntry.getInvoiceOwnerCode().equals(almaExportRun.getInvoiceOwner())) {
+                        Invoice invoiceInd = this.almaInvoicesApiClient.getInvoicesInvoiceId("application/json", invoiceEntry.getInvoiceNumber(), "full");
+                        almaExportRun.addInvoice(invoiceInd);
+                        List<SapData> sapDataList = convertToSapData(invoiceInd, invoiceEntry.getErpCode(), invoiceEntry.getOrderLineType());
+                        log.debug(String.format("adding %d SAP data to the list", sapDataList.size()));
+                        almaExportRun.addSapDataList(sapDataList, homeTaxKeys);
+                        log.debug(String.format("run contains now %d entries: %d home and %d foreign",
+                                almaExportRun.getTotalSapData(),
+                                almaExportRun.getHomeSapData().size(),
+                                almaExportRun.getForeignSapData().size() ));
+                    }
+                }
+            }
+            return invoices;
+        } catch (IOException ioe) {
+            log.error("could not connect to analytics");
+            return null;
+        }
     }
 
     /**

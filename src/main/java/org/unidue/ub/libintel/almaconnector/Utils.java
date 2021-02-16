@@ -28,6 +28,88 @@ public class Utils {
 
     public static SimpleDateFormat dateformat = new SimpleDateFormat("yyyy-MM-dd");
 
+    public static List<SapData> convertToSapData(Invoice invoice, String erpCode, String orderType) {
+        List<SapData> sapDataList = new ArrayList<>();
+        // check if there are invoices
+        if (invoice.getInvoiceLines() != null) {
+            log.debug("processing invoice " + invoice.getId());
+            // go through the invoices
+
+            int positionalNumber = 1;
+            for (InvoiceLine invoiceLine : invoice.getInvoiceLines().getInvoiceLine()) {
+                log.debug("processing invoice line " + invoiceLine.getId());
+
+                log.debug(String.format("found %d funds", invoiceLine.getFundDistribution().size()));
+
+                //go through the individual funds to create a single entry for each of the funds to be allocated
+                for (FundDistribution fundDistribution : invoiceLine.getFundDistribution()) {
+                    // read the fund code
+                    String fundCode = fundDistribution.getFundCode().getValue();
+                    // convert the fund code into the corresponding SAP account data
+                    SapAccountData sapAccountData = convertFundCodeToSapAccountData(fundCode);
+
+                    // if the conversion fails, log the error
+                    if (sapAccountData == null) {
+                        log.warn("no sap account available for fund " + fundDistribution.getFundCode().getValue());
+                        continue;
+                    }
+
+                    // create an SAP data object by the given data
+                    SapData sapData = new SapData()
+                            .withCurrency(invoice.getCurrency().getValue())
+                            .withInvoiceAmount(fundDistribution.getAmount())
+                            .withInvoiceDate(invoice.getInvoiceDate())
+                            .withVendorCode(invoice.getVendor().getValue())
+                            .withCreditor(erpCode)
+                            .withToDate(invoiceLine.getSubscriptionToDate())
+                            .withFromDate(invoiceLine.getSubscriptionFromDate())
+                            .withPositionalNumber(String.valueOf(positionalNumber))
+                            .withCommitmentDate(invoice.getPayment().getVoucherDate())
+                            .withCurrency(invoice.getCurrency().getValue())
+                            .withSapAccountData(sapAccountData)
+                            .withInvoiceNumber(invoice.getNumber())
+                            .withComment(invoiceLine.getNote());
+                    positionalNumber++;
+
+                    if ("EXCLUSIVE".equals(invoice.getInvoiceVat().getType().getValue())) {
+                        double amount = invoiceLine.getPrice() * fundDistribution.getPercent() / 100;
+                        sapData.setInvoiceAmount(amount);
+                    }
+                    // read the VAT code from the data.
+                    try {
+                        // get the vat code
+                        String invoiceLineVatCode = invoiceLine.getInvoiceLineVat().getVatCode().getDesc();
+                        if (invoiceLineVatCode.length() > 2)
+                            invoiceLineVatCode = invoiceLineVatCode.substring(0, 2);
+                        // set the value of the vat code to a value which is not empty
+                        if (!"".equals(invoiceLineVatCode)) {
+                            sapData.costType = invoiceLineVatCode;
+                            log.debug("set VAT code ot " + invoiceLineVatCode);
+                        }
+                        // if no vat code is set on the invoice line take the one from the invoice
+                        else {
+                            String invoiceVatCode = invoice.getInvoiceVat().getVatCode().getValue();
+                            if (invoiceVatCode.length() > 2)
+                                invoiceVatCode = invoiceVatCode.substring(0, 2);
+                            if (!"".equals(invoiceVatCode)) {
+                                sapData.costType = invoiceLineVatCode;
+                                log.debug("set VAT code to " + invoiceVatCode);
+                            } else {
+                                log.warn("no vat code given for invoice line " + invoiceLine.getId());
+                                sapData.costType = "";
+                            }
+                        }
+                    } catch (Exception e) {
+                        log.warn("no vat code given for invoice line " + invoiceLine.getId());
+                        sapData.costType = "";
+                    }
+                    sapDataList.add(sapData);
+                }
+            }
+        }
+        return sapDataList;
+    }
+
     /**
      * converts an Alma invoice and the corresponding vendor information into a set of SAP data
      *
@@ -366,6 +448,7 @@ public class Utils {
         invoice.invoiceStatus(new InvoiceInvoiceStatus().value("ACTIVE"));
         invoice.invoiceWorkflowStatus(new InvoiceInvoiceWorkflowStatus().value("Waiting to be Sent"));
         invoice.invoiceVat(new InvoiceVat().vatPerInvoiceLine(true).type(new InvoiceVatType().value("INCLUSIVE")));
+        invoice.setNumber(bubiOrder.getInvoiceNumber());
 
         for (int i = 0; i< bubiOrder.getBubiOrderLines().size(); i++) {
             BubiOrderLine bubiOrderLine = bubiOrder.getBubiOrderLines().get(i);
