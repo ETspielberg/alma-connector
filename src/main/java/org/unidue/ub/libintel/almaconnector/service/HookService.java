@@ -133,7 +133,7 @@ public class HookService {
         if (item.getHoldingData().getCallNumber().isEmpty()) {
             String itemCallNo = hook.getItem().getItemData().getAlternativeCallNumber();
             if (!itemCallNo.isEmpty()) {
-                String callNo = itemCallNo.replaceAll("\\(\\d+\\)", "");
+                String callNo = itemCallNo.replaceAll("\\+\\d+", "");
                 item.getHoldingData().setCallNumber(callNo);
                 boolean success = this.catalogService.updateCallNoInHolding(item.getBibData().getMmsId(), item.getHoldingData().getHoldingId(), callNo);
                 if (success)
