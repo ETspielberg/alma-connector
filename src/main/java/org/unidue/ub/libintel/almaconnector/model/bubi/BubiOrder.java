@@ -23,7 +23,7 @@ public class BubiOrder {
     @Column(name="alma_order_id")
     private String almaOrderId;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "bubiOrder")
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "bubiOrder")
     private List<BubiOrderLine> bubiOrderLines;
 
     @Column(name="bubi_status")
@@ -64,6 +64,11 @@ public class BubiOrder {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date lastChange;
+
+    @Column(name="invoice_date")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private Date invoiceDate;
 
     @Column(name="collected_on")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -256,6 +261,14 @@ public class BubiOrder {
 
     public void setInvoiceNumber(String invoiceNumber) {
         this.invoiceNumber = invoiceNumber;
+    }
+
+    public Date getInvoiceDate() {
+        return invoiceDate;
+    }
+
+    public void setInvoiceDate(Date invoiceDate) {
+        this.invoiceDate = invoiceDate;
     }
 
     public double calculateTotalPrice() {

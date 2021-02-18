@@ -83,7 +83,7 @@ public interface AlmaCatalogApiClient {
    * @param expand This parameter allows for expanding the bibliographic record with additional information:   p_avail - Expand physical inventory information.   e_avail - Expand electronic inventory information.   d_avail - Expand digital inventory information.   requests - Expand total number of title requests.   To use more than one, use a comma separator. (optional, default to &quot;None&quot;)
    * @return Object
    */
-  @RequestMapping(method= RequestMethod.GET, value="/{mmsId}?view={view}&expand={expand}")
+  @RequestMapping(method= RequestMethod.GET, value="/{mmsId}?view={view}&expand={expand}", produces = MediaType.APPLICATION_XML_VALUE)
   Bib getBibsMmsId(@RequestParam("mms_id") String mmsId, @RequestParam("view") String view, @RequestParam("expand") String expand);
 
 
@@ -184,8 +184,8 @@ public interface AlmaCatalogApiClient {
    * @param checkMatch Indicating whether to check for a match. Default: false (record will be saved despite possible match). (optional, default to &quot;false&quot;)
    * @return Object
    */
-  @RequestMapping(method= RequestMethod.POST, value="/?from_nz_mms_id={fromNzMmsId}&from_cz_mms_id={fromCzMmsId}&normalization={normalization}&validate={validate}&override_warning={overrideWarning}&check_match={checkMatch}")
-  Bib postBibs(Object body, @RequestParam("from_nz_mms_id") String fromNzMmsId, @RequestParam("from_cz_mms_id") String fromCzMmsId, @RequestParam("normalization") String normalization, @RequestParam("validate") String validate, @RequestParam("override_warning") String overrideWarning, @RequestParam("check_match") String checkMatch);
+  @RequestMapping(method= RequestMethod.POST, value="/?from_nz_mms_id={fromNzMmsId}&from_cz_mms_id={fromCzMmsId}&normalization={normalization}&validate={validate}&override_warning={overrideWarning}&check_match={checkMatch}", consumes = MediaType.APPLICATION_XML_VALUE)
+  BibWithRecord postBibs(Object body, @RequestParam("from_nz_mms_id") String fromNzMmsId, @RequestParam("from_cz_mms_id") String fromCzMmsId, @RequestParam("normalization") String normalization, @RequestParam("validate") String validate, @RequestParam("override_warning") String overrideWarning, @RequestParam("check_match") String checkMatch);
 
 
   /**
@@ -196,8 +196,8 @@ public interface AlmaCatalogApiClient {
    * @param body This method takes a Bib object. See [here](/alma/apis/docs/xsd/rest_bib.xsd?tags&#x3D;POST) (required)
    * @return Object
    */
-  @RequestMapping(method= RequestMethod.POST, value="/{mmsId}?op={op}")
-  Bib postBibsMmsId(@RequestParam("mms_id") String mmsId, @RequestParam("op") String op, Object body);
+  @RequestMapping(method= RequestMethod.POST, value="/{mmsId}?op={op}", consumes = MediaType.APPLICATION_XML_VALUE)
+  BibWithRecord postBibsMmsId(@RequestParam("mms_id") String mmsId, @RequestParam("op") String op, Object body);
 
 
   /**
@@ -207,8 +207,8 @@ public interface AlmaCatalogApiClient {
    * @param body This method takes a Holding object. See [here](/alma/apis/docs/xsd/rest_holding.xsd?tags&#x3D;POST) (required)
    * @return Object
    */
-  @RequestMapping(method= RequestMethod.POST, value="/{mmsId}/holdings")
-  HoldingData postBibsMmsIdHoldings(@RequestParam("mms_id") String mmsId, Object body);
+  @RequestMapping(method= RequestMethod.POST, value="/{mmsId}/holdings", consumes = MediaType.APPLICATION_XML_VALUE)
+  HoldingWithRecord postBibsMmsIdHoldings(@RequestParam("mms_id") String mmsId, Object body);
 
   /**
    * Create Item
@@ -270,7 +270,7 @@ public interface AlmaCatalogApiClient {
    * @param checkMatch Indicating whether to check for a match. Default: false (record will be saved despite possible match). (optional, default to &quot;false&quot;)
    * @return Object
    */
-  @RequestMapping(method= RequestMethod.PUT, value="/{mmsId}?normalization={normalization}&validate={validate}&override_warning={overrideWarning}&override_lock={overrideLock}&stale_version_check={staleVersionCheck}&cataloger_level={catalogerLevel}&check_match={checkMatch}")
+  @RequestMapping(method= RequestMethod.PUT, value="/{mmsId}?normalization={normalization}&validate={validate}&override_warning={overrideWarning}&override_lock={overrideLock}&stale_version_check={staleVersionCheck}&cataloger_level={catalogerLevel}&check_match={checkMatch}", consumes = MediaType.APPLICATION_XML_VALUE)
   Bib putBibsMmsId(@RequestParam("mms_id") String mmsId, Object body, @RequestParam("normalization") String normalization, @RequestParam("validate") String validate, @RequestParam("override_warning") String overrideWarning, @RequestParam("override_lock") String overrideLock, @RequestParam("stale_version_check") String staleVersionCheck, @RequestParam("cataloger_level") String catalogerLevel, @RequestParam("check_match") String checkMatch);
 
 

@@ -225,4 +225,12 @@ public class AlmaInvoiceServices {
             }
         return filteredInvoices;
     }
+
+    public void addInvoiceLine(String id, InvoiceLine invoiceLine) {
+        this.almaInvoicesApiClient.postInvoicesInvoiceIdLines(invoiceLine, "application/json", id);
+    }
+
+    public void processInvoice(String id) {
+        this.almaInvoicesApiClient.postInvoicesInvoiceId(new Invoice(), "application/json", id, "process_invoice");
+    }
 }

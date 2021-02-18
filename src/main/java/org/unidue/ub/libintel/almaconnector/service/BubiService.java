@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.Invoice;
+import org.unidue.ub.alma.shared.acq.InvoiceLine;
 import org.unidue.ub.alma.shared.acq.PoLine;
 import org.unidue.ub.alma.shared.bibs.Item;
 import org.unidue.ub.libintel.almaconnector.clients.conf.AlmaJobsApiClient;
@@ -21,8 +22,7 @@ import org.unidue.ub.libintel.almaconnector.repository.CoreDataRepository;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import static org.unidue.ub.libintel.almaconnector.Utils.buildPoLine;
-import static org.unidue.ub.libintel.almaconnector.Utils.getInvoiceForBubiOrder;
+import static org.unidue.ub.libintel.almaconnector.Utils.*;
 
 @Service
 public class BubiService {
@@ -412,8 +412,14 @@ public class BubiService {
 
     public BubiOrder payBubiOrder(BubiOrder bubiOrder) {
         Invoice invoice = getInvoiceForBubiOrder(bubiOrder);
-        this.almaInvoiceServices.saveInvoice(invoice);
+        // log.info(invoice.toString());
+        invoice = this.almaInvoiceServices.saveInvoice(invoice);
+        List<InvoiceLine> invoiceLines = getInvoiceLinesForBubiOrder(bubiOrder);
+        for (InvoiceLine invoiceLine : invoiceLines)
+            this.almaInvoiceServices.addInvoiceLine(invoice.getId(), invoiceLine);
+        this.almaInvoiceServices.processInvoice(invoice.getId());
         bubiOrder.setPaymentStatus(PaymentStatus.PAID);
+        this.bubiOrderRepository.save(bubiOrder);
         return bubiOrder;
     }
 

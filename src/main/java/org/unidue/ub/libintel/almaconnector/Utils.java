@@ -441,28 +441,39 @@ public class Utils {
 
     public static Invoice getInvoiceForBubiOrder(BubiOrder bubiOrder) {
         Invoice invoice = new Invoice();
-        invoice.vendor(new InvoiceVendor().value(bubiOrder.getBubiOrderId()));
-        InvoiceLines invoiceLines = new InvoiceLines();
+        invoice.vendor(new InvoiceVendor().value(bubiOrder.getVendorId()))
+                .vendorAccount(bubiOrder.getVendorAccount());
         invoice.totalAmount(bubiOrder.getTotalAmount());
         invoice.paymentMethod(new InvoicePaymentMethod().value("ACCOUNTINGDEPARTMENT"));
         invoice.invoiceStatus(new InvoiceInvoiceStatus().value("ACTIVE"));
         invoice.invoiceWorkflowStatus(new InvoiceInvoiceWorkflowStatus().value("Waiting to be Sent"));
         invoice.invoiceVat(new InvoiceVat().vatPerInvoiceLine(true).type(new InvoiceVatType().value("INCLUSIVE")));
         invoice.setNumber(bubiOrder.getInvoiceNumber());
+        invoice.setInvoiceDate(bubiOrder.getInvoiceDate());
+        if (bubiOrder.getBubiOrderLines().get(0).getCollection().startsWith("D"))
+            invoice.setOwner(new InvoiceOwner().value("D0001"));
+        else
+            invoice.setOwner(new InvoiceOwner().value("E0001"));
+        return invoice;
+    }
 
+    public static List<InvoiceLine> getInvoiceLinesForBubiOrder(BubiOrder bubiOrder) {
+        List<InvoiceLine> invoiceLines = new ArrayList<>();
         for (int i = 0; i< bubiOrder.getBubiOrderLines().size(); i++) {
             BubiOrderLine bubiOrderLine = bubiOrder.getBubiOrderLines().get(i);
             InvoiceLineVat invoiceLineVat = new InvoiceLineVat().vatCode(new InvoiceLineVatVatCode().value("H8"));
             FundDistributionFundCode fundDistributionFundCode = new FundDistributionFundCode().value(bubiOrderLine.getFund());
+            FundDistribution fundDistribution = new FundDistribution().fundCode(fundDistributionFundCode).amount(bubiOrderLine.getPrice());
+            List<FundDistribution> fundDistributionList = new ArrayList<>();
+            fundDistributionList.add(fundDistribution);
             InvoiceLine invoiceLine = new InvoiceLine()
                     .poLine(bubiOrderLine.getAlmaPoLineId())
                     .fullyInvoiced(true)
                     .totalPrice(bubiOrderLine.getPrice())
-                    .invoiceLineVat(invoiceLineVat);
-
-            invoiceLines.addInvoiceLineItem(invoiceLine);
+                    .invoiceLineVat(invoiceLineVat)
+                    .fundDistribution(fundDistributionList);
+            invoiceLines.add(invoiceLine);
         }
-        invoice.invoiceLines(invoiceLines);
-        return invoice;
+        return invoiceLines;
     }
 }
