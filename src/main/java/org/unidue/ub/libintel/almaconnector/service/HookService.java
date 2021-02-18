@@ -121,20 +121,19 @@ public class HookService {
                         item.getHoldingData().tempLocation(null);
                         item.getHoldingData().tempLibrary(null);
                     }
-                    log.debug("saving item");
+                    log.info("saving item:\n" + item.toString() );
                     this.itemService.updateItem(item);
                 }
         }
     }
 
     @Async("threadPoolTaskExecutor")
-    public void procesItemHook(ItemHook hook) {
+    public void processItemHook(ItemHook hook) {
         Item item = hook.getItem();
         if (item.getHoldingData().getCallNumber().isEmpty()) {
             String itemCallNo = hook.getItem().getItemData().getAlternativeCallNumber();
             if (!itemCallNo.isEmpty()) {
                 String callNo = itemCallNo.replaceAll("\\+\\d+", "");
-                item.getHoldingData().setCallNumber(callNo);
                 boolean success = this.catalogService.updateCallNoInHolding(item.getBibData().getMmsId(), item.getHoldingData().getHoldingId(), callNo);
                 if (success)
                     log.info("successfully updated holding");
