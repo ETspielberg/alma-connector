@@ -31,4 +31,8 @@ public class ItemService {
     public Item updateItem(Item item) {
         return this.almaItemsApiClient.updateItem("application/json", item.getBibData().getMmsId(), item.getHoldingData().getHoldingId(), item.getItemData().getPid(), item);
     }
+
+    public Item updateItem(String mmsId, String holdingId, String itemPid, Item item) {
+        return this.almaItemsApiClient.updateItem("application/json", mmsId, holdingId, itemPid, item);
+    }
 }

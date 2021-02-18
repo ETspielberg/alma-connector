@@ -122,7 +122,7 @@ public class HookService {
                         item.getHoldingData().tempLibrary(null);
                     }
                     log.info("saving item:\n" + item.toString() );
-                    this.itemService.updateItem(item);
+                    this.itemService.updateItem(mmsId, item.getHoldingData().getHoldingId(), itemPid, item);
                 }
         }
     }
