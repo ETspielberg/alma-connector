@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="general :: generalHead"/>
+<body>
+
+<nav th:replace="general :: navbar"></nav>
+
+<div class="container-fluid">
+    <form th:action="@{/alma/showImportFiles}" method="post" th:object="${almaExportRun}">
+        <div class="ui-g">
+            <div class="ui-g-12 ui-md-12 ui-lg-10 ui-lg-offset-1">
+                <div class="tile centered">
+                    <h3 style="height:1.2em;" th:text="#{sap.run.result}"></h3>
+                    <p>Lauf vom <span th:text="${#dates.format(almaExportRun.lastRun, 'dd.MM.yyyy')}"></span>
+                        für den Campus <span th:text="${almaExportRun.invoiceOwner}"></span> vom
+                        <span th:text="${#dates.format(almaExportRun.desiredDate, 'dd.MM.yyyy')}"></span>, Nummer <span
+                                th:text="${almaExportRun.runIndex}"></span></p>
+                    <input hidden th:field="*{dateSpecific}">
+                    <input hidden th:field="*{desiredDate}">
+                    <input hidden th:field="*{numberForeignSapData}">
+                    <input hidden th:field="*{numberHomeSapData}">
+                    <input hidden th:field="*{invoiceOwner}">
+                    <table class="table table-borderless text-left">
+                        <tr>
+                            <th th:text="#{sap.result.number.invoices}"></th>
+                            <td th:text="${almaExportRun.numberInvoices}"></td>
+                            <th th:text="#{sap.result.number.created.sapdata.home}"></th>
+                            <td th:text="${almaExportRun.homeSapData.size()}"></td>
+                            <th style="text-align: center;"><span style="font-size: larger; font-weight: bold;"
+                                                                  th:text="#{sap.result.number.missedsapdata}"></span>:
+                            </th>
+                        </tr>
+                        <tr>
+                            <th th:text="#{sap.result.number.invoicelines}"></th>
+                            <td th:text="${almaExportRun.numberInvoiceLines}"></td>
+                            <th th:text="#{sap.result.number.created.sapdata.foreign}"></th>
+                            <td th:text="${almaExportRun.foreignSapData.size()}"></td>
+                            <td style="text-align: center;"><span
+                                    style="color: darkred; font-size: larger; font-weight: bold;"
+                                    th:text="${almaExportRun.missedSapData}"></span></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="ui-g">
+            <div class="ui-g-12 ui-md-12 ui-lg-12">
+                <div class="tile centered">
+                    <h2 th:text="#{sap.title.home}"></h2>
+                    <table class="table table-striped text-left">
+                        <tr>
+                            <th th:text="#{sap.result.vendorcode}"></th>
+                            <th th:text="#{sap.result.creditor}"></th>
+                            <th th:text="#{sap.result.date.invoice}"></th>
+                            <th th:text="#{sap.result.date.processing}"></th>
+                            <th th:text="#{sap.result.costtype}"></th>
+                            <th th:text="#{sap.result.amount}"></th>
+                            <th th:text="#{sap.result.currency}"></th>
+                            <th th:text="#{sap.result.invoicenumber}"></th>
+                            <th th:text="#{sap.result.invoicelinenumber}"></th>
+                            <th th:text="#{sap.result.briefcode}"></th>
+                            <th th:text="#{sap.result.checkcode}"></th>
+                            <th th:text="#{sap.result.date.from}"></th>
+                            <th th:text="#{sap.result.date.to}"></th>
+                            <th th:text="#{sap.result.checked}"></th>
+                        </tr>
+                        <tr th:each="sapDatum, itemStat : *{homeSapData}">
+
+                            <td th:text="${sapDatum.vendorCode}"></td>
+                            <td th:text="${sapDatum.creditor}"></td>
+                            <td th:text="${#dates.format(sapDatum.invoiceDate, 'dd.MM.yyyy')}"></td>
+                            <td th:text="${#dates.format(sapDatum.commitmentDate, 'dd.MM.yyyy')}"></td>
+                            <td th:text="${sapDatum.costType}"></td>
+                            <td th:text="${sapDatum.invoiceAmount}"></td>
+                            <td th:text="${sapDatum.currency}"></td>
+                            <td th:text="${sapDatum.invoiceNumber}"></td>
+                            <td th:text="${sapDatum.positionalNumber}"></td>
+                            <td th:text="${sapDatum.getCheckCharacter()}"></td>
+                            <td th:text="${sapDatum.sapAccountData.getImportCheckString()}"></td>
+                            <td th:text="${#dates.format(sapDatum.fromDate, 'dd.MM.yyyy')}"></td>
+                            <td th:text="${#dates.format(sapDatum.toDate, 'dd.MM.yyyy')}"></td>
+                            <td>
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].vendorCode}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].sapAccountData.costCentre}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].sapAccountData.fonds}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].sapAccountData.ledgerAccount}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].sapAccountData.pspElement}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].creditor}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].invoiceDate}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].commitmentDate}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].costType}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].invoiceAmount}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].currency}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].invoiceNumber}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].positionalNumber}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].fromDate}">
+                                <input hidden th:field="*{homeSapData[__${itemStat.index}__].toDate}">
+                                <input th:field="*{homeSapData[__${itemStat.index}__].isChecked}"
+                                       th:checked="*{homeSapData[__${itemStat.index}__].isChecked}" type="checkbox">
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="ui-g-12 ui-md-12 ui-lg-12">
+                <div class="tile centered">
+                    <h2 th:text="#{sap.title.foreign}"></h2>
+                    <table class="table table-striped text-left">
+                        <tr>
+                            <th th:text="#{sap.result.vendorcode}"></th>
+                            <th th:text="#{sap.result.creditor}"></th>
+                            <th th:text="#{sap.result.date.invoice}"></th>
+                            <th th:text="#{sap.result.date.processing}"></th>
+                            <th th:text="#{sap.result.costtype}"></th>
+                            <th th:text="#{sap.result.amount}"></th>
+                            <th th:text="#{sap.result.currency}"></th>
+                            <th th:text="#{sap.result.invoicenumber}"></th>
+                            <th th:text="#{sap.result.invoicelinenumber}"></th>
+                            <th th:text="#{sap.result.briefcode}"></th>
+                            <th th:text="#{sap.result.checkcode}"></th>
+                            <th th:text="#{sap.result.date.from}"></th>
+                            <th th:text="#{sap.result.date.to}"></th>
+                            <th th:text="#{sap.result.checked}"></th>
+                        </tr>
+                        <tr th:each="sapDatum, itemStat : *{foreignSapData}">
+                            <td th:text="${sapDatum.vendorCode}"></td>
+                            <td th:text="${sapDatum.creditor}"></td>
+                            <td th:text="${#dates.format(sapDatum.invoiceDate, 'dd.MM.yyyy')}"></td>
+                            <td th:text="${#dates.format(sapDatum.commitmentDate, 'dd.MM.yyyy')}"></td>
+                            <td th:text="${sapDatum.costType}"></td>
+                            <td th:text="${sapDatum.invoiceAmount}"></td>
+                            <td th:text="${sapDatum.currency}"></td>
+                            <td th:text="${sapDatum.invoiceNumber}"></td>
+                            <td th:text="${sapDatum.positionalNumber}"></td>
+                            <td th:text="${sapDatum.getCheckCharacter()}"></td>
+                            <td th:text="${sapDatum.sapAccountData.getImportCheckString()}"></td>
+                            <td th:text="${#dates.format(sapDatum.fromDate, 'dd.MM.yyyy')}"></td>
+                            <td th:text="${#dates.format(sapDatum.toDate, 'dd.MM.yyyy')}"></td>
+                            <td>
+                                <input hidden th:field="*{foreignSapData[__${itemStat.index}__].vendorCode}">
+                                <input hidden th:field="*{foreignSapData[__${itemStat.index}__].sapAccountData.costCentre}">
+                                <input hidden th:field="*{foreignSapData[__${itemStat.index}__].sapAccountData.fonds}">
+                                <input hidden th:field="*{foreignSapData[__${itemStat.index}__].sapAccountData.ledgerAccount}">
+                                <input hidden th:field="*{foreignSapData[__${itemStat.index}__].sapAccountData.pspElement}">
+                                <input hidden th:field="*{foreignSapData[__${itemStat.index}__].creditor}">
+                                <input hidden th:field="*{foreignSapData[__${itemStat.index}__].invoiceDate}">
+                                <input hidden th:field="*{foreignSapData[__${itemStat.index}__].commitmentDate}">
+                                <input hidden th:field="*{foreignSapData[__${itemStat.index}__].costType}">
+                                <input hidden th:field="*{foreignSapData[__${itemStat.index}__].invoiceAmount}">
+                                <input hidden th:field="*{foreignSapData[__${itemStat.index}__].currency}">
+                                <input hidden th:field="*{foreignSapData[__${itemStat.index}__].invoiceNumber}">
+                                <input hidden th:field="*{foreignSapData[__${itemStat.index}__].positionalNumber}">
+                                <input hidden th:field="*{foreignSapData[__${itemStat.index}__].fromDate}">
+                                <input hidden th:field="*{foreignSapData[__${itemStat.index}__].toDate}">
+                                <input th:field="*{foreignSapData[__${itemStat.index}__].isChecked}"
+                                       th:checked="*{foreignSapData[__${itemStat.index}__].isChecked}" type="checkbox">
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="ui-g-12 ui-md-12 ui-lg-12">
+            <div style="margin: auto;" class="tile centered">
+                <input type="submit" class="btn btn-primary" th:value="#{invoices.collect.open}"/>
+            </div>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: alma-connector
+  cloud:
+    config:
+      uri: http://localhost:11811
+      name: client, files, settings-datasource, sap, service-provider, alma-connector
+      username: ${libintel_config_username:dalek}
+      password: ${libintel_config_password:3l1m1nat3}
+      label: ${libintel.profile:dev}
+  main:
+    allow-bean-definition-overriding: true
+  security:
+    user:
+      name: ${libintel.system.username:thedoctor}
+      password: ${libintel.system.password:Tard15}
+      roles: SYSTEM
+  jpa:
+    hibernate:
+      ddl-auto: create
+logging:
+  level:
+    org:
+      unidue:
+        ub:
+          libintel:
+            almaconnector:
+              clients: debug

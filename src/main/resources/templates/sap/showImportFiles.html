@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="general :: generalHead"/>
+<body>
+
+<nav th:replace="general :: navbar"></nav>
+
+<div th:replace="general :: jumbotron" />
+
+<div class="container">
+    <div class="ui-g">
+        <div class="ui-g-12 ui-md-6 ui-lg-4">
+            <div class="tile centered">
+                <h3 style="height:1.2em;" th:text="#{files.heading.home}"></h3>
+                <p style="height:8em;" th:text="#{files.home.short}"></p>
+                <p><span th:text="${almaExportRun.numberHomeDataSelected}"></span> <span th:text="#{files.entries}"></span></p>
+                <p>
+                    <a target="_blank" th:href="@{/alma/downloadFile/home/{owner}/{date}(owner=${almaExportRun.invoiceOwner},date=${#dates.format(almaExportRun.desiredDate, 'yyyy-MM-dd')})}">
+                        <button th:disabled="${almaExportRun.numberHomeDataSelected} == 0" class="btn btn-primary" th:text="#{files.download}"></button>
+                    </a>
+                </p>
+            </div>
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-4">
+            <div class="tile centered">
+                <h3 style="height:1.2em;" th:text="#{files.heading.foreign}"></h3>
+                <p style="height:8em;" th:text="#{files.foreign.short}"></p>
+                <p><span th:text="${almaExportRun.numberForeignDataSelected}"></span> <span th:text="#{files.entries}"></span></p>
+
+                <p>
+                    <a target="_blank" th:href="@{/alma/downloadFile/foreign/{owner}/{date}(owner=${almaExportRun.invoiceOwner},date=${#dates.format(almaExportRun.desiredDate, 'yyyy-MM-dd')})}">
+                        <button th:disabled="${almaExportRun.numberForeignDataSelected} == 0" class="btn btn-primary" th:text="#{files.download}"></button>
+                    </a>
+                </p>
+            </div>
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-4">
+            <div class="tile centered">
+                <h3 style="height:1.2em;" th:text="#{upload.excel}"></h3>
+                <p style="height:6em;" th:text="#{upload.excel.short}"></p>
+                <div id="dropzone">
+                    <form th:action="@{alma/invoicesUpdate}" class="dropzone needsclick" method="post" enctype="multipart/form-data" id="file-upload">
+
+                        <div class="dz-message needsclick">
+                            <button type="button" class="dz-button" th:text="#{upload.excel.choose}">Drop files here or click to upload.</button>
+                            <br/>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    Dropzone.autoDiscover = false;
+
+    $("#file-upload").dropzone({
+        success : function(file, response) {
+            toastr.options.timeout = 0;
+            if (response.numberOfErrors === 0) {
+                toastr.success('Datei ' + file.name + ' erfolgreich hochgeladen. ' + response.numberOfResponses + ' Rechnungsdaten wurden erfolgreich importiert.');
+            } else if (response.numberOfErrors === 1) {
+                toastr.warning('Beim Hochladen der Datei ' + file.name + ' ist ' + response.numberOfErrors + ' Fehler aufgetreten.');
+            } else {
+                toastr.warning('Beim Hochladen der Datei ' + file.name + ' sind ' + response.numberOfErrors + ' Fehler aufgetreten.');
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

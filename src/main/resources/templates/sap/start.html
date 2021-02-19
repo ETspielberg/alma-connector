@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="general :: generalHead"/>
+<body>
+
+<nav th:replace="general :: navbar"></nav>
+
+<div th:replace="general :: jumbotron"/>
+
+<div class="container">
+    <div class="ui-g">
+
+        <div class="ui-g-12 ui-md-6 ui-lg-4">
+            <div class="tile centered">
+                <h3 style="height:1.2em;" th:text="#{sap.collect.open}"></h3>
+                <p style="height:6em;" th:text="#{sap.collect.open.short}"></p>
+                <form th:action="@{/alma/collectInvoices}" th:object="${almaExportRun}" method="post">
+                    <div class="form-group">
+                        <label for="invoiceOwner" th:text="#{sap.invoice.owner}"></label>
+                        <select id="invoiceOwner" th:field="*{invoiceOwner}">
+                            <option th:value="'E0001'" selected th:text="#{sap.invoice.owner.e0001}">Campus Essen</option>
+                            <option th:value="'D0001'" th:text="#{sap.invoice.owner.d0001}">Campus Duisburg</option>
+                            <option th:value="'E0023'" th:text="#{sap.invoice.owner.e0023}">Fachbibliothek Medizin</option>
+                            <option th:value="'49HBZ_UDE'" th:text="#{sap.invoice.owner.ude}">Universität Duisburg-Essen</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="dateSpecific" th:text="#{sap.date.specific}"></label>
+                        <input id="dateSpecific" type="checkbox" th:field="*{dateSpecific}">
+                    </div>
+                    <div class="form-group">
+                        <label for="dateToSearch" th:text="#{sap.day.to.collect}"></label>
+                        <input id="dateToSearch" type="date" th:field="*{desiredDate}">
+                    </div>
+                    <input type="submit" class="btn btn-primary" th:value="#{invoices.collect.open}"/>
+                </form>
+            </div>
+        </div>
+
+        <div class="ui-g-12 ui-md-6 ui-lg-4">
+            <div class="tile centered">
+                <h3 style="height:1.2em;" th:text="#{upload.excel}"></h3>
+                <p style="height:6em;" th:text="#{upload.excel.short}"></p>
+                <div id="dropzone">
+                    <form th:action="@{alma/invoicesUpdate}" class="dropzone needsclick" method="post" enctype="multipart/form-data" id="file-upload">
+
+                        <div class="dz-message needsclick">
+                            <button type="button" class="dz-button" th:text="#{upload.excel.choose}">Drop files here or click to upload.</button>
+                            <br/>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="ui-g">
+        <div class="ui-g-12 ui-md-12 ui-lg-12">
+            <div class="tile centered">
+                <a th:href="@{/alma/start}">
+                    <button class="btn btn-primary">Zurück</button>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    Dropzone.autoDiscover = false;
+
+    $("#file-upload").dropzone({
+        success : function(file, response) {
+            toastr.options.timeout = 0;
+            if (response.numberOfErrors === 0) {
+                toastr.success('Datei ' + file.name + ' erfolgreich hochgeladen. ' + response.numberOfResponses + ' Rechnungsdaten wurden erfolgreich importiert.');
+            } else if (response.numberOfErrors === 1) {
+                toastr.warning('Beim Hochladen der Datei ' + file.name + ' ist ' + response.numberOfErrors + ' Fehler aufgetreten.');
+            } else {
+                toastr.warning('Beim Hochladen der Datei ' + file.name + ' sind ' + response.numberOfErrors + ' Fehler aufgetreten.');
+            }
+        }
+    });
+</script>
+</body>
+</html>
