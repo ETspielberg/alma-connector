@@ -11,8 +11,8 @@ import org.unidue.ub.libintel.almaconnector.clients.analytics.AlmaAnalyticsRepor
 import org.unidue.ub.libintel.almaconnector.model.InvoiceUpdate;
 import org.unidue.ub.libintel.almaconnector.model.SapData;
 import org.unidue.ub.libintel.almaconnector.model.SapResponse;
+import org.unidue.ub.libintel.almaconnector.model.analytics.AnalyticsResult;
 import org.unidue.ub.libintel.almaconnector.model.analytics.InvoiceForPayment;
-import org.unidue.ub.libintel.almaconnector.model.analytics.InvoicesForPaymentAnalyticsResult;
 import org.unidue.ub.libintel.almaconnector.model.run.AlmaExportRun;
 import org.unidue.ub.libintel.almaconnector.model.run.SapResponseRun;
 import org.unidue.ub.libintel.almaconnector.repository.AlmaExportRunRepository;
@@ -77,7 +77,8 @@ public class AlmaInvoiceServices {
 
     public List<Invoice> getOpenInvoicesFromAnalytics(AlmaExportRun almaExportRun) {
         try {
-            InvoicesForPaymentAnalyticsResult result = this.almaAnalyticsReportClient.getReport(reportPath, InvoicesForPaymentAnalyticsResult.class);
+            AnalyticsResult<InvoiceForPayment> analyticsResult = new AnalyticsResult<>();
+            AnalyticsResult<InvoiceForPayment> result = this.almaAnalyticsReportClient.getReport(InvoiceForPayment.PATH, (Class<AnalyticsResult<InvoiceForPayment>>) analyticsResult.getClass());
             List<Invoice> invoices = new ArrayList<>();
             if (result.getRows() != null) {
                 for (InvoiceForPayment invoiceEntry: result.getRows()) {

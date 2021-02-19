@@ -9,7 +9,7 @@
 >
 
 	<xsl:param name="baseurl">https://api-eu.hosted.exlibrisgroup.com/almaws/v1/analytics/reports</xsl:param>
-	<xsl:param name="apikey">l8xx58da980166f24430be5b2cc7cc76b6d0</xsl:param>
+	<xsl:param name="apikey" />
 
 	<xsl:output method="xml" indent="yes" />
 

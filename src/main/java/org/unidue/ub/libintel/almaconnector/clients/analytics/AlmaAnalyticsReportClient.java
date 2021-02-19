@@ -52,13 +52,14 @@ public class AlmaAnalyticsReportClient {
         return xmlMapper.readValue(transformed, clazz);
     }
 
+
     /**
      * helper function for the xsl transformation
      * @param inputXmlString the String to be transformed
      * @param xsltFile the filename relativ to the resources folder
      * @return the transformed xml as String
      */
-    public static String transformXmlDocument(String inputXmlString,
+    private String transformXmlDocument(String inputXmlString,
                                               File xsltFile) {
 
         TransformerFactory factory = TransformerFactory.newInstance();
@@ -70,6 +71,7 @@ public class AlmaAnalyticsReportClient {
 
         try {
             Transformer transformer = factory.newTransformer(xslt);
+            transformer.setParameter("apikey", this.almaAcqApiKey);
             transformer.transform(text, textOP);
         } catch (TransformerException e) {
             log.error("could not transform analytics report", e);

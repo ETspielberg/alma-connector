@@ -7,17 +7,17 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import java.util.List;
 
 @JacksonXmlRootElement(localName = "results")
-public class InvoicesForPaymentAnalyticsResult {
+public class AnalyticsResult<T> {
 
     @JacksonXmlElementWrapper(localName = "rows")
     @JacksonXmlProperty(localName = "row")
-    private List<InvoiceForPayment> rows;
+    private List<T> rows;
 
-    public List<InvoiceForPayment> getRows() {
+    public List<T> getRows() {
         return rows;
     }
 
-    public void setRow(List<InvoiceForPayment> rows) {
+    public void setRow(List<T> rows) {
         this.rows = rows;
     }
 }

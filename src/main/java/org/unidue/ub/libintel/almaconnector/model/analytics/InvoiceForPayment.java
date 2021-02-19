@@ -3,11 +3,11 @@ package org.unidue.ub.libintel.almaconnector.model.analytics;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 
 @JacksonXmlRootElement(localName = "row")
 public class InvoiceForPayment {
+
+    public final static String PATH = "/shared/Universität Duisburg-Essen 49HBZ_UDE/Rechnungen zur Bezahlung";
 
     @JacksonXmlProperty(localName = "InvoiceLine-Status")
     private String invoiceLineStatus;
