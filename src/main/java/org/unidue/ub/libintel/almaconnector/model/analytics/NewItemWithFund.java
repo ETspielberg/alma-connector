@@ -11,13 +11,10 @@ public class NewItemWithFund {
     @JacksonXmlProperty(localName = "FundLedgerCode")
     private String fundLedgerCode;
 
-    @JacksonXmlProperty(localName = "StatisticsNote1")
-    private String statisticNote1;
-
     @JacksonXmlProperty(localName = "CreationDate")
     private String creationDate;
 
-    @JacksonXmlProperty(localName = "MmsId")
+    @JacksonXmlProperty(localName = "MMSId")
     private String mmsId;
 
     @JacksonXmlProperty(localName = "ItemId")
@@ -30,14 +27,6 @@ public class NewItemWithFund {
 
     public void setFundLedgerCode(String fundLedgerCode) {
         this.fundLedgerCode = fundLedgerCode;
-    }
-
-    public String getStatisticNote1() {
-        return statisticNote1;
-    }
-
-    public void setStatisticNote1(String statisticNote1) {
-        this.statisticNote1 = statisticNote1;
     }
 
     public String getCreationDate() {
