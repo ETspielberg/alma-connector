@@ -6,18 +6,19 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 import java.util.List;
 
-@JacksonXmlRootElement(localName = "results")
-public class AnalyticsResult<T> {
+@JacksonXmlRootElement(localName = "result")
+public class NewItemWithFundReport {
 
-    @JacksonXmlElementWrapper(localName = "rows")
+    // @JacksonXmlElementWrapper(localName = "rows")
+    @JacksonXmlElementWrapper(useWrapping = false)
     @JacksonXmlProperty(localName = "row")
-    private List<T> rows;
+    private List<NewItemWithFund> rows;
 
-    public List<T> getRows() {
+    public List<NewItemWithFund> getRows() {
         return rows;
     }
 
-    public void setRow(List<T> rows) {
+    public void setRow(List<NewItemWithFund> rows) {
         this.rows = rows;
     }
 }
