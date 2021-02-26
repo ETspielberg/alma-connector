@@ -75,7 +75,7 @@ public class Utils {
                             .withCurrency(invoice.getCurrency().getValue())
                             .withSapAccountData(sapAccountData)
                             .withInvoiceNumber(invoice.getNumber())
-                            .withComment(invoiceLine.getNote());
+                            .withComment(invoiceLine.getPriceNote());
                     positionalNumber++;
 
                     if ("EXCLUSIVE".equals(invoice.getInvoiceVat().getType().getValue())) {
