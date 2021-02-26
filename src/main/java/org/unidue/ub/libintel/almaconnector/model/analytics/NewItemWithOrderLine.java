@@ -4,15 +4,15 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 @JacksonXmlRootElement(localName = "row")
-public class NewItemWithFund {
+public class NewItemWithOrderLine {
 
     public final static String PATH = "/shared/Universität Duisburg-Essen 49HBZ_UDE/libintel/NewItemsWithFund";
 
-    @JacksonXmlProperty(localName = "FundLedgerCode")
-    private String fundLedgerCode;
+    @JacksonXmlProperty(localName = "POLineReference")
+    private String poLineReference;
 
-    @JacksonXmlProperty(localName = "CreationDate")
-    private String creationDate;
+    @JacksonXmlProperty(localName = "PONumber")
+    private String poNumber;
 
     @JacksonXmlProperty(localName = "MMSId")
     private String mmsId;
@@ -20,21 +20,23 @@ public class NewItemWithFund {
     @JacksonXmlProperty(localName = "ItemId")
     private String itemId;
 
+    @JacksonXmlProperty(localName = "CreationDate")
+    private String creationDate;
 
-    public String getFundLedgerCode() {
-        return fundLedgerCode;
+    public String getPoLineReference() {
+        return poLineReference;
     }
 
-    public void setFundLedgerCode(String fundLedgerCode) {
-        this.fundLedgerCode = fundLedgerCode;
+    public void setPoLineReference(String poLineReference) {
+        this.poLineReference = poLineReference;
     }
 
-    public String getCreationDate() {
-        return creationDate;
+    public String getPoNumber() {
+        return poNumber;
     }
 
-    public void setCreationDate(String creationDate) {
-        this.creationDate = creationDate;
+    public void setPoNumber(String poNumber) {
+        this.poNumber = poNumber;
     }
 
     public String getMmsId() {
@@ -51,5 +53,13 @@ public class NewItemWithFund {
 
     public void setItemId(String itemId) {
         this.itemId = itemId;
+    }
+
+    public String getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(String creationDate) {
+        this.creationDate = creationDate;
     }
 }

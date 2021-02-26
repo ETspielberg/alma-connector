@@ -41,7 +41,7 @@ public class TestController {
 
     @GetMapping("/newItemsWithFunds")
     public ResponseEntity<NewItemWithFundReport> getNewItemsWithFund() throws IOException {
-        return ResponseEntity.ok(this.almaAnalyticsReportClient.getReport(NewItemWithFund.PATH, NewItemWithFundReport.class));
+        return ResponseEntity.ok(this.almaAnalyticsReportClient.getReport(NewItemWithOrderLine.PATH, NewItemWithFundReport.class));
     }
 
     @GetMapping("/mapping/itemStatisticNote")

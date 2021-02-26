@@ -4,13 +4,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.unidue.ub.alma.shared.acq.PoLine;
 import org.unidue.ub.alma.shared.bibs.Item;
 import org.unidue.ub.libintel.almaconnector.clients.analytics.AlmaAnalyticsReportClient;
 import org.unidue.ub.libintel.almaconnector.configuration.MappingTables;
-import org.unidue.ub.libintel.almaconnector.model.analytics.NewItemWithFund;
 import org.unidue.ub.libintel.almaconnector.model.analytics.NewItemWithFundReport;
+import org.unidue.ub.libintel.almaconnector.model.analytics.NewItemWithOrderLine;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,37 +24,71 @@ public class ScheduledService {
 
     private final ItemService itemService;
 
+    private final AlmaPoLineService almaPoLineService;
+
     private final Logger log = LoggerFactory.getLogger(ScheduledService.class);
 
     private final MappingTables mappingTables;
 
     ScheduledService(AlmaAnalyticsReportClient almaAnalyticsReportClient,
                      MappingTables mappingTables,
-                     ItemService itemService) {
+                     ItemService itemService,
+                     AlmaPoLineService almaPoLineService) {
         this.almaAnalyticsReportClient = almaAnalyticsReportClient;
         this.mappingTables = mappingTables;
         this.itemService = itemService;
+        this.almaPoLineService = almaPoLineService;
     }
 
     @Scheduled(cron = "0 0 7 * * *")
     public void updateStatisticField() throws IOException {
         Map<String, String> codes = mappingTables.getItemStatisticNote();
-        List<NewItemWithFund> results = this.almaAnalyticsReportClient.getReport(NewItemWithFund.PATH, NewItemWithFundReport.class).getRows();
-        for (NewItemWithFund newItemWithFund : results) {
-            String fund = newItemWithFund.getFundLedgerCode();
-            if (fund.contains("-"))
-                fund = "etat" + fund.substring(0, fund.indexOf("-"));
-            log.info(String.valueOf(codes.get(fund)));
-            if (codes.containsKey(fund)) {
-                Item item = itemService.findItemByMmsAndItemId(newItemWithFund.getMmsId(), newItemWithFund.getItemId());
-                if (item.getItemData().getStatisticsNote1() == null || item.getItemData().getStatisticsNote1().isEmpty()) {
-                    item.getItemData().setStatisticsNote1(codes.get(fund));
-                    this.itemService.updateItem(item);
-                    log.info(String.format("updated statistics note 1 for item with mms id %s and pid %s to %s",
-                            newItemWithFund.getMmsId(), newItemWithFund.getItemId(), codes.get(fund)));
-                }
+        List<NewItemWithOrderLine> results = this.almaAnalyticsReportClient.getReport(NewItemWithOrderLine.PATH, NewItemWithFundReport.class).getRows();
+        Map<String, List<NewItemWithOrderLine>> orders = new HashMap<>();
+        for (NewItemWithOrderLine newItemWithOrderLine : results) {
+            String poLineNumber = newItemWithOrderLine.getPoLineReference();
+            if (orders.containsKey(poLineNumber))
+                orders.get(poLineNumber).add(newItemWithOrderLine);
+            else {
+                List<NewItemWithOrderLine> newList = new ArrayList<>();
+                newList.add(newItemWithOrderLine);
+                orders.put(poLineNumber, newList);
             }
-
         }
+        orders.forEach(
+                (polineNumber, list) -> {
+                    PoLine poLine = this.almaPoLineService.getPoLine(polineNumber);
+                    if (poLine.getFundDistribution().size() == 1) {
+                        String fund = poLine.getFundDistribution().get(0).getFundCode().getValue();
+                        String fundCode = "etat" + fund.substring(0, fund.indexOf("-"));
+                        double reducedPrice = 0.0;
+                        String currency = "";
+                        try {
+                            double price = Double.parseDouble(poLine.getPrice().getSum());
+                            double discount = Double.parseDouble(poLine.getDiscount());
+                            reducedPrice = price * (1 - discount);
+                            currency = poLine.getPrice().getCurrency().getValue();
+                        } catch (Exception e) {
+                            log.warn("could not calculate reduced price. ", e);
+                        }
+                        log.info(fund);
+                        if (codes.containsKey(fund)) {
+                            for (NewItemWithOrderLine newItemWithOrderLine : list) {
+                                Item item = itemService.findItemByMmsAndItemId(newItemWithOrderLine.getMmsId(), newItemWithOrderLine.getItemId());
+                                if (reducedPrice != 0.0) {
+                                    item.getItemData().setInventoryPrice(String.format("%.2f %s", reducedPrice, currency));
+                                }
+                                if (item.getItemData().getStatisticsNote1() == null || item.getItemData().getStatisticsNote1().isEmpty()) {
+                                    item.getItemData().setStatisticsNote1(codes.get(fundCode));
+                                    this.itemService.updateItem(item);
+                                    log.info(String.format("updated statistics note 1 for item with mms id %s and pid %s to %s",
+                                            newItemWithOrderLine.getMmsId(), newItemWithOrderLine.getItemId(), codes.get(fund)));
+                                }
+                            }
+                        }
+
+                    }
+                }
+        );
     }
 }

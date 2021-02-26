@@ -12,13 +12,13 @@ public class NewItemWithFundReport {
     // @JacksonXmlElementWrapper(localName = "rows")
     @JacksonXmlElementWrapper(useWrapping = false)
     @JacksonXmlProperty(localName = "row")
-    private List<NewItemWithFund> rows;
+    private List<NewItemWithOrderLine> rows;
 
-    public List<NewItemWithFund> getRows() {
+    public List<NewItemWithOrderLine> getRows() {
         return rows;
     }
 
-    public void setRow(List<NewItemWithFund> rows) {
+    public void setRow(List<NewItemWithOrderLine> rows) {
         this.rows = rows;
     }
 }
