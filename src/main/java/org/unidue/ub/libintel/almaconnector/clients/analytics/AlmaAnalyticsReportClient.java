@@ -13,10 +13,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.*;
 
 @Service
 public class AlmaAnalyticsReportClient {
@@ -45,7 +42,7 @@ public class AlmaAnalyticsReportClient {
         RestTemplate restTemplate = new RestTemplate();
         String response = restTemplate.getForObject(url, String.class);
         log.debug("queried alma api with response: " + response);
-        File xslFile = new ClassPathResource("/xslt/analytics2xml.xsl").getFile();
+        InputStream xslFile = new ClassPathResource("/xslt/analytics2xml.xsl").getInputStream();
         String transformed = transformXmlDocument(response, xslFile);
         log.debug("converted response into string: " + transformed);
         XmlMapper xmlMapper = new XmlMapper();
@@ -60,7 +57,7 @@ public class AlmaAnalyticsReportClient {
      * @return the transformed xml as String
      */
     private String transformXmlDocument(String inputXmlString,
-                                              File xsltFile) {
+                                              InputStream xsltFile) {
 
         TransformerFactory factory = TransformerFactory.newInstance();
         StreamSource xslt = new StreamSource(xsltFile);
