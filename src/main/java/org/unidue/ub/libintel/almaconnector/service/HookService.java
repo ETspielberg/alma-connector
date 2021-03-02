@@ -55,6 +55,20 @@ public class HookService {
                     if ("D0001".equals(item.getItemData().getLibrary().getValue()))
                         item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("DES"));
                     item.getItemData().setPublicNote("Einbandstelle");
+                    String library = item.getItemData().getLibrary().getValue();
+                    item.getHoldingData().setInTempLocation(true);
+                    switch(library) {
+                        case "E0001": {
+                            item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("EES"));
+                            item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("E0001"));
+                            break;
+                        }
+                        case "D0001": {
+                            item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("DES"));
+                            item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("D0001"));
+                            break;
+                        }
+                    }
                     this.itemService.updateItem(item);
                     log.info(String.format("created new bubi order line %s for %s: %s", bubiOrderLine.getBubiOrderLineId(), bubiOrderLine.getCollection(), bubiOrderLine.getShelfmark()));
                     break;

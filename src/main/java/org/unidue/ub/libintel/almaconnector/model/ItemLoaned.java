@@ -1,5 +1,6 @@
 package org.unidue.ub.libintel.almaconnector.model;
 
+
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 import javax.xml.bind.annotation.XmlElement;

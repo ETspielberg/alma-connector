@@ -56,6 +56,9 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
     @Column(name= "alma_holding_id")
     private String almaHoldingId;
 
+    @Column(name = "alma_item_id")
+    private String almaItemId;
+
     @Column(name = "title")
     private String title;
 
@@ -461,6 +464,14 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
 
     public void setMediaType(String mediaType) {
         this.mediaType = mediaType;
+    }
+
+    public String getAlmaItemId() {
+        return almaItemId;
+    }
+
+    public void setAlmaItemId(String almaItemId) {
+        this.almaItemId = almaItemId;
     }
 
     @Override

@@ -6,13 +6,13 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.Invoice;
 import org.unidue.ub.alma.shared.acq.InvoiceLine;
 import org.unidue.ub.alma.shared.acq.PoLine;
+import org.unidue.ub.alma.shared.bibs.HoldingDataTempLibrary;
+import org.unidue.ub.alma.shared.bibs.HoldingDataTempLocation;
 import org.unidue.ub.alma.shared.bibs.Item;
-import org.unidue.ub.libintel.almaconnector.clients.conf.AlmaJobsApiClient;
 import org.unidue.ub.libintel.almaconnector.model.bubi.*;
 import org.unidue.ub.libintel.almaconnector.repository.BubiDataRepository;
 import org.unidue.ub.libintel.almaconnector.repository.BubiOrderLineRepository;
@@ -30,23 +30,16 @@ public class BubiService {
     @Value("${libintel.bubi.journal.fund:55510-0-1100}")
     private String journalFund;
 
-    @Value("${libintel.order.pack.job.id:123456789}")
-    private String packOrderJobnId;
-
     @Value("${libintel.bubi.monograph.fund:55510-0-1200}")
     private String monographFund;
 
     private final BubiOrderRepository bubiOrderRepository;
-
-    private final String journalRegEx = "\\d\\dZ\\d+.*";
 
     private final BubiOrderLineRepository bubiOrderLineRepository;
 
     private final CoreDataRepository coreDataRepository;
 
     private final PrimoService primoService;
-
-    private final VendorService vendorService;
 
     private final BubiDataRepository bubiDataRepository;
 
@@ -56,8 +49,6 @@ public class BubiService {
 
     private final AlmaInvoiceServices almaInvoiceServices;
 
-    private final AlmaJobsApiClient almaJobsApiClient;
-
     private final Logger log = LoggerFactory.getLogger(BubiService.class);
 
     public BubiService(
@@ -66,25 +57,17 @@ public class BubiService {
             CoreDataRepository coreDataRepository,
             BubiDataRepository bubiDataRepository,
             PrimoService primoService,
-            VendorService vendorService,
             ItemService itemService,
             AlmaPoLineService almaPoLineService,
-            AlmaInvoiceServices almaInvoiceService,
-            AlmaJobsApiClient almaJobsApiClient) {
+            AlmaInvoiceServices almaInvoiceService) {
         this.bubiOrderLineRepository = bubiOrderLineRepository;
         this.bubiOrderRepository = bubiOrderRepository;
         this.coreDataRepository = coreDataRepository;
         this.bubiDataRepository = bubiDataRepository;
         this.primoService = primoService;
         this.itemService = itemService;
-        this.vendorService = vendorService;
         this.almaPoLineService = almaPoLineService;
         this.almaInvoiceServices = almaInvoiceService;
-        this.almaJobsApiClient = almaJobsApiClient;
-    }
-
-    public BubiOrder getBubiOrder(String orderNumber) {
-        return this.bubiOrderRepository.getOne(orderNumber);
     }
 
     public List<BubiOrder> getBubiOrders(String mode) {
@@ -103,16 +86,8 @@ public class BubiService {
         }
     }
 
-    public List<BubiOrderLine> getAllBubiOrderLines() {
-        return this.bubiOrderLineRepository.findAll();
-    }
-
     public List<BubiOrderLine> getAllBubiOrderLinesForBubi(String vendorId) {
         return this.bubiOrderLineRepository.findAllByVendorId(vendorId);
-    }
-
-    public List<BubiOrderLine> getAllBubiOrderLinesForVendorAccount(String vendorId, String vendorAccount) {
-        return this.bubiOrderLineRepository.findAllByVendorIdAndVendorAccount(vendorId, vendorAccount);
     }
 
     public List<CoreData> getActiveCoreData() {
@@ -121,10 +96,6 @@ public class BubiService {
 
     public List<CoreData> getAllCoreData() {
         return this.coreDataRepository.findAll();
-    }
-
-    public CoreData getCoreData(String collection, String shelfmark) {
-        return this.coreDataRepository.findAllByCollectionAndShelfmark(collection, shelfmark);
     }
 
     public CoreData saveCoreData(CoreData coreData) {
@@ -170,6 +141,7 @@ public class BubiService {
             bubiOrderLine.setTitle(item.getBibData().getTitle());
             bubiOrderLine.setAlmaMmsId(item.getBibData().getMmsId());
             bubiOrderLine.setAlmaHoldingId(item.getHoldingData().getHoldingId());
+            bubiOrderLine.setAlmaItemId(item.getItemData().getPid());
             bubiOrderLine.addCoreData(coredata, true);
         } else {
             log.info("found core data");
@@ -215,6 +187,7 @@ public class BubiService {
                 continue;
             String collection = row.getCell(0).getStringCellValue();
             String shelfmark = row.getCell(1).getStringCellValue();
+            String journalRegEx = "\\d\\dZ\\d+.*";
             if (Pattern.matches(journalRegEx, shelfmark)) {
                 shelfmark = shelfmark.replace("Z", " Z ");
             }
@@ -323,10 +296,6 @@ public class BubiService {
         return this.bubiDataRepository.findAll();
     }
 
-    public BubiData getbubiData(String vendorId, String vendorAccount) {
-        return this.bubiDataRepository.getOne(new BubiDataId(vendorId, vendorAccount));
-    }
-
     public BubiData getVendorAccount(String vendorID, String collection) {
         String campus = collection.startsWith("E") ? "E0001" : "D0001";
         List<BubiData> bubiData = this.bubiDataRepository.findByVendorIdAndCampus(vendorID, campus);
@@ -336,31 +305,10 @@ public class BubiService {
             return bubiData.get(0);
     }
 
-    public void deleteBubiData(String vendorId, String vendorAccount) {
-        this.bubiDataRepository.deleteById(new BubiDataId(vendorId, vendorAccount));
-    }
-
-    public BubiData saveBubiData(BubiData bubiData) {
-        return this.bubiDataRepository.save(bubiData);
-    }
-
-    public BubiOrderLine getBubiOrderLineByAlmaPoLineId(String almaPoLineId) {
-        return this.bubiOrderLineRepository.getBubiOrderLineByAlmaPoLineId(almaPoLineId);
-    }
-
     private boolean addCoreData(BubiOrderLine bubiOrderLine) {
         CoreData coredata = this.coreDataRepository.findAllByCollectionAndShelfmark(bubiOrderLine.getCollection(), bubiOrderLine.getShelfmark());
         if (coredata != null) {
             bubiOrderLine.addCoreData(coredata, false);
-            return true;
-        }
-        return false;
-    }
-
-    private boolean addDefaultCoreData(BubiOrderLine bubiOrderLine, String mediaType, String campus) {
-        CoreData coredata = this.coreDataRepository.findCoreDataByActiveAndShelfmarkAndMediaType(true, "STANDARD_" + campus, mediaType);
-        if (coredata != null) {
-            bubiOrderLine.addCoreData(coredata, true);
             return true;
         }
         return false;
@@ -404,15 +352,34 @@ public class BubiService {
             bubiOrderInd.addBubiOrderLine(bubiOrderLine);
             bubiOrderLine.setBubiOrder(bubiOrderInd);
             bubiOrderInd.calculateTotalPrice();
+            setTemporaryLocation(bubiOrderLine);
+
             this.bubiOrderRepository.save(bubiOrderInd);
             this.bubiOrderLineRepository.save(bubiOrderLine);
         }
         return new ArrayList<>(bubiOrders.values());
     }
 
+    private void setTemporaryLocation(BubiOrderLine bubiOrderLine) {
+        Item item = itemService.findItemByMmsAndItemId(bubiOrderLine.getAlmaMmsId(), bubiOrderLine.getAlmaItemId());
+        item.getHoldingData().setInTempLocation(true);
+        item.getItemData().setPublicNote("Buchbinder");
+        switch(item.getItemData().getLibrary().getValue()) {
+            case "E0001": {
+                item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("EBB"));
+                item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("E0001"));
+                break;
+            }
+            case "D0001": {
+                item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("DBB"));
+                item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("D0001"));
+                break;
+            }
+        }
+    }
+
     public BubiOrder payBubiOrder(BubiOrder bubiOrder) {
         Invoice invoice = getInvoiceForBubiOrder(bubiOrder);
-        // log.info(invoice.toString());
         invoice = this.almaInvoiceServices.saveInvoice(invoice);
         List<InvoiceLine> invoiceLines = getInvoiceLinesForBubiOrder(bubiOrder);
         for (InvoiceLine invoiceLine : invoiceLines)

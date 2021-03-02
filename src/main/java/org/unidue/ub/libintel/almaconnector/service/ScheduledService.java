@@ -26,6 +26,8 @@ public class ScheduledService {
 
     private final AlmaPoLineService almaPoLineService;
 
+    private final AlmaJobsService almaJobsService;
+
     private final Logger log = LoggerFactory.getLogger(ScheduledService.class);
 
     private final MappingTables mappingTables;
@@ -33,11 +35,13 @@ public class ScheduledService {
     ScheduledService(AlmaAnalyticsReportClient almaAnalyticsReportClient,
                      MappingTables mappingTables,
                      ItemService itemService,
-                     AlmaPoLineService almaPoLineService) {
+                     AlmaPoLineService almaPoLineService,
+                     AlmaJobsService almaJobsService) {
         this.almaAnalyticsReportClient = almaAnalyticsReportClient;
         this.mappingTables = mappingTables;
         this.itemService = itemService;
         this.almaPoLineService = almaPoLineService;
+        this.almaJobsService = almaJobsService;
     }
 
     @Scheduled(cron = "0 0 7 * * *")
@@ -90,5 +94,15 @@ public class ScheduledService {
                     }
                 }
         );
+    }
+
+    @Scheduled(cron = "0 7,11,15,9 * * 1,2,3,4,5")
+    public void runElisaImportDuringWeek() {
+        this.almaJobsService.runElisaImportJob();
+    }
+
+    @Scheduled(cron = "0 7 * * 6")
+    public void runElisaImportAtWeekEnd() {
+        this.almaJobsService.runElisaImportJob();
     }
 }

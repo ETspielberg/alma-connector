@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import org.unidue.ub.alma.shared.acq.Payment;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -15,7 +13,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 /**
  * Invoice update object.
  */
-@ApiModel(description = "Invoice update object.")
 @XmlRootElement(name = "invoice")
 @XmlAccessorType(XmlAccessType.FIELD)
 @JacksonXmlRootElement(localName = "invoice")
@@ -33,7 +30,6 @@ public class InvoiceUpdate {
      * Get payment
      * @return payment
      **/
-    @ApiModelProperty(value = "")
     @JsonProperty(JSON_PROPERTY_PAYMENT)
     @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
     @JacksonXmlProperty(localName = "payment")
