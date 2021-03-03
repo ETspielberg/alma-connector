@@ -13,7 +13,7 @@ import feign.*;
 import org.unidue.ub.alma.shared.conf.JobInstance;
 import org.unidue.ub.alma.shared.conf.JobInstances;
 
-@FeignClient(name = "jobs", url = "/almaws/v1/conf/jobs", configuration = JobsFeignConfiguration.class)
+@FeignClient(name = "jobs", url = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/conf/jobs", configuration = JobsFeignConfiguration.class)
 @Service
 public interface AlmaJobsApiClient {
 
