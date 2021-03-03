@@ -96,7 +96,7 @@ public class ScheduledService {
         );
     }
 
-    @Scheduled(cron = "0 0 7,11,15,9 * * 1,2,3,4,5")
+    @Scheduled(cron = "0 0 7,11,15,19 * * 1,2,3,4,5")
     public void runElisaImportDuringWeek() {
         this.almaJobsService.runElisaImportJob();
     }
