@@ -56,7 +56,7 @@ public class HookService {
                         item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("DES"));
                     item.getItemData().setPublicNote("Einbandstelle");
                     String library = item.getItemData().getLibrary().getValue();
-                    item.getHoldingData().setInTempLocation(true);
+                    item.getHoldingData().setInTempLocation(false);
                     switch(library) {
                         case "E0001": {
                             item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("EES"));

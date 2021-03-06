@@ -5,6 +5,8 @@ import org.unidue.ub.libintel.almaconnector.model.SapData;
 class LocalizationService {
 
     static SapData generateComment(SapData sapData) {
+        if (sapData.getComment() != null && !sapData.getComment().isEmpty())
+            return sapData;
         switch (sapData.sapAccountData.getImportCheckString()) {
             case "681004002020P55300000030002":
             case "681010002020P55300000030002":
