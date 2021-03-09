@@ -135,8 +135,8 @@
                             <td th:text="${sapDatum.currency}"></td>
                             <td th:text="${sapDatum.invoiceNumber}"></td>
                             <td th:text="${sapDatum.positionalNumber}"></td>
-                            <td th:text="${sapDatum.comment}"></td>
                             <td th:text="${sapDatum.getCheckCharacter()}"></td>
+                            <td th:text="${sapDatum.comment}"></td>
                             <td th:text="${sapDatum.sapAccountData.getImportCheckString()}"></td>
                             <td th:text="${#dates.format(sapDatum.fromDate, 'dd.MM.yyyy')}"></td>
                             <td th:text="${#dates.format(sapDatum.toDate, 'dd.MM.yyyy')}"></td>
