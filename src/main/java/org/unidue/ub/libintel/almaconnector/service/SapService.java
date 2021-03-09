@@ -1,32 +1,386 @@
-package org.unidue.ub.libintel.almaconnector;
+package org.unidue.ub.libintel.almaconnector.service;
 
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.*;
-import org.unidue.ub.libintel.almaconnector.model.SapAccountData;
-import org.unidue.ub.libintel.almaconnector.model.SapData;
-import org.unidue.ub.libintel.almaconnector.model.SapResponse;
-import org.unidue.ub.libintel.almaconnector.model.bubi.BubiOrder;
-import org.unidue.ub.libintel.almaconnector.model.bubi.BubiOrderLine;
+import org.unidue.ub.libintel.almaconnector.clients.acquisition.AlmaInvoicesApiClient;
+import org.unidue.ub.libintel.almaconnector.clients.analytics.AlmaAnalyticsReportClient;
+import org.unidue.ub.libintel.almaconnector.model.analytics.InvoiceForPayment;
+import org.unidue.ub.libintel.almaconnector.model.analytics.InvoiceForPaymentReport;
+import org.unidue.ub.libintel.almaconnector.model.run.AlmaExportRun;
 import org.unidue.ub.libintel.almaconnector.model.run.SapResponseRun;
+import org.unidue.ub.libintel.almaconnector.model.sap.InvoiceUpdate;
+import org.unidue.ub.libintel.almaconnector.model.sap.SapAccountData;
+import org.unidue.ub.libintel.almaconnector.model.sap.SapData;
+import org.unidue.ub.libintel.almaconnector.model.sap.SapResponse;
+import org.unidue.ub.libintel.almaconnector.repository.AlmaExportRunRepository;
 
+import java.io.*;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
-/**
- * a number of static helper functions to convert data
- */
-public class Utils {
+@Service
+public class SapService {
 
-    private final static Logger log = LoggerFactory.getLogger(Utils.class);
+    private final AlmaInvoicesApiClient almaInvoicesApiClient;
+
+    private final AlmaExportRunRepository almaExportRunRepository;
+
+    private final AlmaAnalyticsReportClient almaAnalyticsReportClient;
 
     public static SimpleDateFormat dateformat = new SimpleDateFormat("yyyy-MM-dd");
+
+    @Value("${sap.home.tax.keys}")
+    private List<String> homeTaxKeys;
+
+    private final String file;
+
+    private final static Logger log = LoggerFactory.getLogger(AlmaInvoiceServices.class);
+
+    /**
+     * constructor based autowiring of the Feign client
+     *
+     * @param almaInvoicesApiClient the Feign client for the Alma Invoice API
+     */
+    SapService(@Value("${ub.statistics.data.dir}") String dataDir,
+               AlmaInvoicesApiClient almaInvoicesApiClient,
+               AlmaExportRunRepository almaExportRunRepository,
+               AlmaAnalyticsReportClient almaAnalyticsReportClient) {
+        this.file = dataDir + "/sapData/";
+        this.almaInvoicesApiClient = almaInvoicesApiClient;
+        this.almaExportRunRepository = almaExportRunRepository;
+        this.almaAnalyticsReportClient = almaAnalyticsReportClient;
+        File folder = new File(this.file);
+        if (!folder.exists()) {
+            if (!folder.mkdirs())
+                log.warn("could not create data directory");
+        }
+    }
+
+    /**
+     * updates the Invoices in Alma with the results of the SAP import
+     *
+     * @param container an SAP container object holding a list of SAP response object
+     * @return the SAP container objects the number of missed entries
+     */
+    @Secured({"ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Invoice Operator Extended"})
+    public SapResponseRun updateInvoiceWithErpData(SapResponseRun container) {
+        for (SapResponse sapResponse : container.getResponses()) {
+            // get the number of the invoice (is not the ID!)
+            String invoiceId = sapResponse.getInvoiceNumber();
+
+            // search the invoices for the invoice number
+            String searchQuery = "invoice_number~" + invoiceId;
+            Invoices invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE",
+                    "Waiting to be Sent", "", "", searchQuery, 20, 0, "");
+
+            log.debug(String.format("found %d invoices for invoice number %s", invoices.getTotalRecordCount(), invoiceId));
+            // process only if there is only one invoice found. Otherwise increase number of errors and log the error
+            if (invoices.getTotalRecordCount() == 1) {
+                Invoice invoice = invoices.getInvoice().get(0);
+                log.info("processing SAP responce for Invoice " + invoiceId);
+
+                // prepare the payment for the update
+                Payment payment = invoice.getPayment();
+                payment.setVoucherNumber(sapResponse.getVoucherNumber());
+                payment.setVoucherAmount(String.valueOf(sapResponse.getAmount()));
+                payment.setVoucherCurrency(new PaymentVoucherCurrency().value(sapResponse.getCurrency()));
+                payment.setVoucherDate(new Date());
+
+                // try to update the invoice.
+                try {
+                    // if the sum is the same as on the invoice, mark the invoice as paid and close the invoice
+                    if (sapResponse.getAmount() == invoice.getTotalAmount()) {
+                        payment.setPaymentStatus(new PaymentPaymentStatus().value("PAID").desc("bezahlt"));
+                        InvoiceUpdate invoiceUpdate = new InvoiceUpdate(payment);
+                        this.almaInvoicesApiClient.postInvoicesInvoiceIdToUpdate(invoiceUpdate, "application/json", invoice.getId(), "paid");
+
+                        // otherwise just add the payment
+                    } else {
+                        InvoiceUpdate invoiceUpdate = new InvoiceUpdate(payment);
+                        this.almaInvoicesApiClient.postInvoicesInvoiceIdToUpdate(invoiceUpdate, "application/json", invoice.getId(), "");
+                    }
+                } catch (Exception e) {
+                    // if an Exception occurs (e.g. when trying to update the invoice), log the message and increase the number of errors.
+                    log.error(String.format("could not update invoice %s", invoiceId));
+                    container.increaseNumberOfErrors();
+                }
+            } else {
+                // if none or more than one invoice is found log the message and increase the number of errors
+                log.warn(String.format("found %d invoices for invoice number %s", invoices.getTotalRecordCount(), invoiceId));
+                container.increaseNumberOfErrors();
+            }
+        }
+        log.info(container.logString());
+        return container;
+    }
+
+    public List<Invoice> getOpenInvoicesFromAnalytics(AlmaExportRun almaExportRun) {
+        try {
+            List<InvoiceForPayment> result = this.almaAnalyticsReportClient.getReport(InvoiceForPayment.PATH, InvoiceForPaymentReport.class).getRows();
+            List<Invoice> invoices = new ArrayList<>();
+            if (result != null) {
+                for (InvoiceForPayment invoiceEntry: result) {
+                    if (invoiceEntry.getInvoiceOwnerCode().equals(almaExportRun.getInvoiceOwner())) {
+                        Invoice invoiceInd = this.almaInvoicesApiClient.getInvoicesInvoiceId("application/json", invoiceEntry.getInvoiceNumber(), "full");
+                        almaExportRun.addInvoice(invoiceInd);
+                        List<SapData> sapDataList = convertToSapData(invoiceInd, invoiceEntry.getErpCode(), invoiceEntry.getOrderLineType());
+                        log.debug(String.format("adding %d SAP data to the list", sapDataList.size()));
+                        almaExportRun.addSapDataList(sapDataList, homeTaxKeys);
+                        log.debug(String.format("run contains now %d entries: %d home and %d foreign",
+                                almaExportRun.getTotalSapData(),
+                                almaExportRun.getHomeSapData().size(),
+                                almaExportRun.getForeignSapData().size() ));
+                    }
+                }
+            }
+            return invoices;
+        } catch (IOException ioe) {
+            log.error("could not connect to analytics");
+            return null;
+        }
+    }
+
+    private SapData generateComment(SapData sapData) {
+        if (sapData.getComment() != null && !sapData.getComment().isEmpty())
+            return sapData;
+        switch (sapData.sapAccountData.getImportCheckString()) {
+            case "681004002020P55300000030002":
+            case "681010002020P55300000030002":
+            case "681000002020P40100000130010":
+            case "681002002020P55300000030002":
+            case "681000002020P55300000030002":
+            case "681005002020P55300000030002":
+                break;
+            default: {
+                if ("B-HBZ".equals(sapData.vendorCode)) {
+                    return sapData;
+                }
+                switch (sapData.sapAccountData.getLedgerAccount()) {
+                    case "68100000": {
+                        sapData.comment = "Monographien";
+                        break;
+                    }
+                    case "68100200": {
+                        sapData.comment = "Zeitschriften-Abo";
+                        break;
+                    }
+                    case "68100210": {
+                        sapData.comment = "Zeitschriften-Abo Verbrauch";
+                        break;
+                    }
+                    case "68100300": {
+                        sapData.comment = "Fortsetzungen";
+                        break;
+                    }
+                    case "68100400": {
+                        sapData.comment = "Elektron. Zeitschr., Kauf";
+                        break;
+                    }
+                    case "68100500": {
+                        sapData.comment = "Elektron. Zeitschr., Lizenz";
+                        break;
+                    }
+                    case "68100600": {
+                        sapData.comment = "Datenbanken, laufend/Kauf";
+                        break;
+                    }
+                    case "68100700": {
+                        sapData.comment = "Datenbanken, laufend/Lizenz";
+                        break;
+                    }
+                    case "68100800": {
+                        sapData.comment = "Datenbanken, einmalig/Kauf";
+                        break;
+                    }
+                    case "68100900": {
+                        sapData.comment = "Datenbanken, einmalig/Lizenz";
+                        break;
+                    }
+                    case "68101000": {
+                        sapData.comment = "Sonst. Non-Book-Materialien";
+                        break;
+                    }
+                    case "68101100": {
+                        sapData.comment = "Einband";
+                        break;
+                    }
+                    case "68101200": {
+                        sapData.comment = "Bestandserhaltung";
+                        break;
+                    }
+                    case "68101900": {
+                        sapData.comment = "Sonst. Literaturkosten";
+                        break;
+                    }
+                    case "68910100": {
+                        sapData.comment = "Aufwendungen f. Veroeffentlichungen";
+                        break;
+                    }
+                    default:
+                        sapData.comment = "";
+                }
+            }
+        }
+        return sapData;
+    }
+
+    /**
+     * writes the SAP data contained in an AlmaExportRun object as files to disk
+     * @param almaExportRun the AlmaExportRun object holding a list of SAP data
+     * @return the AlmaExportRun object updated with the files created and the number of failed entries to be written
+     */
+    @Secured({ "ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Invoice Operator Extended"})
+    public AlmaExportRun writeAlmaExport(AlmaExportRun almaExportRun) {
+        String dateString;
+        if (almaExportRun.isDateSpecific())
+            dateString = dateformat.format(almaExportRun.getDesiredDate());
+        else
+            dateString = dateformat.format(new Date());
+        String checkFilename = String.format("Druck-sap_%s_%s_%s.txt", "all", dateString, almaExportRun.getInvoiceOwner());
+        String homeFilename = String.format("sap_%s_%s_%s.txt", "home", dateString, almaExportRun.getInvoiceOwner());
+        String foreignFilename = String.format("sap_%s_%s_%s.txt", "foreign", dateString, almaExportRun.getInvoiceOwner());
+        initializeFiles(dateString, checkFilename, homeFilename, foreignFilename);
+
+        for (SapData sapData: almaExportRun.getHomeSapData()) {
+            if (!sapData.isChecked)
+                continue;
+            try {
+                addLineToFile(checkFilename, sapData.toFixedLengthLine());
+            } catch (IOException ex) {
+                log.warn("could not write line: " + sapData.toFixedLengthLine());
+            }
+            try {
+                addLineToFile(homeFilename, generateComment(sapData).toCsv());
+            } catch (IOException ex) {
+                almaExportRun.increaseMissedSapData();
+                almaExportRun.addMissedSapData(sapData);
+                log.warn("could not write line: " + sapData.toFixedLengthLine());
+            }
+        }
+        for (SapData sapData: almaExportRun.getForeignSapData()) {
+            if (!sapData.isChecked)
+                continue;
+            try {
+                addLineToFile(checkFilename, sapData.toFixedLengthLine());
+            } catch (IOException ex) {
+                log.warn("could not write line: " + sapData.toFixedLengthLine());
+            }
+            try {
+                addLineToFile(foreignFilename, generateComment(sapData).toCsv());
+            } catch (IOException ex) {
+                almaExportRun.increaseMissedSapData();
+                almaExportRun.addMissedSapData(sapData);
+                log.warn("could not write line: " + sapData.toFixedLengthLine());
+            }
+        }
+        this.almaExportRunRepository.save(almaExportRun);
+        return almaExportRun;
+    }
+
+    private void addLineToFile(String filename, String line) throws IOException {
+        log.info("writing line \n" + line);
+        BufferedWriter bw = new BufferedWriter(new FileWriter(this.file + filename, true));
+        bw.write(line);
+        bw.newLine();
+        bw.flush();
+        bw.close();
+    }
+
+    @Secured({ "ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Invoice Operator Extended" })
+    public List<String> getFiles(@Value("${ub.statistics.data.dir}") String dataDir) {
+        Path rootLocation = Paths.get(dataDir);
+        try {
+            return Files.walk(rootLocation, 1)
+                    .filter(path -> !path.equals(rootLocation))
+                    .map(rootLocation::relativize)
+                    .map(path -> path.getFileName().toString())
+                    .filter(filename -> !filename.startsWith("Druck"))
+                    .map(filename -> filename.replace("sap-",""))
+                    .collect(Collectors.toList());
+        } catch (IOException ioe) {
+            log.error("failed to read stored files", ioe);
+            return null;
+        }
+    }
+
+    /**
+     * adds a line to the output file
+     * @param bw the buffered writer for the file
+     * @param line the line to be added
+     * @throws IOException thrown if problems writing to the file occur
+     */
+    private void addLine(BufferedWriter bw, String line) throws IOException {
+        bw.write(line);
+        bw.newLine();
+        bw.flush();
+    }
+
+    /**
+     * initialize files and deletes the files if present.
+     * @param currentDate the current date
+     * @param checkFilename the filename of the check/printed version
+     * @param sapFilename the filename of the SAP import file
+     */
+    private void initializeFiles(String currentDate, String checkFilename, String sapFilename, String foreignFilename) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(this.file + checkFilename, false))) {
+            addLine(bw, "Kontrollausdruck der SAP-Datei, Bearbeitungsdatum: " + currentDate);
+        } catch(IOException ioe) {
+            log.warn("could not create empty check file at " + currentDate, ioe);
+        }
+        initializeSapFiles(sapFilename);
+        initializeSapFiles(foreignFilename);
+    }
+
+    private void initializeSapFiles(String filename) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(this.file + filename, false))) {
+            bw.write("");
+            bw.flush();
+        } catch(IOException ioe) {
+            log.warn("could not create empty sap file.", ioe);
+        }
+    }
+
+    /**
+     * loads the sap files from  disk
+     * @param date the date for which the file shall be obtained
+     * @param type the type of the file to be obtained (HomeCurrency or ForeignCurrency)
+     * @return the file as Resource object
+     * @throws FileNotFoundException thrown if the file could not be loaded
+     */
+    @Secured({ "ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Invoice Operator Extended" })
+    public org.springframework.core.io.Resource loadFiles(String date, String type, String owner) throws FileNotFoundException {
+        String filename = String.format("sap_%s_%s_%s.txt", type, date, owner);
+        Path file =Paths.get(this.file + filename);
+        try {
+            Resource resource = new UrlResource(file.toUri());
+            if (resource.exists() || resource.isReadable()) {
+                return resource;
+            } else {
+                throw new FileNotFoundException(
+                        "Could not read file: " + filename);
+            }
+        } catch (MalformedURLException e) {
+            log.error("could not read file: " + filename, e);
+            return null;
+        }
+    }
 
     /**
      * converts an alma invoce to a list of sap data to be imported.
@@ -407,121 +761,5 @@ public class Utils {
         return container;
     }
 
-    /**
-     * creates an Alma PO Line form the bubi order line
-     * @param bubiOrderLine the bubi order line from which the Alma PO Line is created
-     * @return an Alma PoLine object
-     */
-    public static PoLine buildPoLine(BubiOrderLine bubiOrderLine) {
-        PoLineOwner poLineOwner;
-
-        // set the owner depending on the collection
-        if (bubiOrderLine.getCollection().startsWith("D"))
-            poLineOwner = new PoLineOwner().value("D0001");
-        else if (bubiOrderLine.getCollection().startsWith("E5"))
-            poLineOwner = new PoLineOwner().value("E0023");
-        else
-            poLineOwner = new PoLineOwner().value("E0001");
-
-        // creates the amount and fund information
-        Amount amount = new Amount().sum(String.valueOf(bubiOrderLine.getPrice()))
-                .currency(new AmountCurrency().value("EUR"));
-        FundDistributionPoLine fundDistribution = new FundDistributionPoLine()
-                .fundCode(new FundDistributionFundCode().value(bubiOrderLine.getFund()))
-                .amount(amount);
-        List<FundDistributionPoLine> fundList = new ArrayList<>();
-        fundList.add(fundDistribution);
-
-        // creates the resource metadata
-        ResourceMetadata resourceMetadata = new ResourceMetadata()
-                .mmsId(new ResourceMetadataMmsId().value(bubiOrderLine.getAlmaMmsId()))
-                .title(bubiOrderLine.getTitle());
-
-        // sets the status to a auto packaging
-        PoLineStatus status = new PoLineStatus().value("AUTO_PACKAGING").desc("Auto Packaging");
-        return new PoLine()
-                .vendorReferenceNumber(String.format("%s - %S:%s)", bubiOrderLine.getFund(),
-                        bubiOrderLine.getCollection(),
-                        bubiOrderLine.getShelfmark()))
-                .sourceType(new PoLineSourceType().value("MANUALENTRY"))
-                .type(new PoLineType().value("OTHER_SERVICES_OT"))
-                .status(status)
-                .price(amount)
-                .baseStatus(PoLine.BaseStatusEnum.ACTIVE)
-                .owner(poLineOwner)
-                .resourceMetadata(resourceMetadata)
-                .vendor(new PoLineVendor().value(bubiOrderLine.getVendorId()))
-                .vendorAccount(bubiOrderLine.getVendorAccount())
-                .fundDistribution(fundList);
-    }
-
-    /**
-     * creates an invoice for a bubi order.
-     * @param bubiOrder a bubi order
-     * @return an Alma Invoice object
-     */
-    public static Invoice getInvoiceForBubiOrder(BubiOrder bubiOrder) {
-        // create new Invocie
-        Invoice invoice = new Invoice();
-
-        // set the vendor information with the information from the bubi order
-        invoice.vendor(new InvoiceVendor().value(bubiOrder.getVendorId()))
-                .vendorAccount(bubiOrder.getVendorAccount());
-
-        // set total amount and payment method
-        invoice.totalAmount(bubiOrder.getTotalAmount());
-        invoice.paymentMethod(new InvoicePaymentMethod().value("ACCOUNTINGDEPARTMENT"));
-
-        // set the status information
-        invoice.invoiceStatus(new InvoiceInvoiceStatus().value("ACTIVE"));
-
-
-        // set the VAT information
-        invoice.invoiceVat(new InvoiceVat().vatPerInvoiceLine(true).type(new InvoiceVatType().value("INCLUSIVE")));
-
-        // set the invoice number and date
-        invoice.setNumber(bubiOrder.getInvoiceNumber());
-        invoice.setInvoiceDate(bubiOrder.getInvoiceDate());
-
-        // set the owner of the order line
-        if (bubiOrder.getBubiOrderLines().get(0).getCollection().startsWith("D"))
-            invoice.setOwner(new InvoiceOwner().value("D0001"));
-        else
-            invoice.setOwner(new InvoiceOwner().value("E0001"));
-        return invoice;
-    }
-
-    /**
-     * creates the individual invoice lines for the bubi order lines in the bubi order
-     * @param bubiOrder the bubi order holding the individual bubi order lines
-     * @return a list of Alma InvoiceLine-objects
-     */
-    public static List<InvoiceLine> getInvoiceLinesForBubiOrder(BubiOrder bubiOrder) {
-        // create new list of order lines
-        List<InvoiceLine> invoiceLines = new ArrayList<>();
-        for (int i = 0; i< bubiOrder.getBubiOrderLines().size(); i++) {
-            // retrieve the bubi order line
-            BubiOrderLine bubiOrderLine = bubiOrder.getBubiOrderLines().get(i);
-
-            // set the standard value for the VAT
-            InvoiceLineVat invoiceLineVat = new InvoiceLineVat().vatCode(new InvoiceLineVatVatCode().value("H8"));
-
-            // set the fund distribution
-            FundDistributionFundCode fundDistributionFundCode = new FundDistributionFundCode().value(bubiOrderLine.getFund());
-            FundDistribution fundDistribution = new FundDistribution().fundCode(fundDistributionFundCode).amount(bubiOrderLine.getPrice());
-            List<FundDistribution> fundDistributionList = new ArrayList<>();
-            fundDistributionList.add(fundDistribution);
-
-            // create invoice line with all information and add it to the list
-            InvoiceLine invoiceLine = new InvoiceLine()
-                    .poLine(bubiOrderLine.getAlmaPoLineId())
-                    .fullyInvoiced(true)
-                    .totalPrice(bubiOrderLine.getPrice())
-                    .invoiceLineVat(invoiceLineVat)
-                    .fundDistribution(fundDistributionList);
-            invoiceLines.add(invoiceLine);
-        }
-        return invoiceLines;
-    }
 
 }

@@ -119,6 +119,7 @@
                             <th th:text="#{sap.result.invoicenumber}"></th>
                             <th th:text="#{sap.result.invoicelinenumber}"></th>
                             <th th:text="#{sap.result.briefcode}"></th>
+                            <th th:text="#{sap.result.comment}"></th>
                             <th th:text="#{sap.result.checkcode}"></th>
                             <th th:text="#{sap.result.date.from}"></th>
                             <th th:text="#{sap.result.date.to}"></th>
@@ -134,6 +135,7 @@
                             <td th:text="${sapDatum.currency}"></td>
                             <td th:text="${sapDatum.invoiceNumber}"></td>
                             <td th:text="${sapDatum.positionalNumber}"></td>
+                            <td th:text="${sapDatum.comment}"></td>
                             <td th:text="${sapDatum.getCheckCharacter()}"></td>
                             <td th:text="${sapDatum.sapAccountData.getImportCheckString()}"></td>
                             <td th:text="${#dates.format(sapDatum.fromDate, 'dd.MM.yyyy')}"></td>

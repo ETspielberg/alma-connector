@@ -3,12 +3,12 @@ package org.unidue.ub.libintel.almaconnector.model.run;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.unidue.ub.alma.shared.acq.Invoice;
-import org.unidue.ub.libintel.almaconnector.model.SapData;
+import org.unidue.ub.libintel.almaconnector.model.sap.SapData;
 
 import javax.persistence.*;
 import java.util.*;
 
-import static org.unidue.ub.libintel.almaconnector.Utils.dateformat;
+import static org.unidue.ub.libintel.almaconnector.service.SapService.dateformat;
 
 /**
  * container object to hold all information about a download of the sap data from Alma

@@ -9,7 +9,7 @@ import org.unidue.ub.libintel.almaconnector.repository.AlmaExportRunRepository;
 import java.util.Date;
 import java.util.List;
 
-import static org.unidue.ub.libintel.almaconnector.Utils.dateformat;
+import static org.unidue.ub.libintel.almaconnector.service.SapService.dateformat;
 
 /**
  * The service  running the export runs

@@ -15,12 +15,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.unidue.ub.alma.shared.acq.Invoice;
 import org.unidue.ub.alma.shared.acq.Vendor;
-import org.unidue.ub.libintel.almaconnector.model.SapData;
+import org.unidue.ub.libintel.almaconnector.model.sap.SapData;
 import org.unidue.ub.libintel.almaconnector.model.run.AlmaExportRun;
 import org.unidue.ub.libintel.almaconnector.model.run.SapResponseRun;
 import org.unidue.ub.libintel.almaconnector.service.AlmaExportRunService;
 import org.unidue.ub.libintel.almaconnector.service.AlmaInvoiceServices;
-import org.unidue.ub.libintel.almaconnector.service.FileWriterService;
+import org.unidue.ub.libintel.almaconnector.service.SapService;
 import org.unidue.ub.libintel.almaconnector.service.VendorService;
 
 
@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
-import static org.unidue.ub.libintel.almaconnector.Utils.*;
+import static org.unidue.ub.libintel.almaconnector.service.SapService.*;
 
 /**
  * Controller defining the endpoints for retrieving the invoices.
@@ -41,9 +41,9 @@ public class InvoiceController {
 
     private final VendorService vendorService;
 
-    private final FileWriterService fileWriterService;
-
     private final AlmaExportRunService almaExportRunService;
+
+    private final SapService sapService;
 
     @Value("${sap.home.tax.keys}")
     private List<String> homeTaxKeys;
@@ -55,16 +55,16 @@ public class InvoiceController {
      *
      * @param almaInvoiceServices the invoice service bean
      * @param vendorService       the vendor service bean
-     * @param fileWriterService   the file writer service
+     * @param sapService          the sap service
      */
     InvoiceController(AlmaInvoiceServices almaInvoiceServices,
                       VendorService vendorService,
-                      FileWriterService fileWriterService,
+                      SapService sapService,
                       AlmaExportRunService almaExportRunService) {
         this.almaInvoiceServices = almaInvoiceServices;
         this.vendorService = vendorService;
-        this.fileWriterService = fileWriterService;
         this.almaExportRunService = almaExportRunService;
+        this.sapService = sapService;
     }
 
     /**
@@ -125,7 +125,7 @@ public class InvoiceController {
 
         //convert the excel sheet to a SapResponseRun holding the individual responses
         SapResponseRun container = getFromExcel(worksheet, sapReturnFile.getOriginalFilename());
-        container = this.almaInvoiceServices.updateInvoiceWithErpData(container);
+        container = this.sapService.updateInvoiceWithErpData(container);
         return ResponseEntity.ok(container);
     }
 
@@ -139,7 +139,7 @@ public class InvoiceController {
     @DateTimeFormat(pattern = "E MMM dd HH:mm:ss z yyyy")
     public String getImportFiles(@ModelAttribute("almaExportRun") AlmaExportRun almaExportRun, Model model) {
         log.info(String.format("showing files for %s : %s; %d selected ", dateformat.format(almaExportRun.getDesiredDate()), almaExportRun.isDateSpecific(), almaExportRun.getNumberHomeDataSelected()));
-        almaExportRun = this.fileWriterService.writeAlmaExport(almaExportRun);
+        almaExportRun = this.sapService.writeAlmaExport(almaExportRun);
         model.addAttribute("almaExportRun", almaExportRun);
         return "sap/showImportFiles";
     }
@@ -154,7 +154,7 @@ public class InvoiceController {
      */
     @GetMapping("/downloadFile/{type}/{owner}/{date}")
     public ResponseEntity<Resource> serveFile(@PathVariable String type, @PathVariable String date, @PathVariable String owner) throws FileNotFoundException {
-        Resource file = fileWriterService.loadFiles(date, type, owner);
+        Resource file = sapService.loadFiles(date, type, owner);
         return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=\"" + file.getFilename() + "\"").body(file);
     }

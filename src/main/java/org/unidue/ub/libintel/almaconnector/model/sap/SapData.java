@@ -1,4 +1,4 @@
-package org.unidue.ub.libintel.almaconnector.model;
+package org.unidue.ub.libintel.almaconnector.model.sap;
 
 import org.springframework.format.annotation.DateTimeFormat;
 

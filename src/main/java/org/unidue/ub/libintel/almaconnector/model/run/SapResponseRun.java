@@ -1,6 +1,6 @@
 package org.unidue.ub.libintel.almaconnector.model.run;
 
-import org.unidue.ub.libintel.almaconnector.model.SapResponse;
+import org.unidue.ub.libintel.almaconnector.model.sap.SapResponse;
 
 import java.util.ArrayList;
 import java.util.List;
