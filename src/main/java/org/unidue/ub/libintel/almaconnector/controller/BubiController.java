@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.unidue.ub.libintel.almaconnector.model.bubi.*;
-import org.unidue.ub.libintel.almaconnector.service.AlmaPoLineService;
 import org.unidue.ub.libintel.almaconnector.service.BubiService;
 import org.unidue.ub.libintel.almaconnector.service.PrimoService;
 

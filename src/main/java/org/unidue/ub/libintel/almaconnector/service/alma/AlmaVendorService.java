@@ -1,4 +1,4 @@
-package org.unidue.ub.libintel.almaconnector.service;
+package org.unidue.ub.libintel.almaconnector.service.alma;
 
 import feign.FeignException;
 import org.slf4j.Logger;
@@ -10,17 +10,17 @@ import org.unidue.ub.alma.shared.acq.Vendor;
 import org.unidue.ub.libintel.almaconnector.clients.acquisition.AlmaVendorApiClient;
 
 @Service
-public class VendorService {
+public class AlmaVendorService {
 
     private final AlmaVendorApiClient almaVendorApiClient;
 
-    private final Logger log = LoggerFactory.getLogger(VendorService.class);
+    private final Logger log = LoggerFactory.getLogger(AlmaVendorService.class);
 
     /**
      * constructor based autowiring of the Feign client.
      * @param almaVendorApiClient the Feign client for the Alma Vendor API
      */
-    VendorService(AlmaVendorApiClient almaVendorApiClient) {
+    AlmaVendorService(AlmaVendorApiClient almaVendorApiClient) {
         this.almaVendorApiClient = almaVendorApiClient;
     }
 

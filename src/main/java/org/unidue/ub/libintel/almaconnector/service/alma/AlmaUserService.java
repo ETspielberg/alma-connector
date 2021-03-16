@@ -1,4 +1,4 @@
-package org.unidue.ub.libintel.almaconnector.service;
+package org.unidue.ub.libintel.almaconnector.service.alma;
 
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.user.AlmaUser;

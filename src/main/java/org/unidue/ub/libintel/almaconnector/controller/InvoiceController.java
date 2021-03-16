@@ -18,10 +18,11 @@ import org.unidue.ub.alma.shared.acq.Vendor;
 import org.unidue.ub.libintel.almaconnector.model.SapData;
 import org.unidue.ub.libintel.almaconnector.model.run.AlmaExportRun;
 import org.unidue.ub.libintel.almaconnector.model.run.SapResponseRun;
-import org.unidue.ub.libintel.almaconnector.service.AlmaExportRunService;
-import org.unidue.ub.libintel.almaconnector.service.AlmaInvoiceServices;
+import org.unidue.ub.libintel.almaconnector.service.SapService;
+import org.unidue.ub.libintel.almaconnector.service.alma.AlmaExportRunService;
+import org.unidue.ub.libintel.almaconnector.service.alma.AlmaInvoiceServices;
 import org.unidue.ub.libintel.almaconnector.service.FileWriterService;
-import org.unidue.ub.libintel.almaconnector.service.VendorService;
+import org.unidue.ub.libintel.almaconnector.service.alma.AlmaVendorService;
 
 
 import java.io.FileNotFoundException;
@@ -39,11 +40,13 @@ public class InvoiceController {
 
     private final AlmaInvoiceServices almaInvoiceServices;
 
-    private final VendorService vendorService;
+    private final AlmaVendorService almaVendorService;
 
     private final FileWriterService fileWriterService;
 
     private final AlmaExportRunService almaExportRunService;
+
+    private final SapService sapService;
 
     @Value("${sap.home.tax.keys}")
     private List<String> homeTaxKeys;
@@ -54,17 +57,19 @@ public class InvoiceController {
      * constructor based autowiring to the invoice service, the filewriter service and the vendorservice.
      *
      * @param almaInvoiceServices the invoice service bean
-     * @param vendorService       the vendor service bean
+     * @param almaVendorService       the vendor service bean
      * @param fileWriterService   the file writer service
      */
     InvoiceController(AlmaInvoiceServices almaInvoiceServices,
-                      VendorService vendorService,
+                      AlmaVendorService almaVendorService,
                       FileWriterService fileWriterService,
-                      AlmaExportRunService almaExportRunService) {
+                      AlmaExportRunService almaExportRunService,
+                      SapService sapService) {
         this.almaInvoiceServices = almaInvoiceServices;
-        this.vendorService = vendorService;
+        this.almaVendorService = almaVendorService;
         this.fileWriterService = fileWriterService;
         this.almaExportRunService = almaExportRunService;
+        this.sapService = sapService;
     }
 
     /**
@@ -91,10 +96,10 @@ public class InvoiceController {
         almaExportRunNew.setDateSpecific(almaExportRun.isDateSpecific());
         log.info(almaExportRunNew.log());
         this.almaExportRunService.saveAlmaExportRun(almaExportRunNew);
-        almaExportRunNew = this.almaInvoiceServices.getInvoices(almaExportRunNew);
+        almaExportRunNew = this.sapService.getInvoices(almaExportRunNew);
         log.info(almaExportRunNew.log());
         for (Invoice invoice : almaExportRunNew.getInvoices()) {
-            Vendor vendor = this.vendorService.getVendorAccount(invoice.getVendor().getValue());
+            Vendor vendor = this.almaVendorService.getVendorAccount(invoice.getVendor().getValue());
             List<SapData> sapDataList = convertInvoiceToSapData(invoice, vendor);
             log.debug(String.format("adding %d SAP data to the list", sapDataList.size()));
             almaExportRunNew.addSapDataList(sapDataList, homeTaxKeys);
@@ -125,7 +130,7 @@ public class InvoiceController {
 
         //convert the excel sheet to a SapResponseRun holding the individual responses
         SapResponseRun container = getFromExcel(worksheet, sapReturnFile.getOriginalFilename());
-        container = this.almaInvoiceServices.updateInvoiceWithErpData(container);
+        container = this.sapService.updateInvoiceWithErpData(container);
         return ResponseEntity.ok(container);
     }
 

@@ -18,6 +18,8 @@ import org.unidue.ub.libintel.almaconnector.repository.BubiDataRepository;
 import org.unidue.ub.libintel.almaconnector.repository.BubiOrderLineRepository;
 import org.unidue.ub.libintel.almaconnector.repository.BubiOrderRepository;
 import org.unidue.ub.libintel.almaconnector.repository.CoreDataRepository;
+import org.unidue.ub.libintel.almaconnector.service.alma.AlmaInvoiceServices;
+import org.unidue.ub.libintel.almaconnector.service.alma.AlmaPoLineService;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -43,7 +45,7 @@ public class BubiService {
 
     private final BubiDataRepository bubiDataRepository;
 
-    private final ItemService itemService;
+    private final FileWriterService.AlmaItemService almaItemService;
 
     private final AlmaPoLineService almaPoLineService;
 
@@ -57,7 +59,7 @@ public class BubiService {
             CoreDataRepository coreDataRepository,
             BubiDataRepository bubiDataRepository,
             PrimoService primoService,
-            ItemService itemService,
+            FileWriterService.AlmaItemService almaItemService,
             AlmaPoLineService almaPoLineService,
             AlmaInvoiceServices almaInvoiceService) {
         this.bubiOrderLineRepository = bubiOrderLineRepository;
@@ -65,7 +67,7 @@ public class BubiService {
         this.coreDataRepository = coreDataRepository;
         this.bubiDataRepository = bubiDataRepository;
         this.primoService = primoService;
-        this.itemService = itemService;
+        this.almaItemService = almaItemService;
         this.almaPoLineService = almaPoLineService;
         this.almaInvoiceServices = almaInvoiceService;
     }
@@ -105,7 +107,7 @@ public class BubiService {
 
     public BubiOrderLine getBubiOrderLineFromBarcode(String barcode) {
         if (barcode != null) {
-            Item item = this.itemService.findItemByBarcode(barcode);
+            Item item = this.almaItemService.findItemByBarcode(barcode);
             return expandBubiOrderLineFromItem(item);
         }
         return null;
@@ -361,7 +363,7 @@ public class BubiService {
     }
 
     private void setTemporaryLocation(BubiOrderLine bubiOrderLine) {
-        Item item = itemService.findItemByMmsAndItemId(bubiOrderLine.getAlmaMmsId(), bubiOrderLine.getAlmaItemId());
+        Item item = almaItemService.findItemByMmsAndItemId(bubiOrderLine.getAlmaMmsId(), bubiOrderLine.getAlmaItemId());
         item.getHoldingData().setInTempLocation(true);
         item.getItemData().setPublicNote("Buchbinder");
         switch(item.getItemData().getLibrary().getValue()) {

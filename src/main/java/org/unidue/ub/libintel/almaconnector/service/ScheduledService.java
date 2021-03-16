@@ -10,6 +10,8 @@ import org.unidue.ub.libintel.almaconnector.clients.analytics.AlmaAnalyticsRepor
 import org.unidue.ub.libintel.almaconnector.configuration.MappingTables;
 import org.unidue.ub.libintel.almaconnector.model.analytics.NewItemWithFundReport;
 import org.unidue.ub.libintel.almaconnector.model.analytics.NewItemWithOrderLine;
+import org.unidue.ub.libintel.almaconnector.service.alma.AlmaJobsService;
+import org.unidue.ub.libintel.almaconnector.service.alma.AlmaPoLineService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,7 +24,7 @@ public class ScheduledService {
 
     private final AlmaAnalyticsReportClient almaAnalyticsReportClient;
 
-    private final ItemService itemService;
+    private final FileWriterService.AlmaItemService almaItemService;
 
     private final AlmaPoLineService almaPoLineService;
 
@@ -34,12 +36,12 @@ public class ScheduledService {
 
     ScheduledService(AlmaAnalyticsReportClient almaAnalyticsReportClient,
                      MappingTables mappingTables,
-                     ItemService itemService,
+                     FileWriterService.AlmaItemService almaItemService,
                      AlmaPoLineService almaPoLineService,
                      AlmaJobsService almaJobsService) {
         this.almaAnalyticsReportClient = almaAnalyticsReportClient;
         this.mappingTables = mappingTables;
-        this.itemService = itemService;
+        this.almaItemService = almaItemService;
         this.almaPoLineService = almaPoLineService;
         this.almaJobsService = almaJobsService;
     }
@@ -78,13 +80,13 @@ public class ScheduledService {
                         log.info(fund);
                         if (codes.containsKey(fund)) {
                             for (NewItemWithOrderLine newItemWithOrderLine : list) {
-                                Item item = itemService.findItemByMmsAndItemId(newItemWithOrderLine.getMmsId(), newItemWithOrderLine.getItemId());
+                                Item item = almaItemService.findItemByMmsAndItemId(newItemWithOrderLine.getMmsId(), newItemWithOrderLine.getItemId());
                                 if (reducedPrice != 0.0) {
                                     item.getItemData().setInventoryPrice(String.format("%.2f %s", reducedPrice, currency));
                                 }
                                 if (item.getItemData().getStatisticsNote1() == null || item.getItemData().getStatisticsNote1().isEmpty()) {
                                     item.getItemData().setStatisticsNote1(codes.get(fundCode));
-                                    this.itemService.updateItem(item);
+                                    this.almaItemService.updateItem(item);
                                     log.info(String.format("updated statistics note 1 for item with mms id %s and pid %s to %s",
                                             newItemWithOrderLine.getMmsId(), newItemWithOrderLine.getItemId(), codes.get(fund)));
                                 }

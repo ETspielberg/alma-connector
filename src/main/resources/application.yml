@@ -12,6 +12,9 @@ feign:
       invoices:
         connectTimeout: 600000
         readTimeout: 600000
+      jobs:
+        connectTimeout: 600000
+        readTimeout: 600000
 server:
   port: ${server_port:11889}
 spring:

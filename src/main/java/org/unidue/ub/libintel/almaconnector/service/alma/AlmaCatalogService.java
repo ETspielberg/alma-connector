@@ -1,4 +1,4 @@
-package org.unidue.ub.libintel.almaconnector.service;
+package org.unidue.ub.libintel.almaconnector.service.alma;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,13 +8,13 @@ import org.unidue.ub.libintel.almaconnector.clients.bib.AlmaCatalogApiClient;
 
 
 @Service
-public class CatalogService {
+public class AlmaCatalogService {
 
     private final AlmaCatalogApiClient almaCatalogApiClient;
 
-    private final Logger log = LoggerFactory.getLogger(CatalogService.class);
+    private final Logger log = LoggerFactory.getLogger(AlmaCatalogService.class);
 
-    CatalogService(AlmaCatalogApiClient almaCatalogApiClient) {
+    AlmaCatalogService(AlmaCatalogApiClient almaCatalogApiClient) {
         this.almaCatalogApiClient = almaCatalogApiClient;
     }
 

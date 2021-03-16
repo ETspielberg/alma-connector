@@ -4,7 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.unidue.ub.alma.shared.acq.PoLine;
-import org.unidue.ub.libintel.almaconnector.service.AlmaPoLineService;
+import org.unidue.ub.libintel.almaconnector.service.alma.AlmaPoLineService;
 
 import java.util.List;
 

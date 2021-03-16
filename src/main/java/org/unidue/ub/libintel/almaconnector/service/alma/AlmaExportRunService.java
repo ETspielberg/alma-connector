@@ -1,4 +1,4 @@
-package org.unidue.ub.libintel.almaconnector.service;
+package org.unidue.ub.libintel.almaconnector.service.alma;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

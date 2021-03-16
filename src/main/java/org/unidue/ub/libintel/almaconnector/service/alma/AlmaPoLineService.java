@@ -1,8 +1,9 @@
-package org.unidue.ub.libintel.almaconnector.service;
+package org.unidue.ub.libintel.almaconnector.service.alma;
 
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.PoLine;
+import org.unidue.ub.alma.shared.acq.PoLineStatus;
 import org.unidue.ub.alma.shared.acq.PoLines;
 import org.unidue.ub.libintel.almaconnector.clients.acquisition.AlmaPoLinesApiClient;
 
@@ -62,6 +63,12 @@ public class AlmaPoLineService {
     @Secured({ "ROLE_SYSTEM", "ROLE_ALMA" , "ROLE_ALMA_Physical_Inventory_Operator"})
     public PoLine getPoLine(String poLineId) {
         return this.almaPoLinesApiClient.getPoLinesPoLineId("application/json", poLineId);
+    }
+
+    public boolean closePoLine(PoLine poLine) {
+        poLine.setStatus(new PoLineStatus().value("CLOSED"));
+        poLine = this.almaPoLinesApiClient.putPoLinesPoLineId(poLine, "application/json", poLine.getNumber(), "false");
+        return "CLOSED".equals(poLine.getStatus().getValue());
     }
 
 }

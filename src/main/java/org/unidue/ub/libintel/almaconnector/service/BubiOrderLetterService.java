@@ -5,21 +5,22 @@ import org.thymeleaf.context.Context;
 import org.unidue.ub.alma.shared.acq.Address;
 import org.unidue.ub.alma.shared.acq.Vendor;
 import org.unidue.ub.libintel.almaconnector.model.bubi.BubiOrder;
+import org.unidue.ub.libintel.almaconnector.service.alma.AlmaVendorService;
 
 public class BubiOrderLetterService {
 
     private final TemplateEngine templateEngine;
 
-    private final VendorService vendorService;
+    private final AlmaVendorService almaVendorService;
 
     public BubiOrderLetterService(TemplateEngine templateEngine,
-                                  VendorService vendorService) {
+                                  AlmaVendorService almaVendorService) {
         this.templateEngine = templateEngine;
-        this.vendorService = vendorService;
+        this.almaVendorService = almaVendorService;
     }
 
     public String buildLetter(String vendorId, BubiOrder bubiOrder) {
-        Vendor vendor = this.vendorService.getVendorAccount(vendorId);
+        Vendor vendor = this.almaVendorService.getVendorAccount(vendorId);
         Context context = new Context();
         context.setVariable("bubiName", vendor.getName());
         for (Address address: vendor.getContactInfo().getAddress())

@@ -2,16 +2,14 @@ package org.unidue.ub.libintel.almaconnector.clients.conf;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.unidue.ub.alma.shared.conf.Job;
 
 import java.util.List;
 import feign.*;
 import org.unidue.ub.alma.shared.conf.JobInstance;
 import org.unidue.ub.alma.shared.conf.JobInstances;
+import org.unidue.ub.alma.shared.conf.Jobs;
 
 @FeignClient(name = "jobs", url = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/conf/jobs", configuration = JobsFeignConfiguration.class)
 @Service
@@ -29,7 +27,7 @@ public interface AlmaJobsApiClient {
    * @return List<Job>
    */
   @RequestMapping(method = RequestMethod.GET, value = "/?limit={limit}&offset={offset}&category={category}&type={type}&profile_id={profile_id}")
-  List<Job> getAlmawsV1ConfJobs(@RequestParam("limit") Integer limit, @RequestParam("offset") Integer offset, @RequestParam("category") String category, @RequestParam("type") String type, @RequestParam("profile_id") String profileId);
+  Jobs getAlmawsV1ConfJobs(@RequestHeader("Accept") String accept, @RequestParam("limit") Integer limit, @RequestParam("offset") Integer offset, @RequestParam("category") String category, @RequestParam("type") String type, @RequestParam("profile_id") String profileId);
 
   /**
    * Retrieve Job Details
