@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.unidue.ub.alma.shared.acq.Invoice;
-import org.unidue.ub.libintel.almaconnector.model.SapAccountData;
+import org.unidue.ub.libintel.almaconnector.model.sap.SapAccountData;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -15,7 +15,7 @@ import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.unidue.ub.libintel.almaconnector.Utils.convertFundCodeToSapAccountData;
+import static org.unidue.ub.libintel.almaconnector.service.SapService.convertFundCodeToSapAccountData;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 public class UtilsTests {

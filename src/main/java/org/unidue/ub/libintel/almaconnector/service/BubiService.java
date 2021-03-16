@@ -7,9 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.unidue.ub.alma.shared.acq.Invoice;
-import org.unidue.ub.alma.shared.acq.InvoiceLine;
-import org.unidue.ub.alma.shared.acq.PoLine;
+import org.unidue.ub.alma.shared.acq.*;
 import org.unidue.ub.alma.shared.bibs.HoldingDataTempLibrary;
 import org.unidue.ub.alma.shared.bibs.HoldingDataTempLocation;
 import org.unidue.ub.alma.shared.bibs.Item;
@@ -23,8 +21,6 @@ import org.unidue.ub.libintel.almaconnector.service.alma.AlmaPoLineService;
 
 import java.util.*;
 import java.util.regex.Pattern;
-
-import static org.unidue.ub.libintel.almaconnector.Utils.*;
 
 @Service
 public class BubiService {
@@ -406,6 +402,123 @@ public class BubiService {
         }
         setFundAndPrice(bubiOrderLine);
         return bubiOrderLine;
+    }
+
+    /**
+     * creates an Alma PO Line form the bubi order line
+     * @param bubiOrderLine the bubi order line from which the Alma PO Line is created
+     * @return an Alma PoLine object
+     */
+    public static PoLine buildPoLine(BubiOrderLine bubiOrderLine) {
+        PoLineOwner poLineOwner;
+
+        // set the owner depending on the collection
+        if (bubiOrderLine.getCollection().startsWith("D"))
+            poLineOwner = new PoLineOwner().value("D0001");
+        else if (bubiOrderLine.getCollection().startsWith("E5"))
+            poLineOwner = new PoLineOwner().value("E0023");
+        else
+            poLineOwner = new PoLineOwner().value("E0001");
+
+        // creates the amount and fund information
+        Amount amount = new Amount().sum(String.valueOf(bubiOrderLine.getPrice()))
+                .currency(new AmountCurrency().value("EUR"));
+        FundDistributionPoLine fundDistribution = new FundDistributionPoLine()
+                .fundCode(new FundDistributionFundCode().value(bubiOrderLine.getFund()))
+                .amount(amount);
+        List<FundDistributionPoLine> fundList = new ArrayList<>();
+        fundList.add(fundDistribution);
+
+        // creates the resource metadata
+        ResourceMetadata resourceMetadata = new ResourceMetadata()
+                .mmsId(new ResourceMetadataMmsId().value(bubiOrderLine.getAlmaMmsId()))
+                .title(bubiOrderLine.getTitle());
+
+        // sets the status to a auto packaging
+        PoLineStatus status = new PoLineStatus().value("AUTO_PACKAGING").desc("Auto Packaging");
+        return new PoLine()
+                .vendorReferenceNumber(String.format("%s - %S:%s)", bubiOrderLine.getFund(),
+                        bubiOrderLine.getCollection(),
+                        bubiOrderLine.getShelfmark()))
+                .sourceType(new PoLineSourceType().value("MANUALENTRY"))
+                .type(new PoLineType().value("OTHER_SERVICES_OT"))
+                .status(status)
+                .price(amount)
+                .baseStatus(PoLine.BaseStatusEnum.ACTIVE)
+                .owner(poLineOwner)
+                .resourceMetadata(resourceMetadata)
+                .vendor(new PoLineVendor().value(bubiOrderLine.getVendorId()))
+                .vendorAccount(bubiOrderLine.getVendorAccount())
+                .fundDistribution(fundList);
+    }
+
+    /**
+     * creates an invoice for a bubi order.
+     * @param bubiOrder a bubi order
+     * @return an Alma Invoice object
+     */
+    public static Invoice getInvoiceForBubiOrder(BubiOrder bubiOrder) {
+        // create new Invocie
+        Invoice invoice = new Invoice();
+
+        // set the vendor information with the information from the bubi order
+        invoice.vendor(new InvoiceVendor().value(bubiOrder.getVendorId()))
+                .vendorAccount(bubiOrder.getVendorAccount());
+
+        // set total amount and payment method
+        invoice.totalAmount(bubiOrder.getTotalAmount());
+        invoice.paymentMethod(new InvoicePaymentMethod().value("ACCOUNTINGDEPARTMENT"));
+
+        // set the status information
+        invoice.invoiceStatus(new InvoiceInvoiceStatus().value("ACTIVE"));
+
+
+        // set the VAT information
+        invoice.invoiceVat(new InvoiceVat().vatPerInvoiceLine(true).type(new InvoiceVatType().value("INCLUSIVE")));
+
+        // set the invoice number and date
+        invoice.setNumber(bubiOrder.getInvoiceNumber());
+        invoice.setInvoiceDate(bubiOrder.getInvoiceDate());
+
+        // set the owner of the order line
+        if (bubiOrder.getBubiOrderLines().get(0).getCollection().startsWith("D"))
+            invoice.setOwner(new InvoiceOwner().value("D0001"));
+        else
+            invoice.setOwner(new InvoiceOwner().value("E0001"));
+        return invoice;
+    }
+
+    /**
+     * creates the individual invoice lines for the bubi order lines in the bubi order
+     * @param bubiOrder the bubi order holding the individual bubi order lines
+     * @return a list of Alma InvoiceLine-objects
+     */
+    public static List<InvoiceLine> getInvoiceLinesForBubiOrder(BubiOrder bubiOrder) {
+        // create new list of order lines
+        List<InvoiceLine> invoiceLines = new ArrayList<>();
+        for (int i = 0; i< bubiOrder.getBubiOrderLines().size(); i++) {
+            // retrieve the bubi order line
+            BubiOrderLine bubiOrderLine = bubiOrder.getBubiOrderLines().get(i);
+
+            // set the standard value for the VAT
+            InvoiceLineVat invoiceLineVat = new InvoiceLineVat().vatCode(new InvoiceLineVatVatCode().value("H8"));
+
+            // set the fund distribution
+            FundDistributionFundCode fundDistributionFundCode = new FundDistributionFundCode().value(bubiOrderLine.getFund());
+            FundDistribution fundDistribution = new FundDistribution().fundCode(fundDistributionFundCode).amount(bubiOrderLine.getPrice());
+            List<FundDistribution> fundDistributionList = new ArrayList<>();
+            fundDistributionList.add(fundDistribution);
+
+            // create invoice line with all information and add it to the list
+            InvoiceLine invoiceLine = new InvoiceLine()
+                    .poLine(bubiOrderLine.getAlmaPoLineId())
+                    .fullyInvoiced(true)
+                    .totalPrice(bubiOrderLine.getPrice())
+                    .invoiceLineVat(invoiceLineVat)
+                    .fundDistribution(fundDistributionList);
+            invoiceLines.add(invoiceLine);
+        }
+        return invoiceLines;
     }
 
 }

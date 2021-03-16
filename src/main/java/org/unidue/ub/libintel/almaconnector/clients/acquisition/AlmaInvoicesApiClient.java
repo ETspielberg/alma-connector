@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import org.unidue.ub.alma.shared.acq.Invoice;
 import org.unidue.ub.alma.shared.acq.InvoiceLine;
 import org.unidue.ub.alma.shared.acq.Invoices;
-import org.unidue.ub.libintel.almaconnector.model.InvoiceUpdate;
+import org.unidue.ub.libintel.almaconnector.model.sap.InvoiceUpdate;
 
 import java.util.List;
 

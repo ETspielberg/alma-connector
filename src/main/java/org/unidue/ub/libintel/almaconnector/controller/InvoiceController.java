@@ -15,14 +15,13 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.unidue.ub.alma.shared.acq.Invoice;
 import org.unidue.ub.alma.shared.acq.Vendor;
-import org.unidue.ub.libintel.almaconnector.model.SapData;
+import org.unidue.ub.libintel.almaconnector.model.sap.SapData;
 import org.unidue.ub.libintel.almaconnector.model.run.AlmaExportRun;
 import org.unidue.ub.libintel.almaconnector.model.run.SapResponseRun;
+import org.unidue.ub.libintel.almaconnector.service.AlmaExportRunService;
+import org.unidue.ub.libintel.almaconnector.service.AlmaInvoiceServices;
 import org.unidue.ub.libintel.almaconnector.service.SapService;
-import org.unidue.ub.libintel.almaconnector.service.alma.AlmaExportRunService;
-import org.unidue.ub.libintel.almaconnector.service.alma.AlmaInvoiceServices;
-import org.unidue.ub.libintel.almaconnector.service.FileWriterService;
-import org.unidue.ub.libintel.almaconnector.service.alma.AlmaVendorService;
+import org.unidue.ub.libintel.almaconnector.service.VendorService;
 
 
 import java.io.FileNotFoundException;
@@ -30,7 +29,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
-import static org.unidue.ub.libintel.almaconnector.Utils.*;
+import static org.unidue.ub.libintel.almaconnector.service.SapService.*;
 
 /**
  * Controller defining the endpoints for retrieving the invoices.
@@ -40,9 +39,7 @@ public class InvoiceController {
 
     private final AlmaInvoiceServices almaInvoiceServices;
 
-    private final AlmaVendorService almaVendorService;
-
-    private final FileWriterService fileWriterService;
+    private final VendorService vendorService;
 
     private final AlmaExportRunService almaExportRunService;
 
@@ -57,17 +54,15 @@ public class InvoiceController {
      * constructor based autowiring to the invoice service, the filewriter service and the vendorservice.
      *
      * @param almaInvoiceServices the invoice service bean
-     * @param almaVendorService       the vendor service bean
-     * @param fileWriterService   the file writer service
+     * @param vendorService       the vendor service bean
+     * @param sapService          the sap service
      */
     InvoiceController(AlmaInvoiceServices almaInvoiceServices,
-                      AlmaVendorService almaVendorService,
-                      FileWriterService fileWriterService,
-                      AlmaExportRunService almaExportRunService,
-                      SapService sapService) {
+                      VendorService vendorService,
+                      SapService sapService,
+                      AlmaExportRunService almaExportRunService) {
         this.almaInvoiceServices = almaInvoiceServices;
-        this.almaVendorService = almaVendorService;
-        this.fileWriterService = fileWriterService;
+        this.vendorService = vendorService;
         this.almaExportRunService = almaExportRunService;
         this.sapService = sapService;
     }
@@ -96,10 +91,10 @@ public class InvoiceController {
         almaExportRunNew.setDateSpecific(almaExportRun.isDateSpecific());
         log.info(almaExportRunNew.log());
         this.almaExportRunService.saveAlmaExportRun(almaExportRunNew);
-        almaExportRunNew = this.sapService.getInvoices(almaExportRunNew);
+        almaExportRunNew = this.almaInvoiceServices.getInvoices(almaExportRunNew);
         log.info(almaExportRunNew.log());
         for (Invoice invoice : almaExportRunNew.getInvoices()) {
-            Vendor vendor = this.almaVendorService.getVendorAccount(invoice.getVendor().getValue());
+            Vendor vendor = this.vendorService.getVendorAccount(invoice.getVendor().getValue());
             List<SapData> sapDataList = convertInvoiceToSapData(invoice, vendor);
             log.debug(String.format("adding %d SAP data to the list", sapDataList.size()));
             almaExportRunNew.addSapDataList(sapDataList, homeTaxKeys);
@@ -144,7 +139,7 @@ public class InvoiceController {
     @DateTimeFormat(pattern = "E MMM dd HH:mm:ss z yyyy")
     public String getImportFiles(@ModelAttribute("almaExportRun") AlmaExportRun almaExportRun, Model model) {
         log.info(String.format("showing files for %s : %s; %d selected ", dateformat.format(almaExportRun.getDesiredDate()), almaExportRun.isDateSpecific(), almaExportRun.getNumberHomeDataSelected()));
-        almaExportRun = this.fileWriterService.writeAlmaExport(almaExportRun);
+        almaExportRun = this.sapService.writeAlmaExport(almaExportRun);
         model.addAttribute("almaExportRun", almaExportRun);
         return "sap/showImportFiles";
     }
@@ -159,7 +154,7 @@ public class InvoiceController {
      */
     @GetMapping("/downloadFile/{type}/{owner}/{date}")
     public ResponseEntity<Resource> serveFile(@PathVariable String type, @PathVariable String date, @PathVariable String owner) throws FileNotFoundException {
-        Resource file = fileWriterService.loadFiles(date, type, owner);
+        Resource file = sapService.loadFiles(date, type, owner);
         return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=\"" + file.getFilename() + "\"").body(file);
     }
