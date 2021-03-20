@@ -8,8 +8,8 @@ import org.unidue.ub.alma.shared.acq.PoLine;
 import org.unidue.ub.alma.shared.bibs.Item;
 import org.unidue.ub.libintel.almaconnector.clients.analytics.AlmaAnalyticsReportClient;
 import org.unidue.ub.libintel.almaconnector.configuration.MappingTables;
-import org.unidue.ub.libintel.almaconnector.model.analytics.NewItemWithFundReport;
-import org.unidue.ub.libintel.almaconnector.model.analytics.NewItemWithOrderLine;
+import org.unidue.ub.libintel.almaconnector.model.analytics.*;
+import org.unidue.ub.libintel.almaconnector.service.alma.AlmaItemService;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaJobsService;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaPoLineService;
 
@@ -24,7 +24,7 @@ public class ScheduledService {
 
     private final AlmaAnalyticsReportClient almaAnalyticsReportClient;
 
-    private final FileWriterService.AlmaItemService almaItemService;
+    private final AlmaItemService almaItemService;
 
     private final AlmaPoLineService almaPoLineService;
 
@@ -36,7 +36,7 @@ public class ScheduledService {
 
     ScheduledService(AlmaAnalyticsReportClient almaAnalyticsReportClient,
                      MappingTables mappingTables,
-                     FileWriterService.AlmaItemService almaItemService,
+                     AlmaItemService almaItemService,
                      AlmaPoLineService almaPoLineService,
                      AlmaJobsService almaJobsService) {
         this.almaAnalyticsReportClient = almaAnalyticsReportClient;
@@ -49,15 +49,15 @@ public class ScheduledService {
     @Scheduled(cron = "0 0 7 * * *")
     public void updateStatisticField() throws IOException {
         Map<String, String> codes = mappingTables.getItemStatisticNote();
-        List<NewItemWithOrderLine> results = this.almaAnalyticsReportClient.getReport(NewItemWithOrderLine.PATH, NewItemWithFundReport.class).getRows();
-        Map<String, List<NewItemWithOrderLine>> orders = new HashMap<>();
-        for (NewItemWithOrderLine newItemWithOrderLine : results) {
-            String poLineNumber = newItemWithOrderLine.getPoLineReference();
+        List<NewItemWithOrder> results = this.almaAnalyticsReportClient.getReport(NewItemWithFundReport.PATH, NewItemWithFundReport.class).getRows();
+        Map<String, List<NewItemWithOrder>> orders = new HashMap<>();
+        for (NewItemWithOrder newItemWithOrder : results) {
+            String poLineNumber = newItemWithOrder.getPoLineReference();
             if (orders.containsKey(poLineNumber))
-                orders.get(poLineNumber).add(newItemWithOrderLine);
+                orders.get(poLineNumber).add(newItemWithOrder);
             else {
-                List<NewItemWithOrderLine> newList = new ArrayList<>();
-                newList.add(newItemWithOrderLine);
+                List<NewItemWithOrder> newList = new ArrayList<>();
+                newList.add(newItemWithOrder);
                 orders.put(poLineNumber, newList);
             }
         }
@@ -79,8 +79,8 @@ public class ScheduledService {
                         }
                         log.info(fund);
                         if (codes.containsKey(fund)) {
-                            for (NewItemWithOrderLine newItemWithOrderLine : list) {
-                                Item item = almaItemService.findItemByMmsAndItemId(newItemWithOrderLine.getMmsId(), newItemWithOrderLine.getItemId());
+                            for (NewItemWithOrder newItemWithOrder : list) {
+                                Item item = almaItemService.findItemByMmsAndItemId(newItemWithOrder.getMmsId(), newItemWithOrder.getItemId());
                                 if (reducedPrice != 0.0) {
                                     item.getItemData().setInventoryPrice(String.format("%.2f %s", reducedPrice, currency));
                                 }
@@ -88,7 +88,7 @@ public class ScheduledService {
                                     item.getItemData().setStatisticsNote1(codes.get(fundCode));
                                     this.almaItemService.updateItem(item);
                                     log.info(String.format("updated statistics note 1 for item with mms id %s and pid %s to %s",
-                                            newItemWithOrderLine.getMmsId(), newItemWithOrderLine.getItemId(), codes.get(fund)));
+                                            newItemWithOrder.getMmsId(), newItemWithOrder.getItemId(), codes.get(fund)));
                                 }
                             }
                         }
@@ -106,5 +106,13 @@ public class ScheduledService {
     @Scheduled(cron = "0 0 7 * * 6")
     public void runElisaImportAtWeekEnd() {
         this.almaJobsService.runElisaImportJob();
+    }
+
+    @Scheduled(cron = "0 0 8 * * *")
+    public void updateBubiOrders() throws IOException {
+        List<OpenBubiOrder> result = this.almaAnalyticsReportClient.getReport(OpenBubiOrdersReport.PATH, OpenBubiOrdersReport.class).getRows();
+        for (OpenBubiOrder openBubiOrder : result) {
+
+        }
     }
 }

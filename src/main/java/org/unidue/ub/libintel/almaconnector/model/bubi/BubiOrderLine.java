@@ -3,29 +3,28 @@ package org.unidue.ub.libintel.almaconnector.model.bubi;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.hibernate.annotations.GenericGenerator;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.NumberFormat;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.UUID;
 
 @Entity
-@IdClass(BubiOrderLineId.class)
 @Table(name = "bubi_order_line")
 public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
 
+    @Id
     @Column(name = "bubi_order_line_id")
     private String bubiOrderLineId;
 
-    @Id
     @Column(name = "collection")
     private String collection;
 
-    @Id
     @Column(name = "shelfmark")
     private String shelfmark;
 
-    @Id
     @Column(name = "counter")
     private long counter;
 

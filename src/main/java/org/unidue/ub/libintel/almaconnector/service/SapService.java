@@ -14,6 +14,7 @@ import org.unidue.ub.libintel.almaconnector.clients.acquisition.AlmaInvoicesApiC
 import org.unidue.ub.libintel.almaconnector.clients.analytics.AlmaAnalyticsReportClient;
 import org.unidue.ub.libintel.almaconnector.model.analytics.InvoiceForPayment;
 import org.unidue.ub.libintel.almaconnector.model.analytics.InvoiceForPaymentReport;
+import org.unidue.ub.libintel.almaconnector.model.analytics.NewItemWithFundReport;
 import org.unidue.ub.libintel.almaconnector.model.run.AlmaExportRun;
 import org.unidue.ub.libintel.almaconnector.model.run.SapResponseRun;
 import org.unidue.ub.libintel.almaconnector.model.sap.InvoiceUpdate;
@@ -21,6 +22,8 @@ import org.unidue.ub.libintel.almaconnector.model.sap.SapAccountData;
 import org.unidue.ub.libintel.almaconnector.model.sap.SapData;
 import org.unidue.ub.libintel.almaconnector.model.sap.SapResponse;
 import org.unidue.ub.libintel.almaconnector.repository.AlmaExportRunRepository;
+import org.unidue.ub.libintel.almaconnector.service.alma.AlmaInvoiceService;
+import org.unidue.ub.libintel.almaconnector.service.alma.AlmaPoLineService;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -38,9 +41,11 @@ import java.util.stream.Collectors;
 @Service
 public class SapService {
 
-    private final AlmaInvoicesApiClient almaInvoicesApiClient;
+    private final AlmaInvoiceService almaInvoiceService;
 
     private final AlmaExportRunRepository almaExportRunRepository;
+
+    private final AlmaPoLineService almaPoLineService;
 
     private final AlmaAnalyticsReportClient almaAnalyticsReportClient;
 
@@ -51,19 +56,21 @@ public class SapService {
 
     private final String file;
 
-    private final static Logger log = LoggerFactory.getLogger(AlmaInvoiceServices.class);
+    private final static Logger log = LoggerFactory.getLogger(SapService.class);
 
     /**
      * constructor based autowiring of the Feign client
      *
-     * @param almaInvoicesApiClient the Feign client for the Alma Invoice API
+     * @param almaInvoiceService the Feign client for the Alma Invoice API
      */
     SapService(@Value("${ub.statistics.data.dir}") String dataDir,
-               AlmaInvoicesApiClient almaInvoicesApiClient,
+               AlmaInvoiceService almaInvoiceService,
+               AlmaPoLineService almaPoLineService,
                AlmaExportRunRepository almaExportRunRepository,
                AlmaAnalyticsReportClient almaAnalyticsReportClient) {
         this.file = dataDir + "/sapData/";
-        this.almaInvoicesApiClient = almaInvoicesApiClient;
+        this.almaInvoiceService = almaInvoiceService;
+        this.almaPoLineService = almaPoLineService;
         this.almaExportRunRepository = almaExportRunRepository;
         this.almaAnalyticsReportClient = almaAnalyticsReportClient;
         File folder = new File(this.file);
@@ -81,20 +88,27 @@ public class SapService {
      */
     @Secured({"ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Invoice Operator Extended"})
     public SapResponseRun updateInvoiceWithErpData(SapResponseRun container) {
+        HashMap<String, Double> poLines = new HashMap<>();
         for (SapResponse sapResponse : container.getResponses()) {
             // get the number of the invoice (is not the ID!)
             String invoiceId = sapResponse.getInvoiceNumber();
 
             // search the invoices for the invoice number
-            String searchQuery = "invoice_number~" + invoiceId;
-            Invoices invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE",
-                    "Waiting to be Sent", "", "", searchQuery, 20, 0, "");
+            Invoices invoices = this.almaInvoiceService.getInvoicesForInvocieId(invoiceId);
 
             log.debug(String.format("found %d invoices for invoice number %s", invoices.getTotalRecordCount(), invoiceId));
             // process only if there is only one invoice found. Otherwise increase number of errors and log the error
             if (invoices.getTotalRecordCount() == 1) {
                 Invoice invoice = invoices.getInvoice().get(0);
                 log.info("processing SAP responce for Invoice " + invoiceId);
+
+                for (InvoiceLine invoiceLine : invoice.getInvoiceLines().getInvoiceLine())
+                    if (poLines.containsKey(invoiceLine.getPoLine())) {
+                        Double sum = poLines.get(invoiceLine.getPoLine());
+                        sum += invoiceLine.getPrice();
+                        poLines.put(invoiceLine.getPoLine(), sum);
+                    } else
+                        poLines.put(invoiceLine.getPoLine(), invoiceLine.getPrice());
 
                 // prepare the payment for the update
                 Payment payment = invoice.getPayment();
@@ -107,14 +121,10 @@ public class SapService {
                 try {
                     // if the sum is the same as on the invoice, mark the invoice as paid and close the invoice
                     if (sapResponse.getAmount() == invoice.getTotalAmount()) {
-                        payment.setPaymentStatus(new PaymentPaymentStatus().value("PAID").desc("bezahlt"));
-                        InvoiceUpdate invoiceUpdate = new InvoiceUpdate(payment);
-                        this.almaInvoicesApiClient.postInvoicesInvoiceIdToUpdate(invoiceUpdate, "application/json", invoice.getId(), "paid");
-
+                        this.almaInvoiceService.addFullPayment(invoice, payment);
                         // otherwise just add the payment
                     } else {
-                        InvoiceUpdate invoiceUpdate = new InvoiceUpdate(payment);
-                        this.almaInvoicesApiClient.postInvoicesInvoiceIdToUpdate(invoiceUpdate, "application/json", invoice.getId(), "");
+                        this.almaInvoiceService.addPartialPayment(invoice, payment);
                     }
                 } catch (Exception e) {
                     // if an Exception occurs (e.g. when trying to update the invoice), log the message and increase the number of errors.
@@ -127,18 +137,37 @@ public class SapService {
                 container.increaseNumberOfErrors();
             }
         }
+        checkAndClosePoLines(poLines);
         log.info(container.logString());
         return container;
     }
 
+    private void checkAndClosePoLines(HashMap<String, Double> poLines) {
+        poLines.forEach(
+                (entry, sum) -> {
+                    PoLine poLine = this.almaPoLineService.getPoLine(entry);
+                    try {
+                        double price = Double.parseDouble(poLine.getPrice().getSum());
+                        if (price == sum) {
+                            boolean success = this.almaPoLineService.closePoLine(poLine);
+                            if (!success)
+                                log.warn(String.format("could not close po line %s", entry));
+                        }
+                    } catch (Exception e) {
+                        log.warn(String.format("could not parse price for po line %s", entry));
+                    }
+                }
+        );
+    }
+
     public List<Invoice> getOpenInvoicesFromAnalytics(AlmaExportRun almaExportRun) {
         try {
-            List<InvoiceForPayment> result = this.almaAnalyticsReportClient.getReport(InvoiceForPayment.PATH, InvoiceForPaymentReport.class).getRows();
+            List<InvoiceForPayment> result = this.almaAnalyticsReportClient.getReport(InvoiceForPaymentReport.PATH, InvoiceForPaymentReport.class).getRows();
             List<Invoice> invoices = new ArrayList<>();
             if (result != null) {
-                for (InvoiceForPayment invoiceEntry: result) {
+                for (InvoiceForPayment invoiceEntry : result) {
                     if (invoiceEntry.getInvoiceOwnerCode().equals(almaExportRun.getInvoiceOwner())) {
-                        Invoice invoiceInd = this.almaInvoicesApiClient.getInvoicesInvoiceId("application/json", invoiceEntry.getInvoiceNumber(), "full");
+                        Invoice invoiceInd = this.almaInvoiceService.retrieveInvoice(invoiceEntry.getInvoiceNumber());
                         almaExportRun.addInvoice(invoiceInd);
                         List<SapData> sapDataList = convertToSapData(invoiceInd, invoiceEntry.getErpCode(), invoiceEntry.getOrderLineType());
                         log.debug(String.format("adding %d SAP data to the list", sapDataList.size()));
@@ -146,7 +175,7 @@ public class SapService {
                         log.debug(String.format("run contains now %d entries: %d home and %d foreign",
                                 almaExportRun.getTotalSapData(),
                                 almaExportRun.getHomeSapData().size(),
-                                almaExportRun.getForeignSapData().size() ));
+                                almaExportRun.getForeignSapData().size()));
                     }
                 }
             }
@@ -243,10 +272,11 @@ public class SapService {
 
     /**
      * writes the SAP data contained in an AlmaExportRun object as files to disk
+     *
      * @param almaExportRun the AlmaExportRun object holding a list of SAP data
      * @return the AlmaExportRun object updated with the files created and the number of failed entries to be written
      */
-    @Secured({ "ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Invoice Operator Extended"})
+    @Secured({"ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Invoice Operator Extended"})
     public AlmaExportRun writeAlmaExport(AlmaExportRun almaExportRun) {
         String dateString;
         if (almaExportRun.isDateSpecific())
@@ -258,7 +288,7 @@ public class SapService {
         String foreignFilename = String.format("sap_%s_%s_%s.txt", "foreign", dateString, almaExportRun.getInvoiceOwner());
         initializeFiles(dateString, checkFilename, homeFilename, foreignFilename);
 
-        for (SapData sapData: almaExportRun.getHomeSapData()) {
+        for (SapData sapData : almaExportRun.getHomeSapData()) {
             if (!sapData.isChecked)
                 continue;
             try {
@@ -274,7 +304,7 @@ public class SapService {
                 log.warn("could not write line: " + sapData.toFixedLengthLine());
             }
         }
-        for (SapData sapData: almaExportRun.getForeignSapData()) {
+        for (SapData sapData : almaExportRun.getForeignSapData()) {
             if (!sapData.isChecked)
                 continue;
             try {
@@ -303,7 +333,7 @@ public class SapService {
         bw.close();
     }
 
-    @Secured({ "ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Invoice Operator Extended" })
+    @Secured({"ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Invoice Operator Extended"})
     public List<String> getFiles(@Value("${ub.statistics.data.dir}") String dataDir) {
         Path rootLocation = Paths.get(dataDir);
         try {
@@ -312,7 +342,7 @@ public class SapService {
                     .map(rootLocation::relativize)
                     .map(path -> path.getFileName().toString())
                     .filter(filename -> !filename.startsWith("Druck"))
-                    .map(filename -> filename.replace("sap-",""))
+                    .map(filename -> filename.replace("sap-", ""))
                     .collect(Collectors.toList());
         } catch (IOException ioe) {
             log.error("failed to read stored files", ioe);
@@ -322,7 +352,8 @@ public class SapService {
 
     /**
      * adds a line to the output file
-     * @param bw the buffered writer for the file
+     *
+     * @param bw   the buffered writer for the file
      * @param line the line to be added
      * @throws IOException thrown if problems writing to the file occur
      */
@@ -334,14 +365,15 @@ public class SapService {
 
     /**
      * initialize files and deletes the files if present.
-     * @param currentDate the current date
+     *
+     * @param currentDate   the current date
      * @param checkFilename the filename of the check/printed version
-     * @param sapFilename the filename of the SAP import file
+     * @param sapFilename   the filename of the SAP import file
      */
     private void initializeFiles(String currentDate, String checkFilename, String sapFilename, String foreignFilename) {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(this.file + checkFilename, false))) {
             addLine(bw, "Kontrollausdruck der SAP-Datei, Bearbeitungsdatum: " + currentDate);
-        } catch(IOException ioe) {
+        } catch (IOException ioe) {
             log.warn("could not create empty check file at " + currentDate, ioe);
         }
         initializeSapFiles(sapFilename);
@@ -352,22 +384,23 @@ public class SapService {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(this.file + filename, false))) {
             bw.write("");
             bw.flush();
-        } catch(IOException ioe) {
+        } catch (IOException ioe) {
             log.warn("could not create empty sap file.", ioe);
         }
     }
 
     /**
      * loads the sap files from  disk
+     *
      * @param date the date for which the file shall be obtained
      * @param type the type of the file to be obtained (HomeCurrency or ForeignCurrency)
      * @return the file as Resource object
      * @throws FileNotFoundException thrown if the file could not be loaded
      */
-    @Secured({ "ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Invoice Operator Extended" })
+    @Secured({"ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Invoice Operator Extended"})
     public org.springframework.core.io.Resource loadFiles(String date, String type, String owner) throws FileNotFoundException {
         String filename = String.format("sap_%s_%s_%s.txt", type, date, owner);
-        Path file =Paths.get(this.file + filename);
+        Path file = Paths.get(this.file + filename);
         try {
             Resource resource = new UrlResource(file.toUri());
             if (resource.exists() || resource.isReadable()) {
@@ -384,8 +417,9 @@ public class SapService {
 
     /**
      * converts an alma invoce to a list of sap data to be imported.
-     * @param invoice the Alma Invoice object
-     * @param erpCode the sap creditor code
+     *
+     * @param invoice   the Alma Invoice object
+     * @param erpCode   the sap creditor code
      * @param orderType the type of order
      * @return a list of SapData objects
      */
@@ -761,5 +795,21 @@ public class SapService {
         return container;
     }
 
+
+    public AlmaExportRun getInvoices(AlmaExportRun almaExportRun) {
+        List<Invoice> invoices;
+        if (almaExportRun.isDateSpecific()) {
+            log.info("collecting invoices for date");
+            invoices = almaInvoiceService.getOpenInvoicesForDate(almaExportRun.getDesiredDate(), almaExportRun.getInvoiceOwner());
+        } else {
+            log.info("collecting all invoices");
+            invoices = almaInvoiceService.getOpenInvoices(almaExportRun.getInvoiceOwner());
+        }
+        log.info("retrieved " + invoices.size() + " (filtered) invoices");
+        almaExportRun.setInvoices(invoices);
+        almaExportRun.setLastRun(new Date());
+        this.almaExportRunRepository.save(almaExportRun);
+        return almaExportRun;
+    }
 
 }

@@ -4,9 +4,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 @JacksonXmlRootElement(localName = "row")
-public class NewItemWithOrderLine {
-
-    public final static String PATH = "/shared/Universität Duisburg-Essen 49HBZ_UDE/libintel/NewItemsWithFund";
+public class NewItemWithOrder {
 
     @JacksonXmlProperty(localName = "POLineReference")
     private String poLineReference;

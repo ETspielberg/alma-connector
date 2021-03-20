@@ -7,20 +7,20 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import java.util.List;
 
 @JacksonXmlRootElement(localName = "result")
-public class InvoiceForPaymentReport {
+public class OpenBubiOrdersReport {
 
-    public final static String PATH = "/shared/Universität Duisburg-Essen 49HBZ_UDE/Rechnungen zur Bezahlung";
+    public final static String PATH = "/shared/Universität Duisburg-Essen 49HBZ_UDE/openBubiOrders";
 
     // @JacksonXmlElementWrapper(localName = "rows")
     @JacksonXmlElementWrapper(useWrapping = false)
     @JacksonXmlProperty(localName = "row")
-    private List<InvoiceForPayment> rows;
+    private List<OpenBubiOrder> rows;
 
-    public List<InvoiceForPayment> getRows() {
+    public List<OpenBubiOrder> getRows() {
         return rows;
     }
 
-    public void setRow(List<InvoiceForPayment> rows) {
+    public void setRow(List<OpenBubiOrder> rows) {
         this.rows = rows;
     }
 }

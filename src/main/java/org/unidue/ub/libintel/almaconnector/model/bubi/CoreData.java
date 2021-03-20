@@ -252,7 +252,7 @@ public class CoreData implements Cloneable {
     }
 
     @Override
-    protected CoreData clone() {
+    public CoreData clone() {
         CoreData clone = new CoreData();
         clone.setAlternativeBubiData(this.alternativeBubiData);
         clone.setVendorId(this.vendorId);

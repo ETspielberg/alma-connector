@@ -9,16 +9,18 @@ import java.util.List;
 @JacksonXmlRootElement(localName = "result")
 public class NewItemWithFundReport {
 
+    public final static String PATH = "/shared/Universität Duisburg-Essen 49HBZ_UDE/libintel/NewItemsWithFund";
+
     // @JacksonXmlElementWrapper(localName = "rows")
     @JacksonXmlElementWrapper(useWrapping = false)
     @JacksonXmlProperty(localName = "row")
-    private List<NewItemWithOrderLine> rows;
+    private List<NewItemWithOrder> rows;
 
-    public List<NewItemWithOrderLine> getRows() {
+    public List<NewItemWithOrder> getRows() {
         return rows;
     }
 
-    public void setRow(List<NewItemWithOrderLine> rows) {
+    public void setRow(List<NewItemWithOrder> rows) {
         this.rows = rows;
     }
 }

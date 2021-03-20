@@ -36,12 +36,12 @@ public class TestController {
 
     @GetMapping("/invoices")
     public ResponseEntity<InvoiceForPaymentReport> getInvoicesForPayment() throws IOException {
-        return ResponseEntity.ok(this.almaAnalyticsReportClient.getReport(InvoiceForPayment.PATH, InvoiceForPaymentReport.class));
+        return ResponseEntity.ok(this.almaAnalyticsReportClient.getReport(InvoiceForPaymentReport.PATH, InvoiceForPaymentReport.class));
     }
 
     @GetMapping("/newItemsWithFunds")
     public ResponseEntity<NewItemWithFundReport> getNewItemsWithFund() throws IOException {
-        return ResponseEntity.ok(this.almaAnalyticsReportClient.getReport(NewItemWithOrderLine.PATH, NewItemWithFundReport.class));
+        return ResponseEntity.ok(this.almaAnalyticsReportClient.getReport(NewItemWithFundReport.PATH, NewItemWithFundReport.class));
     }
 
     @GetMapping("/mapping/itemStatisticNote")

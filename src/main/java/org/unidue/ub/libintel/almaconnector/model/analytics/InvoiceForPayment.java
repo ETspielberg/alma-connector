@@ -7,8 +7,6 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 @JacksonXmlRootElement(localName = "row")
 public class InvoiceForPayment {
 
-    public final static String PATH = "/shared/Universität Duisburg-Essen 49HBZ_UDE/Rechnungen zur Bezahlung";
-
     @JacksonXmlProperty(localName = "InvoiceLine-Status")
     private String invoiceLineStatus;
 

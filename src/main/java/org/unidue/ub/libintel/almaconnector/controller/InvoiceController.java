@@ -18,10 +18,10 @@ import org.unidue.ub.alma.shared.acq.Vendor;
 import org.unidue.ub.libintel.almaconnector.model.sap.SapData;
 import org.unidue.ub.libintel.almaconnector.model.run.AlmaExportRun;
 import org.unidue.ub.libintel.almaconnector.model.run.SapResponseRun;
-import org.unidue.ub.libintel.almaconnector.service.AlmaExportRunService;
-import org.unidue.ub.libintel.almaconnector.service.AlmaInvoiceServices;
 import org.unidue.ub.libintel.almaconnector.service.SapService;
-import org.unidue.ub.libintel.almaconnector.service.VendorService;
+import org.unidue.ub.libintel.almaconnector.service.alma.AlmaExportRunService;
+import org.unidue.ub.libintel.almaconnector.service.alma.AlmaInvoiceService;
+import org.unidue.ub.libintel.almaconnector.service.alma.AlmaVendorService;
 
 
 import java.io.FileNotFoundException;
@@ -37,9 +37,9 @@ import static org.unidue.ub.libintel.almaconnector.service.SapService.*;
 @Controller
 public class InvoiceController {
 
-    private final AlmaInvoiceServices almaInvoiceServices;
+    private final AlmaInvoiceService almaInvoiceService;
 
-    private final VendorService vendorService;
+    private final AlmaVendorService vendorService;
 
     private final AlmaExportRunService almaExportRunService;
 
@@ -53,15 +53,15 @@ public class InvoiceController {
     /**
      * constructor based autowiring to the invoice service, the filewriter service and the vendorservice.
      *
-     * @param almaInvoiceServices the invoice service bean
+     * @param almaInvoiceService the invoice service bean
      * @param vendorService       the vendor service bean
      * @param sapService          the sap service
      */
-    InvoiceController(AlmaInvoiceServices almaInvoiceServices,
-                      VendorService vendorService,
+    InvoiceController(AlmaInvoiceService almaInvoiceService,
+                      AlmaVendorService vendorService,
                       SapService sapService,
                       AlmaExportRunService almaExportRunService) {
-        this.almaInvoiceServices = almaInvoiceServices;
+        this.almaInvoiceService = almaInvoiceService;
         this.vendorService = vendorService;
         this.almaExportRunService = almaExportRunService;
         this.sapService = sapService;
@@ -91,7 +91,7 @@ public class InvoiceController {
         almaExportRunNew.setDateSpecific(almaExportRun.isDateSpecific());
         log.info(almaExportRunNew.log());
         this.almaExportRunService.saveAlmaExportRun(almaExportRunNew);
-        almaExportRunNew = this.almaInvoiceServices.getInvoices(almaExportRunNew);
+        almaExportRunNew = this.sapService.getInvoices(almaExportRunNew);
         log.info(almaExportRunNew.log());
         for (Invoice invoice : almaExportRunNew.getInvoices()) {
             Vendor vendor = this.vendorService.getVendorAccount(invoice.getVendor().getValue());

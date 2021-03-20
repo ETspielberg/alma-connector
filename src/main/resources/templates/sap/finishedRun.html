@@ -77,7 +77,7 @@
                             <td th:text="${sapDatumHome.invoiceNumber}"></td>
                             <td th:text="${sapDatumHome.positionalNumber}"></td>
                             <td th:text="${sapDatumHome.getCheckCharacter()}"></td>
-                            <td th:text="${sapDatumHome.comment}"></td>
+                            <td style="word-wrap: break-word;min-width: 160px;max-width: 160px;" th:text="${sapDatumHome.comment}"></td>
                             <td th:text="${sapDatumHome.sapAccountData.getImportCheckString()}"></td>
                             <td th:text="${#dates.format(sapDatumHome.fromDate, 'dd.MM.yyyy')}"></td>
                             <td th:text="${#dates.format(sapDatumHome.toDate, 'dd.MM.yyyy')}"></td>
@@ -137,7 +137,7 @@
                             <td th:text="${sapDatum.invoiceNumber}"></td>
                             <td th:text="${sapDatum.positionalNumber}"></td>
                             <td th:text="${sapDatum.getCheckCharacter()}"></td>
-                            <td th:text="${sapDatum.comment}"></td>
+                            <td style="word-wrap: break-word;min-width: 160px;max-width: 160px;" th:text="${sapDatum.comment}"></td>
                             <td th:text="${sapDatum.sapAccountData.getImportCheckString()}"></td>
                             <td th:text="${#dates.format(sapDatum.fromDate, 'dd.MM.yyyy')}"></td>
                             <td th:text="${#dates.format(sapDatum.toDate, 'dd.MM.yyyy')}"></td>

@@ -1,4 +1,4 @@
-package org.unidue.ub.libintel.almaconnector.service;
+package org.unidue.ub.libintel.almaconnector.service.alma;
 
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.bibs.Item;
@@ -6,13 +6,13 @@ import org.unidue.ub.libintel.almaconnector.clients.acquisition.AlmaItemsApiClie
 import org.unidue.ub.libintel.almaconnector.clients.bib.AlmaCatalogApiClient;
 
 @Service
-public class ItemService {
+public class AlmaItemService {
 
     private final AlmaItemsApiClient almaItemsApiClient;
 
     private final AlmaCatalogApiClient almaCatalogApiClient;
 
-    public ItemService(AlmaItemsApiClient almaItemsApiClient, AlmaCatalogApiClient almaCatalogApiClient) {
+    public AlmaItemService(AlmaItemsApiClient almaItemsApiClient, AlmaCatalogApiClient almaCatalogApiClient) {
         this.almaItemsApiClient = almaItemsApiClient;
         this.almaCatalogApiClient = almaCatalogApiClient;
     }

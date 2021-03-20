@@ -46,6 +46,11 @@ public class AlmaItemData {
         return this;
     }
 
+    public AlmaItemData withCollection(String collection) {
+        this.collection = collection;
+        return this;
+    }
+
     public AlmaItemData clone() {
         AlmaItemData clone = new AlmaItemData(this.collection, this.shelfmark)
                 .withHoldingId(this.holdingId).withMmsId(this.mmsId).withTitle(title);

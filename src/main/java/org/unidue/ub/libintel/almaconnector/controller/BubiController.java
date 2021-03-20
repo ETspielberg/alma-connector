@@ -7,8 +7,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.unidue.ub.libintel.almaconnector.model.bubi.*;
-import org.unidue.ub.libintel.almaconnector.service.BubiService;
 import org.unidue.ub.libintel.almaconnector.service.PrimoService;
+import org.unidue.ub.libintel.almaconnector.service.bubi.BubiDataService;
+import org.unidue.ub.libintel.almaconnector.service.bubi.BubiOrderLineService;
+import org.unidue.ub.libintel.almaconnector.service.bubi.CoreDataService;
+import org.unidue.ub.libintel.almaconnector.service.bubi.BubiOrderService;
 
 import java.io.IOException;
 import java.util.List;
@@ -18,35 +21,47 @@ import java.util.List;
 @RequestMapping("/bubi")
 public class BubiController {
 
-    private final BubiService bubiService;
+    private final CoreDataService coreDataService;
+
+    private final BubiOrderService bubiOrderService;
+
+    private final BubiDataService bubiDataService;
+
+    private final BubiOrderLineService bubiOrderLineService;
 
     private final PrimoService primoService;
 
     private final Logger log = LoggerFactory.getLogger(BubiController.class);
 
-    BubiController(BubiService bubiService,
-                   PrimoService primoService) {
-        this.bubiService = bubiService;
+    BubiController(PrimoService primoService,
+                   BubiOrderService bubiOrderService,
+                   BubiDataService bubiDataService,
+                   CoreDataService coreDataService,
+                   BubiOrderLineService bubiOrderLineService) {
         this.primoService = primoService;
+        this.bubiOrderService = bubiOrderService;
+        this.bubiDataService = bubiDataService;
+        this.coreDataService = coreDataService;
+        this.bubiOrderLineService = bubiOrderLineService;
     }
 
     // ---------------------- Bubi data endpoints ----------------------
 
     @GetMapping("/bubidata/all")
     private ResponseEntity<List<BubiData>> getAllbubiData() {
-        return ResponseEntity.ok(this.bubiService.listAllBubiData());
+        return ResponseEntity.ok(this.bubiDataService.listAllBubiData());
     }
 
     // ---------------------- Core data endpoints ----------------------
 
     @GetMapping("/coredata/all")
     private ResponseEntity<List<CoreData>> getAllCoreData() {
-        return ResponseEntity.ok(this.bubiService.getAllCoreData());
+        return ResponseEntity.ok(this.coreDataService.getAllCoreData());
     }
 
     @GetMapping("/coredata/active")
     private ResponseEntity<List<CoreData>> getActiveCoreData() {
-        return ResponseEntity.ok(this.bubiService.getActiveCoreData());
+        return ResponseEntity.ok(this.coreDataService.getActiveCoreData());
     }
 
     /**
@@ -60,14 +75,14 @@ public class BubiController {
         // read the excel spreadsheet from the request
         XSSFWorkbook workbook = new XSSFWorkbook(bubiCoreDataFile.getInputStream());
         CoreDataImportRun coreDataImportRun = new CoreDataImportRun();
-        coreDataImportRun = this.bubiService.readCoreDataFromExcelSheet(coreDataImportRun, workbook);
+        coreDataImportRun = this.coreDataService.readCoreDataFromExcelSheet(coreDataImportRun, workbook);
         return ResponseEntity.ok(coreDataImportRun);
     }
 
     @PostMapping("/coredata/save")
     public ResponseEntity<CoreData> saveCoredata(@RequestBody CoreData coredata) {
         log.info(coredata.getMediaType());
-        return ResponseEntity.ok(this.bubiService.saveCoreData(coredata));
+        return ResponseEntity.ok(this.coreDataService.saveCoreData(coredata));
     }
 
 
@@ -75,53 +90,68 @@ public class BubiController {
 
     @PostMapping("/orderline/save")
     public ResponseEntity<BubiOrderLine> saveBubiOrderLine(@RequestBody BubiOrderLine bubiOrderLine) {
-        String vendoraccount = this.bubiService.getVendorAccount(bubiOrderLine.getVendorId(), bubiOrderLine.getCollection()).getVendorAccount();
+        String vendoraccount = this.bubiDataService.getVendorAccount(bubiOrderLine.getVendorId(), bubiOrderLine.getCollection()).getVendorAccount();
         bubiOrderLine.setVendorAccount(vendoraccount);
-        bubiOrderLine = this.bubiService.saveBubiOrderLine(bubiOrderLine);
+        bubiOrderLine = this.bubiOrderLineService.saveBubiOrderLine(bubiOrderLine);
         return ResponseEntity.ok(bubiOrderLine);
     }
 
     @GetMapping("/orderline/fromShelfmark")
     public ResponseEntity<BubiOrderLine> getForShelfmark(String shelfmark, String collection) {
-        return ResponseEntity.ok(this.bubiService.expandBubiOrderLineFromShelfmark(collection, shelfmark));
+        return ResponseEntity.ok(this.bubiOrderLineService.expandBubiOrderLineFromShelfmark(collection, shelfmark));
     }
 
     @GetMapping("/orderline/fromBarcode")
     public ResponseEntity<BubiOrderLine> getForBarcode(String barcode) {
-        return ResponseEntity.ok(this.bubiService.getBubiOrderLineFromBarcode(barcode));
+        return ResponseEntity.ok(this.bubiOrderLineService.getBubiOrderLineFromBarcode(barcode));
     }
 
     @GetMapping("/orderline/fromIdentifier")
     public ResponseEntity<BubiOrderLine> getForIdentifier(String identifier) {
-        return ResponseEntity.ok(this.bubiService.getBubiOrderLineFromIdentifier(identifier));
+        return ResponseEntity.ok(this.bubiOrderLineService.getBubiOrderLineFromIdentifier(identifier));
     }
 
     @GetMapping("/orderline/retrieve")
     public ResponseEntity<List<BubiOrderLine>> getAllActiveOrderlines(String mode) {
-        return ResponseEntity.ok(this.bubiService.getOrderLines(mode));
+        return ResponseEntity.ok(this.bubiOrderLineService.getOrderLines(mode));
 
     }
 
     @GetMapping("/orderline/bubi/{vendorId}")
     public ResponseEntity<List<BubiOrderLine>> getAllOrderlines(@PathVariable String vendorId) {
-        return ResponseEntity.ok(this.bubiService.getAllBubiOrderLinesForBubi(vendorId));
+        return ResponseEntity.ok(this.bubiOrderLineService.getAllBubiOrderLinesForBubi(vendorId));
     }
 
     // ---------------------- bubi order endpoints ----------------------
 
     @GetMapping("/order/retrieve")
     public ResponseEntity<List<BubiOrder>> getOrders(String mode) {
-        return ResponseEntity.ok(this.bubiService.getBubiOrders(mode));
+        return ResponseEntity.ok(this.bubiOrderService.getBubiOrders(mode));
     }
 
-    @PostMapping("/order/save")
+    @GetMapping("/order/retrieve/{bubiOrderId}")
+    public ResponseEntity<BubiOrder> getOrder(@PathVariable String bubiOrderId) {
+        return ResponseEntity.ok(this.bubiOrderService.getBubiOrder(bubiOrderId));
+    }
+
+    @PostMapping("/order/pack")
     public ResponseEntity<List<BubiOrder>> packOrders( @RequestBody BubiOrder bubiOrder) {
-        return ResponseEntity.ok(this.bubiService.packBubiOrder(bubiOrder));
+        return ResponseEntity.ok(this.bubiOrderService.packBubiOrder(bubiOrder));
+    }
+
+    @PostMapping("/order/collect/{bubiOrderId}")
+    public ResponseEntity<BubiOrder> collectOrder( @PathVariable String bubiOrderId) {
+        return ResponseEntity.ok(this.bubiOrderService.collectBubiOrder(bubiOrderId));
+    }
+
+    @PostMapping("/order/return/{bubiOrderId}")
+    public ResponseEntity<BubiOrder> returnOrder( @PathVariable String bubiOrderId) {
+        return ResponseEntity.ok(this.bubiOrderService.returnBubiOrder(bubiOrderId));
     }
 
     @PostMapping("/order/pay")
     public ResponseEntity<BubiOrder> payOrder( @RequestBody BubiOrder bubiOrder) {
-        return ResponseEntity.ok(this.bubiService.payBubiOrder(bubiOrder));
+        return ResponseEntity.ok(this.bubiOrderService.payBubiOrder(bubiOrder));
     }
 
     // ---------------------- primo data endpoints ----------------------

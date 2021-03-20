@@ -12,29 +12,31 @@ import org.unidue.ub.libintel.almaconnector.model.hook.ItemHook;
 import org.unidue.ub.libintel.almaconnector.model.hook.LoanHook;
 import org.unidue.ub.libintel.almaconnector.model.hook.RequestHook;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaCatalogService;
+import org.unidue.ub.libintel.almaconnector.service.alma.AlmaItemService;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaUserService;
+import org.unidue.ub.libintel.almaconnector.service.bubi.BubiOrderLineService;
 
 @Service
 public class HookService {
 
     private final AlmaUserService almaUserService;
 
-    private final BubiService bubiService;
-
-    private final FileWriterService.AlmaItemService almaItemService;
+    private final AlmaItemService almaItemService;
 
     private final AlmaCatalogService almaCatalogService;
+
+    private final BubiOrderLineService bubiOrderLineService;
 
     private final Logger log = LoggerFactory.getLogger(HookService.class);
 
     HookService(AlmaUserService almaUserService,
-                BubiService bubiService,
-                FileWriterService.AlmaItemService almaItemService,
-                AlmaCatalogService almaCatalogService) {
+                AlmaItemService almaItemService,
+                AlmaCatalogService almaCatalogService,
+                BubiOrderLineService bubiOrderLineService) {
         this.almaUserService = almaUserService;
-        this.bubiService = bubiService;
         this.almaItemService = almaItemService;
         this.almaCatalogService = almaCatalogService;
+        this.bubiOrderLineService = bubiOrderLineService;
     }
 
     @Async("threadPoolTaskExecutor")
@@ -52,8 +54,8 @@ public class HookService {
                         item = this.almaItemService.findItemByMmsAndItemId(userRequest.getMmsId(), userRequest.getItemId());
                     } else
                         break;
-                    BubiOrderLine bubiOrderLine = this.bubiService.expandBubiOrderLineFromItem(item);
-                    this.bubiService.saveBubiOrderLine(bubiOrderLine);
+                    BubiOrderLine bubiOrderLine = this.bubiOrderLineService.expandBubiOrderLineFromItem(item);
+                    this.bubiOrderLineService.saveBubiOrderLine(bubiOrderLine);
                     if ("D0001".equals(item.getItemData().getLibrary().getValue()))
                         item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("DES"));
                     item.getItemData().setPublicNote("Einbandstelle");
