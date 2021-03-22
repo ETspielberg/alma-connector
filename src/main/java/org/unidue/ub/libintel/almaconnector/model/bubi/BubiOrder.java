@@ -5,9 +5,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.unidue.ub.alma.shared.acq.Vendor;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @Table(name="bubi_order")
@@ -269,6 +267,29 @@ public class BubiOrder {
 
     public void setInvoiceDate(Date invoiceDate) {
         this.invoiceDate = invoiceDate;
+    }
+
+    public Map<String, List<BubiOrderLine>> returnOrderLinesByMediatype() {
+        Map<String, List<BubiOrderLine>> typedOrderlines = new HashMap<>();
+        for (BubiOrderLine bubiOrderLine: this.bubiOrderLines) {
+            if (typedOrderlines.containsKey(bubiOrderLine.getMediaType()))
+                typedOrderlines.get(bubiOrderLine.getMediaType()).add(bubiOrderLine);
+            else {
+                List<BubiOrderLine> newList = new ArrayList<>();
+                newList.add(bubiOrderLine);
+                typedOrderlines.put(bubiOrderLine.getMediaType(), newList);
+            }
+        }
+        return typedOrderlines;
+    }
+
+    public List<BubiOrderLine> collectMonographOrderLines() {
+        List<BubiOrderLine> monographOrderLines = new ArrayList<>();
+        for (BubiOrderLine bubiOrderLine: this.bubiOrderLines) {
+            if ("book".equals(bubiOrderLine.getMediaType()))
+                monographOrderLines.add(bubiOrderLine);
+        }
+        return monographOrderLines;
     }
 
     public double calculateTotalPrice() {

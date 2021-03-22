@@ -7,7 +7,7 @@
 </head>
 <body>
 
-<div style="text-align: left; margin: 0px;">
+<div style="text-align: left; margin: 0px; background-image: none;">
     <p style="margin: 0px;">Universitätsbibliothek Duisburg-Essen</p>
     <p style="margin: 0px;">Campus Essen</p>
     <p style="margin: 0px;">Universitätsstraße 9</p>
@@ -28,19 +28,19 @@
         <th>
             Auftragsnummer:
         </th>
-        <td>1</td>
+        <td th:text="order.counter">1</td>
     </tr>
     <tr>
         <th>
             Eingangsdatum:
         </th>
-        <td th:text="${#dates.format(order.returnedOn, 'dd-MM-yyyy')}">01.03.2021</td>
+        <!--<td th:text="${#dates.format(order.returnedOn, 'dd-MM-yyyy')}">01.03.2021</td> -->
     </tr>
     <tr>
         <th>
             Ausgangsdatum:
         </th>
-        <td th:text="${#dates.format(order.collectedOn, 'dd-MM-yyyy')}">01.01.2021</td>
+        <!-- <td th:text="${#dates.format(order.collectedOn, 'dd-MM-yyyy')}">01.01.2021</td>-->
     </tr>
 </table>
 

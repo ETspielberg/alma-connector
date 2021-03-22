@@ -69,6 +69,7 @@ public class BubiOrderService {
                 activeOrders.addAll(this.bubiOrderRepository.findAllByBubiStatus(BubiStatus.WAITING));
                 activeOrders.addAll(this.bubiOrderRepository.findAllByBubiStatus(BubiStatus.COMPLAINT));
                 activeOrders.addAll(this.bubiOrderRepository.findAllByBubiStatus(BubiStatus.RETURNED));
+                activeOrders.addAll(this.bubiOrderRepository.findAllByBubiStatus(BubiStatus.READY));
                 return activeOrders;
             }
         }
