@@ -271,14 +271,14 @@ public class BubiOrder {
 
     public Map<String, List<BubiOrderLine>> returnOrderLinesByMediatype() {
         Map<String, List<BubiOrderLine>> typedOrderlines = new HashMap<>();
+        typedOrderlines.put("standard", new ArrayList<>());
+        typedOrderlines.put("book", new ArrayList<>());
+        typedOrderlines.put("journal", new ArrayList<>());
         for (BubiOrderLine bubiOrderLine: this.bubiOrderLines) {
-            if (typedOrderlines.containsKey(bubiOrderLine.getMediaType()))
+            if (bubiOrderLine.getStandard())
+                typedOrderlines.get("standard").add(bubiOrderLine);
+            else
                 typedOrderlines.get(bubiOrderLine.getMediaType()).add(bubiOrderLine);
-            else {
-                List<BubiOrderLine> newList = new ArrayList<>();
-                newList.add(bubiOrderLine);
-                typedOrderlines.put(bubiOrderLine.getMediaType(), newList);
-            }
         }
         return typedOrderlines;
     }
@@ -297,5 +297,11 @@ public class BubiOrder {
             this.totalAmount += bubiOrderLine.getPrice();
         }
         return this.totalAmount;
+    }
+
+    public void sortBubiOrderLines() {
+        this.bubiOrderLines.sort(Comparator.comparing(BubiOrderLine::getMediaType));
+        for (int i = 0; i < this.bubiOrderLines.size(); i++)
+            this.bubiOrderLines.get(i).setPositionalNumber(i+1);
     }
 }

@@ -78,31 +78,33 @@ public class BubiOrderService {
 
     public List<BubiOrder> packBubiOrder(BubiOrder bubiOrder) {
         Hashtable<String, BubiOrder> bubiOrders = new Hashtable<>();
-
-        for (int i = 0; i < bubiOrder.getBubiOrderLines().size(); i++) {
-            BubiOrderLine bubiOrderLine = bubiOrder.getBubiOrderLines().get(i);
-            bubiOrderLine.setPositionalNumber(i + 1);
-            bubiOrderLine.setStatus(BubiStatus.PACKED);
-            bubiOrderLine.setLastChange(new Date());
+        for (BubiOrderLine bubiOrderLine: bubiOrder.getBubiOrderLines()) {
             String key = bubiOrderLine.getVendorId() + "-" + bubiOrderLine.getVendorAccount();
-            BubiOrder bubiOrderInd;
-            if (bubiOrders.containsKey(key)) {
-                bubiOrderInd = bubiOrders.get(key);
-            } else {
+            if (bubiOrders.containsKey(key))
+                bubiOrders.get(key).addBubiOrderLine(bubiOrderLine);
+            else {
                 long counter = this.bubiOrderRepository.countAllByVendorIdAndVendorAccount(bubiOrderLine.getVendorId(), bubiOrderLine.getVendorAccount()) + 1;
-                bubiOrderInd = new BubiOrder(bubiOrderLine.getVendorId(), bubiOrderLine.getVendorAccount(), counter);
+                BubiOrder bubiOrderInd = new BubiOrder(bubiOrderLine.getVendorId(), bubiOrderLine.getVendorAccount(), counter);
+                bubiOrderInd.addBubiOrderLine(bubiOrderLine);
+                this.bubiOrderRepository.save(bubiOrderInd);
+                bubiOrderLine.setBubiOrder(bubiOrderInd);
+                this.bubiOrderLineRepository.save(bubiOrderLine);
                 bubiOrders.put(key, bubiOrderInd);
             }
-            bubiOrderInd.addBubiOrderLine(bubiOrderLine);
-            bubiOrderLine.setBubiOrder(bubiOrderInd);
-            bubiOrderInd.calculateTotalPrice();
-            this.bubiOrderRepository.save(bubiOrderInd);
-            this.bubiOrderLineRepository.save(bubiOrderLine);
         }
         bubiOrders.forEach(
-                (key, entry) -> {
-                    entry.setBubiStatus(BubiStatus.NEW);
-                    this.bubiOrderRepository.save(entry);
+                (key, order) -> {
+                    this.bubiOrderRepository.save(order);
+                    order.setBubiStatus(BubiStatus.NEW);
+                    order.sortBubiOrderLines();
+                    order.calculateTotalPrice();
+                    order.getBubiOrderLines().forEach(
+                            orderline-> {
+                                orderline.setStatus(BubiStatus.PACKED);
+                                orderline.setLastChange(new Date());
+                                this.bubiOrderLineRepository.save(orderline);
+                            });
+                    this.bubiOrderRepository.save(order);
                 }
         );
         return new ArrayList<>(bubiOrders.values());

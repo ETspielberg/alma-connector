@@ -55,7 +55,7 @@
     </tr>
     </thead>
     <tbody>
-    <tr th:each="orderline: ${order.getBubiOrderLines()}">
+    <tr th:each="orderline: ${journals}">
         <th th:text="*{orderline.positionalNumber}">
             1
         </th>
@@ -64,6 +64,30 @@
         </td>
         <td>1</td>
         <td th:text="*{orderline.price}">
+            10,00 €
+        </td>
+    </tr>
+    <tr th:each="orderline: ${books}">
+        <th th:text="*{orderline.positionalNumber}">
+            1
+        </th>
+        <td>
+            Beschreibung
+        </td>
+        <td>1</td>
+        <td th:text="*{orderline.price}">
+            10,00 €
+        </td>
+    </tr>
+    <tr th:each="orderline: ${standard}">
+        <th th:text="${standardPositionalNumber}">
+            1
+        </th>
+        <td>
+            Beschreibung
+        </td>
+        <td>1</td>
+        <td th:text="*{standard.get(0).getPrice()}">
             10,00 €
         </td>
     </tr>

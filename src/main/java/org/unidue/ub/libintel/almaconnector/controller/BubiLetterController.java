@@ -1,5 +1,7 @@
 package org.unidue.ub.libintel.almaconnector.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +25,8 @@ public class BubiLetterController {
 
     private final AlmaVendorService almaVendorService;
 
+    private final Logger log = LoggerFactory.getLogger(BubiLetterController.class);
+
     BubiLetterController(BubiOrderService bubiOrderService,
                          AlmaVendorService almaVendorService) {
         this.bubiOrderService = bubiOrderService;
@@ -30,19 +34,18 @@ public class BubiLetterController {
     }
 
     @GetMapping("/order/letter/{bubiOrderId}")
-    public String getStartPage(@PathVariable String bubiOrderId, Model model) {
+    public String getBubiOrderLetter(@PathVariable String bubiOrderId, Model model) {
         BubiOrder bubiOrder = this.bubiOrderService.getBubiOrder(bubiOrderId);
         Map<String, List<BubiOrderLine>> typedOrderlines = bubiOrder.returnOrderLinesByMediatype();
         Vendor vendor = this.almaVendorService.getVendorAccount(bubiOrder.getVendorId());
-        for (Account account: vendor.getAccount())
+        for (Account account : vendor.getAccount())
             if (account.getCode().equals(bubiOrder.getVendorAccount()))
                 model.addAttribute("account", account);
-        long standard = 0L;
-        for (BubiOrderLine bubiOrderLine : typedOrderlines.get("book")) {
-            if (bubiOrderLine.getStandard())
-                standard++;
-        }
-        model.addAttribute("typedOrderlines", typedOrderlines);
+        model.addAttribute("journals",  typedOrderlines.get("journal"));
+        model.addAttribute("books",  typedOrderlines.get("book"));
+        model.addAttribute("standard",  typedOrderlines.get("standard"));
+        long standardPositionalNumber = typedOrderlines.get("journal").size() + typedOrderlines.get("book").size() + 1;
+        model.addAttribute("standardPositionalNumber", standardPositionalNumber);
         model.addAttribute("bubi", vendor);
         model.addAttribute("order", bubiOrder);
         return "bubi/order";
