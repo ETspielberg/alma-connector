@@ -65,16 +65,16 @@
                             <th th:text="#{sap.result.date.to}"></th>
                             <th th:text="#{sap.result.checked}"></th>
                         </tr>
-                        <tr th:each="sapDatumHome, itemStathome : *{homeSapData}">
+                        <tr th:each="sapDatumHome, itemStathome : *{homeSapData}" th:style="${sapDatumHome.costType == null or sapDatumHome.costType.isEmpty() or sapDatumHome.creditor == null or sapDatumHome.creditor.isEmpty() or sapDatumHome.invoiceNumber == null or sapDatumHome.invoiceNumber.length() > 16 ? 'background-color: pink' : 'background-color: transparent'}">
 
                             <td th:text="${sapDatumHome.vendorCode}"></td>
-                            <td th:text="${sapDatumHome.creditor}"></td>
+                            <td th:style="${sapDatumHome.creditor == null or sapDatumHome.creditor.isEmpty() ? 'background-color: HotPink' : 'background-color: transparent'}" th:text="${sapDatumHome.creditor}"></td>
                             <td th:text="${#dates.format(sapDatumHome.invoiceDate, 'dd.MM.yyyy')}"></td>
                             <td th:text="${#dates.format(sapDatumHome.commitmentDate, 'dd.MM.yyyy')}"></td>
-                            <td th:text="${sapDatumHome.costType}"></td>
+                            <td th:style="${sapDatumHome.costType == null or sapDatumHome.costType.isEmpty() ? 'background-color: HotPink' : 'background-color: transparent'}" th:text="${sapDatumHome.costType}"></td>
                             <td th:text="${sapDatumHome.invoiceAmount}"></td>
                             <td th:text="${sapDatumHome.currency}"></td>
-                            <td th:text="${sapDatumHome.invoiceNumber}"></td>
+                            <td th:style="${sapDatumHome.invoiceNumber == null or sapDatumHome.invoiceNumber.length() > 16 ? 'background-color: HotPink' : 'background-color: transparent'}" th:text="${sapDatumHome.invoiceNumber}"></td>
                             <td th:text="${sapDatumHome.positionalNumber}"></td>
                             <td th:text="${sapDatumHome.getCheckCharacter()}"></td>
                             <td style="word-wrap: break-word;min-width: 160px;max-width: 160px;" th:text="${sapDatumHome.comment}"></td>
@@ -126,15 +126,15 @@
                             <th th:text="#{sap.result.date.to}"></th>
                             <th th:text="#{sap.result.checked}"></th>
                         </tr>
-                        <tr th:each="sapDatum, itemStat : *{foreignSapData}">
+                        <tr th:each="sapDatum, itemStat : *{foreignSapData}" th:style="${sapDatum.costType == null or sapDatum.costType.isEmpty() or sapDatum.creditor == null or sapDatum.creditor.isEmpty() or sapDatum.invoiceNumber == null or sapDatum.invoiceNumber.length() > 16 ? 'background-color: pink' : 'background-color: transparent'}">
                             <td th:text="${sapDatum.vendorCode}"></td>
-                            <td th:text="${sapDatum.creditor}"></td>
+                            <td th:style="${sapDatum.creditor == null or sapDatum.creditor.isEmpty() ? 'background-color: HotPink' : 'background-color: transparent'}" th:text="${sapDatum.creditor}"></td>
                             <td th:text="${#dates.format(sapDatum.invoiceDate, 'dd.MM.yyyy')}"></td>
                             <td th:text="${#dates.format(sapDatum.commitmentDate, 'dd.MM.yyyy')}"></td>
-                            <td th:text="${sapDatum.costType}"></td>
+                            <td th:style="${sapDatum.costType == null or sapDatum.costType.isEmpty() ? 'background-color: HotPink' : 'background-color: transparent'}" th:text="${sapDatum.costType}"></td>
                             <td th:text="${sapDatum.invoiceAmount}"></td>
                             <td th:text="${sapDatum.currency}"></td>
-                            <td th:text="${sapDatum.invoiceNumber}"></td>
+                            <td th:style="${sapDatum.invoiceNumber == null or sapDatum.invoiceNumber.length() > 16 ? 'background-color: HotPink' : 'background-color: transparent'}" th:text="${sapDatum.invoiceNumber}"></td>
                             <td th:text="${sapDatum.positionalNumber}"></td>
                             <td th:text="${sapDatum.getCheckCharacter()}"></td>
                             <td style="word-wrap: break-word;min-width: 160px;max-width: 160px;" th:text="${sapDatum.comment}"></td>
