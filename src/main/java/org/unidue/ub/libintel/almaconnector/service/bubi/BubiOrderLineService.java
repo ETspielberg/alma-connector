@@ -84,9 +84,6 @@ public class BubiOrderLineService {
         return this.bubiOrderLineRepository.findAllByVendorId(vendorId);
     }
 
-
-
-
     public BubiOrderLine getBubiOrderLineFromBarcode(String barcode) {
         if (barcode != null) {
             Item item = this.almaItemService.findItemByBarcode(barcode);
@@ -167,7 +164,7 @@ public class BubiOrderLineService {
             bubiOrderline.setFund(journalFund);
             bubiOrderline.setPrice(bubiData.getStandardPriceJournal());
         } else if (bubiOrderline.getStandard()) {
-            bubiOrderline.setFund(journalFund);
+            bubiOrderline.setFund(monographFund);
             bubiOrderline.setPrice(bubiData.getStandardPriceMonograph());
         } else {
             bubiOrderline.setFund(monographFund);

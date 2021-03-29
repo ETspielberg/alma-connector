@@ -293,6 +293,7 @@ public class BubiOrder {
     }
 
     public double calculateTotalPrice() {
+        this.totalAmount = 0.00;
         for (BubiOrderLine bubiOrderLine: bubiOrderLines) {
             this.totalAmount += bubiOrderLine.getPrice();
         }
@@ -303,5 +304,16 @@ public class BubiOrder {
         this.bubiOrderLines.sort(Comparator.comparing(BubiOrderLine::getMediaType));
         for (int i = 0; i < this.bubiOrderLines.size(); i++)
             this.bubiOrderLines.get(i).setPositionalNumber(i+1);
+    }
+
+    public void removeOrderline(BubiOrderLine bubiOrderLine) {
+        this.bubiOrderLines.remove(bubiOrderLine);
+    }
+
+    public BubiOrderLine duplicateOderline(BubiOrderLine bubiOrderLine) {
+        BubiOrderLine bubiOrderLineNew = bubiOrderLine.clone();
+        this.bubiOrderLines.add(bubiOrderLineNew);
+        return bubiOrderLineNew;
+
     }
 }

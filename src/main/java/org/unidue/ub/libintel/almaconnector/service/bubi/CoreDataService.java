@@ -6,6 +6,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.libintel.almaconnector.model.bubi.AlmaItemData;
 import org.unidue.ub.libintel.almaconnector.model.bubi.CoreData;
+import org.unidue.ub.libintel.almaconnector.model.bubi.CoreDataId;
 import org.unidue.ub.libintel.almaconnector.model.bubi.CoreDataImportRun;
 import org.unidue.ub.libintel.almaconnector.repository.CoreDataRepository;
 import org.unidue.ub.libintel.almaconnector.service.PrimoService;
@@ -46,8 +47,8 @@ public class CoreDataService {
         return this.coreDataRepository.save(coreData);
     }
 
-    public void deleteCoreData(CoreData coreData) {
-        this.coreDataRepository.delete(coreData);
+    public void deleteCoreData(CoreDataId coreDataId) {
+        this.coreDataRepository.deleteById(coreDataId);
     }
 
     public CoreDataImportRun readCoreDataFromExcelSheet(CoreDataImportRun coreDataImportRun, XSSFWorkbook workbook) {

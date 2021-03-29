@@ -21,10 +21,21 @@ public class BubiDataService {
 
     public BubiData getVendorAccount(String vendorID, String collection) {
         String campus = collection.startsWith("E") ? "E0001" : "D0001";
-        List<BubiData> bubiData = this.bubiDataRepository.findByVendorIdAndCampus(vendorID, campus);
-        if (bubiData.size() == 0)
-            return new BubiData();
+        List<BubiData> bubiDataList;
+        if (vendorID == null || vendorID.isEmpty())
+            bubiDataList = this.bubiDataRepository.findByCampusAndActive(campus, true);
         else
-            return bubiData.get(0);
+            bubiDataList = this.bubiDataRepository.findByVendorIdAndActive(vendorID, true);
+        if (bubiDataList.size() == 0)
+            return new BubiData();
+        else if (bubiDataList.size() == 1)
+            return bubiDataList.get(0);
+        else {
+            for (BubiData bubiData : bubiDataList) {
+                if (campus.equals(bubiData.getCampus()))
+                    return bubiData;
+            }
+            return bubiDataList.get(0);
+        }
     }
 }

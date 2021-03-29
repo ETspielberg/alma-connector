@@ -125,4 +125,11 @@ public class AlmaPoLineService {
                 .addNoteItem(note);
     }
 
+    public void updatePoLineByBubiOrderLine(BubiOrderLine bubiOrderLine) {
+        PoLine poLine = this.almaPoLinesApiClient.getPoLinesPoLineId("application/json", bubiOrderLine.getAlmaPoLineId());
+        Amount amount = new Amount().sum(String.valueOf(bubiOrderLine.getPrice()))
+                .currency(new AmountCurrency().value("EUR"));
+        poLine.getFundDistribution().get(0).setAmount(amount);
+        this.almaPoLinesApiClient.putPoLinesPoLineId(poLine, "application/json", bubiOrderLine.getAlmaPoLineId(), "false");
+    }
 }

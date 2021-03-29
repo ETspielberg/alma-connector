@@ -148,6 +148,32 @@ public class BubiOrderService {
         return bubiOrder;
     }
 
+    public BubiOrder removeOrderLine(String bubiOrderId, BubiOrderLine bubiOrderLine) {
+        BubiOrder bubiOrder = this.bubiOrderRepository.getOne(bubiOrderId);
+        bubiOrder.removeOrderline(bubiOrderLine);
+        this.bubiOrderRepository.save(bubiOrder);
+        return bubiOrder;
+    }
+
+    public BubiOrder duplicateOrderline(String bubiOrderId, BubiOrderLine bubiOrderLine) {
+        BubiOrder bubiOrder = this.bubiOrderRepository.getOne(bubiOrderId);
+        BubiOrderLine bubiOrderLineNew = bubiOrder.duplicateOderline(bubiOrderLine);
+        this.bubiOrderRepository.save(bubiOrder);
+        this.bubiOrderLineRepository.save(bubiOrderLineNew);
+        return bubiOrder;
+    }
+
+    public BubiOrder changePrice(BubiOrderLine bubiOrderLineNew) {
+        BubiOrderLine bubiOrderLine = this.bubiOrderLineRepository.getBubiOrderLineByBubiOrderLineId(bubiOrderLineNew.getBubiOrderLineId());
+        bubiOrderLine.setPrice(bubiOrderLineNew.getPrice());
+        this.bubiOrderLineRepository.save(bubiOrderLine);
+        BubiOrder bubiOrder = bubiOrderLine.getBubiOrder();
+        bubiOrder.calculateTotalPrice();
+        this.bubiOrderRepository.save(bubiOrder);
+
+        return bubiOrder;
+    }
+
     private void setTemporaryLocation(BubiOrderLine bubiOrderLine) {
         Item item = almaItemService.findItemByMmsAndItemId(bubiOrderLine.getAlmaMmsId(), bubiOrderLine.getAlmaItemId());
         item.getHoldingData().setInTempLocation(true);

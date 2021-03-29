@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.unidue.ub.libintel.almaconnector.model.bubi.*;
 import org.unidue.ub.libintel.almaconnector.service.PrimoService;
+import org.unidue.ub.libintel.almaconnector.service.alma.AlmaPoLineService;
 import org.unidue.ub.libintel.almaconnector.service.bubi.BubiDataService;
 import org.unidue.ub.libintel.almaconnector.service.bubi.BubiOrderLineService;
 import org.unidue.ub.libintel.almaconnector.service.bubi.CoreDataService;
@@ -29,6 +30,8 @@ public class BubiController {
 
     private final BubiOrderLineService bubiOrderLineService;
 
+    private final AlmaPoLineService almaPoLineService;
+
     private final PrimoService primoService;
 
     private final Logger log = LoggerFactory.getLogger(BubiController.class);
@@ -37,12 +40,14 @@ public class BubiController {
                    BubiOrderService bubiOrderService,
                    BubiDataService bubiDataService,
                    CoreDataService coreDataService,
+                   AlmaPoLineService almaPoLineService,
                    BubiOrderLineService bubiOrderLineService) {
         this.primoService = primoService;
         this.bubiOrderService = bubiOrderService;
         this.bubiDataService = bubiDataService;
         this.coreDataService = coreDataService;
         this.bubiOrderLineService = bubiOrderLineService;
+        this.almaPoLineService = almaPoLineService;
     }
 
     // ---------------------- Bubi data endpoints ----------------------
@@ -85,6 +90,15 @@ public class BubiController {
         return ResponseEntity.ok(this.coreDataService.saveCoreData(coredata));
     }
 
+    @DeleteMapping("/coredata/delete")
+    public ResponseEntity<CoreData> deleteCoreData(String collection, String shelfmark) {
+        log.info(String.format("deleting core data for %s: %s", collection, shelfmark));
+        CoreDataId coreDataId = new CoreDataId(collection, shelfmark);
+        this.coreDataService.deleteCoreData(coreDataId);
+        return ResponseEntity.ok().build();
+    }
+
+
 
     // ---------------------- bubi order line endpoints ----------------------
 
@@ -93,6 +107,13 @@ public class BubiController {
         String vendoraccount = this.bubiDataService.getVendorAccount(bubiOrderLine.getVendorId(), bubiOrderLine.getCollection()).getVendorAccount();
         bubiOrderLine.setVendorAccount(vendoraccount);
         bubiOrderLine = this.bubiOrderLineService.saveBubiOrderLine(bubiOrderLine);
+        return ResponseEntity.ok(bubiOrderLine);
+    }
+
+    @PostMapping("/orderline/changePrice")
+    public ResponseEntity<BubiOrderLine> changePrice(@RequestBody BubiOrderLine bubiOrderLine) {
+        bubiOrderLine = this.bubiOrderLineService.saveBubiOrderLine(bubiOrderLine);
+        this.almaPoLineService.updatePoLineByBubiOrderLine(bubiOrderLine);
         return ResponseEntity.ok(bubiOrderLine);
     }
 
@@ -120,6 +141,11 @@ public class BubiController {
     @GetMapping("/orderline/bubi/{vendorId}")
     public ResponseEntity<List<BubiOrderLine>> getAllOrderlines(@PathVariable String vendorId) {
         return ResponseEntity.ok(this.bubiOrderLineService.getAllBubiOrderLinesForBubi(vendorId));
+    }
+
+    @PutMapping("/orderline/changePrice")
+    public ResponseEntity<BubiOrder> getAllOrderlines(@RequestBody BubiOrderLine bubiOrderLine) {
+        return ResponseEntity.ok(this.bubiOrderService.changePrice(bubiOrderLine));
     }
 
     // ---------------------- bubi order endpoints ----------------------
@@ -152,6 +178,16 @@ public class BubiController {
     @PostMapping("/order/pay")
     public ResponseEntity<BubiOrder> payOrder( @RequestBody BubiOrder bubiOrder) {
         return ResponseEntity.ok(this.bubiOrderService.payBubiOrder(bubiOrder));
+    }
+
+    @PutMapping("/order/removeOrderline/<bubiOrderLineid>")
+    public ResponseEntity<BubiOrder> removeOrderLine(String bubiOrderLineid, @RequestBody BubiOrderLine bubiOrderLine) {
+        return ResponseEntity.ok(this.bubiOrderService.removeOrderLine(bubiOrderLineid, bubiOrderLine));
+    }
+
+    @PutMapping("/order/duplicateOrderline/<bubiOrderLineid>")
+    public ResponseEntity<BubiOrder> duplicateOrderline(String bubiOrderLineid, @RequestBody BubiOrderLine bubiOrderLine) {
+        return ResponseEntity.ok(this.bubiOrderService.duplicateOrderline(bubiOrderLineid, bubiOrderLine));
     }
 
     // ---------------------- primo data endpoints ----------------------

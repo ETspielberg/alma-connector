@@ -477,4 +477,17 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
     public int compareTo(BubiOrderLine other) {
         return (int) (other.counter - this.counter);
     }
+
+    public BubiOrderLine clone() {
+        BubiOrderLine clone = new BubiOrderLine();
+        clone.setStatus(this.status);
+        clone.setBubiOrder(bubiOrder);
+        clone.setAlmaItemId(almaItemId);
+        clone.setAlmaPoLineId(almaPoLineId);
+        clone.setAlmaHoldingId(almaHoldingId);
+        clone.setAlmaMmsId(almaMmsId);
+        clone.setBinding(binding);
+        clone.setBindingsFollow(bindingsFollow);
+        return clone;
+    }
 }

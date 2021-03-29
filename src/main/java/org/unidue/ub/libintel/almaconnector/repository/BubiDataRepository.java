@@ -10,5 +10,7 @@ import java.util.List;
 @RepositoryRestResource(collectionResourceRel = "bubiData", path = "bubiData")
 public interface BubiDataRepository extends JpaRepository<BubiData, BubiDataId> {
 
-    List<BubiData> findByVendorIdAndCampus(String vendorId, String campus);
+    List<BubiData> findByCampusAndActive(String campus, boolean active);
+
+    List<BubiData> findByVendorIdAndActive(String vendorId, boolean active);
 }
