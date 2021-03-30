@@ -180,12 +180,12 @@ public class BubiController {
         return ResponseEntity.ok(this.bubiOrderService.payBubiOrder(bubiOrder));
     }
 
-    @PutMapping("/order/removeOrderline/<bubiOrderLineid>")
+    @PutMapping("/order/removeOrderline/{bubiOrderLineid}")
     public ResponseEntity<BubiOrder> removeOrderLine(String bubiOrderLineid, @RequestBody BubiOrderLine bubiOrderLine) {
         return ResponseEntity.ok(this.bubiOrderService.removeOrderLine(bubiOrderLineid, bubiOrderLine));
     }
 
-    @PutMapping("/order/duplicateOrderline/<bubiOrderLineid>")
+    @PutMapping("/order/duplicateOrderline/{bubiOrderLineid}")
     public ResponseEntity<BubiOrder> duplicateOrderline(String bubiOrderLineid, @RequestBody BubiOrderLine bubiOrderLine) {
         return ResponseEntity.ok(this.bubiOrderService.duplicateOrderline(bubiOrderLineid, bubiOrderLine));
     }

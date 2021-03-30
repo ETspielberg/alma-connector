@@ -115,18 +115,18 @@ public class BubiOrderService {
         LocalDate today = LocalDate.now();
         LocalDate returnDate = today.plusDays(21);
         ZoneId defaultZoneId = ZoneId.systemDefault();
+        bubiOrder.setCollectedOn(Date.from(today.atStartOfDay(defaultZoneId).toInstant()));
         bubiOrder.setReturnedOn(Date.from(returnDate.atStartOfDay(defaultZoneId).toInstant()));
-        bubiOrder.setBubiStatus(BubiStatus.PACKED);
         for (BubiOrderLine bubiOrderLine : bubiOrder.getBubiOrderLines()) {
             PoLine poLine = almaPoLineService.buildPoLine(bubiOrderLine, returnDate);
             poLine = almaPoLineService.savePoLine(poLine);
             setTemporaryLocation(bubiOrderLine);
             bubiOrderLine.setAlmaPoLineId(poLine.getNumber());
-            bubiOrderLine.setStatus(BubiStatus.READY);
+            bubiOrderLine.setStatus(BubiStatus.AT_BUBI);
             bubiOrderLine.setLastChange(new Date());
             this.bubiOrderLineRepository.save(bubiOrderLine);
         }
-        bubiOrder.setBubiStatus(BubiStatus.READY);
+        bubiOrder.setBubiStatus(BubiStatus.AT_BUBI);
         return bubiOrderRepository.save(bubiOrder);
     }
 
@@ -167,6 +167,8 @@ public class BubiOrderService {
         BubiOrderLine bubiOrderLine = this.bubiOrderLineRepository.getBubiOrderLineByBubiOrderLineId(bubiOrderLineNew.getBubiOrderLineId());
         bubiOrderLine.setPrice(bubiOrderLineNew.getPrice());
         this.bubiOrderLineRepository.save(bubiOrderLine);
+        if (bubiOrderLine.getAlmaPoLineId() != null && !bubiOrderLine.getAlmaPoLineId().isEmpty())
+            this.almaPoLineService.updatePoLineByBubiOrderLine(bubiOrderLine);
         BubiOrder bubiOrder = bubiOrderLine.getBubiOrder();
         bubiOrder.calculateTotalPrice();
         this.bubiOrderRepository.save(bubiOrder);
