@@ -54,6 +54,18 @@ public class HookController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/bibListener")
+    public ResponseEntity<Challenge> answerBibChallenge(String challenge) {
+        return ResponseEntity.ok(new Challenge(challenge));
+    }
+
+    @PostMapping("/bibListener")
+    public ResponseEntity<?> receiveBibHook(@RequestBody BibHook hookContent, @RequestHeader("X-Exl-Signature") String signature) {
+        log.info(signature);
+        log.info(hookContent.getBib().toString());
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/requestsListener")
     public ResponseEntity<Challenge> answerRequestChallenge(String challenge) {
         return ResponseEntity.ok(new Challenge(challenge));
