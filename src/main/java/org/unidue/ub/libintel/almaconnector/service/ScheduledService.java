@@ -75,9 +75,9 @@ public class ScheduledService {
                             reducedPrice = price * (1 - discount);
                             currency = poLine.getPrice().getCurrency().getValue();
                         } catch (Exception e) {
-                            log.warn("could not calculate reduced price. ", e);
+                            log.warn(String.format("could not calculate reduced price because: %s", e.getMessage()));
                         }
-                        log.info(fund);
+                        log.info(String.format("updating item price and statistics field for lo line %s and fund %s", polineNumber, fund));
                         if (codes.containsKey(fund)) {
                             for (NewItemWithOrder newItemWithOrder : list) {
                                 Item item = almaItemService.findItemByMmsAndItemId(newItemWithOrder.getMmsId(), newItemWithOrder.getItemId());
