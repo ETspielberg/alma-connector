@@ -63,6 +63,7 @@ public class HookController {
     public ResponseEntity<?> receiveBibHook(@RequestBody BibHook hookContent, @RequestHeader("X-Exl-Signature") String signature) {
         log.info(signature);
         log.info(hookContent.getBib().toString());
+        this.hookService.processBibHook(hookContent);
         return ResponseEntity.ok().build();
     }
 

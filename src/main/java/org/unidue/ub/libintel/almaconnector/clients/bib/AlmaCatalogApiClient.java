@@ -159,7 +159,7 @@ public interface AlmaCatalogApiClient {
    * @return Object
    */
   @RequestMapping(method= RequestMethod.GET, value="/{mmsId}/portfolios?limit={limit}&offset={offset}")
-  List<Portfolio> getBibsMmsIdPortfolios(@RequestParam("mms_id") String mmsId, @RequestParam("limit") Integer limit, @RequestParam("offset") Integer offset);
+  Portfolios getBibsMmsIdPortfolios(@PathVariable("mmsId") String mmsId, @RequestParam("limit") Integer limit, @RequestParam("offset") Integer offset);
 
 
   /**
@@ -250,11 +250,11 @@ public interface AlmaCatalogApiClient {
    * Create Portfolio for a Bib
    * This web service creates a Portfolio for a Bib.
    * @param mmsId The Bib Record ID. (required)
-   * @param body This method takes a portfolio object. See [here](/alma/apis/docs/xsd/rest_portfolio.xsd?tags&#x3D;POST) (required)
+   * @param portfolio This method takes a portfolio object. See [here](/alma/apis/docs/xsd/rest_portfolio.xsd?tags&#x3D;POST) (required)
    * @return Object
    */
   @RequestMapping(method= RequestMethod.POST, value="/{mmsId}/portfolios/")
-  Portfolio postBibsMmsIdPortfolios(@RequestParam("mms_id") String mmsId, Object body);
+  Portfolio postBibsMmsIdPortfolios(@PathVariable("mmsId") String mmsId, @RequestBody Portfolio portfolio);
 
   /**
    * Update Bib Record

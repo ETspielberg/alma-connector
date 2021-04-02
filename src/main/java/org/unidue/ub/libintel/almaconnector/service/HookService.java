@@ -8,10 +8,12 @@ import org.unidue.ub.alma.shared.bibs.*;
 import org.unidue.ub.alma.shared.user.Address;
 import org.unidue.ub.alma.shared.user.AlmaUser;
 import org.unidue.ub.libintel.almaconnector.model.bubi.BubiOrderLine;
+import org.unidue.ub.libintel.almaconnector.model.hook.BibHook;
 import org.unidue.ub.libintel.almaconnector.model.hook.ItemHook;
 import org.unidue.ub.libintel.almaconnector.model.hook.LoanHook;
 import org.unidue.ub.libintel.almaconnector.model.hook.RequestHook;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaCatalogService;
+import org.unidue.ub.libintel.almaconnector.service.alma.AlmaElectronicService;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaItemService;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaUserService;
 import org.unidue.ub.libintel.almaconnector.service.bubi.BubiOrderLineService;
@@ -25,6 +27,8 @@ public class HookService {
 
     private final AlmaCatalogService almaCatalogService;
 
+    private final AlmaElectronicService almaElectronicService;
+
     private final BubiOrderLineService bubiOrderLineService;
 
     private final Logger log = LoggerFactory.getLogger(HookService.class);
@@ -32,10 +36,12 @@ public class HookService {
     HookService(AlmaUserService almaUserService,
                 AlmaItemService almaItemService,
                 AlmaCatalogService almaCatalogService,
-                BubiOrderLineService bubiOrderLineService) {
+                BubiOrderLineService bubiOrderLineService,
+                AlmaElectronicService almaElectronicService) {
         this.almaUserService = almaUserService;
         this.almaItemService = almaItemService;
         this.almaCatalogService = almaCatalogService;
+        this.almaElectronicService = almaElectronicService;
         this.bubiOrderLineService = bubiOrderLineService;
     }
 
@@ -48,7 +54,7 @@ public class HookService {
                     Item item;
                     if ("BOOK".equals(userRequest.getMaterialType().getValue())) {
                         log.debug(String.format("retrieving barcode %s", userRequest.getBarcode()));
-                        item =this.almaItemService.findItemByBarcode(userRequest.getBarcode());
+                        item = this.almaItemService.findItemByBarcode(userRequest.getBarcode());
                     } else if ("ISSBD".equals(userRequest.getMaterialType().getValue())) {
                         log.debug(String.format("retrieving mms and item id %s, %s", userRequest.getMmsId(), userRequest.getItemId()));
                         item = this.almaItemService.findItemByMmsAndItemId(userRequest.getMmsId(), userRequest.getItemId());
@@ -61,7 +67,7 @@ public class HookService {
                     item.getItemData().setPublicNote("Einbandstelle");
                     String library = item.getItemData().getLibrary().getValue();
                     item.getHoldingData().setInTempLocation(false);
-                    switch(library) {
+                    switch (library) {
                         case "E0001": {
                             item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("EES"));
                             item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("E0001"));
@@ -77,11 +83,11 @@ public class HookService {
                     log.info(String.format("created new bubi order line %s for %s: %s", bubiOrderLine.getBubiOrderLineId(), bubiOrderLine.getCollection(), bubiOrderLine.getShelfmark()));
                     break;
                 }
-                case "Aussonderung" :{
+                case "Aussonderung": {
                     log.info("retrieved internal work order for Aussonderung");
                     break;
                 }
-                case "Umarbeitung" : {
+                case "Umarbeitung": {
                     log.info("retrieved internal work order for Umarbeitung");
                     break;
                 }
@@ -114,7 +120,7 @@ public class HookService {
                         item.getItemData().setPublicNote(address.getLine1());
                         String library = itemLoan.getLibrary().getValue();
                         item.getHoldingData().setInTempLocation(true);
-                        switch(library) {
+                        switch (library) {
                             case "E0001": {
                                 item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("ESA"));
                                 item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("E0001"));
@@ -139,7 +145,7 @@ public class HookService {
                         item.getHoldingData().tempLocation(null);
                         item.getHoldingData().tempLibrary(null);
                     }
-                    log.info("saving item:\n" + item.toString() );
+                    log.info("saving item:\n" + item.toString());
                     this.almaItemService.updateItem(mmsId, item.getHoldingData().getHoldingId(), itemPid, item);
                 }
         }
@@ -155,6 +161,40 @@ public class HookService {
                 boolean success = this.almaCatalogService.updateCallNoInHolding(item.getBibData().getMmsId(), item.getHoldingData().getHoldingId(), callNo);
                 if (success)
                     log.info("successfully updated holding");
+            }
+        }
+    }
+
+    @Async("threadPoolTaskExecutor")
+    public void processBibHook(BibHook hook) {
+        BibWithRecord bib = hook.getBib();
+        if ("Universität Duisburg-Essen".equals(bib.getPublisherConst())) {
+            String mmsId = bib.getMmsId();
+            if (this.almaCatalogService.getNumberOfPortfolios(bib.getMmsId()) == 0) {
+                boolean isOnline = false;
+                boolean isDiss = false;
+                String url = "";
+                for (MarcDatafield datafield : bib.getRecord().getDatafield()) {
+                    if ("338".equals(datafield.getTag())) {
+                        for (MarcSubfield subfield : datafield.getSubfield()) {
+                            if ("b".equals(subfield.getCode()))
+                                isOnline = "cr".equals(subfield.getValue());
+                        }
+                    } else if ("502".equals(datafield.getTag())) {
+                        for (MarcSubfield subfield : datafield.getSubfield()) {
+                            if ("b".equals(subfield.getCode()))
+                                isDiss = "Dissertation".equals(subfield.getValue());
+                        }
+                    } else if ("856".equals(datafield.getTag())) {
+                        for (MarcSubfield subfield : datafield.getSubfield()) {
+                            if ("u".equals(subfield.getCode()))
+                                url = subfield.getValue();
+                        }
+                    }
+                }
+                if (isDiss && isOnline) {
+                    this.almaElectronicService.createDissPortfolio(mmsId, url);
+                }
             }
         }
     }

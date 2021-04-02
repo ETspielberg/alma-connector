@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.unidue.ub.alma.shared.bibs.Bib;
+import org.unidue.ub.alma.shared.bibs.BibWithRecord;
 import org.unidue.ub.alma.shared.conf.GeneralInstitution;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -40,7 +41,7 @@ public class BibHook {
 
     public static final String JSON_PROPERTY_BIB = "bib";
     @XmlElement(name = "bib")
-    private Bib bib;
+    private BibWithRecord bib;
 
     @JsonProperty(JSON_PROPERTY_ID)
     @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
@@ -78,11 +79,11 @@ public class BibHook {
     @JsonProperty(JSON_PROPERTY_BIB)
     @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
     @JacksonXmlProperty(localName = "bib")
-    public Bib getBib() {
+    public BibWithRecord getBib() {
         return bib;
     }
 
-    public void setBib(Bib bib) {
+    public void setBib(BibWithRecord bib) {
         this.bib = bib;
     }
 

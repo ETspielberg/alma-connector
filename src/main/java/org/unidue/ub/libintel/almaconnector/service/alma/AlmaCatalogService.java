@@ -2,6 +2,7 @@ package org.unidue.ub.libintel.almaconnector.service.alma;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.bibs.*;
 import org.unidue.ub.libintel.almaconnector.clients.bib.AlmaCatalogApiClient;
@@ -30,6 +31,10 @@ public class AlmaCatalogService {
             }
             this.almaCatalogApiClient.putBibsMmsIdHoldingsHoldingId(mmsId, holdingId, holding);
             return true;
+    }
+
+    public int getNumberOfPortfolios(String mmsId) {
+        return this.almaCatalogApiClient.getBibsMmsIdPortfolios(mmsId, 1, 0).getTotalRecordCount();
     }
 
 }
