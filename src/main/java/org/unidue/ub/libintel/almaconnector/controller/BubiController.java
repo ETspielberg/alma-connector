@@ -150,7 +150,7 @@ public class BubiController {
 
     // ---------------------- bubi order endpoints ----------------------
 
-    @GetMapping("/order/retrieve")
+    @GetMapping("/orders")
     public ResponseEntity<List<BubiOrder>> getOrders(String mode) {
         return ResponseEntity.ok(this.bubiOrderService.getBubiOrders(mode));
     }
@@ -161,28 +161,33 @@ public class BubiController {
     }
 
     @PostMapping("/order/pack")
-    public ResponseEntity<List<BubiOrder>> packOrders( @RequestBody BubiOrder bubiOrder) {
+    public ResponseEntity<List<BubiOrder>> packOrders(@RequestBody BubiOrder bubiOrder) {
         return ResponseEntity.ok(this.bubiOrderService.packBubiOrder(bubiOrder));
     }
 
     @PostMapping("/order/collect/{bubiOrderId}")
-    public ResponseEntity<BubiOrder> collectOrder( @PathVariable String bubiOrderId) {
+    public ResponseEntity<BubiOrder> collectOrder(@PathVariable String bubiOrderId) {
         return ResponseEntity.ok(this.bubiOrderService.collectBubiOrder(bubiOrderId));
     }
 
     @PostMapping("/order/return/{bubiOrderId}")
-    public ResponseEntity<BubiOrder> returnOrder( @PathVariable String bubiOrderId) {
+    public ResponseEntity<BubiOrder> returnOrder(@PathVariable String bubiOrderId) {
         return ResponseEntity.ok(this.bubiOrderService.returnBubiOrder(bubiOrderId));
     }
 
-    @PostMapping("/order/pay")
-    public ResponseEntity<BubiOrder> payOrder( @RequestBody BubiOrder bubiOrder) {
-        return ResponseEntity.ok(this.bubiOrderService.payBubiOrder(bubiOrder));
+    @PostMapping("/order/pay/{bubiOrderId}")
+    public ResponseEntity<BubiOrder> payOrder(@PathVariable String bubiOrderId) {
+        return ResponseEntity.ok(this.bubiOrderService.payBubiOrder(bubiOrderId));
     }
 
     @PutMapping("/order/removeOrderline/{bubiOrderLineid}")
     public ResponseEntity<BubiOrder> removeOrderLine(String bubiOrderLineid, @RequestBody BubiOrderLine bubiOrderLine) {
         return ResponseEntity.ok(this.bubiOrderService.removeOrderLine(bubiOrderLineid, bubiOrderLine));
+    }
+
+    @PutMapping("/order/addOrderline/{bubiOrderLineid}")
+    public ResponseEntity<BubiOrder> addOrderLine(String bubiOrderLineid, @RequestBody BubiOrderLine bubiOrderLine) {
+        return ResponseEntity.ok(this.bubiOrderService.addOrderLine(bubiOrderLineid, bubiOrderLine));
     }
 
     @PutMapping("/order/duplicateOrderline/{bubiOrderLineid}")

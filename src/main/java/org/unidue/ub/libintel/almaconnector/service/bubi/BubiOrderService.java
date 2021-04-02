@@ -8,6 +8,7 @@ import org.unidue.ub.alma.shared.bibs.HoldingDataTempLibrary;
 import org.unidue.ub.alma.shared.bibs.HoldingDataTempLocation;
 import org.unidue.ub.alma.shared.bibs.Item;
 import org.unidue.ub.libintel.almaconnector.model.bubi.*;
+import org.unidue.ub.libintel.almaconnector.repository.BubiDataRepository;
 import org.unidue.ub.libintel.almaconnector.repository.BubiOrderLineRepository;
 import org.unidue.ub.libintel.almaconnector.repository.BubiOrderRepository;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaInvoiceService;
@@ -25,6 +26,8 @@ public class BubiOrderService {
 
     private final BubiOrderLineRepository bubiOrderLineRepository;
 
+    private final BubiDataRepository bubiDataRepository;
+
     private final AlmaPoLineService almaPoLineService;
 
     private final AlmaInvoiceService almaInvoiceService;
@@ -38,12 +41,14 @@ public class BubiOrderService {
             BubiOrderLineRepository bubiOrderLineRepository,
             AlmaPoLineService almaPoLineService,
             AlmaInvoiceService almaInvoiceService,
-            AlmaItemService almaItemService) {
+            AlmaItemService almaItemService,
+            BubiDataRepository bubiDataRepository) {
         this.bubiOrderLineRepository = bubiOrderLineRepository;
         this.bubiOrderRepository = bubiOrderRepository;
         this.almaPoLineService = almaPoLineService;
         this.almaInvoiceService = almaInvoiceService;
         this.almaItemService = almaItemService;
+        this.bubiDataRepository = bubiDataRepository;
     }
 
     public BubiOrder getBubiOrder(String bubiOrderId) {
@@ -55,36 +60,38 @@ public class BubiOrderService {
             case "all":
                 return this.bubiOrderRepository.findAll();
             case "sent":
-                return this.bubiOrderRepository.findAllByBubiStatus(BubiStatus.SENT);
+                return this.bubiOrderRepository.findAllByBubiStatusOrderByBubiOrderId(BubiStatus.SENT);
             case "complaint":
-                return this.bubiOrderRepository.findAllByBubiStatus(BubiStatus.COMPLAINT);
+                return this.bubiOrderRepository.findAllByBubiStatusOrderByBubiOrderId(BubiStatus.COMPLAINT);
             case "closed":
-                return this.bubiOrderRepository.findAllByBubiStatus(BubiStatus.CLOSED);
+                return this.bubiOrderRepository.findAllByBubiStatusOrderByBubiOrderId(BubiStatus.CLOSED);
             default: {
                 List<BubiOrder> activeOrders = new ArrayList<>();
-                activeOrders.addAll(this.bubiOrderRepository.findAllByBubiStatus(BubiStatus.AT_BUBI));
-                activeOrders.addAll(this.bubiOrderRepository.findAllByBubiStatus(BubiStatus.PACKED));
-                activeOrders.addAll(this.bubiOrderRepository.findAllByBubiStatus(BubiStatus.NEW));
-                activeOrders.addAll(this.bubiOrderRepository.findAllByBubiStatus(BubiStatus.SENT));
-                activeOrders.addAll(this.bubiOrderRepository.findAllByBubiStatus(BubiStatus.WAITING));
-                activeOrders.addAll(this.bubiOrderRepository.findAllByBubiStatus(BubiStatus.COMPLAINT));
-                activeOrders.addAll(this.bubiOrderRepository.findAllByBubiStatus(BubiStatus.RETURNED));
-                activeOrders.addAll(this.bubiOrderRepository.findAllByBubiStatus(BubiStatus.READY));
+                activeOrders.addAll(this.bubiOrderRepository.findAllByBubiStatusOrderByBubiOrderId(BubiStatus.AT_BUBI));
+                activeOrders.addAll(this.bubiOrderRepository.findAllByBubiStatusOrderByBubiOrderId(BubiStatus.PACKED));
+                activeOrders.addAll(this.bubiOrderRepository.findAllByBubiStatusOrderByBubiOrderId(BubiStatus.NEW));
+                activeOrders.addAll(this.bubiOrderRepository.findAllByBubiStatusOrderByBubiOrderId(BubiStatus.SENT));
+                activeOrders.addAll(this.bubiOrderRepository.findAllByBubiStatusOrderByBubiOrderId(BubiStatus.WAITING));
+                activeOrders.addAll(this.bubiOrderRepository.findAllByBubiStatusOrderByBubiOrderId(BubiStatus.COMPLAINT));
+                activeOrders.addAll(this.bubiOrderRepository.findAllByBubiStatusOrderByBubiOrderId(BubiStatus.RETURNED));
+                activeOrders.addAll(this.bubiOrderRepository.findAllByBubiStatusOrderByBubiOrderId(BubiStatus.READY));
+                activeOrders.sort(Comparator.comparing(BubiOrder::getBubiOrderId));
                 return activeOrders;
             }
         }
     }
 
-
     public List<BubiOrder> packBubiOrder(BubiOrder bubiOrder) {
         Hashtable<String, BubiOrder> bubiOrders = new Hashtable<>();
         for (BubiOrderLine bubiOrderLine: bubiOrder.getBubiOrderLines()) {
-            String key = bubiOrderLine.getVendorId() + "-" + bubiOrderLine.getVendorAccount();
+            String key = bubiOrderLine.getVendorAccount();
             if (bubiOrders.containsKey(key))
                 bubiOrders.get(key).addBubiOrderLine(bubiOrderLine);
             else {
-                long counter = this.bubiOrderRepository.countAllByVendorIdAndVendorAccount(bubiOrderLine.getVendorId(), bubiOrderLine.getVendorAccount()) + 1;
-                BubiOrder bubiOrderInd = new BubiOrder(bubiOrderLine.getVendorId(), bubiOrderLine.getVendorAccount(), counter);
+                long counter = this.bubiOrderRepository.countAllByVendorAccount(bubiOrderLine.getVendorAccount()) + 1;
+                BubiOrder bubiOrderInd = new BubiOrder(bubiOrderLine.getVendorAccount(), counter);
+                BubiData bubiData = this.bubiDataRepository.getByVendorAccount(bubiOrderLine.getVendorAccount());
+                bubiOrderInd.setVendorId(bubiData.getVendorId());
                 bubiOrderInd.addBubiOrderLine(bubiOrderLine);
                 this.bubiOrderRepository.save(bubiOrderInd);
                 bubiOrderLine.setBubiOrder(bubiOrderInd);
@@ -136,7 +143,8 @@ public class BubiOrderService {
         return bubiOrderRepository.save(bubiOrder);
     }
 
-    public BubiOrder payBubiOrder(BubiOrder bubiOrder) {
+    public BubiOrder payBubiOrder(String bubiOrderId) {
+        BubiOrder bubiOrder = this.bubiOrderRepository.getOne(bubiOrderId);
         Invoice invoice = this.almaInvoiceService.getInvoiceForBubiOrder(bubiOrder);
         invoice = this.almaInvoiceService.saveInvoice(invoice);
         List<InvoiceLine> invoiceLines = this.almaInvoiceService.getInvoiceLinesForBubiOrder(bubiOrder);
@@ -155,6 +163,13 @@ public class BubiOrderService {
         return bubiOrder;
     }
 
+    public BubiOrder addOrderLine(String bubiOrderId, BubiOrderLine bubiOrderLine) {
+        BubiOrder bubiOrder = this.bubiOrderRepository.getOne(bubiOrderId);
+        bubiOrder.addBubiOrderLine(bubiOrderLine);
+        this.bubiOrderRepository.save(bubiOrder);
+        return bubiOrder;
+    }
+
     public BubiOrder duplicateOrderline(String bubiOrderId, BubiOrderLine bubiOrderLine) {
         BubiOrder bubiOrder = this.bubiOrderRepository.getOne(bubiOrderId);
         BubiOrderLine bubiOrderLineNew = bubiOrder.duplicateOderline(bubiOrderLine);
@@ -164,7 +179,7 @@ public class BubiOrderService {
     }
 
     public BubiOrder changePrice(BubiOrderLine bubiOrderLineNew) {
-        BubiOrderLine bubiOrderLine = this.bubiOrderLineRepository.getBubiOrderLineByBubiOrderLineId(bubiOrderLineNew.getBubiOrderLineId());
+        BubiOrderLine bubiOrderLine = this.bubiOrderLineRepository.getBubiOrderLineByBubiOrderLineIdOrderByMinting(bubiOrderLineNew.getBubiOrderLineId());
         bubiOrderLine.setPrice(bubiOrderLineNew.getPrice());
         this.bubiOrderLineRepository.save(bubiOrderLine);
         if (bubiOrderLine.getAlmaPoLineId() != null && !bubiOrderLine.getAlmaPoLineId().isEmpty())

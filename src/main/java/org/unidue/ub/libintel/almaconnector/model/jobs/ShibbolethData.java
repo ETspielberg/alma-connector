@@ -1,4 +1,4 @@
-package org.unidue.ub.libintel.almaconnector.model.run;
+package org.unidue.ub.libintel.almaconnector.model.jobs;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

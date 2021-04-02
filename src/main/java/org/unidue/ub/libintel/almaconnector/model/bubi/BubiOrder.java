@@ -18,9 +18,6 @@ public class BubiOrder {
     @Column(name = "counter")
     private long counter;
 
-    @Column(name="alma_order_id")
-    private String almaOrderId;
-
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "bubiOrder")
     private List<BubiOrderLine> bubiOrderLines;
 
@@ -89,7 +86,7 @@ public class BubiOrder {
         this.vendorId = bubiOrderLine.getVendorId();
         this.vendorAccount = bubiOrderLine.getVendorAccount();
         this.counter = counter;
-        this.bubiOrderId = bubiOrderLine.getVendorId() + "-" + bubiOrderLine.getVendorAccount() + "-" + counter;
+        this.bubiOrderId = bubiOrderLine.getVendorAccount() + "-" + counter;
         this.bubiOrderLines = new ArrayList<>();
         this.bubiOrderLines.add(bubiOrderLine);
         this.bubiStatus = BubiStatus.NEW;
@@ -99,8 +96,8 @@ public class BubiOrder {
         this.totalAmount = bubiOrderLine.getPrice();
     }
 
-    public BubiOrder(String vendorId, String vendorAccount, long counter) {
-        this.bubiOrderId = vendorId + "-" + vendorAccount + "-" + counter;
+    public BubiOrder(String vendorAccount, long counter) {
+        this.bubiOrderId = vendorAccount + "-" + counter;
         this.counter = counter;
         this.vendorId = vendorId;
         this.vendorAccount = vendorAccount;
@@ -134,14 +131,6 @@ public class BubiOrder {
         this.bubiOrderId = bubiOrderId;
     }
 
-    public String getAlmaOrderId() {
-        return almaOrderId;
-    }
-
-    public void setAlmaOrderId(String almaOrderId) {
-        this.almaOrderId = almaOrderId;
-    }
-
     public Vendor getBubiData() {
         return bubiData;
     }
@@ -162,6 +151,7 @@ public class BubiOrder {
 
     public void addBubiOrderLine(BubiOrderLine bubiOrderLine) {
         this.bubiOrderLines.add(bubiOrderLine);
+        bubiOrderLine.setBubiOrder(this);
         this.totalAmount += bubiOrderLine.getPrice();
     }
 

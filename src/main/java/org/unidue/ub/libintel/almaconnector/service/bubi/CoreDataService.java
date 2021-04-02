@@ -28,7 +28,7 @@ public class CoreDataService {
     }
 
     public List<CoreData> getActiveCoreData() {
-        return this.coreDataRepository.findAllByActive(true);
+        return this.coreDataRepository.findAllByActiveOrderByMinting(true);
     }
 
     public List<CoreData> getAllCoreData() {
@@ -40,7 +40,7 @@ public class CoreDataService {
     }
 
     public CoreData findDefaultForMaterial(String material, String campus) {
-        return this.coreDataRepository.findCoreDataByActiveAndShelfmarkAndMediaType(true, "STANDARD_" + campus, material);
+        return this.coreDataRepository.findCoreDataByActiveAndShelfmarkAndMediaTypeOrderByMinting(true, "STANDARD_" + campus, material);
     }
 
     public CoreData saveCoreData(CoreData coreData) {
@@ -103,9 +103,9 @@ public class CoreDataService {
                 coreData.setBinding("");
             }
             try {
-                coreData.setVendorId(row.getCell(11).getStringCellValue());
+                coreData.setVendorAccount(row.getCell(11).getStringCellValue());
             } catch (Exception e) {
-                coreData.setVendorId("");
+                coreData.setVendorAccount("");
             }
             try {
                 coreData.setVolume(row.getCell(13).getStringCellValue());
@@ -141,11 +141,6 @@ public class CoreDataService {
                 coreData.setBindingsFollow(row.getCell(44).getStringCellValue());
             } catch (Exception e) {
                 coreData.setBindingsFollow("");
-            }
-            try {
-                coreData.setAlternativeBubiData(row.getCell(45).getStringCellValue());
-            } catch (Exception e) {
-                coreData.setAlternativeBubiData("");
             }
             coreDataImportRun.addCoreData(coreData);
             if (coreData.isActive()) {

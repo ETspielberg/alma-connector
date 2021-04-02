@@ -2,7 +2,7 @@ package org.unidue.ub.libintel.almaconnector.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.unidue.ub.libintel.almaconnector.model.run.ShibbolethData;
+import org.unidue.ub.libintel.almaconnector.model.jobs.ShibbolethData;
 import org.unidue.ub.libintel.almaconnector.repository.ShibbolethDataRepository;
 
 import java.util.ArrayList;

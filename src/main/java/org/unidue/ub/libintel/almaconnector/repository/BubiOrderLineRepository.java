@@ -9,20 +9,20 @@ import java.util.List;
 import java.util.UUID;
 
 @RepositoryRestResource(collectionResourceRel = "bubiOrderLine", path = "bubiOrderLine")
-public interface BubiOrderLineRepository  extends JpaRepository<BubiOrderLine, UUID> {
+public interface BubiOrderLineRepository  extends JpaRepository<BubiOrderLine, String> {
 
     List<BubiOrderLine> findAllByCollectionAndShelfmark(String collection, String shelfmark);
 
     long countAllByShelfmarkAndCollection(String collection, String shelfmark);
 
-    List<BubiOrderLine> findAllByVendorId(String vendorId);
+    List<BubiOrderLine> findAllByVendorIdOrderByMinting(String vendorId);
 
     List<BubiOrderLine> findAllByVendorIdAndVendorAccount(String vendorId, String vendorAccount);
 
     BubiOrderLine getBubiOrderLineByAlmaPoLineId(String almaPoLineId);
 
-    BubiOrderLine getBubiOrderLineByBubiOrderLineId(String bubiOrderLineId);
+    BubiOrderLine getBubiOrderLineByBubiOrderLineIdOrderByMinting(String bubiOrderLineId);
 
-    List<BubiOrderLine> findAllByStatus(BubiStatus status);
+    List<BubiOrderLine> findAllByStatusOrderByMinting(BubiStatus status);
 
 }

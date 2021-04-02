@@ -101,8 +101,8 @@ public class AlmaPoLineService {
 
         // creates the resource metadata
         ResourceMetadata resourceMetadata = new ResourceMetadata()
-                .mmsId(new ResourceMetadataMmsId().value(bubiOrderLine.getAlmaMmsId()))
-                .title(bubiOrderLine.getTitle());
+                .mmsId(new ResourceMetadataMmsId().value(bubiOrderLine.getAlmaMmsId()));
+                //.title(bubiOrderLine.getTitle());
 
         // sets the status to a auto packaging
         PoLineStatus status = new PoLineStatus().value("AUTO_PACKAGING").desc("Auto Packaging");

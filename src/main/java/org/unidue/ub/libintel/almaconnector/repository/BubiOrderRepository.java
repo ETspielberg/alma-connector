@@ -12,7 +12,7 @@ public interface BubiOrderRepository  extends JpaRepository<BubiOrder, String> {
 
     long countAllByVendorId(String vendorId);
 
-    List<BubiOrder> findAllByBubiStatus(BubiStatus BubiStatus);
+    List<BubiOrder> findAllByBubiStatusOrderByBubiOrderId(BubiStatus BubiStatus);
 
-    long countAllByVendorIdAndVendorAccount(String vendorId, String vendorAccount);
+    long countAllByVendorAccount(String vendorAccount);
 }

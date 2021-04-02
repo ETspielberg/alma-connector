@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.WebRequest;
-import org.unidue.ub.libintel.almaconnector.model.run.ShibbolethData;
+import org.unidue.ub.libintel.almaconnector.model.jobs.ShibbolethData;
 import org.unidue.ub.libintel.almaconnector.service.ShibbolethDataService;
 
 @Controller

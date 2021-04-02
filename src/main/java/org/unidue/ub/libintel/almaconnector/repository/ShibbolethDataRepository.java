@@ -2,7 +2,7 @@ package org.unidue.ub.libintel.almaconnector.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import org.unidue.ub.libintel.almaconnector.model.run.ShibbolethData;
+import org.unidue.ub.libintel.almaconnector.model.jobs.ShibbolethData;
 
 /**
  * simple repository to manage the creation and retrieval of shibboleth information

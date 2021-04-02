@@ -58,11 +58,11 @@ public class BubiOrderLineService {
             case "all":
                 return this.bubiOrderLineRepository.findAll();
             case "packed":
-                return this.bubiOrderLineRepository.findAllByStatus(BubiStatus.PACKED);
+                return this.bubiOrderLineRepository.findAllByStatusOrderByMinting(BubiStatus.PACKED);
             case "sent":
-                return this.bubiOrderLineRepository.findAllByStatus(BubiStatus.SENT);
+                return this.bubiOrderLineRepository.findAllByStatusOrderByMinting(BubiStatus.SENT);
             case "waiting":
-                return this.bubiOrderLineRepository.findAllByStatus(BubiStatus.WAITING);
+                return this.bubiOrderLineRepository.findAllByStatusOrderByMinting(BubiStatus.WAITING);
             default:
                 return getActiveOrderlines();
         }
@@ -70,18 +70,18 @@ public class BubiOrderLineService {
 
     public List<BubiOrderLine> getActiveOrderlines() {
         List<BubiOrderLine> allOpenOrderlines = new ArrayList<>();
-        allOpenOrderlines.addAll(this.bubiOrderLineRepository.findAllByStatus(BubiStatus.NEW));
-        allOpenOrderlines.addAll(this.bubiOrderLineRepository.findAllByStatus(BubiStatus.WAITING));
-        allOpenOrderlines.addAll(this.bubiOrderLineRepository.findAllByStatus(BubiStatus.INWORK));
+        allOpenOrderlines.addAll(this.bubiOrderLineRepository.findAllByStatusOrderByMinting(BubiStatus.NEW));
+        allOpenOrderlines.addAll(this.bubiOrderLineRepository.findAllByStatusOrderByMinting(BubiStatus.WAITING));
+        allOpenOrderlines.addAll(this.bubiOrderLineRepository.findAllByStatusOrderByMinting(BubiStatus.INWORK));
         return allOpenOrderlines;
     }
 
     public BubiOrderLine getBubiOrderLineFromIdentifier(String identifier) {
-        return this.bubiOrderLineRepository.getBubiOrderLineByBubiOrderLineId(identifier);
+        return this.bubiOrderLineRepository.getBubiOrderLineByBubiOrderLineIdOrderByMinting(identifier);
     }
 
     public List<BubiOrderLine> getAllBubiOrderLinesForBubi(String vendorId) {
-        return this.bubiOrderLineRepository.findAllByVendorId(vendorId);
+        return this.bubiOrderLineRepository.findAllByVendorIdOrderByMinting(vendorId);
     }
 
     public BubiOrderLine getBubiOrderLineFromBarcode(String barcode) {
@@ -128,7 +128,7 @@ public class BubiOrderLineService {
             log.info("found core data");
             bubiOrderLine.addCoreData(coredata, false);
         }
-        setFundAndPrice(bubiOrderLine);
+        addDataFromVendor(bubiOrderLine);
         return bubiOrderLine;
     }
 
@@ -153,13 +153,14 @@ public class BubiOrderLineService {
                 bubiOrderLine.addAlmaItemData(foundAlmaItemData.get(0));
             }
         }
-        setFundAndPrice(bubiOrderLine);
+        addDataFromVendor(bubiOrderLine);
         return bubiOrderLine;
     }
 
-    private void setFundAndPrice(BubiOrderLine bubiOrderline) {
+    private void addDataFromVendor(BubiOrderLine bubiOrderline) {
         BubiData bubiData = bubiDataService.getVendorAccount(bubiOrderline.getVendorId(), bubiOrderline.getCollection());
         bubiOrderline.setVendorAccount(bubiData.getVendorAccount());
+        bubiOrderline.setAdditionalCostsAmount(bubiData.getAdditionalCostsAmount());
         if (bubiOrderline.getShelfmark().contains(" Z ")) {
             bubiOrderline.setFund(journalFund);
             bubiOrderline.setPrice(bubiData.getStandardPriceJournal());

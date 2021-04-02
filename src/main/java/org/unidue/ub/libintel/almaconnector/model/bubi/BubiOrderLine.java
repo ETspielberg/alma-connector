@@ -3,13 +3,11 @@ package org.unidue.ub.libintel.almaconnector.model.bubi;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.hibernate.annotations.GenericGenerator;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.NumberFormat;
 
 import javax.persistence.*;
 import java.util.Date;
-import java.util.UUID;
 
 @Entity
 @Table(name = "bubi_order_line")
@@ -113,6 +111,12 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
     @Column(name = "bindings_follow")
     private String bindingsFollow;
 
+    @Column(name = "additional_costs")
+    private boolean additionalCosts;
+
+    @Column(name = "additional_costs_amount")
+    private double additionalCostsAmount;
+
     @Column(name = "created")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -172,11 +176,12 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
                 this.title = coredata.getMinting();
         }
         this.partTitle = coredata.getPartTitle();
-        this.vendorId = coredata.getVendorId();
+        this.vendorId = coredata.getVendorAccount();
         if (this.almaMmsId == null)
             this.almaMmsId = coredata.getAlmaMmsId();
         if (this.almaHoldingId == null)
             this.almaHoldingId = coredata.getAlmaHoldingId();
+        this.standard = coredata.getStandard();
     }
 
     public void addAlmaItemData(AlmaItemData almaItemData) {
@@ -453,10 +458,6 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         this.bubiOrderLineId = bubiOrderLineId;
     }
 
-    public void updateBubiOrderLineId() {
-        this.bubiOrderLineId = String.format("%s-%s-%d", this.collection, this.shelfmark, this.counter);
-    }
-
     public String getMediaType() {
         return mediaType;
     }
@@ -471,6 +472,26 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
 
     public void setAlmaItemId(String almaItemId) {
         this.almaItemId = almaItemId;
+    }
+
+    public boolean getAdditionalCosts() {
+        return additionalCosts;
+    }
+
+    public void setAdditionalCosts(boolean additionalCosts) {
+        this.additionalCosts = additionalCosts;
+    }
+
+    public double getAdditionalCostsAmount() {
+        return additionalCostsAmount;
+    }
+
+    public void setAdditionalCostsAmount(double additionalCostsAmount) {
+        this.additionalCostsAmount = additionalCostsAmount;
+    }
+
+    public void updateBubiOrderLineId() {
+        this.bubiOrderLineId = String.format("%s-%s-%d", this.collection, this.shelfmark, this.counter);
     }
 
     @Override
@@ -488,6 +509,7 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         clone.setAlmaMmsId(almaMmsId);
         clone.setBinding(binding);
         clone.setBindingsFollow(bindingsFollow);
+
         return clone;
     }
 }

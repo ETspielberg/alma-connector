@@ -70,10 +70,13 @@ public class CoreData implements Cloneable {
     private boolean active = true;
 
     @Column(name="vendor_id")
-    private String vendorId;
+    private String vendorAccount;
 
-    @Column(name="alternative_bubi_data")
-    private String alternativeBubiData;
+    @Column(name="additional_costs")
+    private boolean additionalCosts = true;
+
+    @Column(name="standard")
+    private boolean standard = false;
 
     public String getCollection() {
         return collection;
@@ -147,12 +150,12 @@ public class CoreData implements Cloneable {
         this.cover = cover;
     }
 
-    public String getVendorId() {
-        return vendorId;
+    public String getVendorAccount() {
+        return vendorAccount;
     }
 
-    public void setVendorId(String bubiData) {
-        this.vendorId = bubiData;
+    public void setVendorAccount(String bubiData) {
+        this.vendorAccount = bubiData;
     }
 
     public String getPartTitle() {
@@ -227,14 +230,6 @@ public class CoreData implements Cloneable {
         this.bindingsFollow = bindingsFollow;
     }
 
-    public String getAlternativeBubiData() {
-        return alternativeBubiData;
-    }
-
-    public void setAlternativeBubiData(String alternativeBubiData) {
-        this.alternativeBubiData = alternativeBubiData;
-    }
-
     public String getAlmaMmsId() {
         return almaMmsId;
     }
@@ -251,11 +246,26 @@ public class CoreData implements Cloneable {
         this.almaHoldingId = almaHoldingId;
     }
 
+    public boolean getAdditionalCosts() {
+        return additionalCosts;
+    }
+
+    public void setAdditionalCosts(boolean additionalCosts) {
+        this.additionalCosts = additionalCosts;
+    }
+
+    public boolean getStandard() {
+        return standard;
+    }
+
+    public void setStandard(boolean standard) {
+        this.standard = standard;
+    }
+
     @Override
     public CoreData clone() {
         CoreData clone = new CoreData();
-        clone.setAlternativeBubiData(this.alternativeBubiData);
-        clone.setVendorId(this.vendorId);
+        clone.setVendorAccount(this.vendorAccount);
         clone.setBinding(this.binding);
         clone.setBindingsFollow(this.bindingsFollow);
         clone.setCollection(this.collection);
@@ -275,6 +285,8 @@ public class CoreData implements Cloneable {
         clone.setShelfmark(this.shelfmark);
         clone.setAlmaHoldingId(this.almaHoldingId);
         clone.setAlmaMmsId(this.almaMmsId);
+        clone.setAdditionalCosts(this.additionalCosts);
+        clone.setStandard(this.standard);
         return clone;
     }
 }
