@@ -93,8 +93,7 @@ public class BubiController {
     @DeleteMapping("/coredata/delete")
     public ResponseEntity<CoreData> deleteCoreData(String collection, String shelfmark) {
         log.info(String.format("deleting core data for %s: %s", collection, shelfmark));
-        CoreDataId coreDataId = new CoreDataId(collection, shelfmark);
-        this.coreDataService.deleteCoreData(coreDataId);
+        this.coreDataService.deleteCoreData(collection+ "-" + shelfmark);
         return ResponseEntity.ok().build();
     }
 

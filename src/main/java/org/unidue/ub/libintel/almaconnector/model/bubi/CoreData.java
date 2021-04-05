@@ -4,14 +4,15 @@ import javax.persistence.*;
 
 @Entity
 @Table(name="core_data")
-@IdClass(CoreDataId.class)
 public class CoreData implements Cloneable {
 
     @Id
+    @Column(name = "core_data_id")
+    private String coreDataId;
+
     @Column(name="collection")
     private String collection;
 
-    @Id
     @Column(name="shelfmark")
     private String shelfmark;
 
