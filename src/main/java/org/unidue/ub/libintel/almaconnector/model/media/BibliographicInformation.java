@@ -2,6 +2,7 @@ package org.unidue.ub.libintel.almaconnector.model.media;
 
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.unidue.ub.alma.shared.bibs.BibWithRecord;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -119,6 +120,16 @@ public class BibliographicInformation {
 		type = "empty";
 		otherIdentifier = "";
 		fullDescription  = "";
+	}
+
+	BibliographicInformation(BibWithRecord bib) {
+		this.title = bib.getTitle();
+		this.isbn = bib.getIsbn();
+		this.authors = new ArrayList<>();
+		this.authors.add(bib.getAuthor());
+		this.edition = bib.getCompleteEdition();
+		this.publisher = bib.getPublisherConst();
+
 	}
 
 	public String getRecKey() {

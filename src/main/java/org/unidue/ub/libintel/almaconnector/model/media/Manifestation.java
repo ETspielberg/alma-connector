@@ -5,6 +5,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.unidue.ub.alma.shared.bibs.BibWithRecord;
+import org.unidue.ub.alma.shared.bibs.HoldingWithRecord;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -55,6 +57,12 @@ public class Manifestation implements Cloneable, Comparable<Manifestation> {
 	private Set<String> subLibraries;
 
 	public Manifestation() {
+	}
+
+	public Manifestation(BibWithRecord bib) {
+		this.titleID = bib.getMmsId();
+		this.almaId = bib.getMmsId();
+		this.bibliographicInformation = new BibliographicInformation(bib);
 	}
 
 	public Manifestation(String titleID) {

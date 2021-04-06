@@ -44,7 +44,6 @@ public class HookSignatureFilter implements Filter {
                 HttpServletResponse response = (HttpServletResponse) servletResponse;
                 log.warn(String.format("received bad signature on web hook call for endpoint %s: %s",request.getRequestURI(), signature));
                 response.sendError(403, "signatures do not match");
-                return;
             }
         }
         filterChain.doFilter(servletRequest, servletResponse);
