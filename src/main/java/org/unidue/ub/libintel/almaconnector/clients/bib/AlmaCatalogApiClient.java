@@ -84,7 +84,7 @@ public interface AlmaCatalogApiClient {
    * @return Object
    */
   @RequestMapping(method= RequestMethod.GET, value="/{mmsId}?view={view}&expand={expand}", produces = MediaType.APPLICATION_XML_VALUE)
-  BibWithRecord getBibsMmsId(@RequestParam("mms_id") String mmsId, @RequestParam("view") String view, @RequestParam("expand") String expand);
+  BibWithRecord getBibsMmsId(@PathVariable("mmsId") String mmsId, @RequestParam("view") String view, @RequestParam("expand") String expand);
 
 
   /**
