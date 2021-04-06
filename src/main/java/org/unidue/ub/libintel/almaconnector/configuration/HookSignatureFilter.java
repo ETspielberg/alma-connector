@@ -27,6 +27,7 @@ public class HookSignatureFilter implements Filter {
         if (request.getMethod().equals(HttpMethod.POST.name())) {
             String signature = request.getHeader("X-Exl-Signature");
             String payload = request.getInputStream().toString();
+            log.info(payload);
             byte[] hmacSha256 = new byte[0];
             try {
                 log.info("hashing payload with HmacSha256 and key " + this.secret);
