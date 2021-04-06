@@ -29,7 +29,7 @@ public class HookSignatureFilter implements Filter {
             String payload = request.getInputStream().toString();
             byte[] hmacSha256 = new byte[0];
             try {
-                log.debug("hashing payload with HmacSha256 and key " + this.secret);
+                log.info("hashing payload with HmacSha256 and key " + this.secret);
                 hmacSha256 = calcHmacSha256(secret.getBytes(StandardCharsets.UTF_8), payload.getBytes(StandardCharsets.UTF_8));
             } catch (NoSuchAlgorithmException e) {
                 log.warn("wrong algorithm defined. Please select a proper hashing algorithm");
