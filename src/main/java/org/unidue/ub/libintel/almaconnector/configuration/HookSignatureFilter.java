@@ -10,8 +10,6 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -28,18 +26,7 @@ public class HookSignatureFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         if (request.getMethod().equals(HttpMethod.POST.name())) {
             String signature = request.getHeader("X-Exl-Signature");
-            char[] tmp = new char[ 4096 ];
-
-            InputStream payloadStream = request.getInputStream();
-            StringBuilder sb = new StringBuilder( Math.max( 16, payloadStream.available() ) );
-            try {
-                InputStreamReader reader = new InputStreamReader( payloadStream, StandardCharsets.UTF_8 );
-                for( int cnt; ( cnt = reader.read( tmp ) ) > 0; )
-                    sb.append( tmp, 0, cnt );
-            } finally {
-                payloadStream.close();
-            }
-            String payload = payloadStream.toString();
+            String payload = request.getInputStream().toString();
             log.info(payload);
             byte[] hmacSha256 = new byte[0];
             try {
