@@ -37,4 +37,8 @@ public class AlmaCatalogService {
         return this.almaCatalogApiClient.getBibsMmsIdPortfolios(mmsId, 1, 0).getTotalRecordCount();
     }
 
+    public BibWithRecord getRecord(String mmsId) {
+        return this.almaCatalogApiClient.getBibsMmsId(mmsId, "full", "e_avail");
+    }
+
 }

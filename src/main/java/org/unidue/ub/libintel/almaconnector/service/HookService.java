@@ -170,11 +170,12 @@ public class HookService {
         BibWithRecord bib = hook.getBib();
         if ("Universität Duisburg-Essen".equals(bib.getPublisherConst())) {
             String mmsId = bib.getMmsId();
+            BibWithRecord bibWithRecord = this.almaCatalogService.getRecord(mmsId);
             if (this.almaCatalogService.getNumberOfPortfolios(bib.getMmsId()) == 0) {
                 boolean isOnline = false;
                 boolean isDiss = false;
                 String url = "";
-                for (MarcDatafield datafield : bib.getRecord().getDatafield()) {
+                for (MarcDatafield datafield : bibWithRecord.getRecord().getDatafield()) {
                     if ("338".equals(datafield.getTag())) {
                         for (MarcSubfield subfield : datafield.getSubfield()) {
                             if ("b".equals(subfield.getCode()))
