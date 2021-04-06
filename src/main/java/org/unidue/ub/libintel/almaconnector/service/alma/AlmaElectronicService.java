@@ -10,10 +10,10 @@ public class AlmaElectronicService {
 
     private final AlmaElectronicApiClient almaElectronicApiClient;
 
-    @Value("${libintel.alma.diss.collection.id")
+    @Value("${libintel.alma.diss.collection.id}")
     private String dissCollectionId;
 
-    @Value("${libintel.alma.diss.service.id")
+    @Value("${libintel.alma.diss.service.id}")
     private String dissServiceId;
 
     AlmaElectronicService(AlmaElectronicApiClient almaElectronicApiClient) {
