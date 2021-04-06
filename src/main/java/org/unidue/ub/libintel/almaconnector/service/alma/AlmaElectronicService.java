@@ -22,7 +22,7 @@ public class AlmaElectronicService {
 
     public Portfolio createDissPortfolio(String mmsId, String url) {
         Portfolio portfolio = new Portfolio()
-                .link(url)
+                .linkingDetails(new LinkingDetails().staticUrl(url))
                 .availability(new PortfolioAvailability().value("11"))
                 .isLocal(true)
                 .resourceMetadata(new ResourceMetadata().mmsId(new ResourceMetadata2MmsId().value(mmsId)))
