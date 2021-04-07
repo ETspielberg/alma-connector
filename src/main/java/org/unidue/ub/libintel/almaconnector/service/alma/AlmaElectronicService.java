@@ -21,8 +21,13 @@ public class AlmaElectronicService {
     }
 
     public Portfolio createDissPortfolio(String mmsId, String url) {
+        LinkingDetails linkingDetails = new LinkingDetails()
+                .urlType(new LinkingDetailsUrlType().value("static"))
+                .staticUrl("jkey=" + url)
+                .url("jkey=" + url)
+                .proxyEnabled(new LinkingDetailsProxyEnabled().value("false"));
         Portfolio portfolio = new Portfolio()
-                .linkingDetails(new LinkingDetails().staticUrl(url))
+                .linkingDetails(linkingDetails)
                 .availability(new PortfolioAvailability().value("11"))
                 .isLocal(true)
                 .resourceMetadata(new ResourceMetadata().mmsId(new ResourceMetadata2MmsId().value(mmsId)))
