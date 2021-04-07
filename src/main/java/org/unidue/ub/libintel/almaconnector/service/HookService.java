@@ -69,7 +69,12 @@ public class HookService {
                     item.getHoldingData().setInTempLocation(false);
                     switch (library) {
                         case "E0001": {
-                            item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("EES"));
+                            item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("EBB"));
+                            item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("E0001"));
+                            break;
+                        }
+                        case "E0023": {
+                            item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("EBB"));
                             item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("E0001"));
                             break;
                         }
@@ -122,7 +127,7 @@ public class HookService {
                         item.getHoldingData().setInTempLocation(true);
                         switch (library) {
                             case "E0001": {
-                                item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("EBB"));
+                                item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("ESA"));
                                 item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("E0001"));
                                 break;
                             }
@@ -132,7 +137,7 @@ public class HookService {
                                 break;
                             }
                             case "E0023": {
-                                item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("EBB"));
+                                item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("MSA"));
                                 item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("E0023"));
                                 break;
                             }
