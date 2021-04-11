@@ -71,6 +71,9 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
     @Column(name = "color")
     private String color;
 
+    @Column(name = "color_minting")
+    private String colorMinting;
+
     @Column(name = "binding")
     private String binding;
 
@@ -111,12 +114,6 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
     @Column(name = "bindings_follow")
     private String bindingsFollow;
 
-    @Column(name = "additional_costs")
-    private boolean additionalCosts;
-
-    @Column(name = "additional_costs_amount")
-    private double additionalCostsAmount;
-
     @Column(name = "created")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -133,6 +130,24 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
 
     @Column(name="positional_number")
     private long positionalNumber = -1L;
+
+    @Column(name="volume_suffix")
+    private String volumeSuffix;
+
+    @Column(name="security_strip")
+    private boolean securityStrip = true;
+
+    @Column(name="map_slide")
+    private boolean mapSlide = false;
+
+    @Column(name="bind_publisher_sleeve")
+    private boolean bindPublisherSleeve = false;
+
+    @Column(name="cover_back")
+    private boolean coverBack = false;
+
+    @Column(name="hours")
+    private double hours = 0;
 
     public BubiOrderLine() {
         this.status = BubiStatus.NEW;
@@ -164,11 +179,8 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
             this.mediaType = coredata.getMediaType();
         this.standard = standard;
         this.minting = coredata.getMinting();
-        this.issue = coredata.getIssue();
         this.part = coredata.getPart();
         this.partDescription = coredata.getPartDescription();
-        this.year = coredata.getYear();
-        this.volume = coredata.getVolume();
         if (this.title == null) {
             if (coredata.getTitle() != null)
                 this.title = coredata.getTitle();
@@ -181,6 +193,12 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
             this.almaMmsId = coredata.getAlmaMmsId();
         if (this.almaHoldingId == null)
             this.almaHoldingId = coredata.getAlmaHoldingId();
+        this.volumeSuffix = coredata.getVolumeSuffix();
+        this.securityStrip = coredata.getSecurityStrip();
+        this.mapSlide = coredata.getMapSlide();
+        this.bindPublisherSleeve = coredata.getBindPublisherSleeve();
+        this.coverBack = coredata.getCoverBack();
+        this.hours = coredata.getHours();
         this.standard = coredata.getStandard();
     }
 
@@ -474,20 +492,52 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         this.almaItemId = almaItemId;
     }
 
-    public boolean getAdditionalCosts() {
-        return additionalCosts;
+    public String getVolumeSuffix() {
+        return volumeSuffix;
     }
 
-    public void setAdditionalCosts(boolean additionalCosts) {
-        this.additionalCosts = additionalCosts;
+    public void setVolumeSuffix(String volumeSuffix) {
+        this.volumeSuffix = volumeSuffix;
     }
 
-    public double getAdditionalCostsAmount() {
-        return additionalCostsAmount;
+    public boolean getSecurityStrip() {
+        return securityStrip;
     }
 
-    public void setAdditionalCostsAmount(double additionalCostsAmount) {
-        this.additionalCostsAmount = additionalCostsAmount;
+    public void setSecurityStrip(boolean securityStrip) {
+        this.securityStrip = securityStrip;
+    }
+
+    public boolean getMapSlide() {
+        return mapSlide;
+    }
+
+    public void setMapSlide(boolean mapSlide) {
+        this.mapSlide = mapSlide;
+    }
+
+    public boolean getBindPublisherSleeve() {
+        return bindPublisherSleeve;
+    }
+
+    public void setBindPublisherSleeve(boolean bindPublisherSleeve) {
+        this.bindPublisherSleeve = bindPublisherSleeve;
+    }
+
+    public boolean getCoverBack() {
+        return coverBack;
+    }
+
+    public void setCoverBack(boolean coverBack) {
+        this.coverBack = coverBack;
+    }
+
+    public double getHours() {
+        return hours;
+    }
+
+    public void setHours(double hours) {
+        this.hours = hours;
     }
 
     public void updateBubiOrderLineId() {

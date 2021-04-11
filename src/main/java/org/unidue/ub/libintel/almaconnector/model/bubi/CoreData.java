@@ -25,14 +25,14 @@ public class CoreData implements Cloneable {
     @Column(name="color")
     private String color;
 
+    @Column(name="color_minting")
+    private String colorMinting;
+
     @Column(name="binding")
     private String binding;
 
     @Column(name="part_description")
     private String partDescription;
-
-    @Column(name="volume")
-    private String volume;
 
     @Column(name="cover")
     private String cover;
@@ -42,12 +42,6 @@ public class CoreData implements Cloneable {
 
     @Column(name="edition")
     private String edition;
-
-    @Column(name="issue")
-    private String issue;
-
-    @Column(name="year")
-    private String year;
 
     @Column(name="part")
     private String part;
@@ -73,11 +67,26 @@ public class CoreData implements Cloneable {
     @Column(name="vendor_id")
     private String vendorAccount;
 
-    @Column(name="additional_costs")
-    private boolean additionalCosts = true;
-
     @Column(name="standard")
     private boolean standard = false;
+
+    @Column(name="volume_suffix")
+    private String volumeSuffix;
+
+    @Column(name="security_strip")
+    private boolean securityStrip = true;
+
+    @Column(name="map_slide")
+    private boolean mapSlide = false;
+
+    @Column(name="bind_publisher_sleeve")
+    private boolean bindPublisherSleeve = false;
+
+    @Column(name="cover_back")
+    private boolean coverBack = false;
+
+    @Column(name="hours")
+    private double hours = 0;
 
     public String getCollection() {
         return collection;
@@ -175,21 +184,6 @@ public class CoreData implements Cloneable {
         this.edition = edition;
     }
 
-    public String getIssue() {
-        return issue;
-    }
-
-    public void setIssue(String issue) {
-        this.issue = issue;
-    }
-
-    public String getYear() {
-        return year;
-    }
-
-    public void setYear(String year) {
-        this.year = year;
-    }
 
     public String getPart() {
         return part;
@@ -197,14 +191,6 @@ public class CoreData implements Cloneable {
 
     public void setPart(String part) {
         this.part = part;
-    }
-
-    public String getVolume() {
-        return volume;
-    }
-
-    public void setVolume(String volume) {
-        this.volume = volume;
     }
 
     public String getComment() {
@@ -247,20 +233,76 @@ public class CoreData implements Cloneable {
         this.almaHoldingId = almaHoldingId;
     }
 
-    public boolean getAdditionalCosts() {
-        return additionalCosts;
-    }
-
-    public void setAdditionalCosts(boolean additionalCosts) {
-        this.additionalCosts = additionalCosts;
-    }
-
     public boolean getStandard() {
         return standard;
     }
 
     public void setStandard(boolean standard) {
         this.standard = standard;
+    }
+
+    public String getCoreDataId() {
+        return coreDataId;
+    }
+
+    public void setCoreDataId(String coreDataId) {
+        this.coreDataId = coreDataId;
+    }
+
+    public String getVolumeSuffix() {
+        return volumeSuffix;
+    }
+
+    public void setVolumeSuffix(String volumeSuffix) {
+        this.volumeSuffix = volumeSuffix;
+    }
+
+    public boolean getSecurityStrip() {
+        return securityStrip;
+    }
+
+    public void setSecurityStrip(boolean secureStrip) {
+        this.securityStrip = secureStrip;
+    }
+
+    public boolean getMapSlide() {
+        return mapSlide;
+    }
+
+    public void setMapSlide(boolean mapSlide) {
+        this.mapSlide = mapSlide;
+    }
+
+    public boolean getBindPublisherSleeve() {
+        return bindPublisherSleeve;
+    }
+
+    public void setBindPublisherSleeve(boolean bindPublisherSleeve) {
+        this.bindPublisherSleeve = bindPublisherSleeve;
+    }
+
+    public boolean getCoverBack() {
+        return coverBack;
+    }
+
+    public void setCoverBack(boolean coverBack) {
+        this.coverBack = coverBack;
+    }
+
+    public double getHours() {
+        return hours;
+    }
+
+    public void setHours(double hours) {
+        this.hours = hours;
+    }
+
+    public String getColorMinting() {
+        return colorMinting;
+    }
+
+    public void setColorMinting(String colorMinting) {
+        this.colorMinting = colorMinting;
     }
 
     @Override
@@ -271,23 +313,26 @@ public class CoreData implements Cloneable {
         clone.setBindingsFollow(this.bindingsFollow);
         clone.setCollection(this.collection);
         clone.setColor(this.color);
+        clone.setColorMinting(this.colorMinting);
         clone.setComment(this.comment);
         clone.setCover(this.cover);
         clone.setEdition(this.edition);
         clone.setMediaType(this.mediaType);
-        clone.setVolume(this.volume);
-        clone.setIssue(this.issue);
         clone.setMinting(this.minting);
         clone.setPart(this.part);
         clone.setPartDescription(this.partDescription);
         clone.setPartTitle(this.partTitle);
         clone.setTitle(this.title);
-        clone.setYear(this.year);
         clone.setShelfmark(this.shelfmark);
         clone.setAlmaHoldingId(this.almaHoldingId);
         clone.setAlmaMmsId(this.almaMmsId);
-        clone.setAdditionalCosts(this.additionalCosts);
         clone.setStandard(this.standard);
+        clone.setVolumeSuffix(this.volumeSuffix);
+        clone.setSecurityStrip(this.securityStrip);
+        clone.setMapSlide(this.mapSlide);
+        clone.setBindPublisherSleeve(this.bindPublisherSleeve);
+        clone.setCoverBack(this.coverBack);
+        clone.setHours(this.hours);
         return clone;
     }
 }

@@ -28,9 +28,6 @@ public class BubiData {
     @Column(name="standard_price_monograph")
     private double standardPriceMonograph;
 
-    @Column(name="additional_costs_amount")
-    private double additionalCostsAmount;
-
     @Column(name="active")
     private boolean active;
 
@@ -103,13 +100,5 @@ public class BubiData {
 
     public void setActive(boolean active) {
         this.active = active;
-    }
-
-    public double getAdditionalCostsAmount() {
-        return additionalCostsAmount;
-    }
-
-    public void setAdditionalCostsAmount(double additionalCostsAmount) {
-        this.additionalCostsAmount = additionalCostsAmount;
     }
 }

@@ -129,7 +129,7 @@ public class BibliographicInformation {
 		this.authors.add(bib.getAuthor());
 		this.edition = bib.getCompleteEdition();
 		this.publisher = bib.getPublisherConst();
-
+		this.recKey = bib.getMmsId();
 	}
 
 	public String getRecKey() {

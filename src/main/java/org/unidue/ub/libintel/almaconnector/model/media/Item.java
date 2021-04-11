@@ -135,6 +135,18 @@ public class Item {
 		this.price = price;
 	}
 
+	public Item(org.unidue.ub.alma.shared.bibs.Item almaItem) {
+		this.itemId = almaItem.getItemData().getPid();
+		this.subLibrary = almaItem.getItemData().getLibrary().getValue();
+		this.material = almaItem.getItemData().getPhysicalMaterialType().getValue();
+		// this.inventoryDate = almaItem.getItemData().getInventoryDate();
+		this.shelfmark = almaItem.getItemData().getAlternativeCallNumber();
+		this.price = almaItem.getItemData().getInventoryPrice();
+		this.noteOpac = almaItem.getItemData().getPublicNote();
+		this.barcode = almaItem.getItemData().getBarcode();
+
+	}
+
 	/**
 	 * Creates a new <code>Item</code>.
 	 * 

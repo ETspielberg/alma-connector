@@ -9,10 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.unidue.ub.libintel.almaconnector.model.bubi.*;
 import org.unidue.ub.libintel.almaconnector.service.PrimoService;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaPoLineService;
-import org.unidue.ub.libintel.almaconnector.service.bubi.BubiDataService;
-import org.unidue.ub.libintel.almaconnector.service.bubi.BubiOrderLineService;
-import org.unidue.ub.libintel.almaconnector.service.bubi.CoreDataService;
-import org.unidue.ub.libintel.almaconnector.service.bubi.BubiOrderService;
+import org.unidue.ub.libintel.almaconnector.service.bubi.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -30,6 +27,8 @@ public class BubiController {
 
     private final BubiOrderLineService bubiOrderLineService;
 
+    private final BubiPricesService bubiPricesService;
+
     private final AlmaPoLineService almaPoLineService;
 
     private final PrimoService primoService;
@@ -41,13 +40,15 @@ public class BubiController {
                    BubiDataService bubiDataService,
                    CoreDataService coreDataService,
                    AlmaPoLineService almaPoLineService,
-                   BubiOrderLineService bubiOrderLineService) {
+                   BubiOrderLineService bubiOrderLineService,
+                   BubiPricesService bubiPricesService) {
         this.primoService = primoService;
         this.bubiOrderService = bubiOrderService;
         this.bubiDataService = bubiDataService;
         this.coreDataService = coreDataService;
         this.bubiOrderLineService = bubiOrderLineService;
         this.almaPoLineService = almaPoLineService;
+        this.bubiPricesService = bubiPricesService;
     }
 
     // ---------------------- Bubi data endpoints ----------------------
@@ -56,6 +57,20 @@ public class BubiController {
     private ResponseEntity<List<BubiData>> getAllbubiData() {
         return ResponseEntity.ok(this.bubiDataService.listAllBubiData());
     }
+
+    @GetMapping("/bubidata/active")
+    private ResponseEntity<List<BubiData>> getActivebubiData() {
+        return ResponseEntity.ok(this.bubiDataService.listActiveBubiData());
+    }
+
+    @GetMapping("/bubiprices/{vendorAccount}")
+    private ResponseEntity<List<BubiPrice>> getBubiPrices(@PathVariable String vendorAccount) {
+        List<BubiPrice> bubiPrices = this.bubiPricesService.getBubiPricesForVendorAccount(vendorAccount);
+        if (bubiPrices == null || bubiPrices.size() == 0)
+            bubiPrices = this.bubiPricesService.createNewBubiPricesForVendorAccount(vendorAccount);
+        return ResponseEntity.ok(bubiPrices);
+    }
+
 
     // ---------------------- Core data endpoints ----------------------
 
@@ -86,7 +101,6 @@ public class BubiController {
 
     @PostMapping("/coredata/save")
     public ResponseEntity<CoreData> saveCoredata(@RequestBody CoreData coredata) {
-        log.info(coredata.getMediaType());
         return ResponseEntity.ok(this.coreDataService.saveCoreData(coredata));
     }
 
@@ -105,6 +119,7 @@ public class BubiController {
     public ResponseEntity<BubiOrderLine> saveBubiOrderLine(@RequestBody BubiOrderLine bubiOrderLine) {
         String vendoraccount = this.bubiDataService.getVendorAccount(bubiOrderLine.getVendorId(), bubiOrderLine.getCollection()).getVendorAccount();
         bubiOrderLine.setVendorAccount(vendoraccount);
+        bubiOrderLine.setPrice(this.bubiPricesService.calculatePriceForOrderline(bubiOrderLine));
         bubiOrderLine = this.bubiOrderLineService.saveBubiOrderLine(bubiOrderLine);
         return ResponseEntity.ok(bubiOrderLine);
     }

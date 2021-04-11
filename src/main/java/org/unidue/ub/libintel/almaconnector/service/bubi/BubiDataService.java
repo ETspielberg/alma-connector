@@ -19,6 +19,10 @@ public class BubiDataService {
         return this.bubiDataRepository.findAll();
     }
 
+    public List<BubiData> listActiveBubiData() {
+        return this.bubiDataRepository.findByActive(true);
+    }
+
     public BubiData getVendorAccount(String vendorID, String collection) {
         String campus = collection.startsWith("E") ? "E0001" : "D0001";
         List<BubiData> bubiDataList;

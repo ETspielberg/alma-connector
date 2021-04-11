@@ -11,6 +11,8 @@ public interface BubiDataRepository extends JpaRepository<BubiData, String> {
 
     List<BubiData> findByCampusAndActive(String campus, boolean active);
 
+    List<BubiData> findByActive(boolean active);
+
     List<BubiData> findByVendorIdAndActive(String vendorId, boolean active);
 
     BubiData getByVendorAccount(String vendorAccount);

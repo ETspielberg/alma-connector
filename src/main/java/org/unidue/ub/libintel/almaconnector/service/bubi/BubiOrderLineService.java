@@ -160,7 +160,6 @@ public class BubiOrderLineService {
     private void addDataFromVendor(BubiOrderLine bubiOrderline) {
         BubiData bubiData = bubiDataService.getVendorAccount(bubiOrderline.getVendorId(), bubiOrderline.getCollection());
         bubiOrderline.setVendorAccount(bubiData.getVendorAccount());
-        bubiOrderline.setAdditionalCostsAmount(bubiData.getAdditionalCostsAmount());
         if (bubiOrderline.getShelfmark().contains(" Z ")) {
             bubiOrderline.setFund(journalFund);
             bubiOrderline.setPrice(bubiData.getStandardPriceJournal());

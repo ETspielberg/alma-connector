@@ -107,21 +107,6 @@ public class CoreDataService {
                 coreData.setVendorAccount("");
             }
             try {
-                coreData.setVolume(row.getCell(13).getStringCellValue());
-            } catch (Exception e) {
-                coreData.setVolume("");
-            }
-            try {
-                coreData.setIssue(row.getCell(15).getStringCellValue());
-            } catch (Exception e) {
-                coreData.setIssue("");
-            }
-            try {
-                coreData.setYear(row.getCell(14).getStringCellValue());
-            } catch (Exception e) {
-                coreData.setYear("");
-            }
-            try {
                 String comment = row.getCell(39).getStringCellValue();
                 coreData.setComment(comment);
                 coreData.setActive(!comment.contains("abbest."));
