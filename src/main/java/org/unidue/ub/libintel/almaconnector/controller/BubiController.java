@@ -125,9 +125,10 @@ public class BubiController {
     }
 
     @PostMapping("/orderline/updatePrice/{bubiOrderLineId}")
-    public ResponseEntity<BubiOrderLine> changePrice(String bubiOrderLineId) {
+    public ResponseEntity<BubiOrderLine> changePrice(@PathVariable String bubiOrderLineId) {
         BubiOrderLine bubiOrderLine = this.bubiOrderLineService.getBubiOrderLineFromIdentifier(bubiOrderLineId);
-        this.bubiPricesService.calculatePriceForOrderline(bubiOrderLine);
+        bubiOrderLine.setPrice(this.bubiPricesService.calculatePriceForOrderline(bubiOrderLine));
+        this.bubiOrderLineService.saveBubiOrderLine(bubiOrderLine);
         return ResponseEntity.ok(bubiOrderLine);
     }
 

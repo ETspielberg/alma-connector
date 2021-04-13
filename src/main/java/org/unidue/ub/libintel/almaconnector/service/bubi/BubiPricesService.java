@@ -31,7 +31,8 @@ public class BubiPricesService {
         // Grundpreis aus Bindung und Einband
         String bindingTypeName = String.format("%s-%s-%s", bubiOrderLine.getCover(), bubiOrderLine.getBinding().toUpperCase(), bubiOrderLine.getMediaType().toUpperCase());
         log.info("retrieving price for work " + bindingTypeName);
-        price += this.bubiPricesRepository.findByNameAndVendorAccount(bindingTypeName, vendorAccount).getPrice();
+        BubiPrice bubiPrice = this.bubiPricesRepository.findByNameAndVendorAccount(bindingTypeName, vendorAccount);
+        price += bubiPrice.getPrice();
 
         // ggf. Arbeitskosten
         if (bubiOrderLine.getHours() != 0.0)
@@ -65,6 +66,7 @@ public class BubiPricesService {
         bubiPrices.add(new BubiPrice().withPrice(4.0).withName("coverBack").withVendorAccount(vendorAccount));
         bubiPrices.add(new BubiPrice().withPrice(1.6).withName("mapSlide").withVendorAccount(vendorAccount));
         bubiPrices.add(new BubiPrice().withPrice(0.1).withName("securityStrip").withVendorAccount(vendorAccount));
+        bubiPrices.add(new BubiPrice().withPrice(30.00).withName("hours").withVendorAccount(vendorAccount));
         bubiPrices.add(new BubiPrice().withPrice(13.0).withName("GW-K-BOOK").withVendorAccount(vendorAccount));
         bubiPrices.add(new BubiPrice().withPrice(6.0).withName("HPB-K-BOOK").withVendorAccount(vendorAccount));
         bubiPrices.add(new BubiPrice().withPrice(8.50).withName("StoPr-K-BOOK").withVendorAccount(vendorAccount));

@@ -26,7 +26,7 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
     @Column(name = "counter")
     private long counter;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "bubi_order_id")
     @JsonIgnore
     private BubiOrder bubiOrder;
