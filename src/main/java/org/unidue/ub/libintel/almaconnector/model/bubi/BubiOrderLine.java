@@ -26,7 +26,7 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
     @Column(name = "counter")
     private long counter;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bubi_order_id")
     @JsonIgnore
     private BubiOrder bubiOrder;
@@ -542,6 +542,14 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
 
     public void updateBubiOrderLineId() {
         this.bubiOrderLineId = String.format("%s-%s-%d", this.collection, this.shelfmark, this.counter);
+    }
+
+    public String getColorMinting() {
+        return colorMinting;
+    }
+
+    public void setColorMinting(String colorMinting) {
+        this.colorMinting = colorMinting;
     }
 
     @Override

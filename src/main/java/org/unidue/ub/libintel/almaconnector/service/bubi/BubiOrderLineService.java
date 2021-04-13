@@ -129,6 +129,7 @@ public class BubiOrderLineService {
             bubiOrderLine.addCoreData(coredata, false);
         }
         addDataFromVendor(bubiOrderLine);
+        this.bubiOrderLineRepository.save(bubiOrderLine);
         return bubiOrderLine;
     }
 
@@ -154,6 +155,7 @@ public class BubiOrderLineService {
             }
         }
         addDataFromVendor(bubiOrderLine);
+        this.bubiOrderLineRepository.save(bubiOrderLine);
         return bubiOrderLine;
     }
 

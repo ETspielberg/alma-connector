@@ -1,5 +1,7 @@
 package org.unidue.ub.libintel.almaconnector.service.bubi;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.libintel.almaconnector.model.bubi.BubiOrderLine;
 import org.unidue.ub.libintel.almaconnector.model.bubi.BubiPrice;
@@ -13,6 +15,8 @@ public class BubiPricesService {
 
     private final BubiPricesRepository bubiPricesRepository;
 
+    private final Logger log = LoggerFactory.getLogger(BubiPricesService.class);
+
     BubiPricesService(BubiPricesRepository bubiPricesRepository) {
         this.bubiPricesRepository = bubiPricesRepository;
     }
@@ -21,8 +25,12 @@ public class BubiPricesService {
         double price = 0.0;
         String vendorAccount = bubiOrderLine.getVendorAccount();
 
+        if (this.bubiPricesRepository.findAllByVendorAccount(vendorAccount) == null || this.bubiPricesRepository.findAllByVendorAccount(vendorAccount).size() == 0)
+            this.createNewBubiPricesForVendorAccount(vendorAccount);
+
         // Grundpreis aus Bindung und Einband
-        String bindingTypeName = String.format("%s-%s-%s", bubiOrderLine.getBinding(), bubiOrderLine.getCover(), bubiOrderLine.getMediaType());
+        String bindingTypeName = String.format("%s-%s-%s", bubiOrderLine.getCover(), bubiOrderLine.getBinding().toUpperCase(), bubiOrderLine.getMediaType().toUpperCase());
+        log.info("retrieving price for work " + bindingTypeName);
         price += this.bubiPricesRepository.findByNameAndVendorAccount(bindingTypeName, vendorAccount).getPrice();
 
         // ggf. Arbeitskosten

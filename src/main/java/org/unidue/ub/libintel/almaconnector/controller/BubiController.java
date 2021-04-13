@@ -86,6 +86,7 @@ public class BubiController {
 
     /**
      * receives the bubi core data  as xlsx file and saves them to the database
+     *
      * @param bubiCoreDataFile the result xlsx file holding the bubi core data
      * @return returns a status of 200 if the import was successful
      * @throws IOException thrown if the file could not be read
@@ -107,10 +108,9 @@ public class BubiController {
     @DeleteMapping("/coredata/delete")
     public ResponseEntity<CoreData> deleteCoreData(String collection, String shelfmark) {
         log.info(String.format("deleting core data for %s: %s", collection, shelfmark));
-        this.coreDataService.deleteCoreData(collection+ "-" + shelfmark);
+        this.coreDataService.deleteCoreData(collection + "-" + shelfmark);
         return ResponseEntity.ok().build();
     }
-
 
 
     // ---------------------- bubi order line endpoints ----------------------
@@ -121,6 +121,13 @@ public class BubiController {
         bubiOrderLine.setVendorAccount(vendoraccount);
         bubiOrderLine.setPrice(this.bubiPricesService.calculatePriceForOrderline(bubiOrderLine));
         bubiOrderLine = this.bubiOrderLineService.saveBubiOrderLine(bubiOrderLine);
+        return ResponseEntity.ok(bubiOrderLine);
+    }
+
+    @PostMapping("/orderline/updatePrice/{bubiOrderLineId}")
+    public ResponseEntity<BubiOrderLine> changePrice(String bubiOrderLineId) {
+        BubiOrderLine bubiOrderLine = this.bubiOrderLineService.getBubiOrderLineFromIdentifier(bubiOrderLineId);
+        this.bubiPricesService.calculatePriceForOrderline(bubiOrderLine);
         return ResponseEntity.ok(bubiOrderLine);
     }
 
