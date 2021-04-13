@@ -129,6 +129,7 @@ public class BubiController {
         BubiOrderLine bubiOrderLine = this.bubiOrderLineService.getBubiOrderLineFromIdentifier(bubiOrderLineId);
         bubiOrderLine.setPrice(this.bubiPricesService.calculatePriceForOrderline(bubiOrderLine));
         this.bubiOrderLineService.saveBubiOrderLine(bubiOrderLine);
+        this.bubiOrderService.changePrice(bubiOrderLine);
         return ResponseEntity.ok(bubiOrderLine);
     }
 
