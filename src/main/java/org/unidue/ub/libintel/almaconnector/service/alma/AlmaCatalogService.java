@@ -23,11 +23,13 @@ public class AlmaCatalogService {
             HoldingWithRecord holding = this.almaCatalogApiClient.getBibsMmsIdHoldingsHoldingId(mmsId, holdingId);
             log.info(holding.getRecord().getLeader());
             for (MarcDatafield field: holding.getRecord().getDatafield()) {
-                if ("852".equals(field.getTag()))
+                if ("852".equals(field.getTag())) {
                     for (MarcSubfield subfield : field.getSubfield())
                         if ("h".equals(subfield.getCode()))
                             return false;
                     field.getSubfield().add(new MarcSubfield().code("h").value(callNo));
+                    break;
+                }
             }
             this.almaCatalogApiClient.putBibsMmsIdHoldingsHoldingId(mmsId, holdingId, holding);
             return true;
