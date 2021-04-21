@@ -49,7 +49,6 @@ public class HookController {
     @PostMapping("/itemListener")
     public ResponseEntity<?> receiveItemHook(@RequestBody ItemHook hookContent, @RequestHeader("X-Exl-Signature") String signature) {
         log.info("revceived item hook");
-        log.info(hookContent.getItem().toString());
         this.hookService.processItemHook(hookContent);
         return ResponseEntity.ok().build();
     }
