@@ -37,7 +37,6 @@ public class HookController {
 
     @PostMapping("/jobListener")
     public ResponseEntity<?> receiveJobHook(@RequestBody JobHook hookContent, @RequestHeader("X-Exl-Signature") String signature) {
-        log.info(signature);
         this.jobLoggerService.logJob(hookContent.getJobInstance());
         return ResponseEntity.ok().build();
     }
@@ -49,7 +48,8 @@ public class HookController {
 
     @PostMapping("/itemListener")
     public ResponseEntity<?> receiveItemHook(@RequestBody ItemHook hookContent, @RequestHeader("X-Exl-Signature") String signature) {
-        log.info(signature);
+        log.info("revceived item hook");
+        log.info(hookContent.getItem().toString());
         this.hookService.processItemHook(hookContent);
         return ResponseEntity.ok().build();
     }
@@ -61,8 +61,6 @@ public class HookController {
 
     @PostMapping("/bibListener")
     public ResponseEntity<?> receiveBibHook(@RequestBody BibHook hookContent, @RequestHeader("X-Exl-Signature") String signature) {
-        log.info(signature);
-        log.info(hookContent.getBib().toString());
         this.hookService.processBibHook(hookContent);
         return ResponseEntity.ok().build();
     }
@@ -74,7 +72,6 @@ public class HookController {
 
     @PostMapping("/requestsListener")
     public ResponseEntity<?> receiveRequestHook(@RequestBody RequestHook hookContent, @RequestHeader("X-Exl-Signature") String signature) {
-        log.info(signature);
         log.info(String.format("revceived hook of type %s", hookContent.getAction()));
         this.hookService.processRequestHook(hookContent);
         return ResponseEntity.ok().build();
