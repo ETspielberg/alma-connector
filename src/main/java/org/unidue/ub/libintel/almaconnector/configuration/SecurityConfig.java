@@ -30,7 +30,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated();
     }
 
-    @Bean
+    /*@Bean
     public FilterRegistrationBean<HookSignatureFilter> loggingFilter(){
         FilterRegistrationBean<HookSignatureFilter> registrationBean
                 = new FilterRegistrationBean<>();
@@ -38,4 +38,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         registrationBean.addUrlPatterns("/hooks/*");
         return registrationBean;
     }
+    */
 }
