@@ -633,7 +633,28 @@ public class SapService {
                 sapAccountData.setLedgerAccount("6810" + parts[3]);
             else
                 sapAccountData.setLedgerAccount(parts[3]);
+        } else if (parts[0].startsWith("C")) {
+            log.debug("Sonderfonds Corona-Soforthilfe");
 
+            // if a cost centre is given (second part is nine fields long)
+            if (parts[1].length() == 9)
+                // set cost centre and fonds
+                sapAccountData
+                        .withCostCentre(parts[1])
+                        .withFonds(parts[2]);
+
+                // if a psp element is given (second part is 14 fields long)
+            else if (parts[1].length() == 14)
+                // set psp element and fonds
+                sapAccountData
+                        .withPspElement(parts[1])
+                        .withFonds(parts[2]);
+
+            // set the ledger account. if four digits are given us the 6810 prefix number
+            if (parts[3].length() == 4)
+                sapAccountData.setLedgerAccount("6810" + parts[3]);
+            else
+                sapAccountData.setLedgerAccount(parts[3]);
             // second case: Berufungsmittel (starting with 1)
         } else if (parts[0].startsWith("1")) {
             log.debug("Berufungsmittel");
