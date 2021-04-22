@@ -333,7 +333,10 @@ public class SapData implements Comparable<SapData> {
             if (other.vendorCode == null || other.vendorCode.isEmpty()) {
                 return -1;
             } else {
-                return this.vendorCode.compareTo(other.vendorCode);
+                if (this.vendorCode.equals(other.vendorCode))
+                        return this.compareInvoiceNumber(other);
+                else
+                    return this.vendorCode.compareTo(other.vendorCode);
             }
         }
     }
