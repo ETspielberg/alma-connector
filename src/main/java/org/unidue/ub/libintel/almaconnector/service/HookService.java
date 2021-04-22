@@ -64,21 +64,24 @@ public class HookService {
                     this.bubiOrderLineService.saveBubiOrderLine(bubiOrderLine);
                     if ("D0001".equals(item.getItemData().getLibrary().getValue()))
                         item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("DES"));
-                    item.getItemData().setPublicNote("Einbandstelle");
+
                     String library = item.getItemData().getLibrary().getValue();
                     item.getHoldingData().setInTempLocation(true);
                     switch (library) {
                         case "E0001": {
+                            item.getItemData().setPublicNote("Buchbinder");
                             item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("EBB"));
                             item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("E0001"));
                             break;
                         }
                         case "E0023": {
+                            item.getItemData().setPublicNote("Buchbinder");
                             item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("EBB"));
                             item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("E0001"));
                             break;
                         }
                         case "D0001": {
+                            item.getItemData().setPublicNote("Einbandstelle");
                             item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("DES"));
                             item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("D0001"));
                             break;
