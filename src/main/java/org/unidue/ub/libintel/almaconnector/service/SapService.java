@@ -187,7 +187,7 @@ public class SapService {
     }
 
     private SapData generateComment(SapData sapData) {
-        if (sapData.getComment() != null && !sapData.getComment().isEmpty())
+        if (sapData.getComment() != null && !sapData.getComment().trim().isEmpty())
             return sapData;
         switch (sapData.sapAccountData.getImportCheckString()) {
             case "681004002020P55300000030002":
