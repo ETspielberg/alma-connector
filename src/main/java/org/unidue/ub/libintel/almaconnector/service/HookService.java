@@ -124,7 +124,7 @@ public class HookService {
                         log.debug(String.format("setting public note to %s", address.getLine1()));
                         item.getItemData().setPublicNote(address.getLine1());
                         String library = itemLoan.getLibrary().getValue();
-                        item.getHoldingData().setInTempLocation(true);
+                        item.getHoldingData().setInTempLocation(false);
                         switch (library) {
                             case "E0001": {
                                 item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("ESA"));
