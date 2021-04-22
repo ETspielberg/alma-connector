@@ -68,13 +68,8 @@ public class HookService {
                     String library = item.getItemData().getLibrary().getValue();
                     item.getHoldingData().setInTempLocation(true);
                     switch (library) {
-                        case "E0001": {
-                            item.getItemData().setPublicNote("Buchbinder");
-                            item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("EBB"));
-                            item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("E0001"));
-                            break;
-                        }
-                        case "E0023": {
+                        case "E0001":
+                        case "E0023":{
                             item.getItemData().setPublicNote("Buchbinder");
                             item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("EBB"));
                             item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("E0001"));
@@ -153,7 +148,7 @@ public class HookService {
                         item.getHoldingData().tempLocation(null);
                         item.getHoldingData().tempLibrary(null);
                     }
-                    log.info("saving item:\n" + item.toString());
+                    log.debug("saving item:\n" + item);
                     this.almaItemService.updateItem(mmsId, item.getHoldingData().getHoldingId(), itemPid, item);
                 }
         }
