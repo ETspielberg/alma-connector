@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -156,6 +157,6 @@ public class InvoiceController {
     public ResponseEntity<Resource> serveFile(@PathVariable String type, @PathVariable String date, @PathVariable String owner) throws FileNotFoundException {
         Resource file = sapService.loadFiles(date, type, owner);
         return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=\"" + file.getFilename() + "\"").body(file);
+                "attachment; filename=\"" + file.getFilename() + "\"").contentType(MediaType.TEXT_PLAIN).body(file);
     }
 }
