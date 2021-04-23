@@ -69,7 +69,7 @@ public class HookService {
                     item.getHoldingData().setInTempLocation(true);
                     switch (library) {
                         case "E0001":
-                        case "E0023":{
+                        case "E0023": {
                             item.getItemData().setPublicNote("Buchbinder");
                             item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("EBB"));
                             item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("E0001"));
@@ -104,53 +104,100 @@ public class HookService {
         log.debug(String.format("retrieving user %s", itemLoan.getUserId()));
         AlmaUser almaUser = this.almaUserService.getUser(itemLoan.getUserId());
         log.debug(almaUser.getUserGroup().getDesc());
-        if ("Semesterapparat".equals(almaUser.getUserGroup().getDesc())) {
-            log.info("got sem app loan");
-            log.debug(almaUser.getContactInfo().toString());
-            for (Address address : almaUser.getContactInfo().getAddress())
-                if (address.getPreferred()) {
-                    log.debug(String.format("retrieve item with barcode %s", itemLoan.getItemBarcode()));
-                    String mmsId = itemLoan.getMmsId();
-                    String itemPid = itemLoan.getItemId();
-                    Item item = this.almaItemService.findItemByMmsAndItemId(mmsId, itemPid);
-                    log.debug(String.format("retrieved item:\n %s", item.toString()));
-                    // setting bib data to null in order to avoid problems with network-number / network_numbers....
-                    item.setBibData(null);
+        switch (almaUser.getUserGroup().getDesc()) {
+            case "Semesterapparat":
+                log.info("got sem app loan");
+                log.debug(almaUser.getContactInfo().toString());
+                for (Address address : almaUser.getContactInfo().getAddress())
+                    if (address.getPreferred()) {
+                        log.debug(String.format("retrieve item with barcode %s", itemLoan.getItemBarcode()));
+                        String mmsId = itemLoan.getMmsId();
+                        String itemPid = itemLoan.getItemId();
+                        Item item = this.almaItemService.findItemByMmsAndItemId(mmsId, itemPid);
+                        log.debug(String.format("retrieved item:\n %s", item.toString()));
+                        // setting bib data to null in order to avoid problems with network-number / network_numbers....
+                        item.setBibData(null);
 
 
-                    if ("LOAN_CREATED".equals(hook.getEvent().getValue())) {
-                        log.debug(String.format("setting public note to %s", address.getLine1()));
-                        item.getItemData().setPublicNote(address.getLine1());
-                        String library = itemLoan.getLibrary().getValue();
-                        item.getHoldingData().setInTempLocation(false);
-                        switch (library) {
-                            case "E0001": {
-                                item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("ESA"));
-                                item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("E0001"));
-                                break;
+                        if ("LOAN_CREATED".equals(hook.getEvent().getValue())) {
+                            log.debug(String.format("setting public note to %s", address.getLine1()));
+                            item.getItemData().setPublicNote(address.getLine1());
+                            String library = itemLoan.getLibrary().getValue();
+                            item.getHoldingData().setInTempLocation(false);
+                            switch (library) {
+                                case "E0001": {
+                                    item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("ESA"));
+                                    item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("E0001"));
+                                    break;
+                                }
+                                case "D0001": {
+                                    item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("DSA"));
+                                    item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("D0001"));
+                                    break;
+                                }
+                                case "E0023": {
+                                    item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("MSA"));
+                                    item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("E0023"));
+                                    break;
+                                }
                             }
-                            case "D0001": {
-                                item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("DSA"));
-                                item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("D0001"));
-                                break;
-                            }
-                            case "E0023": {
-                                item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("MSA"));
-                                item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("E0023"));
-                                break;
-                            }
+                            log.debug(String.format("retrieved item from library %s", library));
+                        } else if ("LOAN_RETURNED".equals(hook.getEvent().getValue())) {
+                            log.debug("resetting public note");
+                            item.getItemData().setPublicNote("");
+                            item.getHoldingData().setInTempLocation(false);
+                            item.getHoldingData().tempLocation(null);
+                            item.getHoldingData().tempLibrary(null);
                         }
-                        log.debug(String.format("retrieved item from library %s", library));
-                    } else if ("LOAN_RETURNED".equals(hook.getEvent().getValue())) {
-                        log.debug("resetting public note");
-                        item.getItemData().setPublicNote("");
-                        item.getHoldingData().setInTempLocation(false);
-                        item.getHoldingData().tempLocation(null);
-                        item.getHoldingData().tempLibrary(null);
+                        log.debug("saving item:\n" + item);
+                        this.almaItemService.updateItem(mmsId, item.getHoldingData().getHoldingId(), itemPid, item);
                     }
-                    log.debug("saving item:\n" + item);
-                    this.almaItemService.updateItem(mmsId, item.getHoldingData().getHoldingId(), itemPid, item);
-                }
+                break;
+            case "Handapparat":
+            case "Handapparat, 15 Ausleihen":
+            case "Handapparat, gemeinsamer":
+                log.info("got happ loan");
+                for (Address address : almaUser.getContactInfo().getAddress())
+                    if (address.getPreferred()) {
+                        log.debug(String.format("retrieve item with barcode %s", itemLoan.getItemBarcode()));
+                        String mmsId = itemLoan.getMmsId();
+                        String itemPid = itemLoan.getItemId();
+                        Item item = this.almaItemService.findItemByMmsAndItemId(mmsId, itemPid);
+                        log.debug(String.format("retrieved item:\n %s", item.toString()));
+                        // setting bib data to null in order to avoid problems with network-number / network_numbers....
+                        item.setBibData(null);
+                        if ("LOAN_CREATED".equals(hook.getEvent().getValue())) {
+                            log.debug(String.format("setting public note to %s", address.getLine1()));
+                            String library = itemLoan.getLibrary().getValue();
+                            item.getHoldingData().setInTempLocation(true);
+                            switch (library) {
+                                case "E0001": {
+                                    item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("EHA"));
+                                    item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("E0001"));
+                                    break;
+                                }
+                                case "D0001": {
+                                    item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("DHA"));
+                                    item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("D0001"));
+                                    break;
+                                }
+                                case "E0023": {
+                                    item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("MHA"));
+                                    item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("E0023"));
+                                    break;
+                                }
+                            }
+                            log.debug(String.format("retrieved item from library %s", library));
+                        } else if ("LOAN_RETURNED".equals(hook.getEvent().getValue())) {
+                            item.getHoldingData().setInTempLocation(false);
+                            item.getHoldingData().tempLocation(null);
+                            item.getHoldingData().tempLibrary(null);
+                        }
+                        log.debug("saving item:\n" + item);
+                        this.almaItemService.updateItem(mmsId, item.getHoldingData().getHoldingId(), itemPid, item);
+                    }
+                break;
+            default:
         }
     }
 
