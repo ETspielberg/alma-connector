@@ -204,6 +204,7 @@ public class HookService {
     @Async("threadPoolTaskExecutor")
     public void processItemHook(ItemHook hook) {
         Item item = hook.getItem();
+        log.info(String.format("got item with  call number %s and item call number %s", item.getHoldingData().getCallNumber(), item.getItemData().getAlternativeCallNumber()));
         if (item.getHoldingData().getCallNumber().isEmpty()) {
             String itemCallNo = hook.getItem().getItemData().getAlternativeCallNumber();
             if (!itemCallNo.isEmpty()) {
