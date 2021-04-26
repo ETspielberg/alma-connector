@@ -20,24 +20,29 @@ public class AlmaCatalogService {
     }
 
     public boolean updateCallNoInHolding(String mmsId, String holdingId, String callNo) {
-            HoldingWithRecord holding = this.almaCatalogApiClient.getBibsMmsIdHoldingsHoldingId(mmsId, holdingId);
-            log.info(holding.getRecord().getLeader());
-            for (MarcDatafield field: holding.getRecord().getDatafield()) {
-                if ("852".equals(field.getTag())) {
-                    for (MarcSubfield subfield : field.getSubfield())
-                        if ("h".equals(subfield.getCode()))
-                            if (subfield.getValue() != null && !subfield.getCode().strip().isEmpty())
-                                return false;
-                            else {
-                                subfield.setValue(callNo);
-                                break;
-                            }
+        HoldingWithRecord holding = this.almaCatalogApiClient.getBibsMmsIdHoldingsHoldingId(mmsId, holdingId);
+        log.info(holding.getRecord().getLeader());
+        boolean isSet = false;
+        for (MarcDatafield field : holding.getRecord().getDatafield()) {
+            if ("852".equals(field.getTag())) {
+                for (MarcSubfield subfield : field.getSubfield())
+                    if ("h".equals(subfield.getCode()))
+                        if (subfield.getValue() != null && !subfield.getCode().strip().isEmpty())
+                            return false;
+                        else {
+                            subfield.setValue(callNo);
+                            isSet = true;
+                            break;
+                        }
+                if (!isSet) {
                     field.getSubfield().add(new MarcSubfield().code("h").value(callNo));
                     break;
                 }
+
             }
-            this.almaCatalogApiClient.putBibsMmsIdHoldingsHoldingId(mmsId, holdingId, holding);
-            return true;
+        }
+        this.almaCatalogApiClient.putBibsMmsIdHoldingsHoldingId(mmsId, holdingId, holding);
+        return true;
     }
 
     public int getNumberOfPortfolios(String mmsId) {
