@@ -26,7 +26,12 @@ public class AlmaCatalogService {
                 if ("852".equals(field.getTag())) {
                     for (MarcSubfield subfield : field.getSubfield())
                         if ("h".equals(subfield.getCode()))
-                            return false;
+                            if (subfield.getValue() != null && !subfield.getCode().strip().isEmpty())
+                                return false;
+                            else {
+                                subfield.setValue(callNo);
+                                break;
+                            }
                     field.getSubfield().add(new MarcSubfield().code("h").value(callNo));
                     break;
                 }
