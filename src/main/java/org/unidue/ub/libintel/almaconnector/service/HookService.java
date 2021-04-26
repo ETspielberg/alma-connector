@@ -205,8 +205,12 @@ public class HookService {
     public void processItemHook(ItemHook hook) {
         Item item = hook.getItem();
         log.info(String.format("got item with  call number %s and item call number %s", item.getHoldingData().getCallNumber(), item.getItemData().getAlternativeCallNumber()));
-        if (item.getHoldingData().getCallNumber().isEmpty()) {
-            String itemCallNo = hook.getItem().getItemData().getAlternativeCallNumber();
+        if (item.getHoldingData().getCallNumber() == null) {
+            log.warn("holding call number is null for item " + item.getItemData().getPid());
+            return;
+        }
+        if (item.getHoldingData().getCallNumber().strip().isEmpty()) {
+            String itemCallNo = hook.getItem().getItemData().getAlternativeCallNumber().strip();
             if (!itemCallNo.isEmpty()) {
                 String callNo = itemCallNo.replaceAll("\\+\\d+", "");
                 boolean success = this.almaCatalogService.updateCallNoInHolding(item.getBibData().getMmsId(), item.getHoldingData().getHoldingId(), callNo);
