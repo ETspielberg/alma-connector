@@ -225,6 +225,8 @@ public class HookService {
         BibWithRecord bib = hook.getBib();
         if ("Universität Duisburg-Essen".equals(bib.getPublisherConst())) {
             String mmsId = bib.getMmsId();
+            if (this.almaCatalogService.isPortfolios(mmsId))
+                return;
             BibWithRecord bibWithRecord = this.almaCatalogService.getRecord(mmsId);
             if (this.almaCatalogService.getNumberOfPortfolios(bib.getMmsId()) == 0) {
                 boolean isOnline = false;

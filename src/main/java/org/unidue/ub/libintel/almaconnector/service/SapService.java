@@ -138,7 +138,6 @@ public class SapService {
             }
         }
         checkAndClosePoLines(poLines);
-        log.info(container.logString());
         return container;
     }
 
