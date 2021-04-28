@@ -30,6 +30,17 @@ public class HookController {
         this.jobLoggerService = jobLoggerService;
     }
 
+    @GetMapping("/userListener")
+    public ResponseEntity<Challenge> answerUserChallenge(String challenge) {
+        return ResponseEntity.ok(new Challenge(challenge));
+    }
+
+    @PostMapping("/userListener")
+    public ResponseEntity<?> receiveUserHook(@RequestBody UserHook hookContent, @RequestHeader("X-Exl-Signature") String signature) {
+        log.info(String.format("revceived hook of type %s", hookContent.getAction()));
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/jobListener")
     public ResponseEntity<Challenge> answerJobChallenge(String challenge) {
         return ResponseEntity.ok(new Challenge(challenge));
