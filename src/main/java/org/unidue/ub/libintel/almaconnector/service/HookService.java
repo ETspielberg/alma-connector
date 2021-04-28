@@ -153,6 +153,7 @@ public class HookService {
                         this.almaItemService.updateItem(mmsId, item.getHoldingData().getHoldingId(), itemPid, item);
                     }
                 break;
+                    /*
             case "Handapparat":
             case "Handapparat, 15 Ausleihen":
             case "Handapparat, gemeinsamer":
@@ -197,6 +198,8 @@ public class HookService {
                         this.almaItemService.updateItem(mmsId, item.getHoldingData().getHoldingId(), itemPid, item);
                     }
                 break;
+
+                     */
             default:
         }
     }
