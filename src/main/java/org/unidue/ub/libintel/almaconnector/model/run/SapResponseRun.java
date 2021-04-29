@@ -10,17 +10,31 @@ import java.util.List;
  */
 public class SapResponseRun {
 
-    private int numberOfErrors = 0;
+    private long numberOfErrors = 0;
 
-    private int numberOfReadErrors = 0;
+    private long numberOfPoLineErrors = 0;
+
+    private long numberOfInvoiceErrors = 0;
+
+    private long numberOfReadErrors = 0;
 
     private String filename;
+
+    private List<String> closedInvoices = new ArrayList<>();
+
+    private List<String> closedPoLines = new ArrayList<>();
+
+    private List<String> invoicesWithErrors = new ArrayList<>();
+
+    private List<String> partialInvoices = new ArrayList<>();
+
+    private List<String> poLinesWithErrors = new ArrayList<>();
 
     private List<SapResponse> responses = new ArrayList<>();
 
     public SapResponseRun() {}
 
-    public int getNumberOfErrors() {
+    public long getNumberOfErrors() {
         return numberOfErrors;
     }
 
@@ -28,7 +42,7 @@ public class SapResponseRun {
         this.numberOfErrors = numberOfErrors;
     }
 
-    public int getNumberOfReadErrors() {
+    public long getNumberOfReadErrors() {
         return numberOfReadErrors;
     }
 
@@ -60,6 +74,98 @@ public class SapResponseRun {
         return responses.size();
     }
 
+    public long getNumberOfPoLineErrors() {
+        return numberOfPoLineErrors;
+    }
+
+    public void setNumberOfPoLineErrors(int numberOfPoLineErrors) {
+        this.numberOfPoLineErrors = numberOfPoLineErrors;
+    }
+
+    public long getNumberOfInvoiceErrors() {
+        return numberOfInvoiceErrors;
+    }
+
+    public void setNumberOfInvoiceErrors(int numberOfInvoiceErrors) {
+        this.numberOfInvoiceErrors = numberOfInvoiceErrors;
+    }
+
+    public List<String> getClosedInvoices() {
+        return closedInvoices;
+    }
+
+    public void setClosedInvoices(List<String> closedInvoices) {
+        this.closedInvoices = closedInvoices;
+    }
+
+    public List<String> getClosedPoLines() {
+        return closedPoLines;
+    }
+
+    public void setClosedPoLines(List<String> closedPoLines) {
+        this.closedPoLines = closedPoLines;
+    }
+
+    public void setNumberOfErrors(long numberOfErrors) {
+        this.numberOfErrors = numberOfErrors;
+    }
+
+    public void setNumberOfPoLineErrors(long numberOfPoLineErrors) {
+        this.numberOfPoLineErrors = numberOfPoLineErrors;
+    }
+
+    public void setNumberOfInvoiceErrors(long numberOfInvoiceErrors) {
+        this.numberOfInvoiceErrors = numberOfInvoiceErrors;
+    }
+
+    public void setNumberOfReadErrors(long numberOfReadErrors) {
+        this.numberOfReadErrors = numberOfReadErrors;
+    }
+
+    public List<String> getInvoicesWithErrors() {
+        return invoicesWithErrors;
+    }
+
+    public void setInvoicesWithErrors(List<String> invoicesWithErrors) {
+        this.invoicesWithErrors = invoicesWithErrors;
+    }
+
+    public List<String> getPoLinesWithErrors() {
+        return poLinesWithErrors;
+    }
+
+    public void setPoLinesWithErrors(List<String> poLinesWithErrors) {
+        this.poLinesWithErrors = poLinesWithErrors;
+    }
+
+    public List<String> getPartialInvoices() {
+        return partialInvoices;
+    }
+
+    public void setPartialInvoices(List<String> partialInvoices) {
+        this.partialInvoices = partialInvoices;
+    }
+
+    public void addClosedPoLine(String poLineId) {
+        this.closedPoLines.add(poLineId);
+    }
+
+    public void addClosedIncoice(String invoiceId) {
+        this.closedInvoices.add(invoiceId);
+    }
+
+    public void addPoLineWithError(String poLineId) {
+        this.poLinesWithErrors.add(poLineId);
+    }
+
+    public void addInvoiceWithError(String invoiceId) {
+        this.invoicesWithErrors.add(invoiceId);
+    }
+
+    public void addPartialInvoice(String invoiceId) {
+        this.partialInvoices.add(invoiceId);
+    }
+
     public long increaseNumberOfErrors() {
         this.numberOfErrors++;
         return this.numberOfErrors;
@@ -68,6 +174,16 @@ public class SapResponseRun {
     public long increaseNumberOfReadErrors() {
         this.numberOfReadErrors++;
         return this.numberOfReadErrors;
+    }
+
+    public long increaseNumberOfPoLineErrors() {
+        this.numberOfPoLineErrors++;
+        return this.numberOfPoLineErrors;
+    }
+
+    public long increaseNumberOfInvoiceErrors() {
+        this.numberOfInvoiceErrors++;
+        return this.numberOfInvoiceErrors;
     }
 
     public String logString() {

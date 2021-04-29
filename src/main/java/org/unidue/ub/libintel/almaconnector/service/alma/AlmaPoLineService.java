@@ -1,6 +1,5 @@
 package org.unidue.ub.libintel.almaconnector.service.alma;
 
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.*;
 import org.unidue.ub.libintel.almaconnector.clients.acquisition.AlmaPoLinesApiClient;
@@ -28,7 +27,6 @@ public class AlmaPoLineService {
      * retrieves the active po-lines.
      * @return a list of po-lines
      */
-    @Secured({ "ROLE_SYSTEM", "ROLE_ALMA" })
     public List<PoLine> getOpenPoLines() {
         // initialize parameters
         int batchSize = 100;
@@ -51,17 +49,14 @@ public class AlmaPoLineService {
      * retrieves the active po-lines.
      * @return a list of po-lines
      */
-    @Secured({ "ROLE_SYSTEM", "ROLE_ALMA" , "ROLE_ALMA_Physical_Inventory_Operator"})
     public PoLine savePoLine(PoLine poLine) {
         return this.almaPoLinesApiClient.postAcqPoLines(poLine, "application/json", "");
     }
 
-    @Secured({ "ROLE_SYSTEM", "ROLE_ALMA" , "ROLE_ALMA_Physical_Inventory_Operator"})
     public PoLine updatePoLine(PoLine poLine) {
         return this.almaPoLinesApiClient.putPoLinesPoLineId(poLine, "application/json", poLine.getNumber(),"" );
     }
 
-    @Secured({ "ROLE_SYSTEM", "ROLE_ALMA" , "ROLE_ALMA_Physical_Inventory_Operator"})
     public PoLine getPoLine(String poLineId) {
         return this.almaPoLinesApiClient.getPoLinesPoLineId("application/json", poLineId);
     }

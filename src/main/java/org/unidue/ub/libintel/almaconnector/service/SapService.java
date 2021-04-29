@@ -86,7 +86,6 @@ public class SapService {
      * @param container an SAP container object holding a list of SAP response object
      * @return the SAP container objects the number of missed entries
      */
-    @Secured({"ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Invoice Operator Extended"})
     public SapResponseRun updateInvoiceWithErpData(SapResponseRun container) {
         HashMap<String, Double> poLines = new HashMap<>();
         for (SapResponse sapResponse : container.getResponses()) {
@@ -122,11 +121,14 @@ public class SapService {
                     // if the sum is the same as on the invoice, mark the invoice as paid and close the invoice
                     if (sapResponse.getAmount() == invoice.getTotalAmount()) {
                         this.almaInvoiceService.addFullPayment(invoice, payment);
+                        container.addClosedIncoice(invoiceId);
                         // otherwise just add the payment
                     } else {
+                        container.addPartialInvoice(invoiceId);
                         this.almaInvoiceService.addPartialPayment(invoice, payment);
                     }
                 } catch (Exception e) {
+                    container.addInvoiceWithError(invoiceId);
                     // if an Exception occurs (e.g. when trying to update the invoice), log the message and increase the number of errors.
                     log.error(String.format("could not update invoice %s", invoiceId));
                     container.increaseNumberOfErrors();
@@ -134,14 +136,15 @@ public class SapService {
             } else {
                 // if none or more than one invoice is found log the message and increase the number of errors
                 log.warn(String.format("found %d invoices for invoice number %s", invoices.getTotalRecordCount(), invoiceId));
+                container.addInvoiceWithError(invoiceId);
                 container.increaseNumberOfErrors();
             }
         }
-        checkAndClosePoLines(poLines);
+        container = checkAndClosePoLines(poLines, container);
         return container;
     }
 
-    private void checkAndClosePoLines(HashMap<String, Double> poLines) {
+    private SapResponseRun checkAndClosePoLines(HashMap<String, Double> poLines, SapResponseRun container) {
         poLines.forEach(
                 (entry, sum) -> {
                     PoLine poLine = this.almaPoLineService.getPoLine(entry);
@@ -149,14 +152,23 @@ public class SapService {
                         double price = Double.parseDouble(poLine.getPrice().getSum());
                         if (price == sum) {
                             boolean success = this.almaPoLineService.closePoLine(poLine);
-                            if (!success)
+                            if (success) {
+                                container.addClosedPoLine(entry);
+                                log.info(String.format("closed po line %s", entry));
+                            } else {
                                 log.warn(String.format("could not close po line %s", entry));
+                                container.addPoLineWithError(entry);
+                                container.increaseNumberOfPoLineErrors();
+                            }
                         }
                     } catch (Exception e) {
+                        container.addPoLineWithError(entry);
+                        container.increaseNumberOfPoLineErrors();
                         log.warn(String.format("could not parse price for po line %s", entry));
                     }
                 }
         );
+        return container;
     }
 
     public List<Invoice> getOpenInvoicesFromAnalytics(AlmaExportRun almaExportRun) {
@@ -275,7 +287,6 @@ public class SapService {
      * @param almaExportRun the AlmaExportRun object holding a list of SAP data
      * @return the AlmaExportRun object updated with the files created and the number of failed entries to be written
      */
-    @Secured({"ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Invoice Operator Extended"})
     public AlmaExportRun writeAlmaExport(AlmaExportRun almaExportRun) {
         String dateString;
         if (almaExportRun.isDateSpecific())
@@ -332,7 +343,6 @@ public class SapService {
         bw.close();
     }
 
-    @Secured({"ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Invoice Operator Extended"})
     public List<String> getFiles(@Value("${ub.statistics.data.dir}") String dataDir) {
         Path rootLocation = Paths.get(dataDir);
         try {
@@ -396,7 +406,6 @@ public class SapService {
      * @return the file as Resource object
      * @throws FileNotFoundException thrown if the file could not be loaded
      */
-    @Secured({"ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Invoice Operator Extended"})
     public org.springframework.core.io.Resource loadFiles(String date, String type, String owner) throws FileNotFoundException {
         String filename = String.format("sap_%s_%s_%s.txt", type, date, owner);
         Path file = Paths.get(this.file + filename);

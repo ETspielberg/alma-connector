@@ -44,7 +44,6 @@ public class AlmaInvoiceService {
      *
      * @return a list of invoices
      */
-    @Secured({"ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Invoice Operator Extended"})
     public List<Invoice> getOpenInvoices(String owner) {
         // initialize parameters
         int batchSize = 25;
@@ -73,7 +72,6 @@ public class AlmaInvoiceService {
      * @param date the date invoices should be returned for
      * @return a list of invoices
      */
-    @Secured({"ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Invoice Operator Extended"})
     public List<Invoice> getOpenInvoicesForDate(Date date, String owner) {
         log.info("collecting invoices for date " + new SimpleDateFormat("dd.MM.yyyy").format(date));
         return filterList(date, getOpenInvoices(owner));
