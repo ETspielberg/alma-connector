@@ -55,11 +55,11 @@
 
 <script>
     Dropzone.autoDiscover = false;
-
+    toastr.options.timeout = 0;
+    toastr.options.extendedTimeOut = 0;
+    toastr.options.closeButton = true;
     $("#file-upload").dropzone({
         success : function(file, response) {
-            toastr.options.timeout = 0;
-            console.log(response);
             if (response.numberOfErrors === 0) {
                 toastr.success('Datei ' + file.name + ' erfolgreich hochgeladen. ' + response.numberOfResponses + ' Rechnungsdaten wurden erfolgreich importiert.');
             } else if (response.numberOfErrors === 1) {
