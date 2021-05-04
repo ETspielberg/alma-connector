@@ -99,7 +99,7 @@ public class SapService {
             // process only if there is only one invoice found. Otherwise increase number of errors and log the error
             if (invoices.getTotalRecordCount() == 1) {
                 Invoice invoice = invoices.getInvoice().get(0);
-                log.info("processing SAP responce for Invoice " + invoiceId);
+                log.info("processing SAP response for invoice " + invoiceId);
 
                 for (InvoiceLine invoiceLine : invoice.getInvoiceLines().getInvoiceLine())
                     if (poLines.containsKey(invoiceLine.getPoLine())) {
@@ -121,10 +121,12 @@ public class SapService {
                     // if the sum is the same as on the invoice, mark the invoice as paid and close the invoice
                     if (sapResponse.getAmount() == invoice.getTotalAmount()) {
                         this.almaInvoiceService.addFullPayment(invoice, payment);
+                        log.info(String.format("closed invoice %s", invoiceId));
                         container.addClosedIncoice(invoiceId);
                         // otherwise just add the payment
                     } else {
                         container.addPartialInvoice(invoiceId);
+                        log.info(String.format("added partial payment for invoice %s", invoiceId));
                         this.almaInvoiceService.addPartialPayment(invoice, payment);
                     }
                 } catch (Exception e) {
@@ -147,6 +149,7 @@ public class SapService {
     private SapResponseRun checkAndClosePoLines(HashMap<String, Double> poLines, SapResponseRun container) {
         poLines.forEach(
                 (entry, sum) -> {
+                    log.info(String.format("processing po line %s", entry));
                     PoLine poLine = this.almaPoLineService.getPoLine(entry);
                     try {
                         double price = Double.parseDouble(poLine.getPrice().getSum());
@@ -160,6 +163,8 @@ public class SapService {
                                 container.addPoLineWithError(entry);
                                 container.increaseNumberOfPoLineErrors();
                             }
+                        } else {
+                            log.warn(String.format("price on po line %,.2f and price of invoice %,.2f do not match", price, sum));
                         }
                     } catch (Exception e) {
                         container.addPoLineWithError(entry);
@@ -680,7 +685,7 @@ public class SapService {
                     .withPspElement("555100000" + "9" + parts[0]);
 
             // fourth case: QVM (starting with 50)
-        } else if (parts[0].startsWith("50")) {
+        } else if (parts[0].startsWith("50") || parts[0].startsWith("51")  ) {
             log.debug("QVM");
             sapAccountData
                     .withFonds("1400")
