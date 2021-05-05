@@ -151,25 +151,27 @@ public class SapService {
                 (entry, sum) -> {
                     log.info(String.format("processing po line %s", entry));
                     PoLine poLine = this.almaPoLineService.getPoLine(entry);
-                    try {
-                        double price = Double.parseDouble(poLine.getPrice().getSum());
-                        if (price == sum) {
-                            boolean success = this.almaPoLineService.closePoLine(poLine);
-                            if (success) {
-                                container.addClosedPoLine(entry);
-                                log.info(String.format("closed po line %s", entry));
+                    if (poLine.getType().getValue().contains("OT")) {
+                        try {
+                            double price = Double.parseDouble(poLine.getPrice().getSum());
+                            if (price == sum) {
+                                boolean success = this.almaPoLineService.closePoLine(poLine);
+                                if (success) {
+                                    container.addClosedPoLine(entry);
+                                    log.info(String.format("closed po line %s", entry));
+                                } else {
+                                    log.warn(String.format("could not close po line %s", entry));
+                                    container.addPoLineWithError(entry);
+                                    container.increaseNumberOfPoLineErrors();
+                                }
                             } else {
-                                log.warn(String.format("could not close po line %s", entry));
-                                container.addPoLineWithError(entry);
-                                container.increaseNumberOfPoLineErrors();
+                                log.warn(String.format("price on po line %,.2f and price of invoice %,.2f do not match", price, sum));
                             }
-                        } else {
-                            log.warn(String.format("price on po line %,.2f and price of invoice %,.2f do not match", price, sum));
+                        } catch (Exception e) {
+                            container.addPoLineWithError(entry);
+                            container.increaseNumberOfPoLineErrors();
+                            log.warn(String.format("could not parse price for po line %s", entry));
                         }
-                    } catch (Exception e) {
-                        container.addPoLineWithError(entry);
-                        container.increaseNumberOfPoLineErrors();
-                        log.warn(String.format("could not parse price for po line %s", entry));
                     }
                 }
         );

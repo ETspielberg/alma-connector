@@ -97,6 +97,7 @@ public class AlmaInvoiceService {
     public void addPartialPayment(Invoice invoice, Payment payment) {
         InvoiceUpdate invoiceUpdate = new InvoiceUpdate(payment);
         this.almaInvoicesApiClient.postInvoicesInvoiceIdToUpdate(invoiceUpdate, "application/json", invoice.getId(), "paid");
+        this.almaInvoicesApiClient.postInvoicesInvoiceIdToUpdate(invoiceUpdate, "application/json", invoice.getId(), "process_invoice");
     }
 
     public void addFullPayment(Invoice invoice, Payment payment) {
