@@ -18,6 +18,8 @@ public class SapResponseRun {
 
     private long numberOfReadErrors = 0;
 
+    private long numberOfStandingorders = 0;
+
     private String filename;
 
     private List<String> closedInvoices = new ArrayList<>();
@@ -29,6 +31,10 @@ public class SapResponseRun {
     private List<String> partialInvoices = new ArrayList<>();
 
     private List<String> poLinesWithErrors = new ArrayList<>();
+
+    private List<String> standingPoLines = new ArrayList<>();
+
+    private List<String> onetimePoLines = new ArrayList<>();
 
     private List<SapResponse> responses = new ArrayList<>();
 
@@ -146,6 +152,10 @@ public class SapResponseRun {
         this.partialInvoices = partialInvoices;
     }
 
+    public void addStandingOrder(String poLineId) {this.standingPoLines.add(poLineId); }
+
+    public void addOneTimeOrder(String poLineId) {this.onetimePoLines.add(poLineId); }
+
     public void addClosedPoLine(String poLineId) {
         this.closedPoLines.add(poLineId);
     }
@@ -184,6 +194,11 @@ public class SapResponseRun {
     public long increaseNumberOfInvoiceErrors() {
         this.numberOfInvoiceErrors++;
         return this.numberOfInvoiceErrors;
+    }
+
+    public long increaseNumberOfStandingOrders() {
+        this.numberOfStandingorders++;
+        return this.numberOfStandingorders;
     }
 
     public String logString() {

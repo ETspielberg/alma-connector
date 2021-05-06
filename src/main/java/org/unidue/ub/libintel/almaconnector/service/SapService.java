@@ -7,17 +7,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.*;
-import org.unidue.ub.libintel.almaconnector.clients.acquisition.AlmaInvoicesApiClient;
 import org.unidue.ub.libintel.almaconnector.clients.analytics.AlmaAnalyticsReportClient;
 import org.unidue.ub.libintel.almaconnector.model.analytics.InvoiceForPayment;
 import org.unidue.ub.libintel.almaconnector.model.analytics.InvoiceForPaymentReport;
-import org.unidue.ub.libintel.almaconnector.model.analytics.NewItemWithFundReport;
 import org.unidue.ub.libintel.almaconnector.model.run.AlmaExportRun;
 import org.unidue.ub.libintel.almaconnector.model.run.SapResponseRun;
-import org.unidue.ub.libintel.almaconnector.model.sap.InvoiceUpdate;
 import org.unidue.ub.libintel.almaconnector.model.sap.SapAccountData;
 import org.unidue.ub.libintel.almaconnector.model.sap.SapData;
 import org.unidue.ub.libintel.almaconnector.model.sap.SapResponse;
@@ -87,8 +83,9 @@ public class SapService {
      * @return the SAP container objects the number of missed entries
      */
     public SapResponseRun updateInvoiceWithErpData(SapResponseRun container) {
-        HashMap<String, Double> poLines = new HashMap<>();
+        HashMap<String, Boolean> poLines = new HashMap<>();
         for (SapResponse sapResponse : container.getResponses()) {
+            boolean fullyInvoiced = true;
             // get the number of the invoice (is not the ID!)
             String invoiceId = sapResponse.getInvoiceNumber();
 
@@ -103,11 +100,17 @@ public class SapService {
 
                 for (InvoiceLine invoiceLine : invoice.getInvoiceLines().getInvoiceLine())
                     if (poLines.containsKey(invoiceLine.getPoLine())) {
-                        Double sum = poLines.get(invoiceLine.getPoLine());
-                        sum += invoiceLine.getPrice();
-                        poLines.put(invoiceLine.getPoLine(), sum);
-                    } else
-                        poLines.put(invoiceLine.getPoLine(), invoiceLine.getPrice());
+                        if (!invoiceLine.getFullyInvoiced()) {
+                            poLines.put(invoiceLine.getPoLine(), false);
+                            fullyInvoiced = false;
+                        }
+                    } else {
+                        if (!invoiceLine.getFullyInvoiced()) {
+                            poLines.put(invoiceLine.getPoLine(), false);
+                            fullyInvoiced = false;
+                        } else
+                            poLines.put(invoiceLine.getPoLine(), true);
+                    }
 
                 // prepare the payment for the update
                 Payment payment = invoice.getPayment();
@@ -119,7 +122,7 @@ public class SapService {
                 // try to update the invoice.
                 try {
                     // if the sum is the same as on the invoice, mark the invoice as paid and close the invoice
-                    if (sapResponse.getAmount() == invoice.getTotalAmount()) {
+                    if (fullyInvoiced) {
                         this.almaInvoiceService.addFullPayment(invoice, payment);
                         log.info(String.format("closed invoice %s", invoiceId));
                         container.addClosedIncoice(invoiceId);
@@ -142,36 +145,33 @@ public class SapService {
                 container.increaseNumberOfErrors();
             }
         }
-        container = checkAndClosePoLines(poLines, container);
-        return container;
+        return checkAndClosePoLines(poLines, container);
     }
 
-    private SapResponseRun checkAndClosePoLines(HashMap<String, Double> poLines, SapResponseRun container) {
+    private SapResponseRun checkAndClosePoLines(HashMap<String, Boolean> poLines, SapResponseRun container) {
         poLines.forEach(
-                (entry, sum) -> {
+                (entry, fullyInvoiced) -> {
                     log.info(String.format("processing po line %s", entry));
                     PoLine poLine = this.almaPoLineService.getPoLine(entry);
+                    container.addOneTimeOrder(entry);
                     if (poLine.getType().getValue().contains("OT")) {
-                        try {
-                            double price = Double.parseDouble(poLine.getPrice().getSum());
-                            if (price == sum) {
-                                boolean success = this.almaPoLineService.closePoLine(poLine);
-                                if (success) {
-                                    container.addClosedPoLine(entry);
-                                    log.info(String.format("closed po line %s", entry));
-                                } else {
-                                    log.warn(String.format("could not close po line %s", entry));
-                                    container.addPoLineWithError(entry);
-                                    container.increaseNumberOfPoLineErrors();
-                                }
+                        if (fullyInvoiced) {
+                            boolean success = this.almaPoLineService.closePoLine(poLine);
+                            if (success) {
+                                container.addClosedPoLine(entry);
+                                log.info(String.format("closed po line %s", entry));
                             } else {
-                                log.warn(String.format("price on po line %,.2f and price of invoice %,.2f do not match", price, sum));
+                                log.warn(String.format("could not close po line %s", entry));
+                                container.addPoLineWithError(entry);
+                                container.increaseNumberOfPoLineErrors();
                             }
-                        } catch (Exception e) {
-                            container.addPoLineWithError(entry);
-                            container.increaseNumberOfPoLineErrors();
-                            log.warn(String.format("could not parse price for po line %s", entry));
+                        } else {
+                            log.info(String.format("po line %s is not fully invoiced", entry));
                         }
+                    } else {
+                        container.increaseNumberOfStandingOrders();
+                        container.addStandingOrder(entry);
+                        log.info(String.format("po line %s is not an one-time order", entry));
                     }
                 }
         );
@@ -348,22 +348,6 @@ public class SapService {
         bw.newLine();
         bw.flush();
         bw.close();
-    }
-
-    public List<String> getFiles(@Value("${ub.statistics.data.dir}") String dataDir) {
-        Path rootLocation = Paths.get(dataDir);
-        try {
-            return Files.walk(rootLocation, 1)
-                    .filter(path -> !path.equals(rootLocation))
-                    .map(rootLocation::relativize)
-                    .map(path -> path.getFileName().toString())
-                    .filter(filename -> !filename.startsWith("Druck"))
-                    .map(filename -> filename.replace("sap-", ""))
-                    .collect(Collectors.toList());
-        } catch (IOException ioe) {
-            log.error("failed to read stored files", ioe);
-            return null;
-        }
     }
 
     /**
@@ -687,7 +671,7 @@ public class SapService {
                     .withPspElement("555100000" + "9" + parts[0]);
 
             // fourth case: QVM (starting with 50)
-        } else if (parts[0].startsWith("50") || parts[0].startsWith("51")  ) {
+        } else if (parts[0].startsWith("50") || parts[0].startsWith("51")) {
             log.debug("QVM");
             sapAccountData
                     .withFonds("1400")
