@@ -152,6 +152,30 @@ public class SapResponseRun {
         this.partialInvoices = partialInvoices;
     }
 
+    public long getNumberOfStandingorders() {
+        return numberOfStandingorders;
+    }
+
+    public void setNumberOfStandingorders(long numberOfStandingorders) {
+        this.numberOfStandingorders = numberOfStandingorders;
+    }
+
+    public List<String> getStandingPoLines() {
+        return standingPoLines;
+    }
+
+    public void setStandingPoLines(List<String> standingPoLines) {
+        this.standingPoLines = standingPoLines;
+    }
+
+    public List<String> getOnetimePoLines() {
+        return onetimePoLines;
+    }
+
+    public void setOnetimePoLines(List<String> onetimePoLines) {
+        this.onetimePoLines = onetimePoLines;
+    }
+
     public void addStandingOrder(String poLineId) {this.standingPoLines.add(poLineId); }
 
     public void addOneTimeOrder(String poLineId) {this.onetimePoLines.add(poLineId); }

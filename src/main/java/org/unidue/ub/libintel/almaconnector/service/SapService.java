@@ -122,7 +122,7 @@ public class SapService {
                 // try to update the invoice.
                 try {
                     // if the sum is the same as on the invoice, mark the invoice as paid and close the invoice
-                    if (fullyInvoiced) {
+                    if (sapResponse.getAmount() == invoice.getTotalAmount()) {
                         this.almaInvoiceService.addFullPayment(invoice, payment);
                         log.info(String.format("closed invoice %s", invoiceId));
                         container.addClosedIncoice(invoiceId);
@@ -137,11 +137,13 @@ public class SapService {
                     // if an Exception occurs (e.g. when trying to update the invoice), log the message and increase the number of errors.
                     log.error(String.format("could not update invoice %s", invoiceId));
                     container.increaseNumberOfErrors();
+                    container.increaseNumberOfInvoiceErrors();
                 }
             } else {
                 // if none or more than one invoice is found log the message and increase the number of errors
                 log.warn(String.format("found %d invoices for invoice number %s", invoices.getTotalRecordCount(), invoiceId));
                 container.addInvoiceWithError(invoiceId);
+                container.increaseNumberOfInvoiceErrors();
                 container.increaseNumberOfErrors();
             }
         }
