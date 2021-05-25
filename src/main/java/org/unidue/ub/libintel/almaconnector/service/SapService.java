@@ -23,7 +23,6 @@ import org.unidue.ub.libintel.almaconnector.service.alma.AlmaPoLineService;
 
 import java.io.*;
 import java.net.MalformedURLException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
@@ -32,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class SapService {
@@ -85,7 +83,6 @@ public class SapService {
     public SapResponseRun updateInvoiceWithErpData(SapResponseRun container) {
         HashMap<String, Boolean> poLines = new HashMap<>();
         for (SapResponse sapResponse : container.getResponses()) {
-            boolean fullyInvoiced = true;
             // get the number of the invoice (is not the ID!)
             String invoiceId = sapResponse.getInvoiceNumber();
 
@@ -102,12 +99,10 @@ public class SapService {
                     if (poLines.containsKey(invoiceLine.getPoLine())) {
                         if (!invoiceLine.getFullyInvoiced()) {
                             poLines.put(invoiceLine.getPoLine(), false);
-                            fullyInvoiced = false;
                         }
                     } else {
                         if (!invoiceLine.getFullyInvoiced()) {
                             poLines.put(invoiceLine.getPoLine(), false);
-                            fullyInvoiced = false;
                         } else
                             poLines.put(invoiceLine.getPoLine(), true);
                     }
@@ -147,7 +142,7 @@ public class SapService {
                 container.increaseNumberOfErrors();
             }
         }
-        return checkAndClosePoLines(poLines, container);
+        return container;
     }
 
     private SapResponseRun checkAndClosePoLines(HashMap<String, Boolean> poLines, SapResponseRun container) {
@@ -812,7 +807,8 @@ public class SapService {
         }
         // add the sap response objects to the response run container
         for (SapResponse sapResponse : sapResponses.values())
-            container.addSapResponse(sapResponse);
+            if (!sapResponse.getInvoiceNumber().isEmpty())
+                container.addSapResponse(sapResponse);
         log.info(container.logString());
         return container;
     }
