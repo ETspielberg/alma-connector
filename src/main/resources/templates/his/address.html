@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="general :: generalHead"/>
+<body>
+
+<nav th:replace="general :: navbar"></nav>
+
+<div th:replace="general :: jumbotron"/>
+
+<div class="container">
+    <div class="ui-g">
+
+        <div class="ui-g-12 ui-md-6 ui-lg-4">
+            <div class="tile centered">
+                <h2 th:text="#{address.request.results}"></h2>
+                <table class="table table-striped text-left">
+                    <tr>
+                        <th th:text="#{firstname}">
+                            firstname
+                        </th>
+                        <td th:text="${address.firstname}">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th th:text="#{surname}">
+                            surname
+                        </th>
+                        <td th:text="${address.surname}">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th th:text="#{gender}">
+                            genderId
+                        </th>
+                        <td th:text="#{'gender.' + ${address.genderId}}">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th th:text="#{street}">
+                            street
+                        </th>
+                        <td th:text="${address.street}">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th th:text="#{addressaddition}">
+                            addressaddition
+                        </th>
+                        <td th:text="${address.addressaddition}">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th th:text="#{postcode}">
+                            postcode
+                        </th>
+                        <td th:text="${address.postcode}">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th th:text="#{city}">
+                            city
+                        </th>
+                        <td th:text="${address.city}">
+                        </td>
+                    </tr>
+                    <tr>
+                        <th th:text="#{country}">
+                            country
+                        </th>
+                        <td th:text="${address.country}">
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="ui-g-12 ui-md-6 ui-lg-4">
+            <div class="tile centered">
+                <h3 style="height:1.2em;" th:text="#{upload.excel}"></h3>
+                <p style="height:6em;" th:text="#{upload.excel.short}"></p>
+                <div id="dropzone">
+                    <form th:action="@{alma/invoicesUpdate}" class="dropzone needsclick" method="post"
+                          enctype="multipart/form-data" id="file-upload">
+
+                        <div class="dz-message needsclick">
+                            <button type="button" class="dz-button" th:text="#{upload.excel.choose}">Drop files here or
+                                click to upload.
+                            </button>
+                            <br/>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="ui-g">
+        <div class="ui-g-12 ui-md-12 ui-lg-12">
+            <div class="tile centered">
+                <a th:href="@{/alma/start}">
+                    <button class="btn btn-primary">Zurück</button>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    Dropzone.autoDiscover = false;
+
+    $("#file-upload").dropzone({
+        success: function (file, response) {
+            toastr.options.timeout = 0;
+            if (response.numberOfErrors === 0) {
+                toastr.success('Datei ' + file.name + ' erfolgreich hochgeladen. ' + response.numberOfResponses + ' Rechnungsdaten wurden erfolgreich importiert.');
+            } else if (response.numberOfErrors === 1) {
+                toastr.warning('Beim Hochladen der Datei ' + file.name + ' ist ' + response.numberOfErrors + ' Fehler aufgetreten.');
+            } else {
+                toastr.warning('Beim Hochladen der Datei ' + file.name + ' sind ' + response.numberOfErrors + ' Fehler aufgetreten.');
+            }
+        }
+    });
+</script>
+</body>
+</html>
