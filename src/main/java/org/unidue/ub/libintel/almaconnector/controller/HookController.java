@@ -1,15 +1,20 @@
 package org.unidue.ub.libintel.almaconnector.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.unidue.ub.alma.shared.bibs.HookUserRequest;
 import org.unidue.ub.libintel.almaconnector.logging.JobLoggerService;
 import org.unidue.ub.libintel.almaconnector.model.hook.*;
 import org.unidue.ub.libintel.almaconnector.service.HookService;
+import org.unidue.ub.libintel.almaconnector.service.alma.HookValidatorService;
+
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 
 @Controller
 @RequestMapping("/hooks")
@@ -24,10 +29,14 @@ public class HookController {
 
     private final JobLoggerService jobLoggerService;
 
+    private final HookValidatorService hookValidatorService;
+
     public HookController(HookService hookService,
-                          JobLoggerService jobLoggerService) {
+                          JobLoggerService jobLoggerService,
+                          HookValidatorService hookValidatorService) {
         this.hookService = hookService;
         this.jobLoggerService = jobLoggerService;
+        this.hookValidatorService = hookValidatorService;
     }
 
     @GetMapping("/userListener")
@@ -41,6 +50,7 @@ public class HookController {
         return ResponseEntity.ok().build();
     }
 
+
     @GetMapping("/jobListener")
     public ResponseEntity<Challenge> answerJobChallenge(String challenge) {
         return ResponseEntity.ok(new Challenge(challenge));
@@ -52,6 +62,7 @@ public class HookController {
         this.jobLoggerService.logJob(hookContent.getJobInstance());
         return ResponseEntity.ok().build();
     }
+
 
     @GetMapping("/itemListener")
     public ResponseEntity<Challenge> answerItemChallenge(String challenge) {
@@ -99,5 +110,19 @@ public class HookController {
         log.info(String.format("revceived hook of type %s", hookContent.getAction()));
         this.hookService.processLoanHook(hookContent);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/listener/{hookType}")
+    public ResponseEntity<Challenge> answerChallenge(String challenge, @PathVariable String hookType) {
+        return ResponseEntity.ok(new Challenge(challenge));
+    }
+
+    @PostMapping("/listener/{hookType}")
+    public ResponseEntity<?> receiveLoan(@PathVariable String hookType, @RequestBody String hookContent, @RequestHeader("X-Exl-Signature") String signature) throws NoSuchAlgorithmException, NoSuchProviderException, JsonProcessingException, InvalidKeyException {
+        if (this.hookValidatorService.isValid(hookContent, signature)) {
+            this.hookService.processHook(hookContent, hookType);
+            return ResponseEntity.ok().build();
+        } else
+            return ResponseEntity.badRequest().build();
     }
 }

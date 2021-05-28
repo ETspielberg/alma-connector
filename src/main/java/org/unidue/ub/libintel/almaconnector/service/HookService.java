@@ -1,5 +1,6 @@
 package org.unidue.ub.libintel.almaconnector.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
@@ -12,10 +13,7 @@ import org.unidue.ub.libintel.almaconnector.model.hook.BibHook;
 import org.unidue.ub.libintel.almaconnector.model.hook.ItemHook;
 import org.unidue.ub.libintel.almaconnector.model.hook.LoanHook;
 import org.unidue.ub.libintel.almaconnector.model.hook.RequestHook;
-import org.unidue.ub.libintel.almaconnector.service.alma.AlmaCatalogService;
-import org.unidue.ub.libintel.almaconnector.service.alma.AlmaElectronicService;
-import org.unidue.ub.libintel.almaconnector.service.alma.AlmaItemService;
-import org.unidue.ub.libintel.almaconnector.service.alma.AlmaUserService;
+import org.unidue.ub.libintel.almaconnector.service.alma.*;
 import org.unidue.ub.libintel.almaconnector.service.bubi.BubiOrderLineService;
 
 @Service
@@ -31,18 +29,22 @@ public class HookService {
 
     private final BubiOrderLineService bubiOrderLineService;
 
+    private final HookValidatorService hookValidatorService;
+
     private final Logger log = LoggerFactory.getLogger(HookService.class);
 
     HookService(AlmaUserService almaUserService,
                 AlmaItemService almaItemService,
                 AlmaCatalogService almaCatalogService,
                 BubiOrderLineService bubiOrderLineService,
-                AlmaElectronicService almaElectronicService) {
+                AlmaElectronicService almaElectronicService,
+                HookValidatorService hookValidatorService) {
         this.almaUserService = almaUserService;
         this.almaItemService = almaItemService;
         this.almaCatalogService = almaCatalogService;
         this.almaElectronicService = almaElectronicService;
         this.bubiOrderLineService = bubiOrderLineService;
+        this.hookValidatorService = hookValidatorService;
     }
 
     @Async("threadPoolTaskExecutor")
@@ -212,14 +214,13 @@ public class HookService {
             log.warn("holding call number is null for item " + item.getItemData().getPid());
             return;
         }
-        if (item.getHoldingData().getCallNumber().strip().isEmpty()) {
-            String itemCallNo = hook.getItem().getItemData().getAlternativeCallNumber().strip();
-            if (!itemCallNo.isEmpty()) {
-                String callNo = itemCallNo.replaceAll("\\+\\d+", "");
-                boolean success = this.almaCatalogService.updateCallNoInHolding(item.getBibData().getMmsId(), item.getHoldingData().getHoldingId(), callNo);
-                if (success)
-                    log.info("successfully updated holding");
-            }
+        String itemCallNo = hook.getItem().getItemData().getAlternativeCallNumber().strip();
+        if (!itemCallNo.isEmpty()) {
+            String callNo = itemCallNo.replaceAll("\\+\\d+", "");
+            String holdingCallNo = item.getHoldingData().getCallNumber().strip();
+            if (callNo.equals(holdingCallNo))
+                return;
+            this.almaCatalogService.updateCallNoInHolding(item.getBibData().getMmsId(), item.getHoldingData().getHoldingId(), callNo);
         }
     }
 
@@ -257,6 +258,33 @@ public class HookService {
                     this.almaElectronicService.createDissPortfolio(mmsId, url);
                 }
             }
+        }
+    }
+
+    @Async("threadPoolTaskExecutor")
+    public void processHook(String hook, String type) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            switch (type) {
+                case "loan": {
+                    LoanHook loanHook = mapper.readValue(hook, LoanHook.class);
+                    processLoanHook(loanHook);
+                }
+                case "request": {
+                    RequestHook requestHook = mapper.readValue(hook, RequestHook.class);
+                    processRequestHook(requestHook);
+                }
+                case "bib": {
+                    BibHook bibHook = mapper.readValue(hook, BibHook.class);
+                    processBibHook(bibHook);
+                }
+                case "item": {
+                    ItemHook itemHook = mapper.readValue(hook, ItemHook.class);
+                    processItemHook(itemHook);
+                }
+            }
+        } catch (Exception e) {
+            log.warn("");
         }
     }
 }
