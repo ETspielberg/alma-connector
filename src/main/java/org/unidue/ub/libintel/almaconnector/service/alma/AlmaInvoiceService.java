@@ -2,15 +2,12 @@ package org.unidue.ub.libintel.almaconnector.service.alma;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.*;
 import org.unidue.ub.libintel.almaconnector.clients.acquisition.AlmaInvoicesApiClient;
-import org.unidue.ub.libintel.almaconnector.clients.analytics.AlmaAnalyticsReportClient;
 import org.unidue.ub.libintel.almaconnector.model.bubi.BubiOrder;
 import org.unidue.ub.libintel.almaconnector.model.bubi.BubiOrderLine;
 import org.unidue.ub.libintel.almaconnector.model.sap.InvoiceUpdate;
-import org.unidue.ub.libintel.almaconnector.repository.AlmaExportRunRepository;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -21,8 +18,6 @@ public class AlmaInvoiceService {
 
     private final AlmaInvoicesApiClient almaInvoicesApiClient;
 
-    private final AlmaAnalyticsReportClient almaAnalyticsReportClient;
-
     private final static Logger log = LoggerFactory.getLogger(AlmaInvoiceService.class);
 
     /**
@@ -30,11 +25,8 @@ public class AlmaInvoiceService {
      *
      * @param almaInvoicesApiClient the Feign client for the Alma Invoice API
      */
-    AlmaInvoiceService(AlmaInvoicesApiClient almaInvoicesApiClient,
-                       AlmaExportRunRepository almaExportRunRepository,
-                       AlmaAnalyticsReportClient almaAnalyticsReportClient) {
+    AlmaInvoiceService(AlmaInvoicesApiClient almaInvoicesApiClient) {
         this.almaInvoicesApiClient = almaInvoicesApiClient;
-        this.almaAnalyticsReportClient = almaAnalyticsReportClient;
     }
 
 
@@ -97,7 +89,6 @@ public class AlmaInvoiceService {
     public void addPartialPayment(Invoice invoice, Payment payment) {
         InvoiceUpdate invoiceUpdate = new InvoiceUpdate(payment);
         this.almaInvoicesApiClient.postInvoicesInvoiceIdToUpdate(invoiceUpdate, "application/json", invoice.getId(), "paid");
-        this.almaInvoicesApiClient.postInvoicesInvoiceIdToUpdate(invoiceUpdate, "application/json", invoice.getId(), "process_invoice");
     }
 
     public void addFullPayment(Invoice invoice, Payment payment) {
