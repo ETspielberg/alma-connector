@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
+<head th:replace="general :: generalHead" />
+<body>
+<div th:replace="general :: jumbotron" />
+
+<div class="container">
+    <div class="ui-g">
+        <div class="ui-g-12 ui-md-6 ui-md-offset-3">
+            <div class="tile">
+                <h3>Uuuups...</h3>
+                <p>... da ist etwas schief gegangen.</p>
+                <p> Wer mehr wissen möchte: hier ein paar Details:</p>
+                <table>
+                <tr>
+                    <td>Wann ist der Fehler aufgetreten?</td>
+                    <td th:text="${timestamp}"/>
+                </tr>
+                <tr>
+                    <td>Unter welchem Pfad?</td>
+                    <td th:text="${path}"/>
+                </tr>
+                <tr>
+                    <td>Welcher Fehler?</td>
+                    <td th:text="${error}"/>
+                </tr>
+                <tr>
+                    <td>Was war der Status?</td>
+                    <td th:text="${status}"/>
+                </tr>
+                <tr>
+                    <td>Gab es eine Meldung dazu?</td>
+                    <td th:text="${message}"/>
+                </tr>
+                <tr>
+                    <td>Gab es vielleicht sogar eine Exception?</td>
+                    <td th:text="${exception}"/>
+                </tr>
+                </table>
+        </div>
+
+        <div class="ui-g-12 ui-md-6 ui-md-offset-3">
+            <a href="/start">
+                <div class="tile centered clickable">
+                <h3 th:text="#{to.start}" ></h3>
+            </div>
+            </a>
+        </div>
+    </div>
+</div>
+</div>
+</body>
+</html>
