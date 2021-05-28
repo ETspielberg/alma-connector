@@ -1,20 +1,14 @@
 package org.unidue.ub.libintel.almaconnector.clients.bib;
 
-import com.netflix.discovery.converters.wrappers.CodecWrappers;
 import feign.RequestInterceptor;
 import feign.Retryer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.openfeign.support.SpringEncoder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.unidue.ub.libintel.almaconnector.clients.AlmaRetryer;
 import org.unidue.ub.libintel.almaconnector.clients.ApiKeyAuth;
 import org.unidue.ub.libintel.almaconnector.clients.ContentTypeInterceptor;
 
-import java.beans.Encoder;
-import java.beans.XMLEncoder;
 
 /**
  * configuration for the Feign clients to allow for basic authentication upon the requests to the settings backend
@@ -24,8 +18,6 @@ public class CatalogFeignConfiguration {
 
     @Value("${alma.api.key}")
     private String almaAcqApiKey;
-
-    private static final Logger log = LoggerFactory.getLogger(CatalogFeignConfiguration.class);
 
     /**
      * appropriate request interceptor to add the authentication information.
