@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="general :: generalHead"/>
+<body>
+
+<nav th:replace="general :: navbar"></nav>
+
+<div th:replace="general :: jumbotron" />
+
+<div class="container">
+    <div class="ui-g">
+        <div class="ui-g-12 ui-md-6 ui-lg-4">
+            <div class="tile centered">
+                <h3 style="height:1.2em;" th:text="#{reimport.results.read.heading}"></h3>
+                <p style="height:8em;" th:text="#{reimport.results.read.short}"></p>
+                <p>Die Datei <span th:text="${results.filename}"></span> wurde eingelesen. Dabei kam es zu und <span th:text="${results.numberOfReadErrors}"></span> Fehlern.</p>
+                <p th:if="${results.onetimePoLines.size() > 0}">Es waren <span th:text="${results.onetimePoLines.size()}"></span> Bestellungen vom Typ "einmalig".</p>
+                <p style="height:8em;" th:text="#{reimport.results.process.invoice.short}"></p>
+                <p>Dabei traten bei insgesamt <span th:text="${results.responses.size()}"></span> Rechnungen <span th:text="${results.numberOfErrors}"></span> Fehler auf.</p>
+
+                <h4 th:text="#{reimport.results.invoice.errors}"></h4>
+                <p>Bei der Bearbeitung der Rechnungen kam es zu <span th:text="${results.numberOfInvoiceErrors}"></span> Fehlern.</p>
+                <div th:if="${results.invoicesWithErrors.size() > 0}">
+                    <p><span th:text="${results.invoicesWithErrors.size()}"></span> Rechnungen konnten nicht geschlossen werden:</p>
+                    <ul>
+                        <li th:each="invoiceError : ${results.invoicesWithErrors}">
+                            <span th:text="invoiceError"></span>
+                        </li>
+                    </ul>
+                </div>
+                <div th:if="${results.partialInvoices.size() > 0}">
+                    <p><span th:text="${results.partialInvoices.size()}"></span> Rechnungen wurden nur teilweise bezahlt:</p>
+                    <ul>
+                        <li th:each="partialInvoice : ${results.partialInvoices}">
+                            <span th:text="partialInvoice"></span>
+                        </li>
+                    </ul>
+                </div>
+                <h4 th:text="#{reimport.results.polines.errors}"></h4>
+                <div th:if="${results.poLinesWithErrors.size() > 0}">
+                    <p><span th:text="${results.poLinesWithErrors.size()}"></span> Bestellposten konnten nicht geschlossen werden:</p>
+                    <ul>
+                        <li th:each="polineError : ${results.poLinesWithErrors}">
+                            <span th:text="polineError"></span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
