@@ -17,7 +17,7 @@
                 <form th:action="@{/alma/his/address}" method="get">
                     <div class="form-group">
                         <label for="zimkennung" th:text="#{zim.id}"></label>
-                        <input name="zimkennung" id="zimkennung" type="text" >
+                        <input name="zimkennung" id="zimkennung" type="text" autofocus>
                     </div>
                     <input type="submit" class="btn btn-primary" th:value="#{invoices.collect.open}"/>
                 </form>
