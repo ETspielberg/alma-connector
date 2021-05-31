@@ -21,6 +21,9 @@ public class NewItemWithOrder {
     @JacksonXmlProperty(localName = "CreationDate")
     private String creationDate;
 
+    @JacksonXmlProperty(localName = "MaterialType")
+    private String materialType;
+
     public String getPoLineReference() {
         return poLineReference;
     }
@@ -59,5 +62,13 @@ public class NewItemWithOrder {
 
     public void setCreationDate(String creationDate) {
         this.creationDate = creationDate;
+    }
+
+    public String getMaterialType() {
+        return materialType;
+    }
+
+    public void setMaterialType(String materialType) {
+        this.materialType = materialType;
     }
 }
