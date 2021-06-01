@@ -84,48 +84,50 @@ public class ScheduledService {
                 (polineNumber, list) -> {
                     // retrieve the full po line
                     PoLine poLine = this.almaPoLineService.getPoLine(polineNumber);
-                    for (NewItemWithOrder newItemWithOrder : list) {
+                    if (!poLine.getType().getValue().contains("CO")) {
+                        for (NewItemWithOrder newItemWithOrder : list) {
 
-                        // go through all connected items
-                        boolean itemUpdated = false;
+                            // go through all connected items
+                            boolean itemUpdated = false;
 
-                        // retrieve the full item
-                        Item item = almaItemService.findItemByMmsAndItemId(newItemWithOrder.getMmsId(), newItemWithOrder.getItemId());
+                            // retrieve the full item
+                            Item item = almaItemService.findItemByMmsAndItemId(newItemWithOrder.getMmsId(), newItemWithOrder.getItemId());
 
-                        // try to calculate the reduced price of the book and if successful, write it to the inventory price field.
-                        try {
-                            double price = Double.parseDouble(poLine.getPrice().getSum());
-                            double discount = Double.parseDouble(poLine.getDiscount());
-                            double reducedPrice = price * (1 - discount);
-                            String currency = poLine.getPrice().getCurrency().getValue();
-                            if (reducedPrice != 0.0) {
-                                item.getItemData().setInventoryPrice(String.format("%.2f %s", reducedPrice, currency));
-                                itemUpdated = true;
-                                log.debug(String.format("updated item inventory price to %.2f %s", reducedPrice, currency));
+                            // try to calculate the reduced price of the book and if successful, write it to the inventory price field.
+                            try {
+                                double price = Double.parseDouble(poLine.getPrice().getSum());
+                                double discount = Double.parseDouble(poLine.getDiscount());
+                                double reducedPrice = price * (100 - discount) / 100;
+                                String currency = poLine.getPrice().getCurrency().getValue();
+                                if (reducedPrice != 0.0) {
+                                    item.getItemData().setInventoryPrice(String.format("%.2f %s", reducedPrice, currency));
+                                    itemUpdated = true;
+                                    log.debug(String.format("updated item inventory price to %.2f %s", reducedPrice, currency));
+                                }
+                            } catch (Exception e) {
+                                log.warn(String.format("could not calculate reduced price because: %s", e.getMessage()));
                             }
-                        } catch (Exception e) {
-                            log.warn(String.format("could not calculate reduced price because: %s", e.getMessage()));
-                        }
 
-                        // try to set the dbs subject statistics field to the value corresponding to the fund code (if there is only one fund used)
-                        if (poLine.getFundDistribution().size() == 1) {
-                            String fund = poLine.getFundDistribution().get(0).getFundCode().getValue();
-                            String fundCode = "etat" + fund.substring(0, fund.indexOf("-"));
-                            log.info(String.format("updating item price and statistics field for lo line %s and fund %s", polineNumber, fund));
-                            if (codes.containsKey(fund) && item.getItemData().getStatisticsNote1() == null || item.getItemData().getStatisticsNote1().isEmpty()) {
+                            // try to set the dbs subject statistics field to the value corresponding to the fund code (if there is only one fund used)
+                            if (poLine.getFundDistribution().size() == 1) {
+                                String fund = poLine.getFundDistribution().get(0).getFundCode().getValue();
+                                String fundCode = "etat" + fund.substring(0, fund.indexOf("-"));
+                                log.info(String.format("updating item price and statistics field for po line %s and fund %s", polineNumber, fund));
+                                if (codes.containsKey(fund) && (item.getItemData().getStatisticsNote1() == null || item.getItemData().getStatisticsNote1().isEmpty())) {
                                     item.getItemData().setStatisticsNote1(codes.get(fundCode));
                                     itemUpdated = true;
                                     log.debug(String.format("updated statistics note 1 for item with mms id %s and pid %s to %s",
                                             newItemWithOrder.getMmsId(), newItemWithOrder.getItemId(), codes.get(fund)));
+                                }
                             }
-                        }
 
-                        // if the item has been updated, save the changes to alma
-                        if (itemUpdated) {
-                            this.almaItemService.updateItem(item);
-                            log.info(String.format("updated item %s with mms id %s", newItemWithOrder.getMmsId(), newItemWithOrder.getItemId()));
-                        }
+                            // if the item has been updated, save the changes to alma
+                            if (itemUpdated) {
+                                this.almaItemService.updateItem(item);
+                                log.info(String.format("updated item %s with mms id %s", newItemWithOrder.getMmsId(), newItemWithOrder.getItemId()));
+                            }
 
+                        }
                     }
                 }
         );
