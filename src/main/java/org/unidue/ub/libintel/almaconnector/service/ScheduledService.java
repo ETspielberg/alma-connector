@@ -2,16 +2,20 @@ package org.unidue.ub.libintel.almaconnector.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.unidue.ub.alma.shared.acq.InterestedUser;
 import org.unidue.ub.alma.shared.acq.PoLine;
 import org.unidue.ub.alma.shared.bibs.Item;
+import org.unidue.ub.alma.shared.user.AlmaUser;
 import org.unidue.ub.libintel.almaconnector.clients.analytics.AlmaAnalyticsReportClient;
 import org.unidue.ub.libintel.almaconnector.configuration.MappingTables;
 import org.unidue.ub.libintel.almaconnector.model.analytics.*;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaItemService;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaJobsService;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaPoLineService;
+import org.unidue.ub.libintel.almaconnector.service.alma.AlmaUserService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,9 +34,14 @@ public class ScheduledService {
 
     private final AlmaJobsService almaJobsService;
 
+    private final AlmaUserService almaUserService;
+
     private final Logger log = LoggerFactory.getLogger(ScheduledService.class);
 
     private final MappingTables mappingTables;
+
+    @Value("${libintel.happ.users}")
+    private List<String> happUsers;
 
     /**
      * constructor based autowiring of the necessary copmponents
@@ -46,12 +55,14 @@ public class ScheduledService {
                      MappingTables mappingTables,
                      AlmaItemService almaItemService,
                      AlmaPoLineService almaPoLineService,
-                     AlmaJobsService almaJobsService) {
+                     AlmaJobsService almaJobsService,
+                     AlmaUserService almaUserService) {
         this.almaAnalyticsReportClient = almaAnalyticsReportClient;
         this.mappingTables = mappingTables;
         this.almaItemService = almaItemService;
         this.almaPoLineService = almaPoLineService;
         this.almaJobsService = almaJobsService;
+        this.almaUserService = almaUserService;
     }
 
     /**
@@ -84,6 +95,7 @@ public class ScheduledService {
                 (polineNumber, list) -> {
                     // retrieve the full po line
                     PoLine poLine = this.almaPoLineService.getPoLine(polineNumber);
+                    boolean polineUpdated = false;
                     if (!poLine.getType().getValue().contains("CO")) {
                         for (NewItemWithOrder newItemWithOrder : list) {
 
@@ -112,12 +124,32 @@ public class ScheduledService {
                             if (poLine.getFundDistribution().size() == 1) {
                                 String fund = poLine.getFundDistribution().get(0).getFundCode().getValue();
                                 String fundCode = "etat" + fund.substring(0, fund.indexOf("-"));
+                                if (fund.contains("RW"))
+                                    fundCode += "RW";
                                 log.info(String.format("updating item price and statistics field for po line %s and fund %s", polineNumber, fund));
-                                if (codes.containsKey(fund) && (item.getItemData().getStatisticsNote1() == null || item.getItemData().getStatisticsNote1().isEmpty())) {
+                                if (codes.containsKey(fundCode) && (item.getItemData().getStatisticsNote1() == null || item.getItemData().getStatisticsNote1().isEmpty())) {
                                     item.getItemData().setStatisticsNote1(codes.get(fundCode));
                                     itemUpdated = true;
                                     log.debug(String.format("updated statistics note 1 for item with mms id %s and pid %s to %s",
                                             newItemWithOrder.getMmsId(), newItemWithOrder.getItemId(), codes.get(fund)));
+                                }
+                            }
+
+                            if (poLine.getInterestedUser() != null && poLine.getInterestedUser().size() > 0) {
+                                for (InterestedUser interestedUser: poLine.getInterestedUser()) {
+                                    String userId = interestedUser.getPrimaryId();
+                                    AlmaUser almaUser = this.almaUserService.getUser(userId);
+                                    if (happUsers.contains(almaUser.getUserGroup().getValue())) {
+                                        String receivingNote = poLine.getReceivingNote();
+                                        if (receivingNote != null && !receivingNote.isEmpty() && !receivingNote.contains("Happ")) {
+                                            receivingNote += " Happ-Vormerkung";
+                                        } else
+                                            receivingNote = "Happ-Vormerkung";
+                                        poLine.setReceivingNote(receivingNote);
+                                    }
+                                    interestedUser.setNotifyReceivingActivation(false);
+                                    interestedUser.setHoldItem(true);
+                                    polineUpdated = true;
                                 }
                             }
 
@@ -126,8 +158,11 @@ public class ScheduledService {
                                 this.almaItemService.updateItem(item);
                                 log.info(String.format("updated item %s with mms id %s", newItemWithOrder.getMmsId(), newItemWithOrder.getItemId()));
                             }
-
                         }
+                    }
+                    if (polineUpdated) {
+                        this.almaPoLineService.updatePoLine(poLine);
+                        log.info(String.format("updated po line %s tu update interested user", polineNumber));
                     }
                 }
         );
