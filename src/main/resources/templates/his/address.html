@@ -26,7 +26,7 @@
         <div class="ui-g-12 ui-md-6 ui-lg-4">
             <div class="tile centered">
                 <h2 th:text="#{address.request.results}"></h2>
-                <table class="table table-striped text-left">
+                <table th:if="${address ne null}" class="table table-striped text-left">
                     <tr>
                         <th th:text="#{firstname}">
                             firstname
@@ -84,6 +84,9 @@
                         </td>
                     </tr>
                 </table>
+                <p th:otherwise="${address ne null}">
+                    <char th:text="#{no.address.found}"></char>
+                </p>
             </div>
         </div>
 
