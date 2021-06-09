@@ -26,14 +26,11 @@ public class AlmaCatalogService {
         for (MarcDatafield field : holding.getRecord().getDatafield()) {
             if ("852".equals(field.getTag())) {
                 for (MarcSubfield subfield : field.getSubfield())
-                    if ("h".equals(subfield.getCode()))
-                        if (subfield.getValue() != null && !subfield.getCode().strip().isEmpty())
-                            return false;
-                        else {
-                            subfield.setValue(callNo);
-                            isSet = true;
-                            break;
-                        }
+                    if ("h".equals(subfield.getCode())) {
+                        subfield.setValue(callNo);
+                        isSet = true;
+                        break;
+                    }
                 if (!isSet) {
                     field.getSubfield().add(new MarcSubfield().code("h").value(callNo));
                     break;
@@ -54,7 +51,7 @@ public class AlmaCatalogService {
     }
 
     public boolean isPortfolios(String mmsId) {
-        Portfolios portfolios =  this.almaCatalogApiClient.getBibsMmsIdPortfolios(mmsId, 1, 0);
+        Portfolios portfolios = this.almaCatalogApiClient.getBibsMmsIdPortfolios(mmsId, 1, 0);
         return portfolios.getTotalRecordCount() > 0;
     }
 
