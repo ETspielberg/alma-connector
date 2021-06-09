@@ -45,11 +45,12 @@ public class ScheduledService {
 
     /**
      * constructor based autowiring of the necessary copmponents
+     *
      * @param almaAnalyticsReportClient the analytics client to retrieve the reports
-     * @param mappingTables tje mapping tables as defined by the MappingTables configuration and the corresponding configuration file
-     * @param almaItemService the feign client to interact with the alma item API
-     * @param almaPoLineService the feign client to interact with the alma po line API
-     * @param almaJobsService the feign client to interact with the alma jobs API
+     * @param mappingTables             tje mapping tables as defined by the MappingTables configuration and the corresponding configuration file
+     * @param almaItemService           the feign client to interact with the alma item API
+     * @param almaPoLineService         the feign client to interact with the alma po line API
+     * @param almaJobsService           the feign client to interact with the alma jobs API
      */
     ScheduledService(AlmaAnalyticsReportClient almaAnalyticsReportClient,
                      MappingTables mappingTables,
@@ -67,15 +68,21 @@ public class ScheduledService {
 
     /**
      * updates the item statistics note by the fund code in the corresponding order and the inventory price by the reduced item price
-     * @throws IOException thrown if the analytics report could not be retrieved.
      */
     @Scheduled(cron = "0 0 7 * * *")
-    public void updateStatisticField() throws IOException {
+    public void updateStatisticField() {
         // prepare the item statistics notes from the config file
         Map<String, String> codes = mappingTables.getItemStatisticNote();
 
         // retrieve the analytics report showing all new items of type book with the corresponding order and fund data
-        List<NewItemWithOrder> results = this.almaAnalyticsReportClient.getReport(NewItemWithFundReport.PATH, NewItemWithFundReport.class).getRows();
+        List<NewItemWithOrder> results;
+        try {
+            results = this.almaAnalyticsReportClient.getReport(NewItemWithFundReport.PATH, NewItemWithFundReport.class).getRows();
+        } catch (IOException ioe) {
+            log.warn("could not retrieve analytics report.", ioe);
+            return;
+        }
+
 
         // prepare a hashmap to sort the data corresponding to the po line number
         Map<String, List<NewItemWithOrder>> orders = new HashMap<>();
@@ -136,8 +143,10 @@ public class ScheduledService {
                             }
 
                             if (poLine.getInterestedUser() != null && poLine.getInterestedUser().size() > 0) {
-                                for (InterestedUser interestedUser: poLine.getInterestedUser()) {
+                                for (InterestedUser interestedUser : poLine.getInterestedUser()) {
                                     String userId = interestedUser.getPrimaryId();
+                                    if (userId.equals("CATALOGER") ||userId.equals("CD100000091W"))
+                                        continue;
                                     AlmaUser almaUser = this.almaUserService.getUser(userId);
                                     if (happUsers.contains(almaUser.getUserGroup().getValue())) {
                                         String receivingNote = poLine.getReceivingNote();
@@ -166,6 +175,7 @@ public class ScheduledService {
                     }
                 }
         );
+
     }
 
     @Scheduled(cron = "0 0 7,11,15,19 * * 1,2,3,4,5")
