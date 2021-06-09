@@ -1,5 +1,6 @@
 package org.unidue.ub.libintel.almaconnector.service;
 
+import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -147,14 +148,18 @@ public class ScheduledService {
                                     String userId = interestedUser.getPrimaryId();
                                     if (userId.equals("CATALOGER") ||userId.equals("CD100000091W"))
                                         continue;
-                                    AlmaUser almaUser = this.almaUserService.getUser(userId);
-                                    if (happUsers.contains(almaUser.getUserGroup().getValue())) {
-                                        String receivingNote = poLine.getReceivingNote();
-                                        if (receivingNote != null && !receivingNote.isEmpty() && !receivingNote.contains("Happ")) {
-                                            receivingNote += " Happ-Vormerkung";
-                                        } else
-                                            receivingNote = "Happ-Vormerkung";
-                                        poLine.setReceivingNote(receivingNote);
+                                    try {
+                                        AlmaUser almaUser = this.almaUserService.getUser(userId);
+                                        if (happUsers.contains(almaUser.getUserGroup().getValue())) {
+                                            String receivingNote = poLine.getReceivingNote();
+                                            if (receivingNote != null && !receivingNote.isEmpty() && !receivingNote.contains("Happ")) {
+                                                receivingNote += " Happ-Vormerkung";
+                                            } else
+                                                receivingNote = "Happ-Vormerkung";
+                                            poLine.setReceivingNote(receivingNote);
+                                        }
+                                    } catch (FeignException fe) {
+                                        log.warn(String.format("could not retrieve user %s: ", userId), fe);
                                     }
                                     interestedUser.setNotifyReceivingActivation(false);
                                     interestedUser.setHoldItem(true);
