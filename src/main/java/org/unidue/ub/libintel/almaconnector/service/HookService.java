@@ -206,18 +206,33 @@ public class HookService {
     @Async("threadPoolTaskExecutor")
     public void processItemHook(ItemHook hook) {
         Item item = hook.getItem();
-        log.info(String.format("got item with  call number %s and item call number %s", item.getHoldingData().getCallNumber(), item.getItemData().getAlternativeCallNumber()));
-        if (item.getHoldingData().getCallNumber() == null) {
-            log.warn("holding call number is null for item " + item.getItemData().getPid());
-            return;
-        }
-        String itemCallNo = hook.getItem().getItemData().getAlternativeCallNumber().strip();
-        if (!itemCallNo.isEmpty()) {
-            String callNo = itemCallNo.replaceAll("\\+\\d+", "");
-            String holdingCallNo = item.getHoldingData().getCallNumber().strip();
-            if (callNo.equals(holdingCallNo))
-                return;
-            this.almaCatalogService.updateCallNoInHolding(item.getBibData().getMmsId(), item.getHoldingData().getHoldingId(), callNo);
+        switch (item.getItemData().getPhysicalMaterialType().getValue()) {
+            case "ISSUE": {
+                log.info(String.format("deleting temporary location for received issue %s for shelfmark %s", item.getItemData().getBarcode(), item.getHoldingData().getCallNumber()));
+                if (!"ACQ".equals(item.getItemData().getProcessType().getValue())) {
+                    item.getHoldingData().setInTempLocation(false);
+                    item.getHoldingData().tempLocation(null);
+                    item.getHoldingData().tempLibrary(null);
+                }
+                break;
+            }
+            case "ISSBD":
+                break;
+            default: {
+                log.info(String.format("got item with  call number %s and item call number %s", item.getHoldingData().getCallNumber(), item.getItemData().getAlternativeCallNumber()));
+                if (item.getHoldingData().getCallNumber() == null) {
+                    log.warn("holding call number is null for item " + item.getItemData().getPid());
+                    return;
+                }
+                String itemCallNo = hook.getItem().getItemData().getAlternativeCallNumber().strip();
+                if (!itemCallNo.isEmpty()) {
+                    String callNo = itemCallNo.replaceAll("\\+\\d+", "");
+                    String holdingCallNo = item.getHoldingData().getCallNumber().strip();
+                    if (callNo.equals(holdingCallNo))
+                        return;
+                    this.almaCatalogService.updateCallNoInHolding(item.getBibData().getMmsId(), item.getHoldingData().getHoldingId(), callNo);
+                }
+            }
         }
     }
 
