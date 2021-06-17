@@ -79,7 +79,7 @@ public class BubiPricesService {
 
     /**
      * deletes all bubi prices by the corresponding vendor account
-     * @param vendorAccount
+     * @param vendorAccount the vendor account id
      */
     public void deleteBubiPrices(String vendorAccount) {
         this.bubiPricesRepository.deleteAllByVendorAccount(vendorAccount);

@@ -84,7 +84,7 @@ public class BubiOrderService {
      *             'complaint': retrieves all bubi orders with complaints
      *             'closed': retrieves all bubi orders which are already closed
      *             in all other cases all active bubi orders are retrieved (all except closed
-     * @return
+     * @return a list of bubi order
      */
     public List<BubiOrder> getBubiOrders(String mode) {
         switch (mode) {
