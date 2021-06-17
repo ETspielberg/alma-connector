@@ -18,6 +18,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * offers functions to retrieve item data from primo
+ *
+ * @author Eike Spielberg
+ * @author eike.spielberg@uni-due.de
+ * @version 1.0
+ */
 @Service
 public class PrimoService {
 
@@ -32,6 +39,11 @@ public class PrimoService {
     private final Logger log = LoggerFactory.getLogger(PrimoService.class);
 
 
+    /**
+     * retrieves alma data about a given signature
+     * @param almaItemData the alma item data provided
+     * @return the item data extended by the primo response
+     */
     public List<AlmaItemData> getPrimoResponse(AlmaItemData almaItemData) {
         try {
             // determine media type

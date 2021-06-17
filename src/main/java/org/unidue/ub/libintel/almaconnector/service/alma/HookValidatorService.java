@@ -9,12 +9,27 @@ import javax.crypto.spec.SecretKeySpec;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
+/**
+ * validates an alma webhook message by its hash signature
+ *
+ * @author Eike Spielberg
+ * @author eike.spielberg@uni-due.de
+ * @version 1.0
+ */
 @Service
 public class HookValidatorService {
 
     @Value("${libintel.alma.hook.secret}")
     private String hookSecret;
 
+    /**
+     * validates an alma webhook content by the header taken from the request header.
+     * @param content the string content of the webhook request
+     * @param signature the signature provided in the request header
+     * @return true, if the message content validates
+     * @throws NoSuchAlgorithmException thrown if the hashing mechanism is invalid
+     * @throws InvalidKeyException thrown if the hashing key generation fails
+     */
     public boolean isValid(String content, String signature) throws NoSuchAlgorithmException, InvalidKeyException {
         Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
         SecretKeySpec secret_key = new SecretKeySpec(hookSecret.getBytes(), "HmacSHA256");

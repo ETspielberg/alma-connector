@@ -14,6 +14,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * offers functions around jobs in Alma
+ *
+ * @author Eike Spielberg
+ * @author eike.spielberg@uni-due.de
+ * @version 1.0
+ */
 @Service
 public class AlmaJobsService {
 
@@ -21,27 +28,34 @@ public class AlmaJobsService {
 
     private final JobIdWithDescriptionRepository jobIdWithDescriptionRepository;
 
-    private final EntityManager entityManager;
-
     @Value("${alma.elisa.import.job.id:00000000}")
     private String elisaJobId;
 
+    /**
+     * constructor based autowiring of the alma jobs api feign client and the jobs with description repository
+     * @param almaJobsApiClient the alma jobs api feign client
+     * @param jobIdWithDescriptionRepository the jobs with description repository
+     */
     public AlmaJobsService(AlmaJobsApiClient almaJobsApiClient,
-                           JobIdWithDescriptionRepository jobIdWithDescriptionRepository,
-                           EntityManager entityManager) {
+                           JobIdWithDescriptionRepository jobIdWithDescriptionRepository) {
         this.almaJobsApiClient = almaJobsApiClient;
         this.jobIdWithDescriptionRepository = jobIdWithDescriptionRepository;
-        this.entityManager = entityManager;
     }
 
+    /**
+     * runs the elisa import job (elisa job id given as configuration parameter 'alma.elisa.import.job.id'
+     */
     public void runElisaImportJob() {
         this.almaJobsApiClient.postAlmawsV1ConfJobsJobId(new Job(),elisaJobId, "run");
 
     }
 
+    /**
+     * generates a list of <class>JobIdWithDescription</class> objects and stores them in the database
+     */
     public void updateJobsList() {
-        Integer limit = 100;
-        Integer offset = 0;
+        int limit = 100;
+        int offset = 0;
         Jobs jobs = this.almaJobsApiClient.getAlmawsV1ConfJobs("application/json", limit, offset, "", "", "");
         List<Job> allJobs = new ArrayList<>(jobs.getJob());
         int totalNumberOfJobs = jobs.getTotalRecordCount();
@@ -51,8 +65,6 @@ public class AlmaJobsService {
             allJobs.addAll(jobsInd.getJob());
         }
         if (allJobs.size() > 0) {
-            // String sql = "TRUNCATE his_export;";
-            // entityManager.createNativeQuery(sql).executeUpdate();
             for (Job job: allJobs) {
                 JobIdWithDescription jobIdWithDescription = new JobIdWithDescription(job.getId())
                         .withDescription(job.getDescription())
@@ -63,6 +75,11 @@ public class AlmaJobsService {
         }
     }
 
+    /**
+     * searches the jobs with description repository for a given search term
+     * @param term the search term
+     * @return a list of <class>JobIdWithDescription</class> objects
+     */
     public List<JobIdWithDescription> searchJob(String term) {
         return this.jobIdWithDescriptionRepository.findAllByCategoryContainingOrDescriptionContainingOrNameContaining(term, term, term);
     }

@@ -146,7 +146,7 @@ public class ScheduledService {
                             if (poLine.getInterestedUser() != null && poLine.getInterestedUser().size() > 0) {
                                 for (InterestedUser interestedUser : poLine.getInterestedUser()) {
                                     String userId = interestedUser.getPrimaryId();
-                                    if (userId.equals("CATALOGER") ||userId.equals("CD100000091W"))
+                                    if (userId.equals("CATALOGER") || userId.equals("CD100000091W"))
                                         continue;
                                     try {
                                         AlmaUser almaUser = this.almaUserService.getUser(userId);
@@ -180,7 +180,6 @@ public class ScheduledService {
                     }
                 }
         );
-
     }
 
     @Scheduled(cron = "0 0 7,11,15,19 * * 1,2,3,4,5")

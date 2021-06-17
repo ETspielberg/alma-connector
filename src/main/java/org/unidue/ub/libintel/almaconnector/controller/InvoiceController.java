@@ -21,7 +21,6 @@ import org.unidue.ub.libintel.almaconnector.model.run.AlmaExportRun;
 import org.unidue.ub.libintel.almaconnector.model.run.SapResponseRun;
 import org.unidue.ub.libintel.almaconnector.service.SapService;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaExportRunService;
-import org.unidue.ub.libintel.almaconnector.service.alma.AlmaInvoiceService;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaVendorService;
 
 
@@ -38,8 +37,6 @@ import static org.unidue.ub.libintel.almaconnector.service.SapService.*;
 @Controller
 public class InvoiceController {
 
-    private final AlmaInvoiceService almaInvoiceService;
-
     private final AlmaVendorService vendorService;
 
     private final AlmaExportRunService almaExportRunService;
@@ -54,15 +51,12 @@ public class InvoiceController {
     /**
      * constructor based autowiring to the invoice service, the filewriter service and the vendorservice.
      *
-     * @param almaInvoiceService the invoice service bean
      * @param vendorService       the vendor service bean
      * @param sapService          the sap service
      */
-    InvoiceController(AlmaInvoiceService almaInvoiceService,
-                      AlmaVendorService vendorService,
+    InvoiceController(AlmaVendorService vendorService,
                       SapService sapService,
                       AlmaExportRunService almaExportRunService) {
-        this.almaInvoiceService = almaInvoiceService;
         this.vendorService = vendorService;
         this.almaExportRunService = almaExportRunService;
         this.sapService = sapService;
@@ -106,7 +100,6 @@ public class InvoiceController {
         }
         almaExportRunNew.sortSapData();
         log.info(almaExportRunNew.log());
-        // almaExportRunNew = this.fileWriterService.writeAlmaExport(almaExportRunNew);
         model.addAttribute("almaExportRun", almaExportRunNew);
         return "sap/finishedRun";
     }
@@ -118,7 +111,7 @@ public class InvoiceController {
      * @throws IOException thrown if the file could not be read
      */
     @PostMapping("/invoicesUpdate")
-    public ResponseEntity<SapResponseRun> updateInvoicesWithSapData(@RequestParam("file") MultipartFile sapReturnFile) throws IOException {
+    public String updateInvoicesWithSapData(@RequestParam("file") MultipartFile sapReturnFile, Model model) throws IOException {
         // read the excel spreadsheet from the request
         XSSFWorkbook workbook = new XSSFWorkbook(sapReturnFile.getInputStream());
         // retrieve first sheet
@@ -127,7 +120,8 @@ public class InvoiceController {
         //convert the excel sheet to a SapResponseRun holding the individual responses
         SapResponseRun container = getFromExcel(worksheet, sapReturnFile.getOriginalFilename());
         container = this.sapService.updateInvoiceWithErpData(container);
-        return ResponseEntity.ok(container);
+        model.addAttribute("results", container);
+        return "sap/reimportResults";
     }
 
     /**

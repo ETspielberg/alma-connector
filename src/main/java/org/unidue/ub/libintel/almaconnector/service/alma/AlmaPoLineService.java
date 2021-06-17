@@ -10,6 +10,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * offers functions around po lines in Alma
+ *
+ * @author Eike Spielberg
+ * @author eike.spielberg@uni-due.de
+ * @version 1.0
+ */
 @Service
 public class AlmaPoLineService {
 
@@ -120,6 +127,10 @@ public class AlmaPoLineService {
                 .addNoteItem(note);
     }
 
+    /**
+     * updates a po line by the data from a bubi order line
+     * @param bubiOrderLine the bubi order line corresponding to a given po line
+     */
     public void updatePoLineByBubiOrderLine(BubiOrderLine bubiOrderLine) {
         PoLine poLine = this.almaPoLinesApiClient.getPoLinesPoLineId("application/json", bubiOrderLine.getAlmaPoLineId());
         Amount amount = new Amount().sum(String.valueOf(bubiOrderLine.getPrice()))

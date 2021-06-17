@@ -16,6 +16,13 @@ import org.unidue.ub.libintel.almaconnector.model.hook.RequestHook;
 import org.unidue.ub.libintel.almaconnector.service.alma.*;
 import org.unidue.ub.libintel.almaconnector.service.bubi.BubiOrderLineService;
 
+/**
+ * offers functions for processing different types of alma web hooks
+ *
+ * @author Eike Spielberg
+ * @author eike.spielberg@uni-due.de
+ * @version 1.0
+ */
 @Service
 public class HookService {
 
@@ -33,6 +40,15 @@ public class HookService {
 
     private final Logger log = LoggerFactory.getLogger(HookService.class);
 
+    /**
+     * constructor based autowiring to the individual services
+     * @param almaUserService the alma user api feign client
+     * @param almaItemService the alma item api feign client
+     * @param almaCatalogService the alma bib api feign client
+     * @param bubiOrderLineService the bubi order line service
+     * @param almaElectronicService the alma electronic api feign client
+     * @param hookValidatorService the hook validator service
+     */
     HookService(AlmaUserService almaUserService,
                 AlmaItemService almaItemService,
                 AlmaCatalogService almaCatalogService,
@@ -47,6 +63,10 @@ public class HookService {
         this.hookValidatorService = hookValidatorService;
     }
 
+    /**
+     * processes a webhook for a request event sent by alma
+     * @param hook the request webhook
+     */
     @Async("threadPoolTaskExecutor")
     public void processRequestHook(RequestHook hook) {
         HookUserRequest userRequest = hook.getUserRequest();
@@ -97,6 +117,10 @@ public class HookService {
         }
     }
 
+    /**
+     * processes a webhook for a loan event sent by alma
+     * @param hook the loan webhook
+     */
     @Async("threadPoolTaskExecutor")
     public void processLoanHook(LoanHook hook) {
         HookItemLoan itemLoan = hook.getItemLoan();
@@ -203,6 +227,10 @@ public class HookService {
         }
     }
 
+    /**
+     * processes a webhook for an item event sent by alma
+     * @param hook the item webhook
+     */
     @Async("threadPoolTaskExecutor")
     public void processItemHook(ItemHook hook) {
         Item item = hook.getItem();
@@ -236,6 +264,10 @@ public class HookService {
         }
     }
 
+    /**
+     * processes a webhook for a bib event sent by alma
+     * @param hook the bib webhook
+     */
     @Async("threadPoolTaskExecutor")
     public void processBibHook(BibHook hook) {
         BibWithRecord bib = hook.getBib();
@@ -244,35 +276,38 @@ public class HookService {
             if (this.almaCatalogService.isPortfolios(mmsId))
                 return;
             BibWithRecord bibWithRecord = this.almaCatalogService.getRecord(mmsId);
-            if (this.almaCatalogService.getNumberOfPortfolios(bib.getMmsId()) == 0) {
-                boolean isOnline = false;
-                boolean isDiss = false;
-                String url = "";
-                for (MarcDatafield datafield : bibWithRecord.getRecord().getDatafield()) {
-                    if ("338".equals(datafield.getTag())) {
-                        for (MarcSubfield subfield : datafield.getSubfield()) {
-                            if ("b".equals(subfield.getCode()))
-                                isOnline = "cr".equals(subfield.getValue());
-                        }
-                    } else if ("502".equals(datafield.getTag())) {
-                        for (MarcSubfield subfield : datafield.getSubfield()) {
-                            if ("b".equals(subfield.getCode()))
-                                isDiss = "Dissertation".equals(subfield.getValue());
-                        }
-                    } else if ("856".equals(datafield.getTag())) {
-                        for (MarcSubfield subfield : datafield.getSubfield()) {
-                            if ("u".equals(subfield.getCode()))
-                                url = subfield.getValue();
-                        }
+            boolean isOnline = false;
+            boolean isDiss = false;
+            String url = "";
+            for (MarcDatafield datafield : bibWithRecord.getRecord().getDatafield()) {
+                if ("338".equals(datafield.getTag())) {
+                    for (MarcSubfield subfield : datafield.getSubfield()) {
+                        if ("b".equals(subfield.getCode()))
+                            isOnline = "cr".equals(subfield.getValue());
+                    }
+                } else if ("502".equals(datafield.getTag())) {
+                    for (MarcSubfield subfield : datafield.getSubfield()) {
+                        if ("b".equals(subfield.getCode()))
+                            isDiss = "Dissertation".equals(subfield.getValue());
+                    }
+                } else if ("856".equals(datafield.getTag())) {
+                    for (MarcSubfield subfield : datafield.getSubfield()) {
+                        if ("u".equals(subfield.getCode()))
+                            url = subfield.getValue();
                     }
                 }
-                if (isDiss && isOnline) {
-                    this.almaElectronicService.createDissPortfolio(mmsId, url);
-                }
+            }
+            if (isDiss && isOnline) {
+                this.almaElectronicService.createDissPortfolio(mmsId, url);
             }
         }
     }
 
+    /**
+     * generalized method for processing any kind of hook
+     * @param hook the string content of the webhook
+     * @param type the typoe of webhook event
+     */
     @Async("threadPoolTaskExecutor")
     public void processHook(String hook, String type) {
         try {

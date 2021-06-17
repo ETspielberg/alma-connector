@@ -19,7 +19,6 @@ import org.unidue.ub.libintel.almaconnector.model.sap.SapData;
 import org.unidue.ub.libintel.almaconnector.model.sap.SapResponse;
 import org.unidue.ub.libintel.almaconnector.repository.AlmaExportRunRepository;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaInvoiceService;
-import org.unidue.ub.libintel.almaconnector.service.alma.AlmaPoLineService;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -32,14 +31,19 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * offers functions around sap import and export data managed in alma
+ *
+ * @author Eike Spielberg
+ * @author eike.spielberg@uni-due.de
+ * @version 1.0
+ */
 @Service
 public class SapService {
 
     private final AlmaInvoiceService almaInvoiceService;
 
     private final AlmaExportRunRepository almaExportRunRepository;
-
-    private final AlmaPoLineService almaPoLineService;
 
     private final AlmaAnalyticsReportClient almaAnalyticsReportClient;
 
@@ -55,16 +59,18 @@ public class SapService {
     /**
      * constructor based autowiring of the Feign client
      *
+     * @param dataDir the data directory where the export files are stored in
      * @param almaInvoiceService the Feign client for the Alma Invoice API
+     * @param almaExportRunRepository the repository holding the data for an individual export run
+     * @param almaAnalyticsReportClient the client to retrieve alma analytics reports
+     *
      */
     SapService(@Value("${ub.statistics.data.dir}") String dataDir,
                AlmaInvoiceService almaInvoiceService,
-               AlmaPoLineService almaPoLineService,
                AlmaExportRunRepository almaExportRunRepository,
                AlmaAnalyticsReportClient almaAnalyticsReportClient) {
         this.file = dataDir + "/sapData/";
         this.almaInvoiceService = almaInvoiceService;
-        this.almaPoLineService = almaPoLineService;
         this.almaExportRunRepository = almaExportRunRepository;
         this.almaAnalyticsReportClient = almaAnalyticsReportClient;
         File folder = new File(this.file);
@@ -77,7 +83,7 @@ public class SapService {
     /**
      * updates the Invoices in Alma with the results of the SAP import
      *
-     * @param container an SAP container object holding a list of SAP response object
+     * @param container the <class>SapResponseRun</class> object holding the data about this re-import session
      * @return the SAP container objects the number of missed entries
      */
     public SapResponseRun updateInvoiceWithErpData(SapResponseRun container) {
@@ -145,36 +151,11 @@ public class SapService {
         return container;
     }
 
-    private SapResponseRun checkAndClosePoLines(HashMap<String, Boolean> poLines, SapResponseRun container) {
-        poLines.forEach(
-                (entry, fullyInvoiced) -> {
-                    log.info(String.format("processing po line %s", entry));
-                    PoLine poLine = this.almaPoLineService.getPoLine(entry);
-                    container.addOneTimeOrder(entry);
-                    if (poLine.getType().getValue().contains("OT")) {
-                        if (fullyInvoiced) {
-                            boolean success = this.almaPoLineService.closePoLine(poLine);
-                            if (success) {
-                                container.addClosedPoLine(entry);
-                                log.info(String.format("closed po line %s", entry));
-                            } else {
-                                log.warn(String.format("could not close po line %s", entry));
-                                container.addPoLineWithError(entry);
-                                container.increaseNumberOfPoLineErrors();
-                            }
-                        } else {
-                            log.info(String.format("po line %s is not fully invoiced", entry));
-                        }
-                    } else {
-                        container.increaseNumberOfStandingOrders();
-                        container.addStandingOrder(entry);
-                        log.info(String.format("po line %s is not an one-time order", entry));
-                    }
-                }
-        );
-        return container;
-    }
-
+    /**
+     * uses a provided alma analytics report to retrieve the open invoices to be exported
+     * @param almaExportRun the <class>AlmaExportRun</class> object holding the data about this export session
+     * @return a list of invoices
+     */
     public List<Invoice> getOpenInvoicesFromAnalytics(AlmaExportRun almaExportRun) {
         try {
             List<InvoiceForPayment> result = this.almaAnalyticsReportClient.getReport(InvoiceForPaymentReport.PATH, InvoiceForPaymentReport.class).getRows();
@@ -201,94 +182,10 @@ public class SapService {
         }
     }
 
-    private SapData generateComment(SapData sapData) {
-        if (sapData.getComment() != null && !sapData.getComment().trim().isEmpty())
-            return sapData;
-        switch (sapData.sapAccountData.getImportCheckString()) {
-            case "681004002020P55300000030002":
-            case "681010002020P55300000030002":
-            case "681000002020P40100000130010":
-            case "681002002020P55300000030002":
-            case "681000002020P55300000030002":
-            case "681005002020P55300000030002":
-                break;
-            default: {
-                if ("B-HBZ".equals(sapData.vendorCode)) {
-                    return sapData;
-                }
-                switch (sapData.sapAccountData.getLedgerAccount()) {
-                    case "68100000": {
-                        sapData.comment = "Monographien";
-                        break;
-                    }
-                    case "68100200": {
-                        sapData.comment = "Zeitschriften-Abo";
-                        break;
-                    }
-                    case "68100210": {
-                        sapData.comment = "Zeitschriften-Abo Verbrauch";
-                        break;
-                    }
-                    case "68100300": {
-                        sapData.comment = "Fortsetzungen";
-                        break;
-                    }
-                    case "68100400": {
-                        sapData.comment = "Elektron. Zeitschr., Kauf";
-                        break;
-                    }
-                    case "68100500": {
-                        sapData.comment = "Elektron. Zeitschr., Lizenz";
-                        break;
-                    }
-                    case "68100600": {
-                        sapData.comment = "Datenbanken, laufend/Kauf";
-                        break;
-                    }
-                    case "68100700": {
-                        sapData.comment = "Datenbanken, laufend/Lizenz";
-                        break;
-                    }
-                    case "68100800": {
-                        sapData.comment = "Datenbanken, einmalig/Kauf";
-                        break;
-                    }
-                    case "68100900": {
-                        sapData.comment = "Datenbanken, einmalig/Lizenz";
-                        break;
-                    }
-                    case "68101000": {
-                        sapData.comment = "Sonst. Non-Book-Materialien";
-                        break;
-                    }
-                    case "68101100": {
-                        sapData.comment = "Einband";
-                        break;
-                    }
-                    case "68101200": {
-                        sapData.comment = "Bestandserhaltung";
-                        break;
-                    }
-                    case "68101900": {
-                        sapData.comment = "Sonst. Literaturkosten";
-                        break;
-                    }
-                    case "68910100": {
-                        sapData.comment = "Aufwendungen f. Veroeffentlichungen";
-                        break;
-                    }
-                    default:
-                        sapData.comment = "";
-                }
-            }
-        }
-        return sapData;
-    }
-
     /**
      * writes the SAP data contained in an AlmaExportRun object as files to disk
      *
-     * @param almaExportRun the AlmaExportRun object holding a list of SAP data
+     * @param almaExportRun the <class>AlmaExportRun</class> object holding the data about this export session
      * @return the AlmaExportRun object updated with the files created and the number of failed entries to be written
      */
     public AlmaExportRun writeAlmaExport(AlmaExportRun almaExportRun) {
@@ -336,54 +233,6 @@ public class SapService {
         }
         this.almaExportRunRepository.save(almaExportRun);
         return almaExportRun;
-    }
-
-    private void addLineToFile(String filename, String line) throws IOException {
-        log.info("writing line \n" + line);
-        BufferedWriter bw = new BufferedWriter(new FileWriter(this.file + filename, true));
-        bw.write(line);
-        bw.newLine();
-        bw.flush();
-        bw.close();
-    }
-
-    /**
-     * adds a line to the output file
-     *
-     * @param bw   the buffered writer for the file
-     * @param line the line to be added
-     * @throws IOException thrown if problems writing to the file occur
-     */
-    private void addLine(BufferedWriter bw, String line) throws IOException {
-        bw.write(line);
-        bw.newLine();
-        bw.flush();
-    }
-
-    /**
-     * initialize files and deletes the files if present.
-     *
-     * @param currentDate   the current date
-     * @param checkFilename the filename of the check/printed version
-     * @param sapFilename   the filename of the SAP import file
-     */
-    private void initializeFiles(String currentDate, String checkFilename, String sapFilename, String foreignFilename) {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(this.file + checkFilename, false))) {
-            addLine(bw, "Kontrollausdruck der SAP-Datei, Bearbeitungsdatum: " + currentDate);
-        } catch (IOException ioe) {
-            log.warn("could not create empty check file at " + currentDate, ioe);
-        }
-        initializeSapFiles(sapFilename);
-        initializeSapFiles(foreignFilename);
-    }
-
-    private void initializeSapFiles(String filename) {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(this.file + filename, false))) {
-            bw.write("");
-            bw.flush();
-        } catch (IOException ioe) {
-            log.warn("could not create empty sap file.", ioe);
-        }
     }
 
     /**
@@ -814,6 +663,11 @@ public class SapService {
     }
 
 
+    /**
+     * retrieves a list of invoices for a given export session
+     * @param almaExportRun the <class>AlmaExportRun</class> object holding the data about this export session
+     * @return the <class>AlmaExportRun</class> object holding the data about this export session and the retrieved invoices
+     */
     public AlmaExportRun getInvoices(AlmaExportRun almaExportRun) {
         List<Invoice> invoices;
         if (almaExportRun.isDateSpecific()) {
@@ -828,6 +682,124 @@ public class SapService {
         almaExportRun.setLastRun(new Date());
         this.almaExportRunRepository.save(almaExportRun);
         return almaExportRun;
+    }
+
+    private void addLineToFile(String filename, String line) throws IOException {
+        log.info("writing line \n" + line);
+        BufferedWriter bw = new BufferedWriter(new FileWriter(this.file + filename, true));
+        bw.write(line);
+        bw.newLine();
+        bw.flush();
+        bw.close();
+    }
+
+    private void addLine(BufferedWriter bw, String line) throws IOException {
+        bw.write(line);
+        bw.newLine();
+        bw.flush();
+    }
+
+    private void initializeFiles(String currentDate, String checkFilename, String sapFilename, String foreignFilename) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(this.file + checkFilename, false))) {
+            addLine(bw, "Kontrollausdruck der SAP-Datei, Bearbeitungsdatum: " + currentDate);
+        } catch (IOException ioe) {
+            log.warn("could not create empty check file at " + currentDate, ioe);
+        }
+        initializeSapFiles(sapFilename);
+        initializeSapFiles(foreignFilename);
+    }
+
+    private void initializeSapFiles(String filename) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(this.file + filename, false))) {
+            bw.write("");
+            bw.flush();
+        } catch (IOException ioe) {
+            log.warn("could not create empty sap file.", ioe);
+        }
+    }
+
+    private SapData generateComment(SapData sapData) {
+        if (sapData.getComment() != null && !sapData.getComment().trim().isEmpty())
+            return sapData;
+        switch (sapData.sapAccountData.getImportCheckString()) {
+            case "681004002020P55300000030002":
+            case "681010002020P55300000030002":
+            case "681000002020P40100000130010":
+            case "681002002020P55300000030002":
+            case "681000002020P55300000030002":
+            case "681005002020P55300000030002":
+                break;
+            default: {
+                if ("B-HBZ".equals(sapData.vendorCode)) {
+                    return sapData;
+                }
+                switch (sapData.sapAccountData.getLedgerAccount()) {
+                    case "68100000": {
+                        sapData.comment = "Monographien";
+                        break;
+                    }
+                    case "68100200": {
+                        sapData.comment = "Zeitschriften-Abo";
+                        break;
+                    }
+                    case "68100210": {
+                        sapData.comment = "Zeitschriften-Abo Verbrauch";
+                        break;
+                    }
+                    case "68100300": {
+                        sapData.comment = "Fortsetzungen";
+                        break;
+                    }
+                    case "68100400": {
+                        sapData.comment = "Elektron. Zeitschr., Kauf";
+                        break;
+                    }
+                    case "68100500": {
+                        sapData.comment = "Elektron. Zeitschr., Lizenz";
+                        break;
+                    }
+                    case "68100600": {
+                        sapData.comment = "Datenbanken, laufend/Kauf";
+                        break;
+                    }
+                    case "68100700": {
+                        sapData.comment = "Datenbanken, laufend/Lizenz";
+                        break;
+                    }
+                    case "68100800": {
+                        sapData.comment = "Datenbanken, einmalig/Kauf";
+                        break;
+                    }
+                    case "68100900": {
+                        sapData.comment = "Datenbanken, einmalig/Lizenz";
+                        break;
+                    }
+                    case "68101000": {
+                        sapData.comment = "Sonst. Non-Book-Materialien";
+                        break;
+                    }
+                    case "68101100": {
+                        sapData.comment = "Einband";
+                        break;
+                    }
+                    case "68101200": {
+                        sapData.comment = "Bestandserhaltung";
+                        break;
+                    }
+                    case "68101900": {
+                        sapData.comment = "Sonst. Literaturkosten";
+                        break;
+                    }
+                    case "68910100": {
+                        sapData.comment = "Aufwendungen f. Veroeffentlichungen";
+                        break;
+                    }
+                    default:
+                        sapData.comment = "";
+                }
+            }
+        }
+        return sapData;
     }
 
 }

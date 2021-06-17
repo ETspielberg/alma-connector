@@ -13,6 +13,13 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 
+/**
+ * offers functions around invoices in Alma
+ *
+ * @author Eike Spielberg
+ * @author eike.spielberg@uni-due.de
+ * @version 1.0
+ */
 @Service
 public class AlmaInvoiceService {
 
@@ -69,28 +76,53 @@ public class AlmaInvoiceService {
         return filterList(date, getOpenInvoices(owner));
     }
 
+    /**
+     * saves a new invoice to Alma
+     * @param invoice the invoide to be saved
+     * @return the saved invoice
+     */
     public Invoice saveInvoice(Invoice invoice) {
         return this.almaInvoicesApiClient.postAcqInvoices(invoice, "application/json");
     }
 
+    /**
+     * retrieved an invoice by the invoice id
+     * @param invoiceNumber the invoice id
+     * @return the invoice
+     */
     public Invoice retrieveInvoice(String invoiceNumber) {
         return this.almaInvoicesApiClient.getInvoicesInvoiceId("application/json", invoiceNumber, "full");
     }
 
-    public Invoices getInvoicesForInvocieId(String invoiceId) {
-        String searchQuery = "invoice_number~" + invoiceId;
+    /**
+     * retrieves an invoice by the invoice number
+     * @param invoiceNumber the invoice number
+     * @return the an <class>Invoices</class> object, holding all invoices with that invoice number
+     */
+    public Invoices getInvoicesForInvocieId(String invoiceNumber) {
+        String searchQuery = "invoice_number~" + invoiceNumber;
         Invoices invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE",
                 "Waiting to be Sent", "", "", searchQuery, 20, 0, "");
 
-        log.debug(String.format("found %d invoices for invoice number %s", invoices.getTotalRecordCount(), invoiceId));
+        log.debug(String.format("found %d invoices for invoice number %s", invoices.getTotalRecordCount(), invoiceNumber));
         return invoices;
     }
 
+    /**
+     * adds payment information for a partial payment
+     * @param invoice the invoice to be updated
+     * @param payment the information for the partial payment
+     */
     public void addPartialPayment(Invoice invoice, Payment payment) {
         InvoiceUpdate invoiceUpdate = new InvoiceUpdate(payment);
         this.almaInvoicesApiClient.postInvoicesInvoiceIdToUpdate(invoiceUpdate, "application/json", invoice.getId(), "paid");
     }
 
+    /**
+     * adds payment information for a full payment
+     * @param invoice the invoice to be updated
+     * @param payment the information for the full payment
+     */
     public void addFullPayment(Invoice invoice, Payment payment) {
         payment.setPaymentStatus(new PaymentPaymentStatus().value("PAID").desc("bezahlt"));
         InvoiceUpdate invoiceUpdate = new InvoiceUpdate(payment);

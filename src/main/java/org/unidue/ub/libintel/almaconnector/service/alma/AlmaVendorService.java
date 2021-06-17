@@ -9,6 +9,13 @@ import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.Vendor;
 import org.unidue.ub.libintel.almaconnector.clients.acquisition.AlmaVendorApiClient;
 
+/**
+ * offers functions around vendors in Alma
+ *
+ * @author Eike Spielberg
+ * @author eike.spielberg@uni-due.de
+ * @version 1.0
+ */
 @Service
 public class AlmaVendorService {
 
@@ -17,8 +24,8 @@ public class AlmaVendorService {
     private final Logger log = LoggerFactory.getLogger(AlmaVendorService.class);
 
     /**
-     * constructor based autowiring of the Feign client.
-     * @param almaVendorApiClient the Feign client for the Alma Vendor API
+     * constructor based autowiring of the alma vendor api feign client.
+     * @param almaVendorApiClient the alma vendor api feign client
      */
     AlmaVendorService(AlmaVendorApiClient almaVendorApiClient) {
         this.almaVendorApiClient = almaVendorApiClient;

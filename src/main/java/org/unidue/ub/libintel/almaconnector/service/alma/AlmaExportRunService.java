@@ -12,7 +12,11 @@ import java.util.List;
 import static org.unidue.ub.libintel.almaconnector.service.SapService.dateformat;
 
 /**
- * The service  running the export runs
+ * The service running the export runs
+ *
+ * @author Eike Spielberg
+ * @author eike.spielberg@uni-due.de
+ * @version 1.0
  */
 @Service
 public class AlmaExportRunService {
