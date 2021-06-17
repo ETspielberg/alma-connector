@@ -10,6 +10,13 @@ import org.unidue.ub.libintel.almaconnector.repository.BubiPricesRepository;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * offers functions around bubi prices
+ *
+ * @author Eike Spielberg
+ * @author eike.spielberg@uni-due.de
+ * @version 1.0
+ */
 @Service
 public class BubiPricesService {
 
@@ -17,10 +24,19 @@ public class BubiPricesService {
 
     private final Logger log = LoggerFactory.getLogger(BubiPricesService.class);
 
+    /**
+     * autobased autowiring to the bubi price repository
+     * @param bubiPricesRepository the bubi price repository
+     */
     BubiPricesService(BubiPricesRepository bubiPricesRepository) {
         this.bubiPricesRepository = bubiPricesRepository;
     }
 
+    /**
+     * calculates the prices for a given bubi orderline by the prices from the bubi price repository
+     * @param bubiOrderLine the bubi orderline for which the price is to be calculated
+     * @return the price to be paid for a given bubi orderline
+     */
     public double calculatePriceForOrderline(BubiOrderLine bubiOrderLine) {
         double price = 0.0;
         String vendorAccount = bubiOrderLine.getVendorAccount();
@@ -52,14 +68,28 @@ public class BubiPricesService {
         return price;
     }
 
+    /**
+     * saves a single bubi price
+     * @param bubiPrice a single bubi price
+     * @return the saved bubi price
+     */
     public BubiPrice saveBubiPrice(BubiPrice bubiPrice) {
         return bubiPricesRepository.save(bubiPrice);
     }
 
+    /**
+     * deletes all bubi prices by the corresponding vendor account
+     * @param vendorAccount
+     */
     public void deleteBubiPrices(String vendorAccount) {
         this.bubiPricesRepository.deleteAllByVendorAccount(vendorAccount);
     }
 
+    /**
+     * generates a set of new bubi prices for a new vendor account
+     * @param vendorAccount the vendor account
+     * @return a list of bubi prices created for this vendor account
+     */
     public List<BubiPrice> createNewBubiPricesForVendorAccount(String vendorAccount) {
         List<BubiPrice> bubiPrices = new ArrayList<>();
         bubiPrices.add(new BubiPrice().withPrice(12.50).withName("bindPublisherSleeve").withVendorAccount(vendorAccount));
@@ -94,7 +124,12 @@ public class BubiPricesService {
         this.bubiPricesRepository.saveAll(bubiPrices);
         return bubiPrices;
     }
-    
+
+    /**
+     * retrieves all bubi prices for a given vendor account
+     * @param vendorAccount the vendor account
+     * @return a list of bubi prices as obtained from the repository for this vendor account.
+     */
     public List<BubiPrice> getBubiPricesForVendorAccount(String vendorAccount) {
         return this.bubiPricesRepository.findAllByVendorAccount(vendorAccount);
     }

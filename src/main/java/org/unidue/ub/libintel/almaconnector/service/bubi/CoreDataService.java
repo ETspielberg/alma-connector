@@ -13,6 +13,13 @@ import org.unidue.ub.libintel.almaconnector.service.PrimoService;
 import java.util.List;
 import java.util.regex.Pattern;
 
+/**
+ * offers functions around core data for bubi order lines
+ *
+ * @author Eike Spielberg
+ * @author eike.spielberg@uni-due.de
+ * @version 1.0
+ */
 @Service
 public class CoreDataService {
 
@@ -20,36 +27,76 @@ public class CoreDataService {
 
     private final PrimoService primoService;
 
+    /**
+     * constructor based autowiring of the core data repository and the primo service to extend the journal data
+     * @param coreDataRepository the core data repository
+     * @param primoService the primo service
+     */
     CoreDataService(CoreDataRepository coreDataRepository,
                     PrimoService primoService) {
         this.coreDataRepository = coreDataRepository;
         this.primoService = primoService;
     }
 
+    /**
+     * retrieves all core data marked as active
+     * @return a list of <class>CoreData</class> objects
+     */
     public List<CoreData> getActiveCoreData() {
         return this.coreDataRepository.findAllByActiveOrderByMinting(true);
     }
 
+    /**
+     * retrieves all core data (active and inactive)
+     * @return a list of <class>CoreData</class> objects
+     */
     public List<CoreData> getAllCoreData() {
         return this.coreDataRepository.findAll();
     }
 
+    /**
+     * retrieves core data for an item with by its collection and shelfmark
+     * @param collection the collection of the item
+     * @param shelfmark the shelfmark of the item
+     * @return the core data for this item
+     */
     public CoreData getForCollectionAndShelfmark(String collection, String shelfmark) {
         return this.coreDataRepository.findAllByCollectionAndShelfmark(collection, shelfmark);
     }
 
+    /**
+     * retreives the default core data for a given material type
+     * @param material the material type
+     * @param campus the campus for which the mdefault is obtained
+     * @return the default core data for this type of items
+     */
     public CoreData findDefaultForMaterial(String material, String campus) {
         return this.coreDataRepository.findCoreDataByActiveAndShelfmarkAndMediaTypeOrderByMinting(true, "STANDARD_" + campus, material);
     }
 
+    /**
+     * saves the core data for an item
+     * @param coreData the core data to be saved
+     * @return the saved core data
+     */
     public CoreData saveCoreData(CoreData coreData) {
         return this.coreDataRepository.save(coreData);
     }
 
+    /**
+     * deletes the core data for an item
+     * @param coreDataId hte id of the core data to be deleted
+     */
     public void deleteCoreData(String coreDataId) {
         this.coreDataRepository.deleteById(coreDataId);
     }
 
+    /**
+     * loads a list of core data from an excel file
+     * @param coreDataImportRun the import session object
+     * @param workbook the excel workbook to be imported
+     * @return the import session object
+     */
     public CoreDataImportRun readCoreDataFromExcelSheet(CoreDataImportRun coreDataImportRun, XSSFWorkbook workbook) {
         // retrieve first sheet
         XSSFSheet worksheet = workbook.getSheetAt(0);

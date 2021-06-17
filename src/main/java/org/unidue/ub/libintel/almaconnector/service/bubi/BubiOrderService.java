@@ -19,6 +19,13 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 
+/**
+ * offers functions around bubi orders
+ *
+ * @author Eike Spielberg
+ * @author eike.spielberg@uni-due.de
+ * @version 1.0
+ */
 @Service
 public class BubiOrderService {
 
@@ -36,6 +43,15 @@ public class BubiOrderService {
 
     private final Logger log = LoggerFactory.getLogger(BubiOrderService.class);
 
+    /**
+     * constructor based autowiring of the desired services
+     * @param bubiOrderRepository the bubi order repository
+     * @param bubiOrderLineRepository the bubi orderline repository
+     * @param almaPoLineService the alma po line service
+     * @param almaInvoiceService the alma invoices service
+     * @param almaItemService the alma item service
+     * @param bubiDataRepository the bubi data repository
+     */
     public BubiOrderService(
             BubiOrderRepository bubiOrderRepository,
             BubiOrderLineRepository bubiOrderLineRepository,
@@ -51,10 +67,25 @@ public class BubiOrderService {
         this.bubiDataRepository = bubiDataRepository;
     }
 
+    /**
+     * retrieves a bubi order by its id
+     * @param bubiOrderId the id of the bubi order
+     * @return the bubi order
+     */
     public BubiOrder getBubiOrder(String bubiOrderId) {
         return this.bubiOrderRepository.getOne(bubiOrderId);
     }
 
+    /**
+     * retrieves a list of bubi orders by a given mode
+     * @param mode the mode for which the bubi orders are to be retrieved. currently supported:
+     *             'all': retrieves all bubi orders from the repository
+     *             'sent': retrieves all sent, but not yet returned bubi orders
+     *             'complaint': retrieves all bubi orders with complaints
+     *             'closed': retrieves all bubi orders which are already closed
+     *             in all other cases all active bubi orders are retrieved (all except closed
+     * @return
+     */
     public List<BubiOrder> getBubiOrders(String mode) {
         switch (mode) {
             case "all":
@@ -81,6 +112,11 @@ public class BubiOrderService {
         }
     }
 
+    /**
+     * packs a bubi order to be retrieved by the bubi
+     * @param bubiOrder the initial bubi order to be packed
+     * @return a list of bubiorders grouping the initial bubi order by the vendor accounts
+     */
     public List<BubiOrder> packBubiOrder(BubiOrder bubiOrder) {
         Hashtable<String, BubiOrder> bubiOrders = new Hashtable<>();
         for (BubiOrderLine bubiOrderLine: bubiOrder.getBubiOrderLines()) {
@@ -117,6 +153,11 @@ public class BubiOrderService {
         return new ArrayList<>(bubiOrders.values());
     }
 
+    /**
+     * marks a bubi order and the corresponding bubi order lines as collected, sets the corresponding dates and creates the alma po lines
+     * @param bubiOrderId the bubi order to be collected
+     * @return the updated bubi order object
+     */
     public BubiOrder collectBubiOrder(String bubiOrderId) {
         BubiOrder bubiOrder = this.bubiOrderRepository.getOne(bubiOrderId);
         LocalDate today = LocalDate.now();
@@ -137,12 +178,22 @@ public class BubiOrderService {
         return bubiOrderRepository.save(bubiOrder);
     }
 
+    /**
+     * mark a bubi order as returned
+     * @param bubiOrderId the id of the bubi order
+     * @return the updated bubi order
+     */
     public BubiOrder returnBubiOrder(String bubiOrderId) {
         BubiOrder bubiOrder = this.bubiOrderRepository.getOne(bubiOrderId);
         bubiOrder.setBubiStatus(BubiStatus.RETURNED);
         return bubiOrderRepository.save(bubiOrder);
     }
 
+    /**
+     * marks a bubi order as paid and create the corresponding invoice and invoice lines in alma.
+     * @param bubiOrderId the id of the bubi order to be paid
+     * @return the updated bubi order
+     */
     public BubiOrder payBubiOrder(String bubiOrderId) {
         BubiOrder bubiOrder = this.bubiOrderRepository.getOne(bubiOrderId);
         Invoice invoice = this.almaInvoiceService.getInvoiceForBubiOrder(bubiOrder);
@@ -156,6 +207,12 @@ public class BubiOrderService {
         return bubiOrder;
     }
 
+    /**
+     * remove a bubi order line from an order line
+     * @param bubiOrderId the id of the bubi order
+     * @param bubiOrderLine the bubi orderline to be removed
+     * @return the updated bubi order
+     */
     public BubiOrder removeOrderLine(String bubiOrderId, BubiOrderLine bubiOrderLine) {
         BubiOrder bubiOrder = this.bubiOrderRepository.getOne(bubiOrderId);
         bubiOrder.removeOrderline(bubiOrderLine);
@@ -163,6 +220,12 @@ public class BubiOrderService {
         return bubiOrder;
     }
 
+    /**
+     * adds a bubi order line to a bubi order
+     * @param bubiOrderId the id of the bubi order
+     * @param bubiOrderLine the bubi order line to be added
+     * @return the updated bubi order
+     */
     public BubiOrder addOrderLine(String bubiOrderId, BubiOrderLine bubiOrderLine) {
         BubiOrder bubiOrder = this.bubiOrderRepository.getOne(bubiOrderId);
         bubiOrder.addBubiOrderLine(bubiOrderLine);
@@ -170,6 +233,12 @@ public class BubiOrderService {
         return bubiOrder;
     }
 
+    /**
+     * duplicates a bubi order line in a bubi order
+     * @param bubiOrderId the id of the bubi order
+     * @param bubiOrderLine the bubi orderline to be duplicated
+     * @return the updated bubi order
+     */
     public BubiOrder duplicateOrderline(String bubiOrderId, BubiOrderLine bubiOrderLine) {
         BubiOrder bubiOrder = this.bubiOrderRepository.getOne(bubiOrderId);
         BubiOrderLine bubiOrderLineNew = bubiOrder.duplicateOderline(bubiOrderLine);
@@ -178,6 +247,11 @@ public class BubiOrderService {
         return bubiOrder;
     }
 
+    /**
+     * updates the price of a bubi order line in a bubi order and updates the total price of the bubi order
+     * @param bubiOrderLineNew the bubi orderline with the updated price
+     * @return the updated bubi order
+     */
     public BubiOrder changePrice(BubiOrderLine bubiOrderLineNew) {
         BubiOrderLine bubiOrderLine = this.bubiOrderLineRepository.getBubiOrderLineByBubiOrderLineIdOrderByMinting(bubiOrderLineNew.getBubiOrderLineId());
         bubiOrderLine.setPrice(bubiOrderLineNew.getPrice());

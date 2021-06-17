@@ -15,6 +15,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * offers functions around bubi order lines
+ *
+ * @author Eike Spielberg
+ * @author eike.spielberg@uni-due.de
+ * @version 1.0
+ */
 @Service
 public class BubiOrderLineService {
 
@@ -36,6 +43,14 @@ public class BubiOrderLineService {
 
     private final Logger log = LoggerFactory.getLogger(BubiOrderService.class);
 
+    /**
+     * constructor based autowiring of the necessary services
+     * @param bubiOrderLineRepository the bubi orderline repository
+     * @param coreDataService the core data service
+     * @param bubiDataService the bubi data service
+     * @param almaItemService the alma item service
+     * @param primoService the primo service
+     */
     BubiOrderLineService(BubiOrderLineRepository bubiOrderLineRepository,
                          CoreDataService coreDataService,
                          BubiDataService bubiDataService,
@@ -48,11 +63,26 @@ public class BubiOrderLineService {
         this.primoService = primoService;
     }
 
+    /**
+     * saves a bubi orderline to the repositroy
+     * @param bubiOrderLine the bubi orderline to be saved
+     * @return the saved bubi orderline
+     */
     public BubiOrderLine saveBubiOrderLine(BubiOrderLine bubiOrderLine) {
         bubiOrderLine.setLastChange(new Date());
         return this.bubiOrderLineRepository.save(bubiOrderLine);
     }
 
+    /**
+     * retreives all bubi orderlines by a given mode
+     * @param mode the mode for which bubi orderlines shall be retrieved. implemented so far:
+     *             'all': retreives all bubi orderlines
+     *             'packed': retreives all bubi orderlines packed into a bubi order
+     *             'sent': retreives all bubi orderlines collected by the bubi
+     *             'waiting': retreives all bubi orderlines waiting to be collected
+     *             other: retreives all active bubi orderlines
+     * @return
+     */
     public List<BubiOrderLine> getOrderLines(String mode) {
         switch (mode) {
             case "all":
@@ -68,22 +98,29 @@ public class BubiOrderLineService {
         }
     }
 
-    public List<BubiOrderLine> getActiveOrderlines() {
-        List<BubiOrderLine> allOpenOrderlines = new ArrayList<>();
-        allOpenOrderlines.addAll(this.bubiOrderLineRepository.findAllByStatusOrderByMinting(BubiStatus.NEW));
-        allOpenOrderlines.addAll(this.bubiOrderLineRepository.findAllByStatusOrderByMinting(BubiStatus.WAITING));
-        allOpenOrderlines.addAll(this.bubiOrderLineRepository.findAllByStatusOrderByMinting(BubiStatus.INWORK));
-        return allOpenOrderlines;
-    }
-
+    /**
+     * retrieves a bubi orderline by its identifier
+     * @param identifier the identifier of the bubi orderline
+     * @return the bubi orderline
+     */
     public BubiOrderLine getBubiOrderLineFromIdentifier(String identifier) {
         return this.bubiOrderLineRepository.getBubiOrderLineByBubiOrderLineIdOrderByMinting(identifier);
     }
 
+    /**
+     * retrieves all bubi orderlines for a vendor
+     * @param vendorId the id of the vendor
+     * @return the list of bubi orderlines for this vendor
+     */
     public List<BubiOrderLine> getAllBubiOrderLinesForBubi(String vendorId) {
         return this.bubiOrderLineRepository.findAllByVendorIdOrderByMinting(vendorId);
     }
 
+    /**
+     * retrieves a bubi orderline by the barcode of an item
+     * @param barcode the barcode of the bubi orderline item
+     * @return the bubi orderline
+     */
     public BubiOrderLine getBubiOrderLineFromBarcode(String barcode) {
         if (barcode != null) {
             Item item = this.almaItemService.findItemByBarcode(barcode);
@@ -92,6 +129,12 @@ public class BubiOrderLineService {
         return null;
     }
 
+    /**
+     * retrieves a bubi orderline by the collection and shelfmark of an item
+     * @param collection the collection of the item
+     * @param shelfmark the shelfmark of the item
+     * @return the bubi orderline for the item
+     */
     public BubiOrderLine expandBubiOrderLineFromShelfmark(String collection, String shelfmark) {
         if (shelfmark != null && collection != null) {
             return retrieveBubiOrderLine(collection.toUpperCase(), shelfmark.toUpperCase());
@@ -99,6 +142,11 @@ public class BubiOrderLineService {
         return null;
     }
 
+    /**
+     * builds a bubi orderline for an item
+     * @param item the item to create a bubi orderline for
+     * @return the bubi orderline
+     */
     public BubiOrderLine expandBubiOrderLineFromItem(Item item) {
         String collection = item.getItemData().getLocation().getDesc().toUpperCase(Locale.ROOT);
         String shelfmark = item.getHoldingData().getCallNumber().toUpperCase(Locale.ROOT);
@@ -172,5 +220,13 @@ public class BubiOrderLineService {
             bubiOrderline.setFund(monographFund);
             bubiOrderline.setPrice(bubiData.getStandardPriceMonograph());
         }
+    }
+
+    private List<BubiOrderLine> getActiveOrderlines() {
+        List<BubiOrderLine> allOpenOrderlines = new ArrayList<>();
+        allOpenOrderlines.addAll(this.bubiOrderLineRepository.findAllByStatusOrderByMinting(BubiStatus.NEW));
+        allOpenOrderlines.addAll(this.bubiOrderLineRepository.findAllByStatusOrderByMinting(BubiStatus.WAITING));
+        allOpenOrderlines.addAll(this.bubiOrderLineRepository.findAllByStatusOrderByMinting(BubiStatus.INWORK));
+        return allOpenOrderlines;
     }
 }
