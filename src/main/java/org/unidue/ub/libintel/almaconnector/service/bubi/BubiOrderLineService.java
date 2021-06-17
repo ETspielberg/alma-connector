@@ -76,12 +76,12 @@ public class BubiOrderLineService {
     /**
      * retreives all bubi orderlines by a given mode
      * @param mode the mode for which bubi orderlines shall be retrieved. implemented so far:
-     *             'all': retreives all bubi orderlines
-     *             'packed': retreives all bubi orderlines packed into a bubi order
-     *             'sent': retreives all bubi orderlines collected by the bubi
-     *             'waiting': retreives all bubi orderlines waiting to be collected
-     *             other: retreives all active bubi orderlines
-     * @return
+     *             'all': retrieves all bubi orderlines
+     *             'packed': retrieves all bubi orderlines packed into a bubi order
+     *             'sent': retrieves all bubi orderlines collected by the bubi
+     *             'waiting': retrieves all bubi orderlines waiting to be collected
+     *             other: retrieves all active bubi orderlines
+     * @return a list of bubi orderlines
      */
     public List<BubiOrderLine> getOrderLines(String mode) {
         switch (mode) {
