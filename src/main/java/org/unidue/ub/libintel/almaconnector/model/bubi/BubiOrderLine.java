@@ -149,6 +149,9 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
     @Column(name="hours")
     private double hours = 0;
 
+    @Column(name= "number_items")
+    private int numberItems = 1;
+
     public BubiOrderLine() {
         this.status = BubiStatus.NEW;
         this.lastChange = new Date();
@@ -538,6 +541,14 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
 
     public void setHours(double hours) {
         this.hours = hours;
+    }
+
+    public int getNumberItems() {
+        return numberItems;
+    }
+
+    public void setNumberItems(int numberItems) {
+        this.numberItems = numberItems;
     }
 
     public void updateBubiOrderLineId() {

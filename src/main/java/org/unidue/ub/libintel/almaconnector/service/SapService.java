@@ -9,7 +9,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.*;
-import org.unidue.ub.libintel.almaconnector.clients.analytics.AlmaAnalyticsReportClient;
+import org.unidue.ub.libintel.almaconnector.clients.alma.analytics.AlmaAnalyticsReportClient;
 import org.unidue.ub.libintel.almaconnector.model.analytics.InvoiceForPayment;
 import org.unidue.ub.libintel.almaconnector.model.analytics.InvoiceForPaymentReport;
 import org.unidue.ub.libintel.almaconnector.model.run.AlmaExportRun;

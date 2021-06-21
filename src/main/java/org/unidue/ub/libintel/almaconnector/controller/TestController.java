@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.unidue.ub.libintel.almaconnector.clients.analytics.AlmaAnalyticsReportClient;
+import org.unidue.ub.libintel.almaconnector.clients.alma.analytics.AlmaAnalyticsReportClient;
 import org.unidue.ub.libintel.almaconnector.configuration.MappingTables;
 import org.unidue.ub.libintel.almaconnector.model.analytics.*;
 import org.unidue.ub.libintel.almaconnector.service.ScheduledService;

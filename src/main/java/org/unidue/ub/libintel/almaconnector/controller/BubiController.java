@@ -51,6 +51,18 @@ public class BubiController {
         this.bubiPricesService = bubiPricesService;
     }
 
+
+    // ---------------------- Alma data endpoints ----------------------
+
+    @GetMapping("/almaData")
+    private ResponseEntity<List<AlmaItemData>> getAlmaData(String collection, String shelfmark) {
+        AlmaItemData almaItemData = new AlmaItemData(collection, shelfmark);
+        almaItemData.mediaType = "book";
+        if (almaItemData.shelfmark.contains(" Z "))
+            almaItemData.mediaType = "journal";
+        return ResponseEntity.ok(this.primoService.getPrimoResponse(almaItemData));
+    }
+
     // ---------------------- Bubi data endpoints ----------------------
 
     @GetMapping("/bubidata/all")

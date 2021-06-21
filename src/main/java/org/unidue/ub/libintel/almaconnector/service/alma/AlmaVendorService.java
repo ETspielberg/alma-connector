@@ -7,7 +7,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.Vendor;
-import org.unidue.ub.libintel.almaconnector.clients.acquisition.AlmaVendorApiClient;
+import org.unidue.ub.libintel.almaconnector.clients.alma.acquisition.AlmaVendorApiClient;
 
 /**
  * offers functions around vendors in Alma

@@ -4,15 +4,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.conf.Job;
 import org.unidue.ub.alma.shared.conf.Jobs;
-import org.unidue.ub.libintel.almaconnector.clients.conf.AlmaJobsApiClient;
+import org.unidue.ub.libintel.almaconnector.clients.alma.conf.AlmaJobsApiClient;
 import org.unidue.ub.libintel.almaconnector.model.jobs.JobIdWithDescription;
 import org.unidue.ub.libintel.almaconnector.repository.JobIdWithDescriptionRepository;
 
-import javax.persistence.EntityManager;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * offers functions around jobs in Alma

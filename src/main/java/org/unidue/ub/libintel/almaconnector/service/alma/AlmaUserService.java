@@ -2,7 +2,7 @@ package org.unidue.ub.libintel.almaconnector.service.alma;
 
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.user.AlmaUser;
-import org.unidue.ub.libintel.almaconnector.clients.users.AlmaUserApiClient;
+import org.unidue.ub.libintel.almaconnector.clients.alma.users.AlmaUserApiClient;
 
 /**
  * offers functions around users in Alma

@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.*;
-import org.unidue.ub.libintel.almaconnector.clients.acquisition.AlmaInvoicesApiClient;
+import org.unidue.ub.libintel.almaconnector.clients.alma.acquisition.AlmaInvoicesApiClient;
 import org.unidue.ub.libintel.almaconnector.model.bubi.BubiOrder;
 import org.unidue.ub.libintel.almaconnector.model.bubi.BubiOrderLine;
 import org.unidue.ub.libintel.almaconnector.model.sap.InvoiceUpdate;

@@ -3,7 +3,7 @@ package org.unidue.ub.libintel.almaconnector.service.alma;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.bibs.*;
-import org.unidue.ub.libintel.almaconnector.clients.electronic.AlmaElectronicApiClient;
+import org.unidue.ub.libintel.almaconnector.clients.alma.electronic.AlmaElectronicApiClient;
 
 /**
  * offers functions around portfolios, services, and collections in Alma

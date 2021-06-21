@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.bibs.*;
-import org.unidue.ub.libintel.almaconnector.clients.bib.AlmaCatalogApiClient;
+import org.unidue.ub.libintel.almaconnector.clients.alma.bib.AlmaCatalogApiClient;
 
 
 /**

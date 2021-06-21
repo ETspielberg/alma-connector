@@ -2,8 +2,8 @@ package org.unidue.ub.libintel.almaconnector.service.alma;
 
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.bibs.Item;
-import org.unidue.ub.libintel.almaconnector.clients.acquisition.AlmaItemsApiClient;
-import org.unidue.ub.libintel.almaconnector.clients.bib.AlmaCatalogApiClient;
+import org.unidue.ub.libintel.almaconnector.clients.alma.acquisition.AlmaItemsApiClient;
+import org.unidue.ub.libintel.almaconnector.clients.alma.bib.AlmaCatalogApiClient;
 
 /**
  * offers functions around items in Alma

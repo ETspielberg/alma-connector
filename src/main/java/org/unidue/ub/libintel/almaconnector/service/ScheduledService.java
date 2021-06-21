@@ -10,7 +10,7 @@ import org.unidue.ub.alma.shared.acq.InterestedUser;
 import org.unidue.ub.alma.shared.acq.PoLine;
 import org.unidue.ub.alma.shared.bibs.Item;
 import org.unidue.ub.alma.shared.user.AlmaUser;
-import org.unidue.ub.libintel.almaconnector.clients.analytics.AlmaAnalyticsReportClient;
+import org.unidue.ub.libintel.almaconnector.clients.alma.analytics.AlmaAnalyticsReportClient;
 import org.unidue.ub.libintel.almaconnector.configuration.MappingTables;
 import org.unidue.ub.libintel.almaconnector.model.analytics.*;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaItemService;
@@ -169,14 +169,22 @@ public class ScheduledService {
 
                             // if the item has been updated, save the changes to alma
                             if (itemUpdated) {
-                                this.almaItemService.updateItem(item);
-                                log.info(String.format("updated item %s with mms id %s", newItemWithOrder.getMmsId(), newItemWithOrder.getItemId()));
+                                try {
+                                    this.almaItemService.updateItem(item);
+                                    log.info(String.format("updated item %s with mms id %s", newItemWithOrder.getMmsId(), newItemWithOrder.getItemId()));
+                                } catch (Exception e) {
+                                    log.error(String.format("could not update item %s with mms id %s", newItemWithOrder.getMmsId(), newItemWithOrder.getItemId()), e);
+                                }
                             }
                         }
                     }
                     if (polineUpdated) {
-                        this.almaPoLineService.updatePoLine(poLine);
-                        log.info(String.format("updated po line %s tu update interested user", polineNumber));
+                        try {
+                            this.almaPoLineService.updatePoLine(poLine);
+                            log.info(String.format("updated po line %s tu update interested user", polineNumber));
+                        } catch (Exception e) {
+                            log.error(String.format("could not update po line %s tu update interested user", polineNumber), e);
+                        }
                     }
                 }
         );
