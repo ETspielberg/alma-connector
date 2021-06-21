@@ -2,7 +2,7 @@ package org.unidue.ub.libintel.almaconnector.service.alma;
 
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.*;
-import org.unidue.ub.libintel.almaconnector.clients.acquisition.AlmaPoLinesApiClient;
+import org.unidue.ub.libintel.almaconnector.clients.alma.acquisition.AlmaPoLinesApiClient;
 import org.unidue.ub.libintel.almaconnector.model.bubi.BubiOrderLine;
 
 import java.time.LocalDate;
@@ -61,7 +61,7 @@ public class AlmaPoLineService {
     }
 
     public PoLine updatePoLine(PoLine poLine) {
-        return this.almaPoLinesApiClient.putPoLinesPoLineId(poLine, "application/json", poLine.getNumber(),"" );
+        return this.almaPoLinesApiClient.putPoLinesPoLineId(poLine, "application/json", poLine.getNumber(),"false");
     }
 
     public PoLine getPoLine(String poLineId) {
