@@ -111,70 +111,72 @@ public class ScheduledService {
                             boolean itemUpdated = false;
 
                             // retrieve the full item
-                            Item item = almaItemService.findItemByMmsAndItemId(newItemWithOrder.getMmsId(), newItemWithOrder.getItemId());
-
-                            // try to calculate the reduced price of the book and if successful, write it to the inventory price field.
                             try {
-                                double price = Double.parseDouble(poLine.getPrice().getSum());
-                                double discount = Double.parseDouble(poLine.getDiscount());
-                                double reducedPrice = price * (100 - discount) / 100;
-                                String currency = poLine.getPrice().getCurrency().getValue();
-                                if (reducedPrice != 0.0) {
-                                    item.getItemData().setInventoryPrice(String.format("%.2f %s", reducedPrice, currency));
-                                    itemUpdated = true;
-                                    log.debug(String.format("updated item inventory price to %.2f %s", reducedPrice, currency));
-                                }
-                            } catch (Exception e) {
-                                log.warn(String.format("could not calculate reduced price because: %s", e.getMessage()));
-                            }
-
-                            // try to set the dbs subject statistics field to the value corresponding to the fund code (if there is only one fund used)
-                            if (poLine.getFundDistribution().size() == 1) {
-                                String fund = poLine.getFundDistribution().get(0).getFundCode().getValue();
-                                String fundCode = "etat" + fund.substring(0, fund.indexOf("-"));
-                                if (fund.contains("RW"))
-                                    fundCode += "RW";
-                                log.info(String.format("updating item price and statistics field for po line %s and fund %s", polineNumber, fund));
-                                if (codes.containsKey(fundCode) && (item.getItemData().getStatisticsNote1() == null || item.getItemData().getStatisticsNote1().isEmpty())) {
-                                    item.getItemData().setStatisticsNote1(codes.get(fundCode));
-                                    itemUpdated = true;
-                                    log.debug(String.format("updated statistics note 1 for item with mms id %s and pid %s to %s",
-                                            newItemWithOrder.getMmsId(), newItemWithOrder.getItemId(), codes.get(fund)));
-                                }
-                            }
-
-                            if (poLine.getInterestedUser() != null && poLine.getInterestedUser().size() > 0) {
-                                for (InterestedUser interestedUser : poLine.getInterestedUser()) {
-                                    String userId = interestedUser.getPrimaryId();
-                                    if (userId.equals("CATALOGER") || userId.equals("CD100000091W"))
-                                        continue;
-                                    try {
-                                        AlmaUser almaUser = this.almaUserService.getUser(userId);
-                                        if (happUsers.contains(almaUser.getUserGroup().getValue())) {
-                                            String receivingNote = poLine.getReceivingNote();
-                                            if (receivingNote != null && !receivingNote.isEmpty() && !receivingNote.contains("Happ")) {
-                                                receivingNote += " Happ-Vormerkung";
-                                            } else
-                                                receivingNote = "Happ-Vormerkung";
-                                            poLine.setReceivingNote(receivingNote);
-                                        }
-                                    } catch (FeignException fe) {
-                                        log.warn(String.format("could not retrieve user %s: ", userId), fe);
-                                    }
-                                    interestedUser.setNotifyReceivingActivation(false);
-                                    interestedUser.setHoldItem(true);
-                                    polineUpdated = true;
-                                }
-                            }
-
-                            // if the item has been updated, save the changes to alma
-                            if (itemUpdated) {
+                                Item item = almaItemService.findItemByMmsAndItemId(newItemWithOrder.getMmsId(), newItemWithOrder.getItemId());
                                 try {
-                                    this.almaItemService.updateItem(item);
-                                    log.info(String.format("updated item %s with mms id %s", newItemWithOrder.getMmsId(), newItemWithOrder.getItemId()));
+                                    double price = Double.parseDouble(poLine.getPrice().getSum());
+                                    double discount = Double.parseDouble(poLine.getDiscount());
+                                    double reducedPrice = price * (100 - discount) / 100;
+                                    String currency = poLine.getPrice().getCurrency().getValue();
+                                    if (reducedPrice != 0.0) {
+                                        item.getItemData().setInventoryPrice(String.format("%.2f %s", reducedPrice, currency));
+                                        itemUpdated = true;
+                                        log.debug(String.format("updated item inventory price to %.2f %s", reducedPrice, currency));
+                                    }
                                 } catch (Exception e) {
-                                    log.error(String.format("could not update item %s with mms id %s", newItemWithOrder.getMmsId(), newItemWithOrder.getItemId()), e);
+                                    log.warn(String.format("could not calculate reduced price because: %s", e.getMessage()));
                                 }
+
+                                // try to set the dbs subject statistics field to the value corresponding to the fund code (if there is only one fund used)
+                                if (poLine.getFundDistribution().size() == 1) {
+                                    String fund = poLine.getFundDistribution().get(0).getFundCode().getValue();
+                                    String fundCode = "etat" + fund.substring(0, fund.indexOf("-"));
+                                    if (fund.contains("RW"))
+                                        fundCode += "RW";
+                                    log.info(String.format("updating item price and statistics field for po line %s and fund %s", polineNumber, fund));
+                                    if (codes.containsKey(fundCode) && (item.getItemData().getStatisticsNote1() == null || item.getItemData().getStatisticsNote1().isEmpty())) {
+                                        item.getItemData().setStatisticsNote1(codes.get(fundCode));
+                                        itemUpdated = true;
+                                        log.debug(String.format("updated statistics note 1 for item with mms id %s and pid %s to %s",
+                                                newItemWithOrder.getMmsId(), newItemWithOrder.getItemId(), codes.get(fund)));
+                                    }
+                                }
+
+                                if (poLine.getInterestedUser() != null && poLine.getInterestedUser().size() > 0) {
+                                    for (InterestedUser interestedUser : poLine.getInterestedUser()) {
+                                        String userId = interestedUser.getPrimaryId();
+                                        if (userId.equals("CATALOGER") || userId.equals("CD100000091W"))
+                                            continue;
+                                        try {
+                                            AlmaUser almaUser = this.almaUserService.getUser(userId);
+                                            if (happUsers.contains(almaUser.getUserGroup().getValue())) {
+                                                String receivingNote = poLine.getReceivingNote();
+                                                if (receivingNote != null && !receivingNote.isEmpty() && !receivingNote.contains("Happ")) {
+                                                    receivingNote += " Happ-Vormerkung";
+                                                } else
+                                                    receivingNote = "Happ-Vormerkung";
+                                                poLine.setReceivingNote(receivingNote);
+                                            }
+                                        } catch (FeignException fe) {
+                                            log.warn(String.format("could not retrieve user %s: ", userId), fe);
+                                        }
+                                        interestedUser.setNotifyReceivingActivation(false);
+                                        interestedUser.setHoldItem(true);
+                                        polineUpdated = true;
+                                    }
+                                }
+
+                                // if the item has been updated, save the changes to alma
+                                if (itemUpdated) {
+                                    try {
+                                        this.almaItemService.updateItem(item);
+                                        log.info(String.format("updated item %s with mms id %s", newItemWithOrder.getMmsId(), newItemWithOrder.getItemId()));
+                                    } catch (Exception e) {
+                                        log.error(String.format("could not update item %s with mms id %s", newItemWithOrder.getMmsId(), newItemWithOrder.getItemId()), e);
+                                    }
+                                }
+                            } catch (FeignException fe) {
+                                log.warn(String.format("no item found for mms id %s and item id %s", newItemWithOrder.getMmsId(), newItemWithOrder.getItemId()));
                             }
                         }
                     }
