@@ -33,7 +33,7 @@ public class AlmaAnalyticsReportClient {
     /**
      * The general path for all Alma analytics reports
      */
-    private final static String urlTemplate = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/analytics/reports?path=%s&apikey=%s";
+    private final static String urlTemplate = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/analytics/reports?path=%s&apikey=%s&limit=%d";
 
     /**
      * retrieves the report, transforms it and maps it onto the given class
@@ -44,7 +44,7 @@ public class AlmaAnalyticsReportClient {
      * @throws IOException thrown if the transformation results in errors.
      */
     public <T> T getReport(String reportPath, Class<T> clazz) throws IOException {
-        String url = String.format(urlTemplate, reportPath, almaAcqApiKey);
+        String url = String.format(urlTemplate, reportPath, almaAcqApiKey, 500);
         log.debug("querying url: " + url);
         RestTemplate restTemplate = new RestTemplate();
         String response = restTemplate.getForObject(url, String.class);
