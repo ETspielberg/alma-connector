@@ -80,14 +80,17 @@ public class HookService {
                     } else if ("ISSBD".equals(userRequest.getMaterialType().getValue())) {
                         log.debug(String.format("retrieving mms and item id %s, %s", userRequest.getMmsId(), userRequest.getItemId()));
                         item = this.almaItemService.findItemByMmsAndItemId(userRequest.getMmsId(), userRequest.getItemId());
-                    } else
+                    } else {
+                        log.info("Buchbinder request not for book or bounded issue: " + userRequest.getMaterialType().getValue());
                         break;
+                    }
                     BubiOrderLine bubiOrderLine = this.bubiOrderLineService.expandBubiOrderLineFromItem(item);
                     this.bubiOrderLineService.saveBubiOrderLine(bubiOrderLine);
 
+                    item.getItemData().setPublicNote("wird gebunden");
                     String library = item.getItemData().getLibrary().getValue();
                     item.getHoldingData().setInTempLocation(false);
-                    item.getItemData().setPublicNote("wird gebunden");
+
                     switch (library) {
                         case "E0001":
                         case "E0023": {

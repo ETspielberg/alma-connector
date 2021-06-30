@@ -2,12 +2,17 @@ package org.unidue.ub.libintel.almaconnector.clients.alma.conf;
 
 import feign.*;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.*;
+import org.unidue.ub.alma.shared.conf.Members;
+import org.unidue.ub.alma.shared.conf.Set;
+import org.unidue.ub.alma.shared.conf.Sets;
 import org.unidue.ub.libintel.almaconnector.clients.alma.AlmaFeignConfiguration;
 
-@FeignClient(name = "sets", url = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/conf/sets", configuration = AlmaFeignConfiguration.class)
+@FeignClient(name = "sets", url = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/conf", configuration = AlmaFeignConfiguration.class)
 @Service
-public interface SetsApi {
+public interface SetsApiClient {
 
 
   /**
@@ -15,11 +20,8 @@ public interface SetsApi {
    * Web service for deleting a set.
    * @param setId Unique id of the set. Mandatory. (required)
    */
-  @RequestLine("DELETE /almaws/v1/conf/sets/{setId}")
-  @Headers({
-    "Accept: application/json",
-  })
-  void deleteAlmawsV1ConfSetsSetId(@Param("set_id") String setId);
+  @RequestMapping(method = RequestMethod.POST, value ="/sets/{setId}")
+  void deleteConfSetsSetId(@PathVariable("setId") String setId);
 
   /**
    * Retrieve a list of Sets
@@ -30,13 +32,10 @@ public interface SetsApi {
    * @param limit Limits the number of results. Optional. Valid values are 0-100. Default value: 10. (optional)
    * @param offset Offset of the results returned. Optional. Default value: 0, which means that the first results will be returned. (optional)
    * @param setOrigin Set origin for filtering. Optional. Valid values are &#39;UI&#39; or &#39;UI_CZ&#39;. (optional, default to &quot;UI&quot;)
-   * @return Object
+   * @return Sets a list of sets and the total count of sets
    */
-  @RequestLine("GET /almaws/v1/conf/sets?content_type={contentType}&set_type={setType}&q={q}&limit={limit}&offset={offset}&set_origin={setOrigin}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1ConfSets(@Param("content_type") String contentType, @Param("set_type") String setType, @Param("q") String q, @Param("limit") Integer limit, @Param("offset") Integer offset, @Param("set_origin") String setOrigin);
+  @RequestMapping(method = RequestMethod.GET, value ="/sets")
+  Sets getConfSets(@RequestParam("content_type") String contentType, @RequestParam("set_type") String setType, @RequestParam("q") String q, @RequestParam("limit") Integer limit, @RequestParam("offset") Integer offset, @RequestParam("set_origin") String setOrigin);
 
   /**
    * Retrieve a Set
@@ -44,11 +43,8 @@ public interface SetsApi {
    * @param setId Unique id of the set. Mandatory. (required)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/conf/sets/{setId}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1ConfSetsSetId(@Param("set_id") String setId);
+  @RequestMapping(method = RequestMethod.GET, value ="/sets/{setId}")
+  Set getSetsBySetId(@PathVariable("setId") String setId);
 
   /**
    * Retrieve Set Members
@@ -58,11 +54,8 @@ public interface SetsApi {
    * @param offset Offset of the results returned. Optional. Default value: 0, which means that the first results will be returned. (optional)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/conf/sets/{setId}/members?limit={limit}&offset={offset}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1ConfSetsSetIdMembers(@Param("set_id") String setId, @Param("limit") Integer limit, @Param("offset") Integer offset);
+  @RequestMapping(method = RequestMethod.GET, value ="/sets/{setId}/members", produces = MediaType.APPLICATION_JSON_VALUE)
+  Members getConfSetsSetIdMembers(@PathVariable("setId") String setId, @RequestParam String accept, @RequestParam("limit") Integer limit, @RequestParam("offset") Integer offset);
 
 
   /**
@@ -75,14 +68,15 @@ public interface SetsApi {
    * @param combine The logical operator. Choose between AND, OR, NOT. Default is AND. Optional (optional, default to &quot;None&quot;)
    * @param set1 The primary combining set. Optional. (optional, default to &quot;None&quot;)
    * @param set2 The secondary combining set. Optional. (optional, default to &quot;None&quot;)
-   * @return Object
+   * @return Set
    */
   @RequestLine("POST /almaws/v1/conf/sets?population={population}&job_instance_id={jobInstanceId}&from_logical_set={fromLogicalSet}&combine={combine}&set1={set1}&set2={set2}")
   @Headers({
     "Content-Type: application/json",
     "Accept: application/json",
   })
-  Object postAlmawsV1ConfSets(Object body, @Param("population") String population, @Param("job_instance_id") String jobInstanceId, @Param("from_logical_set") String fromLogicalSet, @Param("combine") String combine, @Param("set1") String set1, @Param("set2") String set2);
+  @RequestMapping(method = RequestMethod.POST, value ="/sets/{setId}")
+  Set postConfSets(@RequestBody Set body, @RequestParam("population") String population, @RequestParam("job_instance_id") String jobInstanceId, @RequestParam("from_logical_set") String fromLogicalSet, @RequestParam("combine") String combine, @RequestParam("set1") String set1, @RequestParam("set2") String set2);
 
   /**
    * Manage Members
@@ -93,10 +87,6 @@ public interface SetsApi {
    * @param idType The type of the identifier that is used to identify members. Optional.   For physical items: BARCODE.   For Bib records: SYSTEM_NUMBER, OCLC_NUMBER, ISBN, ISSN. For regular MMS-IDs no need to defined this parameter.   For users: any type that is defined in UserIdentifierTypes Code Table (optional, default to &quot;&quot;)
    * @return Object
    */
-  @RequestLine("POST /almaws/v1/conf/sets/{setId}?id_type={idType}&op={op}")
-  @Headers({
-    "Content-Type: application/json",
-    "Accept: application/json",
-  })
-  Object postAlmawsV1ConfSetsSetId(@Param("set_id") String setId, @Param("op") String op, Object body, @Param("id_type") String idType);
+  @RequestMapping(method = RequestMethod.POST, value ="/sets/{setId}/members")
+  Set postConfSetsSetId(@RequestBody Set body, @PathVariable("setId") String setId, @RequestParam("op") String op, @RequestParam("id_type") String idType);
 }

@@ -1,5 +1,9 @@
 package org.unidue.ub.libintel.almaconnector.service.alma;
 
+import feign.Feign;
+import feign.FeignException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.bibs.Item;
 import org.unidue.ub.libintel.almaconnector.clients.alma.acquisition.AlmaItemsApiClient;
@@ -19,6 +23,8 @@ public class AlmaItemService {
 
     private final AlmaCatalogApiClient almaCatalogApiClient;
 
+    private final Logger log = LoggerFactory.getLogger(AlmaItemService.class);
+
     /**
      * constructor based autowiring to the alma items api feign client and the alma bib api feign client
      * @param almaItemsApiClient the alma item api feign client
@@ -36,6 +42,50 @@ public class AlmaItemService {
      */
     public Item findItemByBarcode(String barcode) {
         return this.almaItemsApiClient.getItemByBarcode("application/json", barcode, "");
+    }
+
+    public Item scanInItem(String barcode, boolean ready) {
+        Item item;
+        try {
+            item = findItemByBarcode(barcode);
+        } catch (FeignException fe) {
+            log.warn("could not retrieve item by barcode " + barcode, fe);
+            return null;
+        }
+        if (item.getItemData().getWorkOrderAt() != null) {
+            log.info(item.toString());
+            String library = "";
+            String mmsId = item.getBibData().getMmsId();
+            String holdingId = item.getHoldingData().getHoldingId();
+            String itemId = item.getItemData().getPid();
+            log.info(mmsId + " " + holdingId + " " + itemId);
+            String workorderDepartment = item.getItemData().getWorkOrderAt().getValue();
+            String workorderType = item.getItemData().getWorkOrderType().getValue();
+            if (workorderDepartment.contains("AcqDept"))
+                library = workorderDepartment.replace("AcqDept", "");
+            try {
+                item = this.almaCatalogApiClient.postBibsMmsIdHoldingsHoldingIdItemsItemPid(
+                        item.getBibData().getMmsId(),
+                        item.getHoldingData().getHoldingId(),
+                        item.getItemData().getPid(),
+                        "scan",
+                        "",
+                        library,
+                        "",
+                        workorderDepartment,
+                        workorderType,
+                        "",
+                        "",
+                        String.valueOf(ready),
+                        "",
+                        "",
+                        "",
+                        "");
+            } catch (FeignException fe) {
+                log.warn("could not scn in item " + item.toString(), fe);
+            }
+        }
+        return item;
     }
 
     /**

@@ -6,9 +6,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.unidue.ub.alma.shared.conf.Set;
 import org.unidue.ub.libintel.almaconnector.model.bubi.*;
 import org.unidue.ub.libintel.almaconnector.service.PrimoService;
+import org.unidue.ub.libintel.almaconnector.service.alma.AlmaItemService;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaPoLineService;
+import org.unidue.ub.libintel.almaconnector.service.alma.AlmaSetService;
 import org.unidue.ub.libintel.almaconnector.service.bubi.*;
 
 import java.io.IOException;
@@ -33,6 +36,8 @@ public class BubiController {
 
     private final PrimoService primoService;
 
+    private final AlmaItemService almaItemService;
+
     private final Logger log = LoggerFactory.getLogger(BubiController.class);
 
     BubiController(PrimoService primoService,
@@ -41,13 +46,15 @@ public class BubiController {
                    CoreDataService coreDataService,
                    AlmaPoLineService almaPoLineService,
                    BubiOrderLineService bubiOrderLineService,
-                   BubiPricesService bubiPricesService) {
+                   BubiPricesService bubiPricesService,
+                   AlmaItemService almaItemService) {
         this.primoService = primoService;
         this.bubiOrderService = bubiOrderService;
         this.bubiDataService = bubiDataService;
         this.coreDataService = coreDataService;
         this.bubiOrderLineService = bubiOrderLineService;
         this.almaPoLineService = almaPoLineService;
+        this.almaItemService = almaItemService;
         this.bubiPricesService = bubiPricesService;
     }
 
