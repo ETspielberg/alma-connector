@@ -195,6 +195,7 @@ public class HookService {
                     log.debug("resetting public note");
                     item.getItemData().setPublicNote("");
                 }
+                this.almaItemService.updateItem(mmsId, item.getHoldingData().getHoldingId(), itemPid, item);
                 break;
 
                     /*
