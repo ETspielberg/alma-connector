@@ -130,8 +130,8 @@ public class HookService {
         log.debug(String.format("retrieving user %s", itemLoan.getUserId()));
         AlmaUser almaUser = this.almaUserService.getUser(itemLoan.getUserId());
         log.debug(almaUser.getUserGroup().getDesc());
-        switch (almaUser.getUserGroup().getDesc()) {
-            case "Semesterapparat":
+        switch (almaUser.getUserGroup().getValue()) {
+            case "10":
                 log.info("got sem app loan");
                 log.debug(almaUser.getContactInfo().toString());
                 for (Address address : almaUser.getContactInfo().getAddress())
@@ -179,7 +179,7 @@ public class HookService {
                         this.almaItemService.updateItem(mmsId, item.getHoldingData().getHoldingId(), itemPid, item);
                     }
                 break;
-            case "Neuerw. / 14":
+            case "13":
                 log.info("got neuerwerbungs loan");
                 log.debug(String.format("retrieve item with barcode %s", itemLoan.getItemBarcode()));
                 String mmsId = itemLoan.getMmsId();
