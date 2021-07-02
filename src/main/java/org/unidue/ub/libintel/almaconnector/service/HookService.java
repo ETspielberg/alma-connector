@@ -179,6 +179,24 @@ public class HookService {
                         this.almaItemService.updateItem(mmsId, item.getHoldingData().getHoldingId(), itemPid, item);
                     }
                 break;
+            case "Neuerw. / 14 ":
+                log.info("got neuerwerbungs loan");
+                log.debug(String.format("retrieve item with barcode %s", itemLoan.getItemBarcode()));
+                String mmsId = itemLoan.getMmsId();
+                String itemPid = itemLoan.getItemId();
+                Item item = this.almaItemService.findItemByMmsAndItemId(mmsId, itemPid);
+                log.debug(String.format("retrieved item:\n %s", item.toString()));
+                // setting bib data to null in order to avoid problems with network-number / network_numbers....
+                item.setBibData(null);
+                if ("LOAN_CREATED".equals(hook.getEvent().getValue())) {
+                    log.debug(String.format("setting public note to %s", almaUser.getLastName()));
+                    item.getItemData().setPublicNote(almaUser.getLastName());
+                } else if ("LOAN_RETURNED".equals(hook.getEvent().getValue())) {
+                    log.debug("resetting public note");
+                    item.getItemData().setPublicNote("");
+                }
+                break;
+
                     /*
             case "Handapparat":
             case "Handapparat, 15 Ausleihen":
