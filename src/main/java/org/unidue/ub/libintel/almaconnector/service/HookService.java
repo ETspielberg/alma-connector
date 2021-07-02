@@ -179,7 +179,7 @@ public class HookService {
                         this.almaItemService.updateItem(mmsId, item.getHoldingData().getHoldingId(), itemPid, item);
                     }
                 break;
-            case "Neuerw. / 14 ":
+            case "Neuerw. / 14":
                 log.info("got neuerwerbungs loan");
                 log.debug(String.format("retrieve item with barcode %s", itemLoan.getItemBarcode()));
                 String mmsId = itemLoan.getMmsId();
