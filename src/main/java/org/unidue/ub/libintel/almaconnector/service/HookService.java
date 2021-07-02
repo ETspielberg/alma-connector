@@ -130,7 +130,7 @@ public class HookService {
         log.debug(String.format("retrieving user %s", itemLoan.getUserId()));
         AlmaUser almaUser = this.almaUserService.getUser(itemLoan.getUserId());
         log.debug(almaUser.getUserGroup().getDesc());
-        switch (almaUser.getUserGroup().getValue()) {
+        switch (almaUser.getUserGroup().getDesc()) {
             case "Semesterapparat":
                 log.info("got sem app loan");
                 log.debug(almaUser.getContactInfo().toString());
