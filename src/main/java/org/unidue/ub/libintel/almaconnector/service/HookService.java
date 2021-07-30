@@ -274,8 +274,13 @@ public class HookService {
                     log.warn("holding call number is null for item " + item.getItemData().getPid());
                     return;
                 }
-                String itemCallNo = hook.getItem().getItemData().getAlternativeCallNumber().strip();
+                String itemCallNo = item.getItemData().getAlternativeCallNumber().strip();
                 if (!itemCallNo.isEmpty()) {
+                    ItemDataAlternativeCallNumberType itemDataAlternativeCallNumberType = item.getItemData().getAlternativeCallNumberType();
+                    if (itemDataAlternativeCallNumberType == null || itemDataAlternativeCallNumberType.getValue().isEmpty()) {
+                        item.getItemData().setAlternativeCallNumberType(new ItemDataAlternativeCallNumberType().value("8"));
+                        this.almaItemService.updateItem(item);
+                    }
                     String callNo = itemCallNo.replaceAll("\\+\\d+", "");
                     String holdingCallNo = item.getHoldingData().getCallNumber().strip();
                     if (callNo.equals(holdingCallNo))
