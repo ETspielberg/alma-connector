@@ -256,6 +256,9 @@ public class HookService {
     @Async("threadPoolTaskExecutor")
     public void processItemHook(ItemHook hook) {
         Item item = hook.getItem();
+        if (hook.getEvent() != null && hook.getEvent().getValue() != null) {
+            log.info(String.format("received item hook with event %s (%s)", hook.getEvent().getDesc(), hook.getEvent().getValue()));
+        }
         switch (item.getItemData().getPhysicalMaterialType().getValue()) {
             case "ISSUE": {
                 log.info(String.format("deleting temporary location for received issue %s for shelfmark %s", item.getItemData().getBarcode(), item.getHoldingData().getCallNumber()));
