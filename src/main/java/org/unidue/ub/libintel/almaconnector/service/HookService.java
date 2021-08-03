@@ -267,6 +267,7 @@ public class HookService {
                 break;
             }
             case "ISSBD":
+            case "KEYS":
                 break;
             default: {
                 log.info(String.format("got item with  call number %s and item call number %s", item.getHoldingData().getCallNumber(), item.getItemData().getAlternativeCallNumber()));
@@ -282,6 +283,8 @@ public class HookService {
                         this.almaItemService.updateItem(item);
                     }
                     String callNo = itemCallNo.replaceAll("\\+\\d+", "");
+                    if (callNo.startsWith("SF "))
+                        callNo = itemCallNo.replaceAll(" \\d+", "");
                     String holdingCallNo = item.getHoldingData().getCallNumber().strip();
                     if (callNo.equals(holdingCallNo))
                         return;
