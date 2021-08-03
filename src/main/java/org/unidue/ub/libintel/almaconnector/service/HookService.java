@@ -283,8 +283,6 @@ public class HookService {
                         this.almaItemService.updateItem(item);
                     }
                     String callNo = itemCallNo.replaceAll("\\+\\d+", "");
-                    if (callNo.startsWith("SF "))
-                        callNo = itemCallNo.replaceAll(" \\d+", "");
                     String holdingCallNo = item.getHoldingData().getCallNumber().strip();
                     if (callNo.equals(holdingCallNo))
                         return;
