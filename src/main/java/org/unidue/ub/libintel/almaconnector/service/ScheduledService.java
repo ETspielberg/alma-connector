@@ -41,6 +41,9 @@ public class ScheduledService {
 
     private final MappingTables mappingTables;
 
+    @Value("${libintel.profile:dev}")
+    private String profile;
+
     @Value("${libintel.happ.users}")
     private List<String> happUsers;
 
@@ -72,6 +75,7 @@ public class ScheduledService {
      */
     @Scheduled(cron = "0 0 7 * * *")
     public void updateStatisticField() {
+        if (profile.equals("dev")) return;
         // prepare the item statistics notes from the config file
         Map<String, String> codes = mappingTables.getItemStatisticNote();
 
@@ -194,16 +198,19 @@ public class ScheduledService {
 
     @Scheduled(cron = "0 0 7,11,15,19 * * 1,2,3,4,5")
     public void runElisaImportDuringWeek() {
+        if (profile.equals("dev")) return;
         this.almaJobsService.runElisaImportJob();
     }
 
     @Scheduled(cron = "0 0 7 * * 6")
     public void runElisaImportAtWeekEnd() {
+        if (profile.equals("dev")) return;
         this.almaJobsService.runElisaImportJob();
     }
 
     @Scheduled(cron = "0 0 8 * * *")
     public void updateBubiOrders() throws IOException {
+        if (profile.equals("dev")) return;
         List<OpenBubiOrder> result = this.almaAnalyticsReportClient.getReport(OpenBubiOrdersReport.PATH, OpenBubiOrdersReport.class).getRows();
         for (OpenBubiOrder openBubiOrder : result) {
 
