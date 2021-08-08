@@ -3,7 +3,7 @@ package org.unidue.ub.libintel.almaconnector.service.alma;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.*;
 import org.unidue.ub.libintel.almaconnector.clients.alma.acquisition.AlmaPoLinesApiClient;
-import org.unidue.ub.libintel.almaconnector.model.bubi.BubiOrderLine;
+import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderLine;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

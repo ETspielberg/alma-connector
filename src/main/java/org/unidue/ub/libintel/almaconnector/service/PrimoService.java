@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.unidue.ub.libintel.almaconnector.model.bubi.AlmaItemData;
+import org.unidue.ub.libintel.almaconnector.model.bubi.dto.AlmaItemData;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;

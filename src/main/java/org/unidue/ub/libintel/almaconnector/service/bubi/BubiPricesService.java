@@ -29,7 +29,7 @@ public class BubiPricesService {
 
     private final BubiDataRepository bubiDataRepository;
 
-    private Logger log = LoggerFactory.getLogger(BubiPricesService.class);
+    private final Logger log = LoggerFactory.getLogger(BubiPricesService.class);
 
     /**
      * autobased autowiring to the bubi price repository

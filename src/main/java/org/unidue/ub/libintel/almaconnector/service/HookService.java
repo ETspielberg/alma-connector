@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.bibs.*;
 import org.unidue.ub.alma.shared.user.Address;
 import org.unidue.ub.alma.shared.user.AlmaUser;
-import org.unidue.ub.libintel.almaconnector.model.bubi.BubiOrderLine;
+import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderLine;
 import org.unidue.ub.libintel.almaconnector.model.hook.BibHook;
 import org.unidue.ub.libintel.almaconnector.model.hook.ItemHook;
 import org.unidue.ub.libintel.almaconnector.model.hook.LoanHook;
