@@ -1,14 +1,14 @@
 package org.unidue.ub.libintel.almaconnector.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrder;
 import org.unidue.ub.libintel.almaconnector.model.bubi.BubiStatus;
 
 import java.util.List;
 
-@RepositoryRestResource(collectionResourceRel = "bubiOrder", path = "bubiOrder")
-public interface BubiOrderRepository  extends JpaRepository<BubiOrder, String> {
+@Repository
+public interface BubiOrderRepository  extends CrudRepository<BubiOrder, String> {
 
     long countAllByVendorId(String vendorId);
 

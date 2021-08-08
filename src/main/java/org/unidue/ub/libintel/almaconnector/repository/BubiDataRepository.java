@@ -1,13 +1,13 @@
 package org.unidue.ub.libintel.almaconnector.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiData;
 
 import java.util.List;
 
-@RepositoryRestResource(collectionResourceRel = "bubiData", path = "bubiData")
-public interface BubiDataRepository extends JpaRepository<BubiData, String> {
+@Repository
+public interface BubiDataRepository extends CrudRepository<BubiData, String> {
 
     List<BubiData> findByCampusAndActive(String campus, boolean active);
 
