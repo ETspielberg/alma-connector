@@ -4,12 +4,15 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
-import org.unidue.ub.libintel.almaconnector.model.bubi.AlmaItemData;
-import org.unidue.ub.libintel.almaconnector.model.bubi.CoreData;
-import org.unidue.ub.libintel.almaconnector.model.bubi.CoreDataImportRun;
+import org.unidue.ub.libintel.almaconnector.model.bubi.dto.AlmaItemData;
+import org.unidue.ub.libintel.almaconnector.model.bubi.dto.CoreDataBriefDto;
+import org.unidue.ub.libintel.almaconnector.model.bubi.dto.CoreDataFullDto;
+import org.unidue.ub.libintel.almaconnector.model.bubi.entities.CoreData;
+import org.unidue.ub.libintel.almaconnector.model.bubi.dto.CoreDataImportRun;
 import org.unidue.ub.libintel.almaconnector.repository.CoreDataRepository;
 import org.unidue.ub.libintel.almaconnector.service.PrimoService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -42,8 +45,21 @@ public class CoreDataService {
      * retrieves all core data marked as active
      * @return a list of <class>CoreData</class> objects
      */
-    public List<CoreData> getActiveCoreData() {
-        return this.coreDataRepository.findAllByActiveOrderByMinting(true);
+    public List<CoreDataBriefDto> getCoreData(String mode) {
+        List<CoreDataBriefDto> coreData = new ArrayList<>();
+        if ("active".equals(mode))
+            this.coreDataRepository.findAllByActiveOrderByMinting(true).forEach(entry -> coreData.add(new CoreDataBriefDto(entry)));
+        else
+            this.coreDataRepository.findAll().forEach(entry -> coreData.add(new CoreDataBriefDto(entry)));
+        return coreData;
+    }
+
+    public CoreDataFullDto getCoreDatum(String coreDataId) {
+        CoreData coreData = this.coreDataRepository.findById(coreDataId).orElse(null);
+        if (coreData == null)
+            return null;
+        else
+            return new CoreDataFullDto(coreData);
     }
 
     /**
@@ -76,11 +92,13 @@ public class CoreDataService {
 
     /**
      * saves the core data for an item
-     * @param coreData the core data to be saved
+     * @param coreDataFullDto the core data to be saved
      * @return the saved core data
      */
-    public CoreData saveCoreData(CoreData coreData) {
-        return this.coreDataRepository.save(coreData);
+    public CoreDataFullDto saveCoreData(CoreDataFullDto coreDataFullDto) {
+        CoreData coreData = this.coreDataRepository.findById(coreDataFullDto.getCoreDataId()).orElse(new CoreData());
+        coreData = this.coreDataRepository.save(coreDataFullDto.updateCoreData(coreData));
+        return new CoreDataFullDto(coreData);
     }
 
     /**

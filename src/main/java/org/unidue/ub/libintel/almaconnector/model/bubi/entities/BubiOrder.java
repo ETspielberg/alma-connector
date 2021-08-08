@@ -1,8 +1,10 @@
-package org.unidue.ub.libintel.almaconnector.model.bubi;
+package org.unidue.ub.libintel.almaconnector.model.bubi.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.unidue.ub.alma.shared.acq.Vendor;
+import org.unidue.ub.libintel.almaconnector.model.bubi.BubiStatus;
+import org.unidue.ub.libintel.almaconnector.model.bubi.PaymentStatus;
 
 import javax.persistence.*;
 import java.util.*;
@@ -35,8 +37,14 @@ public class BubiOrder {
     @Column(name="invoice_number")
     private String invoiceNumber;
 
-    @Column(name="alma_po_line_number")
-    private String almaPoLineNumber;
+    @Column(name="alma_po_number")
+    private String almaPoNumber;
+
+    @Column(name="alma_set_id")
+    private String almaSetId;
+
+    @Column(name="alma_set_name")
+    private String almaSetName;
 
     @Column(name="vendor_id")
     private String vendorId;
@@ -203,12 +211,12 @@ public class BubiOrder {
         this.comment = comment;
     }
 
-    public String getAlmaPoLineNumber() {
-        return almaPoLineNumber;
+    public String getAlmaPoNumber() {
+        return almaPoNumber;
     }
 
-    public void setAlmaPoLineNumber(String almaPoLineNumber) {
-        this.almaPoLineNumber = almaPoLineNumber;
+    public void setAlmaPoNumber(String almaPoLineNumber) {
+        this.almaPoNumber = almaPoLineNumber;
     }
 
     public Date getCreated() {
@@ -257,6 +265,22 @@ public class BubiOrder {
 
     public void setInvoiceDate(Date invoiceDate) {
         this.invoiceDate = invoiceDate;
+    }
+
+    public String getAlmaSetId() {
+        return almaSetId;
+    }
+
+    public void setAlmaSetId(String almaSetId) {
+        this.almaSetId = almaSetId;
+    }
+
+    public String getAlmaSetName() {
+        return almaSetName;
+    }
+
+    public void setAlmaSetName(String almaSetName) {
+        this.almaSetName = almaSetName;
     }
 
     public Map<String, List<BubiOrderLine>> returnOrderLinesByMediatype() {

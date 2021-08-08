@@ -1,9 +1,14 @@
 package org.unidue.ub.libintel.almaconnector.service.bubi;
 
 import org.springframework.stereotype.Service;
-import org.unidue.ub.libintel.almaconnector.model.bubi.BubiData;
+import org.unidue.ub.libintel.almaconnector.model.bubi.dto.BubiDataBriefDto;
+import org.unidue.ub.libintel.almaconnector.model.bubi.dto.BubiDataFullDto;
+import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiData;
+import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiPrice;
 import org.unidue.ub.libintel.almaconnector.repository.BubiDataRepository;
+import org.unidue.ub.libintel.almaconnector.repository.BubiPricesRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,33 +23,37 @@ public class BubiDataService {
 
     private final BubiDataRepository bubiDataRepository;
 
+    private final BubiPricesRepository bubiPricesRepository;
+
     /**
      * constructor based autowiring to the cbubi data repository
+     *
      * @param bubiDataRepository the bubi data repository
      */
-    BubiDataService(BubiDataRepository bubiDataRepository) {
+    BubiDataService(BubiDataRepository bubiDataRepository,
+                    BubiPricesRepository bubiPricesRepository) {
         this.bubiDataRepository = bubiDataRepository;
+        this.bubiPricesRepository = bubiPricesRepository;
     }
 
     /**
      * retrieves all saved bubi data
+     *
      * @return a list of bubi data
      */
-    public List<BubiData> listAllBubiData() {
-        return this.bubiDataRepository.findAll();
-    }
-
-    /**
-     * retrieves all saved bubi data marked as acitve
-     * @return a list of active bubi data
-     */
-    public List<BubiData> listActiveBubiData() {
-        return this.bubiDataRepository.findByActive(true);
+    public List<BubiDataBriefDto> listAllBubiData(String mode) {
+        List<BubiDataBriefDto> bubiData = new ArrayList<>();
+        if ("active".equals(mode))
+            this.bubiDataRepository.findByActiveOrderByName(true).forEach(entry -> bubiData.add(new BubiDataBriefDto(entry)));
+        else
+            this.bubiDataRepository.findAll().forEach(entry -> bubiData.add(new BubiDataBriefDto(entry)));
+        return bubiData;
     }
 
     /**
      * retrieves the bubi data for a vendor and a given collection
-     * @param vendorID the id of the vendor
+     *
+     * @param vendorID   the id of the vendor
      * @param collection the collection
      * @return the bubi data
      */
@@ -65,6 +74,43 @@ public class BubiDataService {
                     return bubiData;
             }
             return bubiDataList.get(0);
+        }
+    }
+
+    /**
+     *
+     * retrrives the data for a given bubi data id
+     * @param bubiDataId the id of the given bubi
+     * @return a bubi data DTO holding the full data for this bubi
+     */
+    public BubiDataFullDto getBubiData(String bubiDataId) {
+        BubiData bubiData = this.bubiDataRepository.findById(bubiDataId).orElse(null);
+        if (bubiData == null)
+            return null;
+        return new BubiDataFullDto(bubiData);
+    }
+
+    public BubiDataFullDto saveBubidata(BubiDataFullDto bubiDataFullDto) {
+        BubiData bubiData = this.bubiDataRepository.findById(bubiDataFullDto.getVendorAccount()).orElse(null);
+        if (bubiData == null)
+            bubiData = new BubiData();
+        bubiData = bubiDataFullDto.updateBubidata(bubiData);
+        for (BubiPrice price: bubiData.getBubiPrices()) {
+            price.setBubiData(bubiData);
+            bubiPricesRepository.save(price);
+        }
+        bubiData = this.bubiDataRepository.save(bubiData);
+        return new BubiDataFullDto(bubiData);
+    }
+
+    public BubiDataFullDto toggleActive(String bubidataId) {
+        BubiData bubiData = this.bubiDataRepository.findById(bubidataId).orElse(null);
+        if (bubiData == null)
+            return null;
+        else {
+            bubiData.setActive(!bubiData.getActive());
+            bubiData = this.bubiDataRepository.save(bubiData);
+            return new BubiDataFullDto(bubiData);
         }
     }
 }

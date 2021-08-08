@@ -20,7 +20,7 @@ public interface SetsApiClient {
    * Web service for deleting a set.
    * @param setId Unique id of the set. Mandatory. (required)
    */
-  @RequestMapping(method = RequestMethod.POST, value ="/sets/{setId}")
+  @RequestMapping(method = RequestMethod.DELETE, value ="/sets/{setId}")
   void deleteConfSetsSetId(@PathVariable("setId") String setId);
 
   /**
@@ -75,7 +75,7 @@ public interface SetsApiClient {
     "Content-Type: application/json",
     "Accept: application/json",
   })
-  @RequestMapping(method = RequestMethod.POST, value ="/sets/{setId}")
+  @RequestMapping(method = RequestMethod.POST, value ="/sets")
   Set postConfSets(@RequestBody Set body, @RequestParam("population") String population, @RequestParam("job_instance_id") String jobInstanceId, @RequestParam("from_logical_set") String fromLogicalSet, @RequestParam("combine") String combine, @RequestParam("set1") String set1, @RequestParam("set2") String set2);
 
   /**

@@ -1,4 +1,6 @@
-package org.unidue.ub.libintel.almaconnector.model.bubi;
+package org.unidue.ub.libintel.almaconnector.model.bubi.dto;
+
+import org.unidue.ub.libintel.almaconnector.model.bubi.entities.CoreData;
 
 import java.util.ArrayList;
 import java.util.List;

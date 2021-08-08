@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.unidue.ub.alma.shared.acq.Account;
 import org.unidue.ub.alma.shared.acq.Vendor;
-import org.unidue.ub.libintel.almaconnector.model.bubi.BubiOrder;
-import org.unidue.ub.libintel.almaconnector.model.bubi.BubiOrderLine;
+import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrder;
+import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderLine;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaVendorService;
 import org.unidue.ub.libintel.almaconnector.service.bubi.BubiOrderService;
 

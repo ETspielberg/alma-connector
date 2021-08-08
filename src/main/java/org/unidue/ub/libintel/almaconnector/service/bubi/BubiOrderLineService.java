@@ -6,7 +6,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.bibs.Item;
 import org.unidue.ub.libintel.almaconnector.model.bubi.*;
+import org.unidue.ub.libintel.almaconnector.model.bubi.dto.AlmaItemData;
+import org.unidue.ub.libintel.almaconnector.model.bubi.dto.BubiOrderLineBriefDto;
+import org.unidue.ub.libintel.almaconnector.model.bubi.dto.BubiOrderLineFullDto;
+import org.unidue.ub.libintel.almaconnector.model.bubi.dto.CoreDataFullDto;
+import org.unidue.ub.libintel.almaconnector.model.bubi.entities.*;
+import org.unidue.ub.libintel.almaconnector.repository.BubiOrderLinePositionRepository;
 import org.unidue.ub.libintel.almaconnector.repository.BubiOrderLineRepository;
+import org.unidue.ub.libintel.almaconnector.service.PriceNotFoundException;
 import org.unidue.ub.libintel.almaconnector.service.PrimoService;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaItemService;
 
@@ -33,11 +40,17 @@ public class BubiOrderLineService {
 
     private final BubiOrderLineRepository bubiOrderLineRepository;
 
+    private final BubiOrderService bubiOrderService;
+
     private final CoreDataService coreDataService;
 
     private final BubiDataService bubiDataService;
 
     private final AlmaItemService almaItemService;
+
+    private final BubiPricesService bubiPricesService;
+
+    private final BubiOrderLinePositionRepository bubiOrderLinePositionRepository;
 
     private final PrimoService primoService;
 
@@ -51,14 +64,20 @@ public class BubiOrderLineService {
      * @param almaItemService the alma item service
      * @param primoService the primo service
      */
-    BubiOrderLineService(BubiOrderLineRepository bubiOrderLineRepository,
+    BubiOrderLineService(BubiOrderService bubiOrderService,
+                         BubiOrderLineRepository bubiOrderLineRepository,
+                         BubiOrderLinePositionRepository bubiOrderLinePositionRepository,
                          CoreDataService coreDataService,
                          BubiDataService bubiDataService,
+                         BubiPricesService bubiPricesService,
                          AlmaItemService almaItemService,
                          PrimoService primoService) {
+        this.bubiOrderService = bubiOrderService;
         this.bubiOrderLineRepository = bubiOrderLineRepository;
+        this.bubiOrderLinePositionRepository = bubiOrderLinePositionRepository;
         this.coreDataService = coreDataService;
         this.bubiDataService = bubiDataService;
+        this.bubiPricesService = bubiPricesService;
         this.almaItemService = almaItemService;
         this.primoService = primoService;
     }
@@ -70,7 +89,38 @@ public class BubiOrderLineService {
      */
     public BubiOrderLine saveBubiOrderLine(BubiOrderLine bubiOrderLine) {
         bubiOrderLine.setLastChange(new Date());
-        return this.bubiOrderLineRepository.save(bubiOrderLine);
+        bubiOrderLine = this.bubiOrderLineRepository.save(bubiOrderLine);
+        for (BubiOrderlinePosition bubiOrderlinePosition: bubiOrderLine.getBubiOrderlinePositions()) {
+            bubiOrderlinePosition = bubiOrderLinePositionRepository.save(bubiOrderlinePosition);
+            bubiOrderlinePosition.setBubiOrderLine(bubiOrderLine);
+        }
+        return bubiOrderLine;
+    }
+
+    public BubiOrderLine saveBubiOrderLineFullDTO(BubiOrderLineFullDto bubiOrderLineFullDto) {
+        BubiOrderLine bubiOrderLine = bubiOrderLineRepository.getBubiOrderLineByBubiOrderLineIdOrderByMinting(bubiOrderLineFullDto.getBubiOrderLineId());
+        bubiOrderLineFullDto.updateBubiOrderLine(bubiOrderLine);
+        for (BubiOrderlinePosition bubiOrderlinePosition: bubiOrderLine.getBubiOrderlinePositions()) {
+            bubiOrderlinePosition.setBubiOrderLine(bubiOrderLine);
+            this.bubiOrderLinePositionRepository.save(bubiOrderlinePosition);
+        }
+        try {
+            bubiOrderLine.setPrice(this.bubiPricesService.calculatePriceForOrderline(bubiOrderLine));
+        } catch (PriceNotFoundException pnfe) {
+            log.warn("could not calculate price - no price information available", pnfe);
+        }
+        String bubiOrderId = bubiOrderLineFullDto.getBubiOrderId();
+        if (bubiOrderId != null && !bubiOrderId.isEmpty()) {
+            BubiOrder bubiOrder = this.bubiOrderService.getBubiOrder(bubiOrderId);
+            log.info("retrieving bubi order " + bubiOrderId);
+            if (bubiOrder == null)
+                bubiOrder = this.bubiOrderService.createNewBubiOrder(bubiOrderLineFullDto.getBubiOrderId(), bubiOrderLine);
+            bubiOrderLine.setBubiOrder(bubiOrder);
+            bubiOrderLine.setStatus(BubiStatus.PACKED);
+        } else
+            bubiOrderLine.setStatus(BubiStatus.WAITING);
+        this.bubiOrderLineRepository.save(bubiOrderLine);
+        return bubiOrderLine;
     }
 
     /**
@@ -83,19 +133,26 @@ public class BubiOrderLineService {
      *             other: retrieves all active bubi orderlines
      * @return a list of bubi orderlines
      */
-    public List<BubiOrderLine> getOrderLines(String mode) {
+    public List<BubiOrderLineBriefDto> getOrderLines(String mode) {
+        List<BubiOrderLineBriefDto> orderlines = new ArrayList<>();
         switch (mode) {
             case "all":
-                return this.bubiOrderLineRepository.findAll();
+                this.bubiOrderLineRepository.findAll().forEach(entry -> orderlines.add(new BubiOrderLineBriefDto(entry)));
+                break;
             case "packed":
-                return this.bubiOrderLineRepository.findAllByStatusOrderByMinting(BubiStatus.PACKED);
+                this.bubiOrderLineRepository.findAllByStatusOrderByMinting(BubiStatus.PACKED).forEach(entry -> orderlines.add(new BubiOrderLineBriefDto(entry)));
+                break;
             case "sent":
-                return this.bubiOrderLineRepository.findAllByStatusOrderByMinting(BubiStatus.SENT);
+                this.bubiOrderLineRepository.findAllByStatusOrderByMinting(BubiStatus.SENT).forEach(entry -> orderlines.add(new BubiOrderLineBriefDto(entry)));
+                break;
             case "waiting":
-                return this.bubiOrderLineRepository.findAllByStatusOrderByMinting(BubiStatus.WAITING);
+                this.bubiOrderLineRepository.findAllByStatusOrderByMinting(BubiStatus.WAITING).forEach(entry -> orderlines.add(new BubiOrderLineBriefDto(entry)));
+                break;
             default:
-                return getActiveOrderlines();
+                getActiveOrderlines().forEach(entry -> orderlines.add(new BubiOrderLineBriefDto(entry)));
+                break;
         }
+        return orderlines;
     }
 
     /**
@@ -103,8 +160,14 @@ public class BubiOrderLineService {
      * @param identifier the identifier of the bubi orderline
      * @return the bubi orderline
      */
-    public BubiOrderLine getBubiOrderLineFromIdentifier(String identifier) {
-        return this.bubiOrderLineRepository.getBubiOrderLineByBubiOrderLineIdOrderByMinting(identifier);
+    public BubiOrderLineFullDto getBubiOrderLineFromIdentifier(String identifier) {
+        BubiOrderLine bubiOrderLine = this.bubiOrderLineRepository.getBubiOrderLineByBubiOrderLineIdOrderByMinting(identifier);
+        if (bubiOrderLine.getBubiOrderlinePositions() == null || bubiOrderLine.getBubiOrderlinePositions().size() == 0) {
+            List<BubiOrderlinePosition> positions = new ArrayList<>();
+            positions.add(new BubiOrderlinePosition());
+            bubiOrderLine.setBubiOrderlinePositions(positions);
+        }
+        return new BubiOrderLineFullDto(bubiOrderLine);
     }
 
     /**
@@ -112,8 +175,10 @@ public class BubiOrderLineService {
      * @param vendorId the id of the vendor
      * @return the list of bubi orderlines for this vendor
      */
-    public List<BubiOrderLine> getAllBubiOrderLinesForBubi(String vendorId) {
-        return this.bubiOrderLineRepository.findAllByVendorIdOrderByMinting(vendorId);
+    public List<BubiOrderLineBriefDto> getAllBubiOrderLinesForBubi(String vendorId) {
+        List<BubiOrderLineBriefDto> orderlines = new ArrayList<>();
+        this.bubiOrderLineRepository.findAllByVendorIdOrderByMinting(vendorId).forEach(entry -> orderlines.add(new BubiOrderLineBriefDto(entry)));
+        return orderlines;
     }
 
     /**
@@ -228,5 +293,10 @@ public class BubiOrderLineService {
         allOpenOrderlines.addAll(this.bubiOrderLineRepository.findAllByStatusOrderByMinting(BubiStatus.WAITING));
         allOpenOrderlines.addAll(this.bubiOrderLineRepository.findAllByStatusOrderByMinting(BubiStatus.INWORK));
         return allOpenOrderlines;
+    }
+
+    public BubiOrderLine getBubiOrderLineFromCoredata(String coredataId) {
+        CoreDataFullDto coreData = this.coreDataService.getCoreDatum(coredataId);
+        return this.retrieveBubiOrderLine(coreData.getCollection(), coreData.getShelfmark());
     }
 }

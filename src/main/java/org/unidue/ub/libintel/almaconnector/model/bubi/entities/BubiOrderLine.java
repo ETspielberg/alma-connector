@@ -1,13 +1,17 @@
-package org.unidue.ub.libintel.almaconnector.model.bubi;
+package org.unidue.ub.libintel.almaconnector.model.bubi.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.NumberFormat;
+import org.unidue.ub.libintel.almaconnector.model.bubi.dto.AlmaItemData;
+import org.unidue.ub.libintel.almaconnector.model.bubi.BubiStatus;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "bubi_order_line")
@@ -26,7 +30,7 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
     @Column(name = "counter")
     private long counter;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bubi_order_id")
     @JsonIgnore
     private BubiOrder bubiOrder;
@@ -152,10 +156,14 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
     @Column(name= "number_items")
     private int numberItems = 1;
 
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "bubiOrderLine")
+    private List<BubiOrderlinePosition> bubiOrderlinePositions;
+
     public BubiOrderLine() {
         this.status = BubiStatus.NEW;
         this.lastChange = new Date();
         this.created = new Date();
+        this.bubiOrderlinePositions = new ArrayList<>();
     }
 
     public BubiOrderLine(String collection, String shelfmark, long counter) {
@@ -165,6 +173,7 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         this.counter = counter;
         this.lastChange = new Date();
         this.created = new Date();
+        this.bubiOrderlinePositions = new ArrayList<>();
         this.updateBubiOrderLineId();
     }
 
@@ -196,6 +205,9 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
             this.almaMmsId = coredata.getAlmaMmsId();
         if (this.almaHoldingId == null)
             this.almaHoldingId = coredata.getAlmaHoldingId();
+        BubiOrderlinePosition bubiOrderlinePosition = new BubiOrderlinePosition()
+                .withVolumeSuffix(volumeSuffix);
+        this.bubiOrderlinePositions.add(bubiOrderlinePosition);
         this.volumeSuffix = coredata.getVolumeSuffix();
         this.securityStrip = coredata.getSecurityStrip();
         this.mapSlide = coredata.getMapSlide();
@@ -561,6 +573,14 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
 
     public void setColorMinting(String colorMinting) {
         this.colorMinting = colorMinting;
+    }
+
+    public List<BubiOrderlinePosition> getBubiOrderlinePositions() {
+        return bubiOrderlinePositions;
+    }
+
+    public void setBubiOrderlinePositions(List<BubiOrderlinePosition> bubiOrderlinePositions) {
+        this.bubiOrderlinePositions = bubiOrderlinePositions;
     }
 
     @Override

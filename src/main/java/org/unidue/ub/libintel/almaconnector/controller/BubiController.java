@@ -1,17 +1,13 @@
 package org.unidue.ub.libintel.almaconnector.controller;
 
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.unidue.ub.alma.shared.conf.Set;
-import org.unidue.ub.libintel.almaconnector.model.bubi.*;
+import org.unidue.ub.libintel.almaconnector.model.bubi.dto.*;
+import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiPrice;
+import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrder;
 import org.unidue.ub.libintel.almaconnector.service.PrimoService;
-import org.unidue.ub.libintel.almaconnector.service.alma.AlmaItemService;
-import org.unidue.ub.libintel.almaconnector.service.alma.AlmaPoLineService;
-import org.unidue.ub.libintel.almaconnector.service.alma.AlmaSetService;
 import org.unidue.ub.libintel.almaconnector.service.bubi.*;
 
 import java.io.IOException;
@@ -32,29 +28,19 @@ public class BubiController {
 
     private final BubiPricesService bubiPricesService;
 
-    private final AlmaPoLineService almaPoLineService;
-
     private final PrimoService primoService;
-
-    private final AlmaItemService almaItemService;
-
-    private final Logger log = LoggerFactory.getLogger(BubiController.class);
 
     BubiController(PrimoService primoService,
                    BubiOrderService bubiOrderService,
                    BubiDataService bubiDataService,
                    CoreDataService coreDataService,
-                   AlmaPoLineService almaPoLineService,
                    BubiOrderLineService bubiOrderLineService,
-                   BubiPricesService bubiPricesService,
-                   AlmaItemService almaItemService) {
+                   BubiPricesService bubiPricesService) {
         this.primoService = primoService;
         this.bubiOrderService = bubiOrderService;
         this.bubiDataService = bubiDataService;
         this.coreDataService = coreDataService;
         this.bubiOrderLineService = bubiOrderLineService;
-        this.almaPoLineService = almaPoLineService;
-        this.almaItemService = almaItemService;
         this.bubiPricesService = bubiPricesService;
     }
 
@@ -64,43 +50,57 @@ public class BubiController {
     @GetMapping("/almaData")
     private ResponseEntity<List<AlmaItemData>> getAlmaData(String collection, String shelfmark) {
         AlmaItemData almaItemData = new AlmaItemData(collection, shelfmark);
-        almaItemData.mediaType = "book";
-        if (almaItemData.shelfmark.contains(" Z "))
-            almaItemData.mediaType = "journal";
         return ResponseEntity.ok(this.primoService.getPrimoResponse(almaItemData));
     }
 
+
     // ---------------------- Bubi data endpoints ----------------------
 
-    @GetMapping("/bubidata/all")
-    private ResponseEntity<List<BubiData>> getAllbubiData() {
-        return ResponseEntity.ok(this.bubiDataService.listAllBubiData());
+    @GetMapping("/bubidata")
+    private ResponseEntity<List<BubiDataBriefDto>> getbubiData(String mode) {
+        return ResponseEntity.ok(this.bubiDataService.listAllBubiData(mode));
     }
 
-    @GetMapping("/bubidata/active")
-    private ResponseEntity<List<BubiData>> getActivebubiData() {
-        return ResponseEntity.ok(this.bubiDataService.listActiveBubiData());
+    @PostMapping("/bubidata")
+    private ResponseEntity<BubiDataFullDto> savebubiData(@RequestBody BubiDataFullDto bubiDataFullDto) {
+        return ResponseEntity.ok(this.bubiDataService.saveBubidata(bubiDataFullDto));
     }
 
-    @GetMapping("/bubiprices/{vendorAccount}")
-    private ResponseEntity<List<BubiPrice>> getBubiPrices(@PathVariable String vendorAccount) {
-        List<BubiPrice> bubiPrices = this.bubiPricesService.getBubiPricesForVendorAccount(vendorAccount);
-        if (bubiPrices == null || bubiPrices.size() == 0)
-            bubiPrices = this.bubiPricesService.createNewBubiPricesForVendorAccount(vendorAccount);
-        return ResponseEntity.ok(bubiPrices);
+    @GetMapping("/bubidata/retrieve")
+    private ResponseEntity<BubiDataFullDto> getBubiData(String bubidataId) {
+        return ResponseEntity.ok(this.bubiDataService.getBubiData(bubidataId));
+    }
+
+    @PostMapping("/bubidata/active/{bubidataId}")
+    private ResponseEntity<BubiDataFullDto> toggleActive(@PathVariable String bubidataId) {
+        return ResponseEntity.ok(this.bubiDataService.toggleActive(bubidataId));
+    }
+
+
+    // ---------------------- Bubi prices endpoints ----------------------
+
+    @PostMapping("/prices")
+    private ResponseEntity<BubiPrice> saveBubiPrice(@RequestBody BubiPrice bubiPrice) {
+        return ResponseEntity.ok(this.bubiPricesService.saveBubiPrice(bubiPrice));
+    }
+
+    @DeleteMapping("/prices/delete")
+    private ResponseEntity<?> deleteBubiPrice(String vendorAccount) {
+        this.bubiPricesService.deleteBubiPrices(vendorAccount);
+        return ResponseEntity.ok().build();
     }
 
 
     // ---------------------- Core data endpoints ----------------------
 
-    @GetMapping("/coredata/all")
-    private ResponseEntity<List<CoreData>> getAllCoreData() {
-        return ResponseEntity.ok(this.coreDataService.getAllCoreData());
+    @GetMapping("/coredata")
+    private ResponseEntity<List<CoreDataBriefDto>> getCoreData(String mode) {
+        return ResponseEntity.ok(this.coreDataService.getCoreData(mode));
     }
 
-    @GetMapping("/coredata/active")
-    private ResponseEntity<List<CoreData>> getActiveCoreData() {
-        return ResponseEntity.ok(this.coreDataService.getActiveCoreData());
+    @GetMapping("/coredata/retrieve")
+    public ResponseEntity<CoreDataFullDto> getCoreDatum(String coredataId) {
+        return ResponseEntity.ok(this.coreDataService.getCoreDatum(coredataId));
     }
 
     /**
@@ -119,14 +119,13 @@ public class BubiController {
         return ResponseEntity.ok(coreDataImportRun);
     }
 
-    @PostMapping("/coredata/save")
-    public ResponseEntity<CoreData> saveCoredata(@RequestBody CoreData coredata) {
-        return ResponseEntity.ok(this.coreDataService.saveCoreData(coredata));
+    @PostMapping("/coredata")
+    public ResponseEntity<CoreDataFullDto> saveCoredata(@RequestBody CoreDataFullDto coreDataFullDto) {
+        return ResponseEntity.ok(this.coreDataService.saveCoreData(coreDataFullDto));
     }
 
     @DeleteMapping("/coredata/delete")
-    public ResponseEntity<CoreData> deleteCoreData(String collection, String shelfmark) {
-        log.info(String.format("deleting core data for %s: %s", collection, shelfmark));
+    public ResponseEntity<?> deleteCoreData(String collection, String shelfmark) {
         this.coreDataService.deleteCoreData(collection + "-" + shelfmark);
         return ResponseEntity.ok().build();
     }
@@ -134,115 +133,94 @@ public class BubiController {
 
     // ---------------------- bubi order line endpoints ----------------------
 
-    @PostMapping("/orderline/save")
-    public ResponseEntity<BubiOrderLine> saveBubiOrderLine(@RequestBody BubiOrderLine bubiOrderLine) {
-        String vendoraccount = this.bubiDataService.getVendorAccount(bubiOrderLine.getVendorId(), bubiOrderLine.getCollection()).getVendorAccount();
-        bubiOrderLine.setVendorAccount(vendoraccount);
-        bubiOrderLine.setPrice(this.bubiPricesService.calculatePriceForOrderline(bubiOrderLine));
-        bubiOrderLine = this.bubiOrderLineService.saveBubiOrderLine(bubiOrderLine);
-        return ResponseEntity.ok(bubiOrderLine);
+    @GetMapping("/orderline")
+    public ResponseEntity<List<BubiOrderLineBriefDto>> getOrderlines(String mode) {
+        return ResponseEntity.ok(this.bubiOrderLineService.getOrderLines(mode));
     }
 
-    @PostMapping("/orderline/updatePrice/{bubiOrderLineId}")
-    public ResponseEntity<BubiOrderLine> changePrice(@PathVariable String bubiOrderLineId) {
-        BubiOrderLine bubiOrderLine = this.bubiOrderLineService.getBubiOrderLineFromIdentifier(bubiOrderLineId);
-        bubiOrderLine.setPrice(this.bubiPricesService.calculatePriceForOrderline(bubiOrderLine));
-        this.bubiOrderLineService.saveBubiOrderLine(bubiOrderLine);
-        if (bubiOrderLine.getBubiOrder() != null)
-            this.bubiOrderService.changePrice(bubiOrderLine);
-        return ResponseEntity.ok(bubiOrderLine);
-    }
-
-    @PostMapping("/orderline/changePrice")
-    public ResponseEntity<BubiOrderLine> changePrice(@RequestBody BubiOrderLine bubiOrderLine) {
-        bubiOrderLine = this.bubiOrderLineService.saveBubiOrderLine(bubiOrderLine);
-        this.almaPoLineService.updatePoLineByBubiOrderLine(bubiOrderLine);
-        return ResponseEntity.ok(bubiOrderLine);
+    @PostMapping("/orderline")
+    public ResponseEntity<BubiOrderLineFullDto> saveBubiOrderLine(@RequestBody BubiOrderLineFullDto bubiOrderLineFullDto) {
+        return ResponseEntity.ok(new BubiOrderLineFullDto(this.bubiOrderLineService.saveBubiOrderLineFullDTO(bubiOrderLineFullDto)));
     }
 
     @GetMapping("/orderline/fromShelfmark")
-    public ResponseEntity<BubiOrderLine> getForShelfmark(String shelfmark, String collection) {
-        return ResponseEntity.ok(this.bubiOrderLineService.expandBubiOrderLineFromShelfmark(collection, shelfmark));
+    public ResponseEntity<BubiOrderLineFullDto> getForShelfmark(String shelfmark, String collection) {
+        return ResponseEntity.ok(new BubiOrderLineFullDto(this.bubiOrderLineService.expandBubiOrderLineFromShelfmark(collection, shelfmark)));
     }
 
     @GetMapping("/orderline/fromBarcode")
-    public ResponseEntity<BubiOrderLine> getForBarcode(String barcode) {
-        return ResponseEntity.ok(this.bubiOrderLineService.getBubiOrderLineFromBarcode(barcode));
+    public ResponseEntity<BubiOrderLineFullDto> getForBarcode(String barcode) {
+        return ResponseEntity.ok(new BubiOrderLineFullDto(this.bubiOrderLineService.getBubiOrderLineFromBarcode(barcode)));
+    }
+
+    @GetMapping("/orderline/fromCoredata")
+    public ResponseEntity<BubiOrderLineFullDto> getForCoredata(String coredataId) {
+        return ResponseEntity.ok(new BubiOrderLineFullDto(this.bubiOrderLineService.getBubiOrderLineFromCoredata(coredataId)));
     }
 
     @GetMapping("/orderline/fromIdentifier")
-    public ResponseEntity<BubiOrderLine> getForIdentifier(String identifier) {
+    public ResponseEntity<BubiOrderLineFullDto> getForIdentifier(String identifier) {
         return ResponseEntity.ok(this.bubiOrderLineService.getBubiOrderLineFromIdentifier(identifier));
     }
 
-    @GetMapping("/orderline/retrieve")
-    public ResponseEntity<List<BubiOrderLine>> getAllActiveOrderlines(String mode) {
-        return ResponseEntity.ok(this.bubiOrderLineService.getOrderLines(mode));
-
+    @GetMapping("/orderline/bubi")
+    public ResponseEntity<List<BubiOrderLineBriefDto>> getAllOrderlines( String vendorAccount) {
+        return ResponseEntity.ok(this.bubiOrderLineService.getAllBubiOrderLinesForBubi(vendorAccount));
     }
 
-    @GetMapping("/orderline/bubi/{vendorId}")
-    public ResponseEntity<List<BubiOrderLine>> getAllOrderlines(@PathVariable String vendorId) {
-        return ResponseEntity.ok(this.bubiOrderLineService.getAllBubiOrderLinesForBubi(vendorId));
-    }
-
-    @PutMapping("/orderline/changePrice")
-    public ResponseEntity<BubiOrder> getAllOrderlines(@RequestBody BubiOrderLine bubiOrderLine) {
-        return ResponseEntity.ok(this.bubiOrderService.changePrice(bubiOrderLine));
-    }
 
     // ---------------------- bubi order endpoints ----------------------
 
-    @GetMapping("/orders")
-    public ResponseEntity<List<BubiOrder>> getOrders(String mode) {
-        return ResponseEntity.ok(this.bubiOrderService.getBubiOrders(mode));
+    @GetMapping("/order")
+    public ResponseEntity<List<BubiOrderBriefDto>> getOrders(String mode) {
+        return ResponseEntity.ok(this.bubiOrderService.getBriefBubiOrders(mode));
     }
 
-    @GetMapping("/order/retrieve/{bubiOrderId}")
-    public ResponseEntity<BubiOrder> getOrder(@PathVariable String bubiOrderId) {
-        return ResponseEntity.ok(this.bubiOrderService.getBubiOrder(bubiOrderId));
+    @GetMapping("/order/list")
+    public ResponseEntity<List<BubiOrderShortDto>> getOrderOverview(String mode) {
+        return ResponseEntity.ok(this.bubiOrderService.getShortBubiOrders(mode));
     }
+
+    @GetMapping("/order/retrieve")
+    public ResponseEntity<BubiOrderFullDto> getOrder(String bubiOrderId) {
+        return ResponseEntity.ok(this.bubiOrderService.getBubiOrderFull(bubiOrderId));
+    }
+
 
     @PostMapping("/order/pack")
-    public ResponseEntity<List<BubiOrder>> packOrders(@RequestBody BubiOrder bubiOrder) {
+    public ResponseEntity<List<BubiOrderFullDto>> packOrders(@RequestBody BubiOrder bubiOrder) {
         return ResponseEntity.ok(this.bubiOrderService.packBubiOrder(bubiOrder));
     }
 
     @PostMapping("/order/collect/{bubiOrderId}")
-    public ResponseEntity<BubiOrder> collectOrder(@PathVariable String bubiOrderId) {
+    public ResponseEntity<BubiOrderFullDto> collectOrder(@PathVariable String bubiOrderId) {
         return ResponseEntity.ok(this.bubiOrderService.collectBubiOrder(bubiOrderId));
     }
 
     @PostMapping("/order/return/{bubiOrderId}")
-    public ResponseEntity<BubiOrder> returnOrder(@PathVariable String bubiOrderId) {
+    public ResponseEntity<BubiOrderFullDto> returnOrder(@PathVariable String bubiOrderId) {
         return ResponseEntity.ok(this.bubiOrderService.returnBubiOrder(bubiOrderId));
     }
 
     @PostMapping("/order/pay/{bubiOrderId}")
-    public ResponseEntity<BubiOrder> payOrder(@PathVariable String bubiOrderId) {
+    public ResponseEntity<BubiOrderFullDto> payOrder(@PathVariable String bubiOrderId) {
         return ResponseEntity.ok(this.bubiOrderService.payBubiOrder(bubiOrderId));
     }
 
     @PutMapping("/order/removeOrderline/{bubiOrderLineid}")
-    public ResponseEntity<BubiOrder> removeOrderLine(String bubiOrderLineid, @RequestBody BubiOrderLine bubiOrderLine) {
-        return ResponseEntity.ok(this.bubiOrderService.removeOrderLine(bubiOrderLineid, bubiOrderLine));
+    public ResponseEntity<BubiOrderFullDto> removeOrderLine(@PathVariable String bubiOrderLineid, String bubiOrderLineId) {
+        return ResponseEntity.ok(this.bubiOrderService.removeOrderLine(bubiOrderLineid, bubiOrderLineId));
     }
 
     @PutMapping("/order/addOrderline/{bubiOrderLineid}")
-    public ResponseEntity<BubiOrder> addOrderLine(String bubiOrderLineid, @RequestBody BubiOrderLine bubiOrderLine) {
-        return ResponseEntity.ok(this.bubiOrderService.addOrderLine(bubiOrderLineid, bubiOrderLine));
+    public ResponseEntity<BubiOrderFullDto> addOrderLine(@PathVariable String bubiOrderLineid, String bubiOrderLineId) {
+        return ResponseEntity.ok(this.bubiOrderService.addOrderLine(bubiOrderLineid, bubiOrderLineId));
     }
 
     @PutMapping("/order/duplicateOrderline/{bubiOrderLineid}")
-    public ResponseEntity<BubiOrder> duplicateOrderline(String bubiOrderLineid, @RequestBody BubiOrderLine bubiOrderLine) {
-        return ResponseEntity.ok(this.bubiOrderService.duplicateOrderline(bubiOrderLineid, bubiOrderLine));
+    public ResponseEntity<BubiOrderFullDto> duplicateOrderline(@PathVariable String bubiOrderLineid, String bubiOrderLineId) {
+        return ResponseEntity.ok(this.bubiOrderService.duplicateOrderline(bubiOrderLineid, bubiOrderLineId));
     }
 
-    // ---------------------- primo data endpoints ----------------------
 
-    @GetMapping("/getJournalData")
-    public ResponseEntity<List<AlmaItemData>> getJournalData(String collection, String shelfmark) {
-        AlmaItemData almaItemData = new AlmaItemData(collection, shelfmark);
-        return ResponseEntity.ok(this.primoService.getPrimoResponse(almaItemData));
-    }
 }
