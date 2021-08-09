@@ -186,7 +186,6 @@ public class BubiController {
         return ResponseEntity.ok(this.bubiOrderService.getBubiOrderFull(bubiOrderId));
     }
 
-
     @PostMapping("/order/pack")
     public ResponseEntity<List<BubiOrderFullDto>> packOrders(@RequestBody BubiOrder bubiOrder) {
         return ResponseEntity.ok(this.bubiOrderService.packBubiOrder(bubiOrder));
@@ -221,6 +220,4 @@ public class BubiController {
     public ResponseEntity<BubiOrderFullDto> duplicateOrderline(@PathVariable String bubiOrderLineid, String bubiOrderLineId) {
         return ResponseEntity.ok(this.bubiOrderService.duplicateOrderline(bubiOrderLineid, bubiOrderLineId));
     }
-
-
 }

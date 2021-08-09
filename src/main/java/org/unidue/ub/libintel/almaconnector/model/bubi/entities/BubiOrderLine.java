@@ -9,9 +9,7 @@ import org.unidue.ub.libintel.almaconnector.model.bubi.dto.AlmaItemData;
 import org.unidue.ub.libintel.almaconnector.model.bubi.BubiStatus;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @Table(name = "bubi_order_line")
@@ -157,13 +155,13 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
     private int numberItems = 1;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "bubiOrderLine")
-    private List<BubiOrderlinePosition> bubiOrderlinePositions;
+    private Set<BubiOrderlinePosition> bubiOrderlinePositions;
 
     public BubiOrderLine() {
         this.status = BubiStatus.NEW;
         this.lastChange = new Date();
         this.created = new Date();
-        this.bubiOrderlinePositions = new ArrayList<>();
+        this.bubiOrderlinePositions = new HashSet<>();
     }
 
     public BubiOrderLine(String collection, String shelfmark, long counter) {
@@ -173,7 +171,7 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         this.counter = counter;
         this.lastChange = new Date();
         this.created = new Date();
-        this.bubiOrderlinePositions = new ArrayList<>();
+        this.bubiOrderlinePositions = new HashSet<>();
         this.updateBubiOrderLineId();
     }
 
@@ -575,11 +573,11 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         this.colorMinting = colorMinting;
     }
 
-    public List<BubiOrderlinePosition> getBubiOrderlinePositions() {
+    public Set<BubiOrderlinePosition> getBubiOrderlinePositions() {
         return bubiOrderlinePositions;
     }
 
-    public void setBubiOrderlinePositions(List<BubiOrderlinePosition> bubiOrderlinePositions) {
+    public void setBubiOrderlinePositions(Set<BubiOrderlinePosition> bubiOrderlinePositions) {
         this.bubiOrderlinePositions = bubiOrderlinePositions;
     }
 

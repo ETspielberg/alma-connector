@@ -12,7 +12,7 @@ public class BubiOrderFullDto {
 
     private long counter;
 
-    private List<BubiOrderLineFullDto> bubiOrderLines;
+    private Set<BubiOrderLineBriefDto> bubiOrderLines;
 
     private String bubiStatus;
 
@@ -62,12 +62,14 @@ public class BubiOrderFullDto {
         this.vendorAccount = bubiOrder.getVendorAccount();
         this.counter = bubiOrder.getCounter();
         this.bubiOrderId = bubiOrder.getBubiOrderId();
-        bubiOrder.getBubiOrderLines().forEach(entry -> this.bubiOrderLines.add(new BubiOrderLineFullDto(entry)));
+        this.bubiOrderLines = new HashSet<>();
+        bubiOrder.getBubiOrderLines().forEach(entry -> this.bubiOrderLines.add(new BubiOrderLineBriefDto(entry)));
         this.bubiStatus = bubiOrder.getBubiStatus().name();
         this.paymentStatus = bubiOrder.getPaymentStatus().name();
         this.created = bubiOrder.getCreated();
         this.lastChange = bubiOrder.getLastChange();
-        this.totalAmount = bubiOrder.getTotalAmount();
+        this.totalAmount = 0.0;
+        bubiOrder.getBubiOrderLines().forEach(entry -> this.totalAmount += entry.getPrice());
         this.comment = bubiOrder.getComment();
         this.invoiceNumber = bubiOrder.getInvoiceNumber();
         this.invoiceDate = bubiOrder.getInvoiceDate();
@@ -94,11 +96,11 @@ public class BubiOrderFullDto {
         this.counter = counter;
     }
 
-    public List<BubiOrderLineFullDto> getBubiOrderLines() {
+    public Set<BubiOrderLineBriefDto> getBubiOrderLines() {
         return bubiOrderLines;
     }
 
-    public void setBubiOrderLines(List<BubiOrderLineFullDto> bubiOrderLines) {
+    public void setBubiOrderLines(Set<BubiOrderLineBriefDto> bubiOrderLines) {
         this.bubiOrderLines = bubiOrderLines;
     }
 

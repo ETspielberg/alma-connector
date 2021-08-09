@@ -17,10 +17,7 @@ import org.unidue.ub.libintel.almaconnector.service.PriceNotFoundException;
 import org.unidue.ub.libintel.almaconnector.service.PrimoService;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaItemService;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 /**
  * offers functions around bubi order lines
@@ -89,11 +86,11 @@ public class BubiOrderLineService {
      */
     public BubiOrderLine saveBubiOrderLine(BubiOrderLine bubiOrderLine) {
         bubiOrderLine.setLastChange(new Date());
-        bubiOrderLine = this.bubiOrderLineRepository.save(bubiOrderLine);
         for (BubiOrderlinePosition bubiOrderlinePosition: bubiOrderLine.getBubiOrderlinePositions()) {
             bubiOrderlinePosition = bubiOrderLinePositionRepository.save(bubiOrderlinePosition);
             bubiOrderlinePosition.setBubiOrderLine(bubiOrderLine);
         }
+        bubiOrderLine = this.bubiOrderLineRepository.save(bubiOrderLine);
         return bubiOrderLine;
     }
 
@@ -163,7 +160,7 @@ public class BubiOrderLineService {
     public BubiOrderLineFullDto getBubiOrderLineFromIdentifier(String identifier) {
         BubiOrderLine bubiOrderLine = this.bubiOrderLineRepository.getBubiOrderLineByBubiOrderLineIdOrderByMinting(identifier);
         if (bubiOrderLine.getBubiOrderlinePositions() == null || bubiOrderLine.getBubiOrderlinePositions().size() == 0) {
-            List<BubiOrderlinePosition> positions = new ArrayList<>();
+            Set<BubiOrderlinePosition> positions = new HashSet<>();
             positions.add(new BubiOrderlinePosition());
             bubiOrderLine.setBubiOrderlinePositions(positions);
         }

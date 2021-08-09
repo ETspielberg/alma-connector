@@ -21,7 +21,7 @@ public class BubiOrder {
     private long counter;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "bubiOrder")
-    private List<BubiOrderLine> bubiOrderLines;
+    private Set<BubiOrderLine> bubiOrderLines;
 
     @Column(name="bubi_status")
     @Enumerated(EnumType.STRING)
@@ -84,7 +84,7 @@ public class BubiOrder {
     private Date returnedOn;
 
     public BubiOrder() {
-        this.bubiOrderLines = new ArrayList<>();
+        this.bubiOrderLines = new HashSet<>();
         this.counter = 0;
         this.vendorAccount = "";
         this.vendorId = "";
@@ -95,7 +95,7 @@ public class BubiOrder {
         this.vendorAccount = bubiOrderLine.getVendorAccount();
         this.counter = counter;
         this.bubiOrderId = bubiOrderLine.getVendorAccount() + "-" + counter;
-        this.bubiOrderLines = new ArrayList<>();
+        this.bubiOrderLines = new HashSet<>();
         this.bubiOrderLines.add(bubiOrderLine);
         this.bubiStatus = BubiStatus.NEW;
         this.paymentStatus = PaymentStatus.OPEN;
@@ -114,7 +114,7 @@ public class BubiOrder {
         this.created = new Date();
         this.lastChange = new Date();
         this.totalAmount = 0.0;
-        this.bubiOrderLines = new ArrayList<>();
+        this.bubiOrderLines = new HashSet<>();
     }
 
     public BubiOrder withCounter(long counter) {
@@ -147,14 +147,14 @@ public class BubiOrder {
         this.bubiData = bubiData;
     }
 
-    public List<BubiOrderLine> getBubiOrderLines() {
+    public Set<BubiOrderLine> getBubiOrderLines() {
         return bubiOrderLines;
     }
 
-    public void setBubiOrderLines(List<BubiOrderLine> bubiOrderLines) {
+    public void setBubiOrderLines(Set<BubiOrderLine> bubiOrderLines) {
         this.bubiOrderLines = bubiOrderLines;
-        //for (BubiOrderLine bubiOrderLine: bubiOrderLines)
-        //    this.totalAmount += bubiOrderLine.getPrice();
+        for (BubiOrderLine bubiOrderLine: bubiOrderLines)
+            this.totalAmount += bubiOrderLine.getPrice();
     }
 
     public void addBubiOrderLine(BubiOrderLine bubiOrderLine) {
@@ -315,9 +315,11 @@ public class BubiOrder {
     }
 
     public void sortBubiOrderLines() {
-        this.bubiOrderLines.sort(Comparator.comparing(BubiOrderLine::getMediaType));
-        for (int i = 0; i < this.bubiOrderLines.size(); i++)
-            this.bubiOrderLines.get(i).setPositionalNumber(i+1);
+        List<BubiOrderLine> orderlines = new ArrayList<>(this.bubiOrderLines);
+        orderlines.sort(Comparator.comparing(BubiOrderLine::getMediaType));
+        for (int i = 0; i < orderlines.size(); i++)
+            orderlines.get(i).setPositionalNumber(i+1);
+        this.bubiOrderLines.addAll(orderlines);
     }
 
     public void removeOrderline(BubiOrderLine bubiOrderLine) {

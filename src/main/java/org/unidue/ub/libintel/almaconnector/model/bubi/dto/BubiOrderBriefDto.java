@@ -6,6 +6,7 @@ import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrder;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderLine;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 public class BubiOrderBriefDto {
 
@@ -13,7 +14,7 @@ public class BubiOrderBriefDto {
 
     private String name;
 
-    private List<BubiOrderLine> bubiOrderLines;
+    private Set<BubiOrderLine> bubiOrderLines;
 
     private String bubiStatus;
 
@@ -59,7 +60,8 @@ public class BubiOrderBriefDto {
         this.comment = bubiOrder.getComment();
         this.vendorAccount = bubiOrder.getVendorAccount();
         this.vendorId = bubiOrder.getVendorId();
-        this.totalAmount = bubiOrder.getTotalAmount();
+        this.totalAmount = 0.0;
+        bubiOrder.getBubiOrderLines().forEach(entry -> this.totalAmount += entry.getPrice());
         this.lastChange = bubiOrder.getLastChange();
         this.created = bubiOrder.getCreated();
         this.invoiceDate = bubiOrder.getInvoiceDate();
@@ -97,11 +99,11 @@ public class BubiOrderBriefDto {
         this.vendorAccount = vendorAccount;
     }
 
-    public List<BubiOrderLine> getBubiOrderLines() {
+    public Set<BubiOrderLine> getBubiOrderLines() {
         return bubiOrderLines;
     }
 
-    public void setBubiOrderLines(List<BubiOrderLine> bubiOrderLines) {
+    public void setBubiOrderLines(Set<BubiOrderLine> bubiOrderLines) {
         this.bubiOrderLines = bubiOrderLines;
     }
 

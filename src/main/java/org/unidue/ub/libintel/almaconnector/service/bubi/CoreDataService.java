@@ -63,14 +63,6 @@ public class CoreDataService {
     }
 
     /**
-     * retrieves all core data (active and inactive)
-     * @return a list of <class>CoreData</class> objects
-     */
-    public List<CoreData> getAllCoreData() {
-        return this.coreDataRepository.findAll();
-    }
-
-    /**
      * retrieves core data for an item with by its collection and shelfmark
      * @param collection the collection of the item
      * @param shelfmark the shelfmark of the item

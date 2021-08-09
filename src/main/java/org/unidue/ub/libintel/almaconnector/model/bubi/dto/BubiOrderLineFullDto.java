@@ -6,8 +6,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderLine;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderlinePosition;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 public class BubiOrderLineFullDto {
 
@@ -84,7 +86,7 @@ public class BubiOrderLineFullDto {
 
     private int numberItems = 1;
 
-    private List<BubiOrderlinePosition> bubiOrderlinePositions;
+    private Set<BubiOrderlinePosition> bubiOrderlinePositions;
 
     public BubiOrderLineFullDto() {}
 
@@ -421,11 +423,11 @@ public class BubiOrderLineFullDto {
         this.numberItems = numberItems;
     }
 
-    public List<BubiOrderlinePosition> getBubiOrderlinePositions() {
+    public Set<BubiOrderlinePosition> getBubiOrderlinePositions() {
         return bubiOrderlinePositions;
     }
 
-    public void setBubiOrderlinePositions(List<BubiOrderlinePosition> bubiOrderlinePositions) {
+    public void setBubiOrderlinePositions(Set<BubiOrderlinePosition> bubiOrderlinePositions) {
         this.bubiOrderlinePositions = bubiOrderlinePositions;
     }
 

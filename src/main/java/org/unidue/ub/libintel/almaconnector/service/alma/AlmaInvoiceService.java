@@ -190,9 +190,14 @@ public class AlmaInvoiceService {
         invoice.setInvoiceDate(bubiOrder.getInvoiceDate());
 
         // set the owner of the order line
-        if (bubiOrder.getBubiOrderLines().get(0).getCollection().startsWith("D"))
+        Optional<BubiOrderLine> option = bubiOrder.getBubiOrderLines().stream().findFirst();
+        if (option.isPresent()) {
+
+            if (option.get().getCollection().startsWith("D"))
             invoice.setOwner(new InvoiceOwner().value("D0001"));
         else
+            invoice.setOwner(new InvoiceOwner().value("E0001"));
+        } else
             invoice.setOwner(new InvoiceOwner().value("E0001"));
         return invoice;
     }
@@ -206,28 +211,25 @@ public class AlmaInvoiceService {
     public List<InvoiceLine> getInvoiceLinesForBubiOrder(BubiOrder bubiOrder) {
         // create new list of order lines
         List<InvoiceLine> invoiceLines = new ArrayList<>();
-        for (int i = 0; i < bubiOrder.getBubiOrderLines().size(); i++) {
-            // retrieve the bubi order line
-            BubiOrderLine bubiOrderLine = bubiOrder.getBubiOrderLines().get(i);
-
-            // set the standard value for the VAT
-            InvoiceLineVat invoiceLineVat = new InvoiceLineVat().vatCode(new InvoiceLineVatVatCode().value("H8"));
-
-            // set the fund distribution
-            FundDistributionFundCode fundDistributionFundCode = new FundDistributionFundCode().value(bubiOrderLine.getFund());
-            FundDistribution fundDistribution = new FundDistribution().fundCode(fundDistributionFundCode).amount(bubiOrderLine.getPrice());
-            List<FundDistribution> fundDistributionList = new ArrayList<>();
-            fundDistributionList.add(fundDistribution);
-
-            // create invoice line with all information and add it to the list
-            InvoiceLine invoiceLine = new InvoiceLine()
-                    .poLine(bubiOrderLine.getAlmaPoLineId())
-                    .fullyInvoiced(true)
-                    .totalPrice(bubiOrderLine.getPrice())
-                    .invoiceLineVat(invoiceLineVat)
-                    .fundDistribution(fundDistributionList);
-            invoiceLines.add(invoiceLine);
-        }
+        bubiOrder.getBubiOrderLines().forEach(bubiOrderLine -> invoiceLines.add(this.createInvoiceLine(bubiOrderLine)));
         return invoiceLines;
+    }
+
+    private InvoiceLine createInvoiceLine(BubiOrderLine bubiOrderLine) {
+        InvoiceLineVat invoiceLineVat = new InvoiceLineVat().vatCode(new InvoiceLineVatVatCode().value("H8"));
+
+        // set the fund distribution
+        FundDistributionFundCode fundDistributionFundCode = new FundDistributionFundCode().value(bubiOrderLine.getFund());
+        FundDistribution fundDistribution = new FundDistribution().fundCode(fundDistributionFundCode).amount(bubiOrderLine.getPrice());
+        List<FundDistribution> fundDistributionList = new ArrayList<>();
+        fundDistributionList.add(fundDistribution);
+
+        // create invoice line with all information and add it to the list
+        return new InvoiceLine()
+                .poLine(bubiOrderLine.getAlmaPoLineId())
+                .fullyInvoiced(true)
+                .totalPrice(bubiOrderLine.getPrice())
+                .invoiceLineVat(invoiceLineVat)
+                .fundDistribution(fundDistributionList);
     }
 }

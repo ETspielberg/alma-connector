@@ -29,7 +29,7 @@ public class BubiOrderlinePosition {
     @Column(name = "specification")
     private String specification = "";
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bubi_order_line_id")
     @JsonIgnore
     private BubiOrderLine bubiOrderLine;

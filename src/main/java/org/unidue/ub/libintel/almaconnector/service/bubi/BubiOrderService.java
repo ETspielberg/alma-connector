@@ -144,7 +144,7 @@ public class BubiOrderService {
         List<BubiOrder> orderEntities = new ArrayList<>();
         switch (mode) {
             case "all":
-                orderEntities = this.bubiOrderRepository.findAll();
+                this.bubiOrderRepository.findAll().forEach(orderEntities::add);
                 break;
             case "sent":
                 orderEntities = this.bubiOrderRepository.findAllByBubiStatusOrderByBubiOrderId(BubiStatus.SENT);
@@ -229,7 +229,8 @@ public class BubiOrderService {
      * @return the updated bubi order object
      */
     public BubiOrderFullDto collectBubiOrder(String bubiOrderId) {
-        BubiOrder bubiOrder = this.bubiOrderRepository.getOne(bubiOrderId);
+        BubiOrder bubiOrder = this.bubiOrderRepository.findById(bubiOrderId).orElse(null);
+        if (bubiOrder == null) return null;
         LocalDate today = LocalDate.now();
         LocalDate returnDate = today.plusDays(21);
         ZoneId defaultZoneId = ZoneId.systemDefault();
@@ -254,7 +255,8 @@ public class BubiOrderService {
      * @return the updated bubi order
      */
     public BubiOrderFullDto returnBubiOrder(String bubiOrderId) {
-        BubiOrder bubiOrder = this.bubiOrderRepository.getOne(bubiOrderId);
+        BubiOrder bubiOrder = this.bubiOrderRepository.findById(bubiOrderId).orElse(null);
+        if (bubiOrder == null) return null;
         bubiOrder.setBubiStatus(BubiStatus.RETURNED);
         return new BubiOrderFullDto(bubiOrderRepository.save(bubiOrder));
     }
@@ -265,7 +267,8 @@ public class BubiOrderService {
      * @return the updated bubi order
      */
     public BubiOrderFullDto payBubiOrder(String bubiOrderId) {
-        BubiOrder bubiOrder = this.bubiOrderRepository.getOne(bubiOrderId);
+        BubiOrder bubiOrder = this.bubiOrderRepository.findById(bubiOrderId).orElse(null);
+        if (bubiOrder == null) return null;
         Invoice invoice = this.almaInvoiceService.getInvoiceForBubiOrder(bubiOrder);
         invoice = this.almaInvoiceService.saveInvoice(invoice);
         List<InvoiceLine> invoiceLines = this.almaInvoiceService.getInvoiceLinesForBubiOrder(bubiOrder);
