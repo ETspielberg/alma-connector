@@ -24,12 +24,6 @@ public class BubiData {
     @Column(name="campus")
     private String campus;
 
-    @Column(name="standard_price_journal")
-    private double standardPriceJournal;
-
-    @Column(name="standard_price_monograph")
-    private double standardPriceMonograph;
-
     @Column(name="active")
     private boolean active;
 
@@ -52,11 +46,6 @@ public class BubiData {
     private List<BubiPrice> bubiPrices = new ArrayList<>();
 
     public BubiData() {}
-
-    public BubiData(String vendorId, String name) {
-        this.vendorId = vendorId;
-        this.name = name;
-    }
 
     public String getVendorId() {
         return vendorId;
@@ -96,22 +85,6 @@ public class BubiData {
 
     public void setCampus(String campus) {
         this.campus = campus;
-    }
-
-    public double getStandardPriceJournal() {
-        return standardPriceJournal;
-    }
-
-    public void setStandardPriceJournal(double standardPriceJournal) {
-        this.standardPriceJournal = standardPriceJournal;
-    }
-
-    public double getStandardPriceMonograph() {
-        return standardPriceMonograph;
-    }
-
-    public void setStandardPriceMonograph(double standardPriceMonograph) {
-        this.standardPriceMonograph = standardPriceMonograph;
     }
 
     public boolean getActive() {
