@@ -102,7 +102,7 @@ public class BubiOrderLineService {
             this.bubiOrderLinePositionRepository.save(bubiOrderlinePosition);
         }
         try {
-            bubiOrderLine.setPrice(this.bubiPricesService.calculatePriceForOrderline(bubiOrderLine));
+            this.bubiPricesService.calculatePriceForOrderline(bubiOrderLine);
         } catch (PriceNotFoundException pnfe) {
             log.warn("could not calculate price - no price information available", pnfe);
         }
@@ -274,14 +274,12 @@ public class BubiOrderLineService {
         bubiOrderline.setVendorAccount(bubiData.getVendorAccount());
         if (bubiOrderline.getShelfmark().contains(" Z ")) {
             bubiOrderline.setFund(journalFund);
-            bubiOrderline.setPrice(bubiData.getStandardPriceJournal());
         } else if (bubiOrderline.getStandard()) {
             bubiOrderline.setFund(monographFund);
-            bubiOrderline.setPrice(bubiData.getStandardPriceMonograph());
         } else {
             bubiOrderline.setFund(monographFund);
-            bubiOrderline.setPrice(bubiData.getStandardPriceMonograph());
         }
+        this.bubiPricesService.calculatePriceForOrderline(bubiOrderline);
     }
 
     private List<BubiOrderLine> getActiveOrderlines() {
