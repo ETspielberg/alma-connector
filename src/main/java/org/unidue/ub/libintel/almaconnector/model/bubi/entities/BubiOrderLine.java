@@ -142,6 +142,12 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
     @Column(name= "number_items")
     private int numberItems = 1;
 
+    @Column(name = "internal_note")
+    private String internalNote;
+
+    @Column(name = "bubi_note")
+    private String bubiNote;
+
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "bubiOrderLine")
     private Set<BubiOrderlinePosition> bubiOrderlinePositions;
 
@@ -535,6 +541,22 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
 
     public void setBubiOrderlinePositions(Set<BubiOrderlinePosition> bubiOrderlinePositions) {
         this.bubiOrderlinePositions = bubiOrderlinePositions;
+    }
+
+    public String getInternalNote() {
+        return internalNote;
+    }
+
+    public void setInternalNote(String internalNote) {
+        this.internalNote = internalNote;
+    }
+
+    public String getBubiNote() {
+        return bubiNote;
+    }
+
+    public void setBubiNote(String bubiNote) {
+        this.bubiNote = bubiNote;
     }
 
     @Override

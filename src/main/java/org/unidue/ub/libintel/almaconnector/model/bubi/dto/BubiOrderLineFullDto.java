@@ -88,6 +88,10 @@ public class BubiOrderLineFullDto {
 
     private Set<BubiOrderlinePosition> bubiOrderlinePositions;
 
+    private String internalNote;
+
+    private String bubiNote;
+
     public BubiOrderLineFullDto() {}
 
     public BubiOrderLineFullDto(BubiOrderLine bubiOrderLine) {
@@ -130,6 +134,8 @@ public class BubiOrderLineFullDto {
         this.title = bubiOrderLine.getTitle();
         this.vendorAccount = bubiOrderLine.getVendorAccount();
         this.vendorId = bubiOrderLine.getVendorId();
+        this.bubiNote = bubiOrderLine.getBubiNote();
+        this.internalNote = bubiOrderLine.getInternalNote();
     }
 
     public BubiOrderLine updateBubiOrderLine(BubiOrderLine bubiOrderLine) {
@@ -156,6 +162,8 @@ public class BubiOrderLineFullDto {
         bubiOrderLine.setVendorAccount(this.vendorAccount);
         bubiOrderLine.setVendorId(this.vendorId);
         bubiOrderLine.setBubiOrderlinePositions(this.bubiOrderlinePositions);
+        bubiOrderLine.setBubiNote(this.bubiNote);
+        bubiOrderLine.setInternalNote(this.internalNote);
         return bubiOrderLine;
     }
 
@@ -437,5 +445,21 @@ public class BubiOrderLineFullDto {
 
     public void setCounter(long counter) {
         this.counter = counter;
+    }
+
+    public String getInternalNote() {
+        return internalNote;
+    }
+
+    public void setInternalNote(String internalNote) {
+        this.internalNote = internalNote;
+    }
+
+    public String getBubiNote() {
+        return bubiNote;
+    }
+
+    public void setBubiNote(String bubiNote) {
+        this.bubiNote = bubiNote;
     }
 }
