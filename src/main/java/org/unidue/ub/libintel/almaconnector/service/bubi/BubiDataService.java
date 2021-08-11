@@ -1,12 +1,16 @@
 package org.unidue.ub.libintel.almaconnector.service.bubi;
 
 import org.springframework.stereotype.Service;
+import org.unidue.ub.alma.shared.acq.Address;
+import org.unidue.ub.alma.shared.acq.Vendor;
+import org.unidue.ub.libintel.almaconnector.model.bubi.dto.BubiAddress;
 import org.unidue.ub.libintel.almaconnector.model.bubi.dto.BubiDataBriefDto;
 import org.unidue.ub.libintel.almaconnector.model.bubi.dto.BubiDataFullDto;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiData;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiPrice;
 import org.unidue.ub.libintel.almaconnector.repository.BubiDataRepository;
 import org.unidue.ub.libintel.almaconnector.repository.BubiPricesRepository;
+import org.unidue.ub.libintel.almaconnector.service.alma.AlmaVendorService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,15 +29,18 @@ public class BubiDataService {
 
     private final BubiPricesRepository bubiPricesRepository;
 
+    private final AlmaVendorService almaVendorService;
     /**
      * constructor based autowiring to the cbubi data repository
      *
      * @param bubiDataRepository the bubi data repository
      */
     BubiDataService(BubiDataRepository bubiDataRepository,
-                    BubiPricesRepository bubiPricesRepository) {
+                    BubiPricesRepository bubiPricesRepository,
+                    AlmaVendorService almaVendorService) {
         this.bubiDataRepository = bubiDataRepository;
         this.bubiPricesRepository = bubiPricesRepository;
+        this.almaVendorService = almaVendorService;
     }
 
     /**
@@ -113,4 +120,28 @@ public class BubiDataService {
             return new BubiDataFullDto(bubiData);
         }
     }
+
+    public BubiAddress getBubiAddress(String bubiDataId) {
+        BubiData bubiData = this.bubiDataRepository.findById(bubiDataId).orElse(null);
+        if (bubiData == null) return null;
+        Vendor vendor = this.almaVendorService.getVendorAccount(bubiDataId);
+        for (Address address: vendor.getContactInfo().getAddress()) {
+            if (address.getPreferred()) {
+                BubiAddress bubiAddress = new BubiAddress()
+                        .withCity(address.getCity())
+                        .withName(vendor.getName())
+                        .withCountry(address.getCountry().getDesc())
+                        .withPlz(address.getPostalCode());
+                if (address.getLine2() != null) {
+                    bubiAddress.setAdditionaAddressLine(address.getLine1());
+                    bubiAddress.setStreet(address.getLine2());
+                } else
+                    bubiAddress.setStreet(address.getLine1());
+                return bubiAddress;
+            }
+        }
+        return null;
+    }
+
+
 }

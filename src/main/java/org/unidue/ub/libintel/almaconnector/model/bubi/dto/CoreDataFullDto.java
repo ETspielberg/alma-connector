@@ -58,6 +58,12 @@ public class CoreDataFullDto {
 
     private double hours = 0;
 
+    private String internalNote = "";
+
+    private String bubiNote = "";
+
+    private String fund = "";
+
     public String getCollection() {
         return collection;
     }
@@ -275,6 +281,22 @@ public class CoreDataFullDto {
         this.colorMinting = colorMinting;
     }
 
+    public String getInternalNote() {
+        return internalNote;
+    }
+
+    public void setInternalNote(String internalNote) {
+        this.internalNote = internalNote;
+    }
+
+    public String getBubiNote() {
+        return bubiNote;
+    }
+
+    public void setBubiNote(String bubiNote) {
+        this.bubiNote = bubiNote;
+    }
+
     public CoreDataFullDto() {}
 
     public CoreDataFullDto(CoreData coreData) {
@@ -305,6 +327,9 @@ public class CoreDataFullDto {
         this.bindPublisherSleeve = coreData.getBindPublisherSleeve();
         this.coverBack = coreData.getCoverBack();
         this.hours = coreData.getHours();
+        this.internalNote = coreData.getInternalNote();
+        this.bubiNote = coreData.getBubiNote();
+        this.fund = coreData.getFund();
     }
 
     public CoreData updateCoreData(CoreData coreData) {
@@ -335,6 +360,9 @@ public class CoreDataFullDto {
         coreData.setBindPublisherSleeve(this.bindPublisherSleeve);
         coreData.setCoverBack(this.coverBack);
         coreData.setHours(this.hours);
+        coreData.setBubiNote(this.bubiNote);
+        coreData.setInternalNote(this.internalNote);
+        coreData.setFund(this.fund);
         return coreData;
     }
 }

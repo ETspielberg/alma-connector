@@ -29,6 +29,12 @@ public class BubiOrderlinePosition {
     @Column(name = "specification")
     private String specification = "";
 
+    @Column(name = "bubi_note")
+    private String bubiNote = "";
+
+    @Column(name = "internal_note")
+    private String internalNote = "";
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bubi_order_line_id")
     @JsonIgnore
@@ -51,6 +57,16 @@ public class BubiOrderlinePosition {
 
     public BubiOrderlinePosition withVolumeSuffix(String volumeSuffix) {
         this.volumeSuffix = volumeSuffix;
+        return this;
+    }
+
+    public BubiOrderlinePosition withInternalNote(String internalNote) {
+        this.internalNote = internalNote;
+        return this;
+    }
+
+    public BubiOrderlinePosition withBubiNote(String bubiNote) {
+        this.bubiNote = bubiNote;
         return this;
     }
 
@@ -108,5 +124,21 @@ public class BubiOrderlinePosition {
 
     public void setVolumeSuffix(String editionSuffix) {
         this.volumeSuffix = editionSuffix;
+    }
+
+    public String getBubiNote() {
+        return bubiNote;
+    }
+
+    public void setBubiNote(String bubiNote) {
+        this.bubiNote = bubiNote;
+    }
+
+    public String getInternalNote() {
+        return internalNote;
+    }
+
+    public void setInternalNote(String internalNote) {
+        this.internalNote = internalNote;
     }
 }

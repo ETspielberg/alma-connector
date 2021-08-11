@@ -85,20 +85,11 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
     @Column(name = "cover")
     private String cover;
 
-    @Column(name="volume")
-    private String volume;
-
     @Column(name = "part_title")
     private String partTitle;
 
     @Column(name = "edition")
     private String edition;
-
-    @Column(name = "issue")
-    private String issue;
-
-    @Column(name = "year")
-    private String year;
 
     @Column(name = "part")
     private String part;
@@ -132,9 +123,6 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
 
     @Column(name="positional_number")
     private long positionalNumber = -1L;
-
-    @Column(name="volume_suffix")
-    private String volumeSuffix;
 
     @Column(name="security_strip")
     private boolean securityStrip = true;
@@ -204,9 +192,8 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         if (this.almaHoldingId == null)
             this.almaHoldingId = coredata.getAlmaHoldingId();
         BubiOrderlinePosition bubiOrderlinePosition = new BubiOrderlinePosition()
-                .withVolumeSuffix(volumeSuffix);
+                .withVolumeSuffix(coredata.getVolumeSuffix());
         this.bubiOrderlinePositions.add(bubiOrderlinePosition);
-        this.volumeSuffix = coredata.getVolumeSuffix();
         this.securityStrip = coredata.getSecurityStrip();
         this.mapSlide = coredata.getMapSlide();
         this.bindPublisherSleeve = coredata.getBindPublisherSleeve();
@@ -329,14 +316,6 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         this.minting = minting;
     }
 
-    public String getVolume() {
-        return volume;
-    }
-
-    public void setVolume(String volume) {
-        this.volume = volume;
-    }
-
     public String getColor() {
         return color;
     }
@@ -383,22 +362,6 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
 
     public void setEdition(String edition) {
         this.edition = edition;
-    }
-
-    public String getIssue() {
-        return issue;
-    }
-
-    public void setIssue(String issue) {
-        this.issue = issue;
-    }
-
-    public String getYear() {
-        return year;
-    }
-
-    public void setYear(String year) {
-        this.year = year;
     }
 
     public String getPart() {
@@ -505,13 +468,6 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         this.almaItemId = almaItemId;
     }
 
-    public String getVolumeSuffix() {
-        return volumeSuffix;
-    }
-
-    public void setVolumeSuffix(String volumeSuffix) {
-        this.volumeSuffix = volumeSuffix;
-    }
 
     public boolean getSecurityStrip() {
         return securityStrip;

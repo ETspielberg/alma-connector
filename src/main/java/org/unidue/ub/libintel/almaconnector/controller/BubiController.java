@@ -53,7 +53,6 @@ public class BubiController {
         return ResponseEntity.ok(this.primoService.getPrimoResponse(almaItemData));
     }
 
-
     // ---------------------- Bubi data endpoints ----------------------
 
     @GetMapping("/bubidata")
@@ -76,6 +75,11 @@ public class BubiController {
         return ResponseEntity.ok(this.bubiDataService.toggleActive(bubidataId));
     }
 
+    @GetMapping("/bubidata/address")
+    private ResponseEntity<BubiAddress> getbubiAddress(String vendorAccount) {
+        return ResponseEntity.ok(this.bubiDataService.getBubiAddress(vendorAccount));
+
+    }
 
     // ---------------------- Bubi prices endpoints ----------------------
 
@@ -101,6 +105,11 @@ public class BubiController {
     @GetMapping("/coredata/retrieve")
     public ResponseEntity<CoreDataFullDto> getCoreDatum(String coredataId) {
         return ResponseEntity.ok(this.coreDataService.getCoreDatum(coredataId));
+    }
+
+    @GetMapping("coredata/fromShelfmark")
+    public ResponseEntity<CoreDataFullDto> createCoredataFromHolding(String shelfmark, String collection) {
+        return ResponseEntity.ok(this.coreDataService.createCoredataFromShelfmark(collection, shelfmark));
     }
 
     /**

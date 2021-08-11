@@ -32,8 +32,9 @@ public class CoreDataService {
 
     /**
      * constructor based autowiring of the core data repository and the primo service to extend the journal data
+     *
      * @param coreDataRepository the core data repository
-     * @param primoService the primo service
+     * @param primoService       the primo service
      */
     CoreDataService(CoreDataRepository coreDataRepository,
                     PrimoService primoService) {
@@ -43,6 +44,7 @@ public class CoreDataService {
 
     /**
      * retrieves all core data marked as active
+     *
      * @return a list of <class>CoreData</class> objects
      */
     public List<CoreDataBriefDto> getCoreData(String mode) {
@@ -64,8 +66,9 @@ public class CoreDataService {
 
     /**
      * retrieves core data for an item with by its collection and shelfmark
+     *
      * @param collection the collection of the item
-     * @param shelfmark the shelfmark of the item
+     * @param shelfmark  the shelfmark of the item
      * @return the core data for this item
      */
     public CoreData getForCollectionAndShelfmark(String collection, String shelfmark) {
@@ -74,8 +77,9 @@ public class CoreDataService {
 
     /**
      * retreives the default core data for a given material type
+     *
      * @param material the material type
-     * @param campus the campus for which the mdefault is obtained
+     * @param campus   the campus for which the mdefault is obtained
      * @return the default core data for this type of items
      */
     public CoreData findDefaultForMaterial(String material, String campus) {
@@ -84,6 +88,7 @@ public class CoreDataService {
 
     /**
      * saves the core data for an item
+     *
      * @param coreDataFullDto the core data to be saved
      * @return the saved core data
      */
@@ -95,6 +100,7 @@ public class CoreDataService {
 
     /**
      * deletes the core data for an item
+     *
      * @param coreDataId hte id of the core data to be deleted
      */
     public void deleteCoreData(String coreDataId) {
@@ -103,8 +109,9 @@ public class CoreDataService {
 
     /**
      * loads a list of core data from an excel file
+     *
      * @param coreDataImportRun the import session object
-     * @param workbook the excel workbook to be imported
+     * @param workbook          the excel workbook to be imported
      * @return the import session object
      */
     public CoreDataImportRun readCoreDataFromExcelSheet(CoreDataImportRun coreDataImportRun, XSSFWorkbook workbook) {
@@ -212,5 +219,23 @@ public class CoreDataService {
             }
         }
         return coreDataImportRun;
+    }
+
+    public CoreDataFullDto createCoredataFromShelfmark(String collection, String shelfmark) {
+        CoreDataFullDto coreDataFullDto = new CoreDataFullDto();
+        AlmaItemData almaItemData = new AlmaItemData(collection, shelfmark);
+        List<AlmaItemData> foundData = this.primoService.getPrimoResponse(almaItemData);
+        if (foundData.size() == 1) {
+            almaItemData = foundData.get(0);
+            coreDataFullDto.setAlmaHoldingId(almaItemData.holdingId);
+            coreDataFullDto.setAlmaMmsId(almaItemData.mmsId);
+            coreDataFullDto.setCollection(almaItemData.collection);
+            coreDataFullDto.setShelfmark(almaItemData.shelfmark);
+            coreDataFullDto.setMediaType(almaItemData.mediaType);
+            coreDataFullDto.setTitle(almaItemData.title);
+            coreDataFullDto.setMinting(almaItemData.title);
+            coreDataFullDto.setStandard(!"JOURNAL".equals(almaItemData.mediaType));
+        }
+        return coreDataFullDto;
     }
 }

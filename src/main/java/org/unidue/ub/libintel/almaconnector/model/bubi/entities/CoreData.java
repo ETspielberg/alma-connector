@@ -85,8 +85,17 @@ public class CoreData implements Cloneable {
     @Column(name="cover_back")
     private boolean coverBack = false;
 
+    @Column(name = "internal_note")
+    private String internalNote = "";
+
+    @Column(name = "bubi_note")
+    private String bubiNote = "";
+
     @Column(name="hours")
     private double hours = 0;
+
+    @Column(name= "fund")
+    private String fund;
 
     public String getCollection() {
         return collection;
@@ -183,7 +192,6 @@ public class CoreData implements Cloneable {
     public void setEdition(String edition) {
         this.edition = edition;
     }
-
 
     public String getPart() {
         return part;
@@ -305,6 +313,30 @@ public class CoreData implements Cloneable {
         this.colorMinting = colorMinting;
     }
 
+    public String getInternalNote() {
+        return internalNote;
+    }
+
+    public void setInternalNote(String internalNote) {
+        this.internalNote = internalNote;
+    }
+
+    public String getBubiNote() {
+        return bubiNote;
+    }
+
+    public void setBubiNote(String bubiNote) {
+        this.bubiNote = bubiNote;
+    }
+
+    public String getFund() {
+        return fund;
+    }
+
+    public void setFund(String fund) {
+        this.fund = fund;
+    }
+
     @Override
     public CoreData clone() {
         CoreData clone = new CoreData();
@@ -333,6 +365,8 @@ public class CoreData implements Cloneable {
         clone.setBindPublisherSleeve(this.bindPublisherSleeve);
         clone.setCoverBack(this.coverBack);
         clone.setHours(this.hours);
+        clone.setInternalNote(this.internalNote);
+        clone.setBubiNote(this.bubiNote);
         return clone;
     }
 }

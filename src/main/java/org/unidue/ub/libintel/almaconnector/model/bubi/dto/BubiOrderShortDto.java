@@ -10,11 +10,14 @@ public class BubiOrderShortDto {
 
     private String vendorAccount;
 
+    private double price;
+
     public BubiOrderShortDto() {}
 
     public BubiOrderShortDto(BubiOrder bubiOrder) {
         this.bubiOrderId = bubiOrder.getBubiOrderId();
         this.vendorAccount = bubiOrder.getVendorAccount();
+        this.price = bubiOrder.calculateTotalPrice();
         if (bubiOrder.getAlmaSetName() == null)
             this.name = "";
         else
@@ -43,5 +46,13 @@ public class BubiOrderShortDto {
 
     public void setVendorAccount(String vendorAccount) {
         this.vendorAccount = vendorAccount;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
     }
 }
