@@ -33,6 +33,7 @@ public class BubiPricesService {
 
     /**
      * autobased autowiring to the bubi price repository
+     *
      * @param bubiPricesRepository the bubi price repository
      */
     BubiPricesService(BubiPricesRepository bubiPricesRepository,
@@ -43,12 +44,17 @@ public class BubiPricesService {
 
     /**
      * calculates the prices for a given bubi orderline by the prices from the bubi price repository
+     *
      * @param bubiOrderLine the bubi orderline for which the price is to be calculated
-     * @return the price to be paid for a given bubi orderline
      */
     public void calculatePriceForOrderline(BubiOrderLine bubiOrderLine) throws PriceNotFoundException {
         double price = 0.0;
         String vendorAccount = bubiOrderLine.getVendorAccount();
+        log.debug(String.format("calculating prices for order %s with vendor %s", bubiOrderLine.getBubiOrderLineId(), bubiOrderLine.getVendorAccount()));
+        if (vendorAccount == null) {
+            bubiOrderLine.setPrice(0.0);
+            return;
+        }
         Optional<BubiData> optional = this.bubiDataRepository.findById(vendorAccount);
         if (optional.isEmpty())
             throw new PriceNotFoundException("no bubi data found!");
@@ -83,6 +89,7 @@ public class BubiPricesService {
 
     /**
      * saves a single bubi price
+     *
      * @param bubiPrice a single bubi price
      * @return the saved bubi price
      */
@@ -92,6 +99,7 @@ public class BubiPricesService {
 
     /**
      * deletes all bubi prices by the corresponding vendor account
+     *
      * @param vendorAccount the vendor account id
      */
     public void deleteBubiPrices(String vendorAccount) {
@@ -100,6 +108,7 @@ public class BubiPricesService {
 
     /**
      * generates a set of new bubi prices for a new vendor account
+     *
      * @param bubiData the bubi data
      */
     public void createNewBubiPricesForVendorAccount(BubiData bubiData) {
