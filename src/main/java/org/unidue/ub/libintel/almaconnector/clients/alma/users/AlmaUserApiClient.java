@@ -4,6 +4,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 import org.unidue.ub.alma.shared.user.AlmaUser;
+import org.unidue.ub.alma.shared.user.UserLoans;
+import org.unidue.ub.alma.shared.user.UserRequests;
 import org.unidue.ub.libintel.almaconnector.clients.alma.AlmaFeignConfiguration;
 
 import java.util.List;
@@ -88,4 +90,10 @@ public interface AlmaUserApiClient {
      */
     @RequestMapping(method=RequestMethod.PUT, value="/{userId}")
     AlmaUser putAlmaUsersUserId(@RequestBody AlmaUser body, @RequestParam("Accept") String accept, @PathVariable("userId") String userId, @RequestParam("user_id_type") String userIdType, @RequestParam("override") String override, @RequestParam("send_pin_number_letter") String sendPinNumberLetter);
+
+    @RequestMapping(method=RequestMethod.GET, value="/{userId}/loans")
+    UserLoans getUserLoansByUserId(@PathVariable String userId, @RequestParam int limit, @RequestParam int offset, @RequestParam String user_id_type, @RequestParam String order_by, @RequestParam String direction, @RequestParam String expand);
+
+    @RequestMapping(method=RequestMethod.GET, value="/{userId}/requests")
+    UserRequests getUserRequestsByUserId(@PathVariable String userId, @RequestParam int limit, @RequestParam int offset, @RequestParam String request_type, @RequestParam String user_id_type, @RequestParam String status);
 }
