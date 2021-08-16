@@ -107,7 +107,7 @@ public class BubiDataService {
         BubiData bubiData = this.bubiDataRepository.findById(bubiDataFullDto.getVendorAccount()).orElse(null);
         if (bubiData == null)
             bubiData = new BubiData();
-        bubiData = bubiDataFullDto.updateBubidata(bubiData);
+        bubiDataFullDto.updateBubidata(bubiData);
         for (BubiPrice price: bubiData.getBubiPrices()) {
             price.setBubiData(bubiData);
             bubiPricesRepository.save(price);
