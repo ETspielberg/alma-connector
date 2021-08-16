@@ -8,10 +8,8 @@ import org.unidue.ub.alma.shared.acq.*;
 import org.unidue.ub.alma.shared.bibs.HoldingDataTempLibrary;
 import org.unidue.ub.alma.shared.bibs.HoldingDataTempLocation;
 import org.unidue.ub.alma.shared.bibs.Item;
-import org.unidue.ub.alma.shared.conf.Member;
-import org.unidue.ub.alma.shared.conf.Members;
+import org.unidue.ub.alma.shared.conf.*;
 import org.unidue.ub.alma.shared.conf.Set;
-import org.unidue.ub.alma.shared.conf.SetAdditionalInfo;
 import org.unidue.ub.libintel.almaconnector.model.bubi.*;
 import org.unidue.ub.libintel.almaconnector.model.bubi.dto.BubiOrderBriefDto;
 import org.unidue.ub.libintel.almaconnector.model.bubi.dto.BubiOrderFullDto;
@@ -353,7 +351,14 @@ public class BubiOrderService {
         long counter = this.bubiOrderRepository.countAllByVendorAccount(bubiOrderline.getVendorAccount()) + 1;
         BubiOrder bubiOrder = new BubiOrder(bubiOrderline.getVendorAccount(), counter);
         bubiOrder.setAlmaSetName(bubiOrderId);
-        Set set = new Set().name("Bubi " + bubiOrderId).description(bubiOrder.getComment());
+        Set set = new Set()
+                .name(bubiOrderId)
+                .description(bubiOrder.getComment())
+                .type(new SetType().value("ITEMIZED"))
+                .content(new SetContent().value("ITEM"))
+                .status(new SetStatus().value("ACTIVE"));
+        set.setPrivate(new SetPrivate().value("false"));
+        set.setOrigin(null);
         List<Member> setMembers = new ArrayList<>();
         setMembers.add(new Member().id(bubiOrderline.getAlmaItemId()));
         Members members = new Members().member(setMembers);
