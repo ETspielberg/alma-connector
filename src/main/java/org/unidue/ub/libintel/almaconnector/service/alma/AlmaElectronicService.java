@@ -1,5 +1,6 @@
 package org.unidue.ub.libintel.almaconnector.service.alma;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.bibs.*;
@@ -13,6 +14,7 @@ import org.unidue.ub.libintel.almaconnector.clients.alma.electronic.AlmaElectron
  * @version 1.0
  */
 @Service
+@Slf4j
 public class AlmaElectronicService {
 
     private final AlmaElectronicApiClient almaElectronicApiClient;

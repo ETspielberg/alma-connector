@@ -1,7 +1,5 @@
 package org.unidue.ub.libintel.almaconnector.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,8 +22,6 @@ public class TestController {
 
     public final ScheduledService scheduledService;
 
-    private final Logger log = LoggerFactory.getLogger(TestController.class);
-
     TestController(AlmaAnalyticsReportClient almaAnalyticsReportClient,
                    MappingTables mappingTables,
                    ScheduledService scheduledService) {
@@ -46,13 +42,11 @@ public class TestController {
 
     @GetMapping("/mapping/itemStatisticNote")
     public ResponseEntity<String> getMappingValue(String key) {
-        log.info(key);
-        log.info(String.valueOf(mappingTables.getItemStatisticNote().size()));
         return ResponseEntity.ok(mappingTables.getItemStatisticNote().get(key));
     }
 
     @GetMapping("/updateStatistics")
-    public ResponseEntity<?> updateStatistics() throws IOException {
+    public ResponseEntity<?> updateStatistics() {
         this.scheduledService.updateStatisticField();
         return ResponseEntity.ok().build();
     }

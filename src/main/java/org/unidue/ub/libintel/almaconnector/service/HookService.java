@@ -1,8 +1,7 @@
 package org.unidue.ub.libintel.almaconnector.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.bibs.*;
@@ -24,6 +23,7 @@ import org.unidue.ub.libintel.almaconnector.service.bubi.BubiOrderLineService;
  * @version 1.0
  */
 @Service
+@Slf4j
 public class HookService {
 
     private final AlmaUserService almaUserService;
@@ -38,7 +38,6 @@ public class HookService {
 
     private final HookValidatorService hookValidatorService;
 
-    private final Logger log = LoggerFactory.getLogger(HookService.class);
 
     /**
      * constructor based autowiring to the individual services

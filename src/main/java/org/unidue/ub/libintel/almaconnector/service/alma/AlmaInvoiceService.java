@@ -1,7 +1,6 @@
 package org.unidue.ub.libintel.almaconnector.service.alma;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.*;
 import org.unidue.ub.libintel.almaconnector.clients.alma.acquisition.AlmaInvoicesApiClient;
@@ -12,7 +11,6 @@ import org.unidue.ub.libintel.almaconnector.model.sap.InvoiceUpdate;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-
 /**
  * offers functions around invoices in Alma
  *
@@ -21,11 +19,10 @@ import java.util.*;
  * @version 1.0
  */
 @Service
+@Slf4j
 public class AlmaInvoiceService {
 
     private final AlmaInvoicesApiClient almaInvoicesApiClient;
-
-    private final static Logger log = LoggerFactory.getLogger(AlmaInvoiceService.class);
 
     /**
      * constructor based autowiring of the Feign client

@@ -1,8 +1,7 @@
 package org.unidue.ub.libintel.almaconnector.service;
 
 import feign.FeignException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -25,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@Slf4j
 public class ScheduledService {
 
     private final AlmaAnalyticsReportClient almaAnalyticsReportClient;
@@ -36,8 +36,6 @@ public class ScheduledService {
     private final AlmaJobsService almaJobsService;
 
     private final AlmaUserService almaUserService;
-
-    private final Logger log = LoggerFactory.getLogger(ScheduledService.class);
 
     private final MappingTables mappingTables;
 

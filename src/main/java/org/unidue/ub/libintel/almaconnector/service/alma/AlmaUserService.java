@@ -1,14 +1,9 @@
 package org.unidue.ub.libintel.almaconnector.service.alma;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.unidue.ub.alma.shared.bibs.Item;
-import org.unidue.ub.alma.shared.bibs.UserRequest;
 import org.unidue.ub.alma.shared.user.AlmaUser;
-import org.unidue.ub.alma.shared.user.UserRequests;
 import org.unidue.ub.libintel.almaconnector.clients.alma.users.AlmaUserApiClient;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * offers functions around users in Alma
@@ -18,6 +13,7 @@ import java.util.List;
  * @version 1.0
  */
 @Service
+@Slf4j
 public class AlmaUserService {
 
     private final AlmaUserApiClient almaUserApiClient;

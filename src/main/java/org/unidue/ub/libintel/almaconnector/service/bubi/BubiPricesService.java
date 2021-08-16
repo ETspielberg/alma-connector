@@ -1,7 +1,6 @@
 package org.unidue.ub.libintel.almaconnector.service.bubi;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiData;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderLine;
@@ -23,13 +22,12 @@ import java.util.Optional;
  * @version 1.0
  */
 @Service
+@Slf4j
 public class BubiPricesService {
 
     private final BubiPricesRepository bubiPricesRepository;
 
     private final BubiDataRepository bubiDataRepository;
-
-    private final Logger log = LoggerFactory.getLogger(BubiPricesService.class);
 
     /**
      * autobased autowiring to the bubi price repository

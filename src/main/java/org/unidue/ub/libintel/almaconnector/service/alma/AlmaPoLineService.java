@@ -1,5 +1,6 @@
 package org.unidue.ub.libintel.almaconnector.service.alma;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.*;
 import org.unidue.ub.libintel.almaconnector.clients.alma.acquisition.AlmaPoLinesApiClient;
@@ -18,6 +19,7 @@ import java.util.List;
  * @version 1.0
  */
 @Service
+@Slf4j
 public class AlmaPoLineService {
 
     private final AlmaPoLinesApiClient almaPoLinesApiClient;

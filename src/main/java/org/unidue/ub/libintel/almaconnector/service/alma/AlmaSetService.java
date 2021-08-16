@@ -1,8 +1,7 @@
 package org.unidue.ub.libintel.almaconnector.service.alma;
 
 import feign.FeignException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.bibs.Item;
 import org.unidue.ub.alma.shared.conf.Member;
@@ -14,13 +13,10 @@ import org.unidue.ub.libintel.almaconnector.clients.alma.conf.SetsApiClient;
 import java.util.List;
 
 @Service
+@Slf4j
 public class AlmaSetService {
 
-
-
     private final SetsApiClient setsApiClient;
-
-    private final Logger log = LoggerFactory.getLogger(AlmaSetService.class);
 
     private final AlmaItemService almaItemService;
 

@@ -1,8 +1,7 @@
 package org.unidue.ub.libintel.almaconnector.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -18,12 +17,11 @@ import java.security.NoSuchProviderException;
 
 @Controller
 @RequestMapping("/hooks")
+@Slf4j
 public class HookController {
 
     @Value("${libintel.alma.jobs.id.packaging:123456789}")
     private String packagingJobId;
-
-    private final static Logger log = LoggerFactory.getLogger(HookController.class);
 
     private final HookService hookService;
 

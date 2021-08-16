@@ -1,9 +1,7 @@
 package org.unidue.ub.libintel.almaconnector.service.alma;
 
-import feign.Feign;
 import feign.FeignException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.bibs.Item;
 import org.unidue.ub.libintel.almaconnector.clients.alma.acquisition.AlmaItemsApiClient;
@@ -17,13 +15,12 @@ import org.unidue.ub.libintel.almaconnector.clients.alma.bib.AlmaCatalogApiClien
  * @version 1.0
  */
 @Service
+@Slf4j
 public class AlmaItemService {
 
     private final AlmaItemsApiClient almaItemsApiClient;
 
     private final AlmaCatalogApiClient almaCatalogApiClient;
-
-    private final Logger log = LoggerFactory.getLogger(AlmaItemService.class);
 
     /**
      * constructor based autowiring to the alma items api feign client and the alma bib api feign client

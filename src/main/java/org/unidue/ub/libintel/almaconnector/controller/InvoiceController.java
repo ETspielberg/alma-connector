@@ -1,9 +1,8 @@
 package org.unidue.ub.libintel.almaconnector.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -35,6 +34,7 @@ import static org.unidue.ub.libintel.almaconnector.service.SapService.*;
  * Controller defining the endpoints for retrieving the invoices.
  */
 @Controller
+@Slf4j
 public class InvoiceController {
 
     private final AlmaVendorService vendorService;
@@ -45,8 +45,6 @@ public class InvoiceController {
 
     @Value("${sap.home.tax.keys}")
     private List<String> homeTaxKeys;
-
-    private final static Logger log = LoggerFactory.getLogger(InvoiceController.class);
 
     /**
      * constructor based autowiring to the invoice service, the filewriter service and the vendorservice.

@@ -1,5 +1,6 @@
 package org.unidue.ub.libintel.almaconnector.service.alma;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import java.security.NoSuchAlgorithmException;
  * @version 1.0
  */
 @Service
+@Slf4j
 public class HookValidatorService {
 
     @Value("${libintel.alma.hook.secret}")

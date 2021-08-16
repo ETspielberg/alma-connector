@@ -1,11 +1,9 @@
 package org.unidue.ub.libintel.almaconnector.service.alma;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.bibs.*;
 import org.unidue.ub.libintel.almaconnector.clients.alma.bib.AlmaCatalogApiClient;
-
 
 /**
  * offers functions around bibliographic entries in Alma
@@ -15,11 +13,10 @@ import org.unidue.ub.libintel.almaconnector.clients.alma.bib.AlmaCatalogApiClien
  * @version 1.0
  */
 @Service
+@Slf4j
 public class AlmaCatalogService {
 
     private final AlmaCatalogApiClient almaCatalogApiClient;
-
-    private final Logger log = LoggerFactory.getLogger(AlmaCatalogService.class);
 
     /**
      * Constructor based autowiring of the alma bib api feign client to the service

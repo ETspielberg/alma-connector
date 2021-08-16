@@ -1,8 +1,7 @@
 package org.unidue.ub.libintel.almaconnector.service.alma;
 
 import feign.FeignException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
@@ -17,11 +16,10 @@ import org.unidue.ub.libintel.almaconnector.clients.alma.acquisition.AlmaVendorA
  * @version 1.0
  */
 @Service
+@Slf4j
 public class AlmaVendorService {
 
     private final AlmaVendorApiClient almaVendorApiClient;
-
-    private final Logger log = LoggerFactory.getLogger(AlmaVendorService.class);
 
     /**
      * constructor based autowiring of the alma vendor api feign client.

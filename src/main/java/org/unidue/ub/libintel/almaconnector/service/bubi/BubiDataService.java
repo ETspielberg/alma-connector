@@ -1,7 +1,6 @@
 package org.unidue.ub.libintel.almaconnector.service.bubi;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.Address;
 import org.unidue.ub.alma.shared.acq.Vendor;
@@ -25,6 +24,7 @@ import java.util.List;
  * @version 1.0
  */
 @Service
+@Slf4j
 public class BubiDataService {
 
     private final BubiDataRepository bubiDataRepository;
@@ -32,8 +32,6 @@ public class BubiDataService {
     private final BubiPricesRepository bubiPricesRepository;
 
     private final AlmaVendorService almaVendorService;
-
-    private final static Logger log = LoggerFactory.getLogger(BubiDataService.class);
 
     /**
      * constructor based autowiring to the cbubi data repository

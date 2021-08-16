@@ -1,7 +1,5 @@
 package org.unidue.ub.libintel.almaconnector.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,8 +15,6 @@ import org.unidue.ub.libintel.almaconnector.service.ShibbolethDataService;
 public class ShibbolethController {
 
     private final ShibbolethDataService shibbolethDataService;
-
-    private final Logger log = LoggerFactory.getLogger(ShibbolethController.class);
 
     public ShibbolethController(ShibbolethDataService shibbolethDataService) {
         this.shibbolethDataService = shibbolethDataService;
@@ -45,9 +41,7 @@ public class ShibbolethController {
 
     @PostMapping("/delete")
     public String deletePlatform(WebRequest request, Model model) {
-
         String platform = request.getParameter("platformToDelete");
-        log.info(String.format("deleting shibboleth data for platform %s", platform));
         this.shibbolethDataService.delete(platform);
         return getStartPage(model);
     }

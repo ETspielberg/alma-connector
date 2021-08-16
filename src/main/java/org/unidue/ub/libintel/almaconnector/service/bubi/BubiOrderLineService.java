@@ -1,7 +1,6 @@
 package org.unidue.ub.libintel.almaconnector.service.bubi;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.bibs.Item;
@@ -27,6 +26,7 @@ import java.util.*;
  * @version 1.0
  */
 @Service
+@Slf4j
 public class BubiOrderLineService {
 
     @Value("${libintel.bubi.journal.fund:55510-0-1100}")
@@ -50,8 +50,6 @@ public class BubiOrderLineService {
     private final BubiOrderLinePositionRepository bubiOrderLinePositionRepository;
 
     private final PrimoService primoService;
-
-    private final Logger log = LoggerFactory.getLogger(BubiOrderService.class);
 
     /**
      * constructor based autowiring of the necessary services

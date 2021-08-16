@@ -1,5 +1,6 @@
 package org.unidue.ub.libintel.almaconnector.service.bubi;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -24,6 +25,7 @@ import java.util.List;
  * @version 1.0
  */
 @Service
+@Slf4j
 public class CoreDataService {
 
     private final CoreDataRepository coreDataRepository;

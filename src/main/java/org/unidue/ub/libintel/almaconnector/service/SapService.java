@@ -1,9 +1,8 @@
 package org.unidue.ub.libintel.almaconnector.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -39,6 +38,7 @@ import java.util.List;
  * @version 1.0
  */
 @Service
+@Slf4j
 public class SapService {
 
     private final AlmaInvoiceService almaInvoiceService;
@@ -53,8 +53,6 @@ public class SapService {
     private List<String> homeTaxKeys;
 
     private final String file;
-
-    private final static Logger log = LoggerFactory.getLogger(SapService.class);
 
     /**
      * constructor based autowiring of the Feign client

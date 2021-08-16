@@ -3,8 +3,7 @@ package org.unidue.ub.libintel.almaconnector.service;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +25,7 @@ import java.util.List;
  * @version 1.0
  */
 @Service
+@Slf4j
 public class PrimoService {
 
     @Value("${primo.vid}")
@@ -35,9 +35,6 @@ public class PrimoService {
     private String primoApiKey;
 
     private final static String PRIMO_BASE_URL = "https://api-eu.hosted.exlibrisgroup.com/primo/v1/search?q=%s&vid=%s&apikey=%s";
-
-    private final Logger log = LoggerFactory.getLogger(PrimoService.class);
-
 
     /**
      * retrieves alma data about a given signature

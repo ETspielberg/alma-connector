@@ -1,5 +1,6 @@
 package org.unidue.ub.libintel.almaconnector.service.alma;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.conf.Job;
@@ -19,6 +20,7 @@ import java.util.List;
  * @version 1.0
  */
 @Service
+@Slf4j
 public class AlmaJobsService {
 
     private final AlmaJobsApiClient almaJobsApiClient;

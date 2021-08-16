@@ -1,7 +1,6 @@
 package org.unidue.ub.libintel.almaconnector.service.alma;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.libintel.almaconnector.model.run.AlmaExportRun;
 import org.unidue.ub.libintel.almaconnector.repository.AlmaExportRunRepository;
@@ -19,11 +18,10 @@ import static org.unidue.ub.libintel.almaconnector.service.SapService.dateformat
  * @version 1.0
  */
 @Service
+@Slf4j
 public class AlmaExportRunService {
 
     private final AlmaExportRunRepository almaExportRunRepository;
-
-    private final Logger log = LoggerFactory.getLogger(AlmaExportRunService.class);
 
     /**
      * constructor based autowiring of the repository

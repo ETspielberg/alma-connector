@@ -1,8 +1,7 @@
 package org.unidue.ub.libintel.almaconnector.service.bubi;
 
 import feign.FeignException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.*;
 import org.unidue.ub.alma.shared.bibs.HoldingDataTempLibrary;
@@ -38,6 +37,7 @@ import java.util.*;
  * @version 1.0
  */
 @Service
+@Slf4j
 public class BubiOrderService {
 
     private final BubiOrderRepository bubiOrderRepository;
@@ -55,8 +55,6 @@ public class BubiOrderService {
     private final AlmaSetService almaSetService;
 
     public static final String DATE_FORMAT_NOW = "yyyy-MM-dd HH:mm:ss";
-
-    private final Logger log = LoggerFactory.getLogger(BubiOrderService.class);
 
     /**
      * constructor based autowiring of the desired services
