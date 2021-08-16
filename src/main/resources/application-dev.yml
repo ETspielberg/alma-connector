@@ -1,0 +1,8 @@
+logging:
+  level:
+    org:
+      unidue:
+        ub:
+          libintel:
+            almaconnector:
+              service: debug

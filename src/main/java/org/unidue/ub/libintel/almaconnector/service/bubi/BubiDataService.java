@@ -1,5 +1,7 @@
 package org.unidue.ub.libintel.almaconnector.service.bubi;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.Address;
 import org.unidue.ub.alma.shared.acq.Vendor;
@@ -30,6 +32,9 @@ public class BubiDataService {
     private final BubiPricesRepository bubiPricesRepository;
 
     private final AlmaVendorService almaVendorService;
+
+    private final static Logger log = LoggerFactory.getLogger(BubiDataService.class);
+
     /**
      * constructor based autowiring to the cbubi data repository
      *
@@ -49,6 +54,7 @@ public class BubiDataService {
      * @return a list of bubi data
      */
     public List<BubiDataBriefDto> listAllBubiData(String mode) {
+        log.debug("listing all saved bubi data");
         List<BubiDataBriefDto> bubiData = new ArrayList<>();
         if ("active".equals(mode))
             this.bubiDataRepository.findByActiveOrderByName(true).forEach(entry -> bubiData.add(new BubiDataBriefDto(entry)));
