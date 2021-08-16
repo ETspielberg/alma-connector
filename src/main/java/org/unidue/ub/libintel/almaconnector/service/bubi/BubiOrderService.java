@@ -185,7 +185,6 @@ public class BubiOrderService {
                 long counter = this.bubiOrderRepository.countAllByVendorAccount(bubiOrderLine.getVendorAccount()) + 1;
                 BubiOrder bubiOrderInd = new BubiOrder(bubiOrderLine.getVendorAccount(), counter);
                 BubiData bubiData = this.bubiDataRepository.getByVendorAccount(bubiOrderLine.getVendorAccount());
-                bubiOrderInd.setVendorId(bubiData.getVendorId());
                 bubiOrderInd.addBubiOrderLine(bubiOrderLine);
                 this.bubiOrderRepository.save(bubiOrderInd);
                 bubiOrderLine.setBubiOrder(bubiOrderInd);

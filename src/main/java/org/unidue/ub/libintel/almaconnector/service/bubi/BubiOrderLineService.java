@@ -174,7 +174,7 @@ public class BubiOrderLineService {
      */
     public List<BubiOrderLineBriefDto> getAllBubiOrderLinesForBubi(String vendorId) {
         List<BubiOrderLineBriefDto> orderlines = new ArrayList<>();
-        this.bubiOrderLineRepository.findAllByVendorIdOrderByMinting(vendorId).forEach(entry -> orderlines.add(new BubiOrderLineBriefDto(entry)));
+        this.bubiOrderLineRepository.findAllByVendorAccountOrderByMinting(vendorId).forEach(entry -> orderlines.add(new BubiOrderLineBriefDto(entry)));
         return orderlines;
     }
 
@@ -219,9 +219,9 @@ public class BubiOrderLineService {
             if (collection.startsWith("D"))
                 campus = "D0001";
         }
-        String material = "book";
+        String material = MediaType.BOOK.name();
         if ("ISSBD".equals(item.getItemData().getPhysicalMaterialType().getValue()))
-            material = "journal";
+            material = MediaType.JOURNAL.name();
         long counter = this.bubiOrderLineRepository.countAllByShelfmarkAndCollection(shelfmark, collection);
         BubiOrderLine bubiOrderLine = new BubiOrderLine(collection, shelfmark, counter);
         log.info(String.format("retrieving core data for collection %s and shelfmark %s", bubiOrderLine.getCollection(), bubiOrderLine.getShelfmark()));
@@ -235,7 +235,7 @@ public class BubiOrderLineService {
             bubiOrderLine.setAlmaItemId(item.getItemData().getPid());
             bubiOrderLine.addCoreData(coredata, true);
         } else {
-            log.info("found core data");
+            log.debug("found core data");
             bubiOrderLine.addCoreData(coredata, false);
         }
         addDataFromVendor(bubiOrderLine);
@@ -270,7 +270,7 @@ public class BubiOrderLineService {
     }
 
     private void addDataFromVendor(BubiOrderLine bubiOrderline) {
-        BubiData bubiData = bubiDataService.getVendorAccount(bubiOrderline.getVendorId(), bubiOrderline.getCollection());
+        BubiData bubiData = bubiDataService.getVendorAccount(bubiOrderline.getVendorAccount(), bubiOrderline.getCollection());
         bubiOrderline.setVendorAccount(bubiData.getVendorAccount());
         if (bubiOrderline.getShelfmark().contains(" Z ")) {
             bubiOrderline.setFund(journalFund);

@@ -16,24 +16,23 @@ public class BubiOrderlinePosition {
     @Column(name = "volume")
     private String volume = "";
 
-    @Column(name = "volume_suffix")
-    private String volumeSuffix = "";
-
-
-    @Column(name = "issue")
-    private String issue = "";
+    @Column(name = "part")
+    private String part = "";
 
     @Column(name = "year")
     private String year = "";
 
-    @Column(name = "specification")
-    private String specification = "";
+    @Column(name = "description")
+    private String description = "";
 
     @Column(name = "bubi_note")
     private String bubiNote = "";
 
     @Column(name = "internal_note")
     private String internalNote = "";
+
+    @Column(name = "alma_item_id")
+    private String almaItemId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bubi_order_line_id")
@@ -50,13 +49,13 @@ public class BubiOrderlinePosition {
         return this;
     }
 
-    public BubiOrderlinePosition withSpecification(String specification) {
-        this.specification = specification;
+    public BubiOrderlinePosition withDescription(String description) {
+        this.description = description;
         return this;
     }
 
-    public BubiOrderlinePosition withVolumeSuffix(String volumeSuffix) {
-        this.volumeSuffix = volumeSuffix;
+    public BubiOrderlinePosition withPart(String part) {
+        this.part = part;
         return this;
     }
 
@@ -86,14 +85,6 @@ public class BubiOrderlinePosition {
         this.volume = edition;
     }
 
-    public String getIssue() {
-        return issue;
-    }
-
-    public void setIssue(String issue) {
-        this.issue = issue;
-    }
-
     public String getYear() {
         return year;
     }
@@ -102,12 +93,12 @@ public class BubiOrderlinePosition {
         this.year = year;
     }
 
-    public String getSpecification() {
-        return specification;
+    public String getDescription() {
+        return description;
     }
 
-    public void setSpecification(String specification) {
-        this.specification = specification;
+    public void setDescription(String specification) {
+        this.description = specification;
     }
 
     public BubiOrderLine getBubiOrderLine() {
@@ -118,12 +109,12 @@ public class BubiOrderlinePosition {
         this.bubiOrderLine = bubiOrderLine;
     }
 
-    public String getVolumeSuffix() {
-        return volumeSuffix;
+    public String getPart() {
+        return part;
     }
 
-    public void setVolumeSuffix(String editionSuffix) {
-        this.volumeSuffix = editionSuffix;
+    public void setPart(String editionSuffix) {
+        this.part = editionSuffix;
     }
 
     public String getBubiNote() {
@@ -136,6 +127,14 @@ public class BubiOrderlinePosition {
 
     public String getInternalNote() {
         return internalNote;
+    }
+
+    public String getAlmaItemId() {
+        return almaItemId;
+    }
+
+    public void setAlmaItemId(String almaItemId) {
+        this.almaItemId = almaItemId;
     }
 
     public void setInternalNote(String internalNote) {

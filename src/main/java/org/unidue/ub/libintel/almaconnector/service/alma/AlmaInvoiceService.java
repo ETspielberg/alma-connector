@@ -171,7 +171,7 @@ public class AlmaInvoiceService {
         Invoice invoice = new Invoice();
 
         // set the vendor information with the information from the bubi order
-        invoice.vendor(new InvoiceVendor().value(bubiOrder.getVendorId()))
+        invoice.vendor(new InvoiceVendor().value(bubiOrder.getVendorAccount()))
                 .vendorAccount(bubiOrder.getVendorAccount());
 
         // set total amount and payment method

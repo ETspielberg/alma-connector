@@ -46,9 +46,6 @@ public class BubiOrder {
     @Column(name="alma_set_name")
     private String almaSetName;
 
-    @Column(name="vendor_id")
-    private String vendorId;
-
     @Column(name="vendor_account")
     private String vendorAccount;
 
@@ -87,11 +84,9 @@ public class BubiOrder {
         this.bubiOrderLines = new HashSet<>();
         this.counter = 0;
         this.vendorAccount = "";
-        this.vendorId = "";
     }
 
     public BubiOrder(long counter, BubiOrderLine bubiOrderLine) {
-        this.vendorId = bubiOrderLine.getVendorId();
         this.vendorAccount = bubiOrderLine.getVendorAccount();
         this.counter = counter;
         this.bubiOrderId = bubiOrderLine.getVendorAccount() + "-" + counter;
@@ -107,7 +102,6 @@ public class BubiOrder {
     public BubiOrder(String vendorAccount, long counter) {
         this.bubiOrderId = vendorAccount + "-" + counter;
         this.counter = counter;
-        this.vendorId = vendorId;
         this.vendorAccount = vendorAccount;
         this.bubiStatus = BubiStatus.NEW;
         this.paymentStatus = PaymentStatus.OPEN;
@@ -124,15 +118,6 @@ public class BubiOrder {
 
     public String getBubiOrderId() {
         return bubiOrderId;
-    }
-
-
-    public String getVendorId() {
-        return vendorId;
-    }
-
-    public void setVendorId(String vendorId) {
-        this.vendorId = vendorId;
     }
 
     public void setBubiOrderId(String bubiOrderId) {

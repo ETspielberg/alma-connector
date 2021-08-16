@@ -10,8 +10,6 @@ import java.util.List;
 @Repository
 public interface BubiOrderRepository  extends CrudRepository<BubiOrder, String> {
 
-    long countAllByVendorId(String vendorId);
-
     List<BubiOrder> findAllByBubiStatusOrderByBubiOrderId(BubiStatus BubiStatus);
 
     long countAllByVendorAccount(String vendorAccount);

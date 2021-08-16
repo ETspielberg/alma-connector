@@ -31,20 +31,8 @@ public class CoreData implements Cloneable {
     @Column(name="binding")
     private String binding;
 
-    @Column(name="part_description")
-    private String partDescription;
-
     @Column(name="cover")
     private String cover;
-
-    @Column(name="part_title")
-    private String partTitle;
-
-    @Column(name="edition")
-    private String edition;
-
-    @Column(name="part")
-    private String part;
 
     @Column(name="comment", columnDefinition = "TEXT")
     private String comment;
@@ -70,8 +58,17 @@ public class CoreData implements Cloneable {
     @Column(name="standard")
     private boolean standard = false;
 
-    @Column(name="volume_suffix")
-    private String volumeSuffix;
+    @Column(name="position_volume")
+    private String positionVolume;
+
+    @Column(name="position_year")
+    private String positionYear;
+
+    @Column(name= "position_part")
+    private String positionPart;
+
+    @Column(name= "position_description")
+    private String positionDescription;
 
     @Column(name="security_strip")
     private boolean securityStrip = true;
@@ -153,14 +150,6 @@ public class CoreData implements Cloneable {
         this.binding = binding;
     }
 
-    public String getPartDescription() {
-        return partDescription;
-    }
-
-    public void setPartDescription(String partDescription) {
-        this.partDescription = partDescription;
-    }
-
     public String getCover() {
         return cover;
     }
@@ -175,30 +164,6 @@ public class CoreData implements Cloneable {
 
     public void setVendorAccount(String bubiData) {
         this.vendorAccount = bubiData;
-    }
-
-    public String getPartTitle() {
-        return partTitle;
-    }
-
-    public void setPartTitle(String partTitle) {
-        this.partTitle = partTitle;
-    }
-
-    public String getEdition() {
-        return edition;
-    }
-
-    public void setEdition(String edition) {
-        this.edition = edition;
-    }
-
-    public String getPart() {
-        return part;
-    }
-
-    public void setPart(String part) {
-        this.part = part;
     }
 
     public String getComment() {
@@ -255,14 +220,6 @@ public class CoreData implements Cloneable {
 
     public void setCoreDataId(String coreDataId) {
         this.coreDataId = coreDataId;
-    }
-
-    public String getVolumeSuffix() {
-        return volumeSuffix;
-    }
-
-    public void setVolumeSuffix(String volumeSuffix) {
-        this.volumeSuffix = volumeSuffix;
     }
 
     public boolean getSecurityStrip() {
@@ -337,6 +294,38 @@ public class CoreData implements Cloneable {
         this.fund = fund;
     }
 
+    public String getPositionVolume() {
+        return positionVolume;
+    }
+
+    public void setPositionVolume(String positionVolume) {
+        this.positionVolume = positionVolume;
+    }
+
+    public String getPositionYear() {
+        return positionYear;
+    }
+
+    public void setPositionYear(String positionYear) {
+        this.positionYear = positionYear;
+    }
+
+    public String getPositionPart() {
+        return positionPart;
+    }
+
+    public void setPositionPart(String positionPart) {
+        this.positionPart = positionPart;
+    }
+
+    public String getPositionDescription() {
+        return positionDescription;
+    }
+
+    public void setPositionDescription(String positionDescription) {
+        this.positionDescription = positionDescription;
+    }
+
     @Override
     public CoreData clone() {
         CoreData clone = new CoreData();
@@ -348,18 +337,13 @@ public class CoreData implements Cloneable {
         clone.setColorMinting(this.colorMinting);
         clone.setComment(this.comment);
         clone.setCover(this.cover);
-        clone.setEdition(this.edition);
         clone.setMediaType(this.mediaType);
         clone.setMinting(this.minting);
-        clone.setPart(this.part);
-        clone.setPartDescription(this.partDescription);
-        clone.setPartTitle(this.partTitle);
         clone.setTitle(this.title);
         clone.setShelfmark(this.shelfmark);
         clone.setAlmaHoldingId(this.almaHoldingId);
         clone.setAlmaMmsId(this.almaMmsId);
         clone.setStandard(this.standard);
-        clone.setVolumeSuffix(this.volumeSuffix);
         clone.setSecurityStrip(this.securityStrip);
         clone.setMapSlide(this.mapSlide);
         clone.setBindPublisherSleeve(this.bindPublisherSleeve);
@@ -367,6 +351,14 @@ public class CoreData implements Cloneable {
         clone.setHours(this.hours);
         clone.setInternalNote(this.internalNote);
         clone.setBubiNote(this.bubiNote);
+        clone.setPositionDescription(this.positionDescription);
+        clone.setPositionPart(this.positionPart);
+        clone.setPositionVolume(this.positionVolume);
+        clone.setPositionDescription(this.positionDescription);
         return clone;
+    }
+
+    public void calculateId() {
+        this.coreDataId = this.collection + "-" + this.shelfmark;
     }
 }

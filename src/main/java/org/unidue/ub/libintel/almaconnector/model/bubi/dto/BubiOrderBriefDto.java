@@ -24,8 +24,6 @@ public class BubiOrderBriefDto {
 
     private String almaSetId;
 
-    private String vendorId;
-
     private String vendorAccount;
 
     private Double totalAmount;
@@ -59,7 +57,6 @@ public class BubiOrderBriefDto {
         this.bubiOrderId = bubiOrder.getBubiOrderId();
         this.comment = bubiOrder.getComment();
         this.vendorAccount = bubiOrder.getVendorAccount();
-        this.vendorId = bubiOrder.getVendorId();
         this.totalAmount = 0.0;
         bubiOrder.getBubiOrderLines().forEach(entry -> this.totalAmount += entry.getPrice());
         this.lastChange = bubiOrder.getLastChange();
@@ -137,14 +134,6 @@ public class BubiOrderBriefDto {
 
     public void setAlmaSetId(String almaSetId) {
         this.almaSetId = almaSetId;
-    }
-
-    public String getVendorId() {
-        return vendorId;
-    }
-
-    public void setVendorId(String vendorId) {
-        this.vendorId = vendorId;
     }
 
     public Double getTotalAmount() {

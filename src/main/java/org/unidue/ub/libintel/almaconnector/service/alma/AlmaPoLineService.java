@@ -121,7 +121,7 @@ public class AlmaPoLineService {
                 .baseStatus(PoLine.BaseStatusEnum.ACTIVE)
                 .owner(poLineOwner)
                 .resourceMetadata(resourceMetadata)
-                .vendor(new PoLineVendor().value(bubiOrderLine.getVendorId()))
+                .vendor(new PoLineVendor().value(bubiOrderLine.getVendorAccount()))
                 .vendorAccount(bubiOrderLine.getVendorAccount())
                 .fundDistribution(fundList)
                 .addNoteItem(note);
