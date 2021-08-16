@@ -70,6 +70,7 @@ public class HookService {
     @Async("threadPoolTaskExecutor")
     public void processRequestHook(RequestHook hook) {
         HookUserRequest userRequest = hook.getUserRequest();
+        log.debug("received user request: " + userRequest.toString());
         if ("WORK_ORDER".equals(userRequest.getRequestType()) && "Int".equals(userRequest.getRequestSubType().getValue())) {
             switch (userRequest.getTargetDestination().getValue()) {
                 case "Buchbinder": {
@@ -127,9 +128,9 @@ public class HookService {
     @Async("threadPoolTaskExecutor")
     public void processLoanHook(LoanHook hook) {
         HookItemLoan itemLoan = hook.getItemLoan();
+        log.debug("received item loan: " + itemLoan.toString());
         log.debug(String.format("retrieving user %s", itemLoan.getUserId()));
         AlmaUser almaUser = this.almaUserService.getUser(itemLoan.getUserId());
-        log.debug(almaUser.getUserGroup().getDesc());
         switch (almaUser.getUserGroup().getDesc()) {
             case "Semesterapparat":
                 log.info("got sem app loan");
@@ -256,6 +257,7 @@ public class HookService {
     @Async("threadPoolTaskExecutor")
     public void processItemHook(ItemHook hook) {
         Item item = hook.getItem();
+        log.debug("received item hook: " + item.toString());
         if (hook.getEvent() != null && hook.getEvent().getValue() != null) {
             log.info(String.format("received item hook with event %s (%s)", hook.getEvent().getDesc(), hook.getEvent().getValue()));
         }
@@ -302,6 +304,7 @@ public class HookService {
     @Async("threadPoolTaskExecutor")
     public void processBibHook(BibHook hook) {
         BibWithRecord bib = hook.getBib();
+        log.debug("received bib hook: " + bib.toString());
         if ("Universität Duisburg-Essen".equals(bib.getPublisherConst())) {
             String mmsId = bib.getMmsId();
             if (this.almaCatalogService.isPortfolios(mmsId))
