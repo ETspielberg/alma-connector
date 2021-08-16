@@ -347,12 +347,12 @@ public class BubiOrderService {
         }
     }
 
-    public BubiOrder createNewBubiOrder(String bubiOrderId, BubiOrderLine bubiOrderline) {
+    public BubiOrder createNewBubiOrder(String orderName, BubiOrderLine bubiOrderline) {
         long counter = this.bubiOrderRepository.countAllByVendorAccount(bubiOrderline.getVendorAccount()) + 1;
         BubiOrder bubiOrder = new BubiOrder(bubiOrderline.getVendorAccount(), counter);
-        bubiOrder.setAlmaSetName(bubiOrderId);
+        bubiOrder.setAlmaSetName(orderName);
         Set set = new Set()
-                .name(bubiOrderId)
+                .name(orderName)
                 .description(bubiOrder.getComment())
                 .type(new SetType().value("ITEMIZED"))
                 .content(new SetContent().value("ITEM"))
@@ -360,7 +360,7 @@ public class BubiOrderService {
         set.setPrivate(new SetPrivate().value("false"));
         set.setOrigin(null);
         List<Member> setMembers = new ArrayList<>();
-        setMembers.add(new Member().id(bubiOrderline.getAlmaItemId()));
+        setMembers.add(new Member().id(bubiOrderline.getAlmaItemId()).description(bubiOrderline.getTitle()));
         Members members = new Members().member(setMembers);
         set.setMembers(members);
         try {

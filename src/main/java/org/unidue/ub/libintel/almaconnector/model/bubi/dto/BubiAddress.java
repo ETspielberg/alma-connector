@@ -1,5 +1,10 @@
 package org.unidue.ub.libintel.almaconnector.model.bubi.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class BubiAddress {
 
     private String name;
@@ -44,53 +49,5 @@ public class BubiAddress {
     public BubiAddress withName(String name) {
         this.name = name;
         return this;
-    }
-
-    public String getStreet() {
-        return street;
-    }
-
-    public void setStreet(String street) {
-        this.street = street;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public String getPlz() {
-        return plz;
-    }
-
-    public void setPlz(String plz) {
-        this.plz = plz;
-    }
-
-    public String getCountry() {
-        return country;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
-    public String getAdditionaAddressLine() {
-        return additionaAddressLine;
-    }
-
-    public void setAdditionaAddressLine(String additionaAddressLine) {
-        this.additionaAddressLine = additionaAddressLine;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 }

@@ -1,7 +1,11 @@
 package org.unidue.ub.libintel.almaconnector.model.bubi.dto;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiData;
 
+@Getter
+@Setter
 public class BubiDataBriefDto {
 
     private String vendorAccount;
@@ -21,25 +25,5 @@ public class BubiDataBriefDto {
 
     public String getVendorAccount() {
         return vendorAccount;
-    }
-
-    public void setVendorAccount(String vendorAccount) {
-        this.vendorAccount = vendorAccount;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
     }
 }

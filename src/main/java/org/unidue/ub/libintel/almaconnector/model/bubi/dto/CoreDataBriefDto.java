@@ -1,7 +1,11 @@
 package org.unidue.ub.libintel.almaconnector.model.bubi.dto;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.CoreData;
 
+@Getter
+@Setter
 public class CoreDataBriefDto {
 
     private String coreDataId;
@@ -17,62 +21,6 @@ public class CoreDataBriefDto {
     private String title;
 
     private String vendorAccount;
-
-    public String getCollection() {
-        return collection;
-    }
-
-    public void setCollection(String collection) {
-        this.collection = collection;
-    }
-
-    public String getShelfmark() {
-        return shelfmark;
-    }
-
-    public void setShelfmark(String shelfmark) {
-        this.shelfmark = shelfmark;
-    }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getVendorAccount() {
-        return vendorAccount;
-    }
-
-    public void setVendorAccount(String bubiData) {
-        this.vendorAccount = bubiData;
-    }
-
-    public String getMediaType() {
-        return mediaType;
-    }
-
-    public void setMediaType(String mediaType) {
-        this.mediaType = mediaType;
-    }
-
-    public String getCoreDataId() {
-        return coreDataId;
-    }
-
-    public void setCoreDataId(String coreDataId) {
-        this.coreDataId = coreDataId;
-    }
 
     public CoreDataBriefDto() {}
 

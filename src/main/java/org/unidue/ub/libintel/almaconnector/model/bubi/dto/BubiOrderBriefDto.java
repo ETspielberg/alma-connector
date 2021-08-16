@@ -1,13 +1,16 @@
 package org.unidue.ub.libintel.almaconnector.model.bubi.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrder;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderLine;
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 
+@Getter
+@Setter
 public class BubiOrderBriefDto {
 
     private String bubiOrderId;
@@ -70,117 +73,5 @@ public class BubiOrderBriefDto {
             this.name = bubiOrder.getAlmaSetName();
             this.almaSetId = bubiOrder.getAlmaSetId();
         }
-    }
-
-    public String getBubiOrderId() {
-        return bubiOrderId;
-    }
-
-    public void setBubiOrderId(String bubiOrderId) {
-        this.bubiOrderId = bubiOrderId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getVendorAccount() {
-        return vendorAccount;
-    }
-
-    public void setVendorAccount(String vendorAccount) {
-        this.vendorAccount = vendorAccount;
-    }
-
-    public Set<BubiOrderLine> getBubiOrderLines() {
-        return bubiOrderLines;
-    }
-
-    public void setBubiOrderLines(Set<BubiOrderLine> bubiOrderLines) {
-        this.bubiOrderLines = bubiOrderLines;
-    }
-
-    public String getBubiStatus() {
-        return bubiStatus;
-    }
-
-    public void setBubiStatus(String bubiStatus) {
-        this.bubiStatus = bubiStatus;
-    }
-
-    public String getPaymentStatus() {
-        return paymentStatus;
-    }
-
-    public void setPaymentStatus(String paymentStatus) {
-        this.paymentStatus = paymentStatus;
-    }
-
-    public String getComment() {
-        return comment;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
-
-    public String getAlmaSetId() {
-        return almaSetId;
-    }
-
-    public void setAlmaSetId(String almaSetId) {
-        this.almaSetId = almaSetId;
-    }
-
-    public Double getTotalAmount() {
-        return totalAmount;
-    }
-
-    public void setTotalAmount(Double totalAmount) {
-        this.totalAmount = totalAmount;
-    }
-
-    public Date getCreated() {
-        return created;
-    }
-
-    public void setCreated(Date created) {
-        this.created = created;
-    }
-
-    public Date getLastChange() {
-        return lastChange;
-    }
-
-    public void setLastChange(Date lastChange) {
-        this.lastChange = lastChange;
-    }
-
-    public Date getInvoiceDate() {
-        return invoiceDate;
-    }
-
-    public void setInvoiceDate(Date invoiceDate) {
-        this.invoiceDate = invoiceDate;
-    }
-
-    public Date getCollectedOn() {
-        return collectedOn;
-    }
-
-    public void setCollectedOn(Date collectedOn) {
-        this.collectedOn = collectedOn;
-    }
-
-    public Date getReturnedOn() {
-        return returnedOn;
-    }
-
-    public void setReturnedOn(Date returnedOn) {
-        this.returnedOn = returnedOn;
     }
 }
