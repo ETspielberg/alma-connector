@@ -4,12 +4,10 @@ import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.bibs.Item;
-import org.unidue.ub.alma.shared.conf.Member;
-import org.unidue.ub.alma.shared.conf.Members;
-import org.unidue.ub.alma.shared.conf.Set;
-import org.unidue.ub.alma.shared.conf.Sets;
+import org.unidue.ub.alma.shared.conf.*;
 import org.unidue.ub.libintel.almaconnector.clients.alma.conf.SetsApiClient;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -80,12 +78,34 @@ public class AlmaSetService {
         return true;
     }
 
-    public Set createSet(Set set) {
+    public Set createSet(String setName, String setDescription) {
+        Set set = new Set()
+                .name(setName)
+                .description(setDescription)
+                .type(new SetType().value("ITEMIZED"))
+                .content(new SetContent().value("ITEM"))
+                .status(new SetStatus().value("ACTIVE"));
+        set.setPrivate(new SetPrivate().value("false"));
+        set.setOrigin(null);
+        List<Member> setMembers = new ArrayList<>();
+        Members members = new Members().member(setMembers);
+        set.setMembers(members);
         return this.setsApiClient.postConfSets(set, "", "", "", "", "", "");
     }
 
-    public Set addMemberToSet(String almaItemId, String almaSetId) {
-        Set set = new Set().members(new Members().addMemberItem(new Member().id(almaItemId)));
+    public Set addMemberToSet(String almaSetId, String almaItemId, String itemDescription) {
+        Member member = new Member().id(almaItemId).description(itemDescription);
+        Set set = new Set().members(new Members().addMemberItem(member));
+        return this.setsApiClient.postConfSetsSetId(set,almaSetId, "add_members", "" );
+    }
+
+    public Set addMembersToSet(String almaSetId, List<String> almaItemIds) {
+        Members members = new Members();
+        for (String almaItemId: almaItemIds) {
+            Member member = new Member().id(almaItemId);
+            members.addMemberItem(member);
+        }
+        Set set = new Set().members(members);
         return this.setsApiClient.postConfSetsSetId(set,almaSetId, "add_members", "" );
     }
 }

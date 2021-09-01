@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="general :: generalHead"/>
+<body>
+
+<nav th:replace="general :: navbar"></nav>
+
+<div th:replace="general :: jumbotron"/>
+
+<div class="container">
+    <div class="ui-g">
+
+        <div class="ui-g-12 ui-md-6 ui-lg-4">
+            <div class="tile centered">
+                <h3 style="height:1.2em;" th:text="#{scan.finished.set}"></h3>
+                <p style="height:6em;" th:text="#{scan.finished.set.short}"></p>
+                <form th:action="@{/alma/service/scan/{setId}(setId=${setId})}" method="post">
+                    <div class="form-group">
+                        <label for="setId" th:text="#{set.id}"></label>
+                        <input name="setId" id="setId" type="text" th:value="${setId}" autofocus>
+                    </div>
+                    <input type="submit" class="btn btn-primary" th:value="#{scan.finished.set}"/>
+                </form>
+            </div>
+        </div>
+</div>
+</body>
+</html>

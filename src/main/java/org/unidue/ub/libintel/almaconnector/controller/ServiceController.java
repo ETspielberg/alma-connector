@@ -8,8 +8,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.unidue.ub.alma.shared.user.AlmaUser;
+import org.unidue.ub.libintel.almaconnector.service.ScheduledService;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaSetService;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaUserService;
+
+import java.io.IOException;
 
 @Controller
 @RequestMapping("/services")
@@ -19,19 +22,35 @@ public class ServiceController {
 
     private final AlmaUserService almaUserService;
 
+    private final ScheduledService scheduledService;
+
     ServiceController(AlmaSetService almaSetService,
-                      AlmaUserService almaUserService) {
+                      AlmaUserService almaUserService,
+                      ScheduledService scheduledService) {
         this.almaSetService = almaSetService;
         this.almaUserService = almaUserService;
+        this.scheduledService = scheduledService;
     }
 
-    @PostMapping("/scanOut/{setId}")
+    @GetMapping("/scan")
+    private String showScanOutForm(Model model) {
+        model.addAttribute("setId", "");
+        return "services/scan";
+    }
+
+    @PostMapping("/scan/{setId}")
     private ResponseEntity<?> receiveSet(@PathVariable String setId) {
         boolean success = this.almaSetService.scanInSet(setId, true);
         if (success)
             return ResponseEntity.ok().build();
         else
             return ResponseEntity.badRequest().build();
+    }
+
+    @GetMapping("/collectRequests")
+    private ResponseEntity<?> collectRequests() throws IOException {
+        this.scheduledService.collectRequests();
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/bereitstellungen")
