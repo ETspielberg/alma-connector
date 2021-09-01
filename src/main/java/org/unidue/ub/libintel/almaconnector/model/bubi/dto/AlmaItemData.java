@@ -1,5 +1,8 @@
 package org.unidue.ub.libintel.almaconnector.model.bubi.dto;
 
+import lombok.Data;
+
+@Data
 public class AlmaItemData {
 
     public String mmsId = "";

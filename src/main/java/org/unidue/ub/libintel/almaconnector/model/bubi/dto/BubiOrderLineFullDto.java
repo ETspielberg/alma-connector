@@ -2,8 +2,7 @@ package org.unidue.ub.libintel.almaconnector.model.bubi.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderLine;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderlinePosition;
@@ -11,8 +10,7 @@ import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderlinePos
 import java.util.Date;
 import java.util.Set;
 
-@Getter
-@Setter
+@Data
 public class BubiOrderLineFullDto {
 
     private String bubiOrderLineId;

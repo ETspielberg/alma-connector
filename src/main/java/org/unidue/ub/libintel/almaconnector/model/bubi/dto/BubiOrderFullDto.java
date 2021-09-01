@@ -1,15 +1,13 @@
 package org.unidue.ub.libintel.almaconnector.model.bubi.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrder;
 
 import java.util.*;
 
-@Getter
-@Setter
+@Data
 public class BubiOrderFullDto {
 
     private String bubiOrderId;

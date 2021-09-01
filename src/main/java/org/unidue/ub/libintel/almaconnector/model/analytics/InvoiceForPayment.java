@@ -2,9 +2,11 @@ package org.unidue.ub.libintel.almaconnector.model.analytics;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import lombok.Data;
 
 
 @JacksonXmlRootElement(localName = "row")
+@Data
 public class InvoiceForPayment {
 
     @JacksonXmlProperty(localName = "InvoiceLine-Status")
@@ -27,60 +29,4 @@ public class InvoiceForPayment {
 
     @JacksonXmlProperty(localName = "ERPCode")
     private String erpCode;
-
-    public String getInvoiceLineStatus() {
-        return invoiceLineStatus;
-    }
-
-    public void setInvoiceLineStatus(String invoiceLineStatus) {
-        this.invoiceLineStatus = invoiceLineStatus;
-    }
-
-    public String getInvoiceNumber() {
-        return invoiceNumber;
-    }
-
-    public void setInvoiceNumber(String invoiceNumber) {
-        this.invoiceNumber = invoiceNumber;
-    }
-
-    public String getInvoiceStatus() {
-        return invoiceStatus;
-    }
-
-    public void setInvoiceStatus(String invoiceStatus) {
-        this.invoiceStatus = invoiceStatus;
-    }
-
-    public String getOrderLineType() {
-        return orderLineType;
-    }
-
-    public void setOrderLineType(String orderLineType) {
-        this.orderLineType = orderLineType;
-    }
-
-    public String getPoNumber() {
-        return poNumber;
-    }
-
-    public void setPoNumber(String poNumber) {
-        this.poNumber = poNumber;
-    }
-
-    public String getInvoiceOwnerCode() {
-        return invoiceOwnerCode;
-    }
-
-    public void setInvoiceOwnerCode(String invoiceOwnerCode) {
-        this.invoiceOwnerCode = invoiceOwnerCode;
-    }
-
-    public String getErpCode() {
-        return erpCode;
-    }
-
-    public void setErpCode(String erpCode) {
-        this.erpCode = erpCode;
-    }
 }

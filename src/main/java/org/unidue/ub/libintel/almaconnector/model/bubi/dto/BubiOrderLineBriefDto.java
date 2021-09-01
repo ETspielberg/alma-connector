@@ -1,11 +1,9 @@
 package org.unidue.ub.libintel.almaconnector.model.bubi.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderLine;
 
-@Getter
-@Setter
+@Data
 public class BubiOrderLineBriefDto {
 
     private String bubiOrderLineId;
