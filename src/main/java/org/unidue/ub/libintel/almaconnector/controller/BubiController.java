@@ -14,6 +14,13 @@ import java.io.IOException;
 import java.util.List;
 
 
+/**
+ * maps the bubi endpoints to the individual service options. in particular, this encludes paths for
+ * - the bubi data (/bubi/bubidata)
+ * - the core data (/bubi/coredata)
+ * - the order line (/bubi/orderline)
+ * - the orders (/bubi/order)
+ */
 @RestController
 @RequestMapping("/bubi")
 public class BubiController {
