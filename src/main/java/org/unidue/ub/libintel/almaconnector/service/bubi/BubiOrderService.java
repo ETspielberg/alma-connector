@@ -58,12 +58,13 @@ public class BubiOrderService {
 
     /**
      * constructor based autowiring of the desired services
-     * @param bubiOrderRepository the bubi order repository
+     *
+     * @param bubiOrderRepository     the bubi order repository
      * @param bubiOrderLineRepository the bubi orderline repository
-     * @param almaPoLineService the alma po line service
-     * @param almaInvoiceService the alma invoices service
-     * @param almaItemService the alma item service
-     * @param bubiDataRepository the bubi data repository
+     * @param almaPoLineService       the alma po line service
+     * @param almaInvoiceService      the alma invoices service
+     * @param almaItemService         the alma item service
+     * @param bubiDataRepository      the bubi data repository
      */
     public BubiOrderService(
             BubiOrderRepository bubiOrderRepository,
@@ -84,6 +85,7 @@ public class BubiOrderService {
 
     /**
      * retrieves a bubi order by its id
+     *
      * @param bubiOrderId the id of the bubi order
      * @return the bubi order
      */
@@ -94,6 +96,7 @@ public class BubiOrderService {
 
     /**
      * retrieves a bubi order by its id
+     *
      * @param bubiOrderId the id of the bubi order
      * @return the bubi order
      */
@@ -104,6 +107,7 @@ public class BubiOrderService {
 
     /**
      * retrieves a list of bubi orders by a given mode
+     *
      * @param mode the mode for which the bubi orders are to be retrieved. currently supported:
      *             'all': retrieves all bubi orders from the repository
      *             'sent': retrieves all sent, but not yet returned bubi orders
@@ -121,6 +125,7 @@ public class BubiOrderService {
 
     /**
      * retrieves a list of bubi orders by a given mode
+     *
      * @param mode the mode for which the bubi orders are to be retrieved. currently supported:
      *             'all': retrieves all bubi orders from the repository
      *             'sent': retrieves all sent, but not yet returned bubi orders
@@ -168,12 +173,13 @@ public class BubiOrderService {
 
     /**
      * packs a bubi order to be retrieved by the bubi
+     *
      * @param bubiOrder the initial bubi order to be packed
      * @return a list of bubiorders grouping the initial bubi order by the vendor accounts
      */
     public List<BubiOrderFullDto> packBubiOrder(BubiOrder bubiOrder) {
         Hashtable<String, BubiOrder> bubiOrders = new Hashtable<>();
-        for (BubiOrderLine bubiOrderLine: bubiOrder.getBubiOrderLines()) {
+        for (BubiOrderLine bubiOrderLine : bubiOrder.getBubiOrderLines()) {
             String key = bubiOrderLine.getVendorAccount();
             if (bubiOrders.containsKey(key))
                 bubiOrders.get(key).addBubiOrderLine(bubiOrderLine);
@@ -196,7 +202,7 @@ public class BubiOrderService {
                     order.sortBubiOrderLines();
                     order.calculateTotalPrice();
                     order.getBubiOrderLines().forEach(
-                            orderline-> {
+                            orderline -> {
                                 Member member = new Member().id(orderline.getAlmaItemId()).description(orderline.getCollection() + " " + orderline.getShelfmark());
                                 members.addMemberItem(member);
                                 orderline.setStatus(BubiStatus.PACKED);
@@ -210,7 +216,7 @@ public class BubiOrderService {
                             .additionalInfo(new SetAdditionalInfo().value(order.getBubiOrderId()))
                             .description(description)
                             .members(members);
-                    almaSetService.createSet(set);
+                    // almaSetService.save(set);
                 }
         );
         List<BubiOrderFullDto> orders = new ArrayList<>();
@@ -220,6 +226,7 @@ public class BubiOrderService {
 
     /**
      * marks a bubi order and the corresponding bubi order lines as collected, sets the corresponding dates and creates the alma po lines
+     *
      * @param bubiOrderId the bubi order to be collected
      * @return the updated bubi order object
      */
@@ -246,6 +253,7 @@ public class BubiOrderService {
 
     /**
      * mark a bubi order as returned
+     *
      * @param bubiOrderId the id of the bubi order
      * @return the updated bubi order
      */
@@ -258,6 +266,7 @@ public class BubiOrderService {
 
     /**
      * marks a bubi order as paid and create the corresponding invoice and invoice lines in alma.
+     *
      * @param bubiOrderId the id of the bubi order to be paid
      * @return the updated bubi order
      */
@@ -276,7 +285,8 @@ public class BubiOrderService {
 
     /**
      * remove a bubi order line from an order line
-     * @param bubiOrderId the id of the bubi order
+     *
+     * @param bubiOrderId     the id of the bubi order
      * @param bubiOrderlineId the id of the bubi orderline to be removed
      * @return the updated bubi order
      */
@@ -293,7 +303,8 @@ public class BubiOrderService {
 
     /**
      * adds a bubi order line to a bubi order
-     * @param bubiOrderId the id of the bubi order
+     *
+     * @param bubiOrderId     the id of the bubi order
      * @param bubiOrderlineId the id of the  bubi order line to be added
      * @return the updated bubi order
      */
@@ -301,8 +312,10 @@ public class BubiOrderService {
         BubiOrderLine bubiOrderLine = this.bubiOrderLineRepository.findById(bubiOrderlineId).orElse(null);
         BubiOrder bubiOrder = this.bubiOrderRepository.findById(bubiOrderId).orElse(null);
         if (bubiOrderLine != null && bubiOrder != null) {
-            this.almaSetService.addMemberToSet(bubiOrderLine.getAlmaItemId(), bubiOrder.getAlmaSetId());
+            this.almaSetService.addMemberToSet(bubiOrderLine.getAlmaItemId(), bubiOrder.getAlmaSetId(), "");
             bubiOrder.addBubiOrderLine(bubiOrderLine);
+            bubiOrderLine.setBubiOrder(bubiOrder);
+            this.bubiOrderLineRepository.save(bubiOrderLine);
             this.bubiOrderRepository.save(bubiOrder);
             return new BubiOrderFullDto(bubiOrder);
         }
@@ -311,7 +324,8 @@ public class BubiOrderService {
 
     /**
      * duplicates a bubi order line in a bubi order
-     * @param bubiOrderId the id of the bubi order
+     *
+     * @param bubiOrderId     the id of the bubi order
      * @param bubiOrderlineId the id of the  bubi orderline to be duplicated
      * @return the updated bubi order
      */
@@ -349,23 +363,7 @@ public class BubiOrderService {
         long counter = this.bubiOrderRepository.countAllByVendorAccount(bubiOrderline.getVendorAccount()) + 1;
         BubiOrder bubiOrder = new BubiOrder(bubiOrderline.getVendorAccount(), counter);
         bubiOrder.setAlmaSetName(orderName);
-        Set set = new Set()
-                .name(orderName)
-                .description(bubiOrder.getComment())
-                .type(new SetType().value("ITEMIZED"))
-                .content(new SetContent().value("ITEM"))
-                .status(new SetStatus().value("ACTIVE"));
-        set.setPrivate(new SetPrivate().value("false"));
-        set.setOrigin(null);
-        List<Member> setMembers = new ArrayList<>();
-        setMembers.add(new Member().id(bubiOrderline.getAlmaItemId()).description(bubiOrderline.getTitle()));
-        Members members = new Members().member(setMembers);
-        set.setMembers(members);
-        try {
-            set = this.almaSetService.createSet(set);
-        } catch (FeignException fe) {
-            log.warn("could not connect create set, faild to connect to alma api", fe);
-        }
+        Set set = this.almaSetService.createSet(orderName, bubiOrder.getComment());
         bubiOrder.setAlmaSetId(set.getId());
         return this.bubiOrderRepository.save(bubiOrder);
     }

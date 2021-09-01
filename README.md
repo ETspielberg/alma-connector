@@ -21,7 +21,7 @@ In this environment several conditions must be fulfilled to run the service:
 ## Configuration
 
 The microservice tries to retrieve several configuration files from the central config server:
-* the 'files' configuration, defining the mandatory `ub.statistics.data.dir`property holding the information about the central data directory to store the sap files.
+* the 'files' configuration, defining the mandatory `ub.statistics.data.dir` property holding the information about the central data directory to store the sap files.
 * the 'client' configuration, holding several optional properties for the interaction within the Lib intel platform.
 * the 'alma' configuration, holding the keys for the alma API. These should either be supplied in an encrypted properties file or by defining the environment variables. 
 * the 'settings-datasource' configuration, defining the porperties for the database holding the bookbinder order data

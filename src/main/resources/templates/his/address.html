@@ -84,7 +84,7 @@
                         </td>
                     </tr>
                 </table>
-                <p th:otherwise="${address ne null}">
+                <p th:unless="${address ne null}">
                     <char th:text="#{no.address.found}"></char>
                 </p>
             </div>
