@@ -27,7 +27,7 @@ public class AlmaAnalyticsReportClient {
 
     private final static Logger log = LoggerFactory.getLogger(AlmaAnalyticsReportClient.class);
 
-    @Value("${alma.api.key:1234}")
+    @Value("${alma.prod.api.key:1234}")
     private String almaAcqApiKey;
 
     /**

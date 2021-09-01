@@ -7,15 +7,14 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.InterestedUser;
 import org.unidue.ub.alma.shared.acq.PoLine;
+import org.unidue.ub.alma.shared.bibs.BibWithRecord;
 import org.unidue.ub.alma.shared.bibs.Item;
 import org.unidue.ub.alma.shared.user.AlmaUser;
 import org.unidue.ub.libintel.almaconnector.clients.alma.analytics.AlmaAnalyticsReportClient;
 import org.unidue.ub.libintel.almaconnector.configuration.MappingTables;
 import org.unidue.ub.libintel.almaconnector.model.analytics.*;
-import org.unidue.ub.libintel.almaconnector.service.alma.AlmaItemService;
-import org.unidue.ub.libintel.almaconnector.service.alma.AlmaJobsService;
-import org.unidue.ub.libintel.almaconnector.service.alma.AlmaPoLineService;
-import org.unidue.ub.libintel.almaconnector.service.alma.AlmaUserService;
+import org.unidue.ub.libintel.almaconnector.model.usage.SingleRequestData;
+import org.unidue.ub.libintel.almaconnector.service.alma.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,6 +36,8 @@ public class ScheduledService {
 
     private final AlmaUserService almaUserService;
 
+    private final AlmaCatalogService almaCatalogService;
+
     private final MappingTables mappingTables;
 
     @Value("${libintel.profile:dev}")
@@ -44,6 +45,10 @@ public class ScheduledService {
 
     @Value("${libintel.happ.users}")
     private List<String> happUsers;
+
+
+    @Value("${libintel.magazin.locations}")
+    private List<String> magazinLocations;
 
     /**
      * constructor based autowiring of the necessary copmponents
@@ -59,13 +64,15 @@ public class ScheduledService {
                      AlmaItemService almaItemService,
                      AlmaPoLineService almaPoLineService,
                      AlmaJobsService almaJobsService,
-                     AlmaUserService almaUserService) {
+                     AlmaUserService almaUserService,
+                     AlmaCatalogService almaCatalogService) {
         this.almaAnalyticsReportClient = almaAnalyticsReportClient;
         this.mappingTables = mappingTables;
         this.almaItemService = almaItemService;
         this.almaPoLineService = almaPoLineService;
         this.almaJobsService = almaJobsService;
         this.almaUserService = almaUserService;
+        this.almaCatalogService = almaCatalogService;
     }
 
     /**
@@ -212,6 +219,42 @@ public class ScheduledService {
         List<OpenBubiOrder> result = this.almaAnalyticsReportClient.getReport(OpenBubiOrdersReport.PATH, OpenBubiOrdersReport.class).getRows();
         for (OpenBubiOrder openBubiOrder : result) {
 
+        }
+    }
+
+    @Scheduled(cron = "0 0 5 * * *")
+    public void collectRequests() throws IOException {
+        List<RequestsItem> result = this.almaAnalyticsReportClient.getReport(RequestsReport.PATH, RequestsReport.class).getRows();
+        for (RequestsItem requestsItem : result) {
+            switch (requestsItem.getPickupLocation()) {
+                case "Campus Duisburg": {
+                    requestsItem.setPickupLocation("D0001");
+                    break;
+                }
+                case "FB Medizin": {
+                    requestsItem.setPickupLocation("E0023");
+                    break;
+                }
+                default: {
+                    requestsItem.setPickupLocation("E0001");
+                    break;
+                }
+            }
+            SingleRequestData singleRequestData = new SingleRequestData(requestsItem);
+            singleRequestData.setMagazin(magazinLocations.contains(requestsItem.getOwningLocationName()));
+            try {
+                BibWithRecord bib = this.almaCatalogService.getRecord(requestsItem.getMMSId());
+                singleRequestData.setTitle(bib.getTitle());
+                singleRequestData.setIsbn(bib.getIsbn());
+            } catch (FeignException fe) {
+                log.warn("could not retrieve bib data: ", fe);
+            }
+            try {
+                singleRequestData.setNItems(this.almaCatalogService.getNumberOfItems(requestsItem.getMMSId(), requestsItem.getHoldingId()));
+            } catch (FeignException fe) {
+                log.warn("could not retrieve holding data: ", fe);
+            }
+            log.info(singleRequestData.toString());
         }
     }
 }

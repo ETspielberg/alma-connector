@@ -81,4 +81,7 @@ public class AlmaCatalogService {
         return portfolios.getTotalRecordCount() > 0;
     }
 
+    public long getNumberOfItems(String mmsId, String holdingId) {
+        return this.almaCatalogApiClient.getBibsMmsIdHoldingsHoldingIdItems(mmsId, holdingId, 1,0,"","","","","","","","","","","","","","","","").getTotalRecordCount();
+    }
 }
