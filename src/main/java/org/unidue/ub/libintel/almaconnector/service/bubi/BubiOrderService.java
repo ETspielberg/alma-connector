@@ -364,6 +364,7 @@ public class BubiOrderService {
         BubiOrder bubiOrder = new BubiOrder(bubiOrderline.getVendorAccount(), counter);
         bubiOrder.setAlmaSetName(orderName);
         Set set = this.almaSetService.createSet(orderName, bubiOrder.getComment());
+        this.almaSetService.addMemberToSet(set.getId(),bubiOrderline.getAlmaItemId(), bubiOrderline.getTitle());
         bubiOrder.setAlmaSetId(set.getId());
         return this.bubiOrderRepository.save(bubiOrder);
     }
