@@ -31,4 +31,7 @@ public class RequestsItem {
 
     @JacksonXmlProperty(localName = "UserGroup")
     private String userGroup;
+
+    @JacksonXmlProperty(localName = "RequestStatusCode")
+    private String requestStatusCode;
 }

@@ -14,38 +14,49 @@ public class SingleRequestData {
 
     private String isbn;
 
-    private String shelfmark;
+    private String library;
 
     private String location;
 
+    private String shelfmark;
+
     private String userGroup;
 
-    private boolean isCald;
-
-    private boolean isMagazin;
-
     public long nItems = 1L;
+
+    public long nRequests = 0L;
+
+    public long nCald = 0L;
+
+    public long nMagazin = 0L;
 
     public SingleRequestData(RequestsItem requestsItem) {
         this.mmsId = requestsItem.getMMSId();
         this.holdingId = requestsItem.getHoldingId();
         this.shelfmark = requestsItem.getPermanentCallNumber();
+        this.location = requestsItem.getOwningLocationName();
         this.userGroup = requestsItem.getUserGroup();
-        this.location = requestsItem.getOwningLibraryCode();
-        this.isCald = !requestsItem.getPickupLocation().equals(requestsItem.getOwningLibraryCode());
+        this.library = requestsItem.getOwningLibraryCode();
     }
+
+    public void addRequest() { this.nRequests++; }
+
+    public void addCald() { this.nCald++; }
+
+    public void addMagazin() { this.nMagazin++; }
 
     public String toString() {
         return "mmsId: " + this.mmsId +
                 ", holdingId: " + this.holdingId +
-                ", title: " + this.title +
-                ", isbn: " + this.isbn +
-                ", shelfmark: " + this.shelfmark +
+                ", library: " + this.library +
                 ", location: " + this.location +
+                ", shelfmark: " + this.shelfmark +
                 ", userGroup: " + this.userGroup +
-                ", isCald: " + this.isCald +
-                ", isMagazin: " + this.isMagazin +
-                ", nItems: " + this.nItems;
-
+                ", nRequests: " + this.nRequests +
+                ", nCald: " + this.nCald +
+                ", nMagazin: " + this.nMagazin +
+                ", nItems: " + this.nItems +
+                ", title: " + this.title +
+                ", isbn: " + this.isbn;
     }
 }

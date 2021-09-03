@@ -224,6 +224,7 @@ public class ScheduledService {
 
     @Scheduled(cron = "0 0 5 * * *")
     public void collectRequests() throws IOException {
+        HashMap<String, SingleRequestData> allRequestData = new HashMap<>();
         List<RequestsItem> result = this.almaAnalyticsReportClient.getReport(RequestsReport.PATH, RequestsReport.class).getRows();
         for (RequestsItem requestsItem : result) {
             switch (requestsItem.getPickupLocation()) {
@@ -240,8 +241,20 @@ public class ScheduledService {
                     break;
                 }
             }
-            SingleRequestData singleRequestData = new SingleRequestData(requestsItem);
-            singleRequestData.setMagazin(magazinLocations.contains(requestsItem.getOwningLocationName()));
+            SingleRequestData singleRequestData;
+            String key = requestsItem.getMMSId() + "-" + requestsItem.getHoldingId() + "-" + requestsItem.getUserGroup();
+            if (allRequestData.containsKey(key)) {
+                singleRequestData = allRequestData.get(key);
+            } else {
+                singleRequestData = new SingleRequestData(requestsItem);
+                allRequestData.put(key, singleRequestData);
+            }
+            if (magazinLocations.contains(requestsItem.getOwningLocationName()))
+                singleRequestData.addMagazin();
+            else if (!requestsItem.getPickupLocation().equals(requestsItem.getOwningLibraryCode()))
+                singleRequestData.addCald();
+            else
+                singleRequestData.addRequest();
             try {
                 BibWithRecord bib = this.almaCatalogService.getRecord(requestsItem.getMMSId());
                 singleRequestData.setTitle(bib.getTitle());
@@ -254,7 +267,7 @@ public class ScheduledService {
             } catch (FeignException fe) {
                 log.warn("could not retrieve holding data: ", fe);
             }
-            log.info(singleRequestData.toString());
         }
+        allRequestData.forEach((key, entry) -> log.info(entry.toString()));
     }
 }
