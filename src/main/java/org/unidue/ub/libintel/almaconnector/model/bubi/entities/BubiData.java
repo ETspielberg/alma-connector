@@ -143,9 +143,9 @@ public class BubiData {
         this.bubiPrices = bubiPrices;
     }
 
-    public BubiPrice retrieveExecutionPrice(String binding, String cover, String mediaType) {
+    public BubiPrice retrieveExecutionPrice(String binding, String cover, String materialType) {
         for (BubiPrice price: this.bubiPrices) {
-            if (price.getBinding().equals(binding) && price.getCover().equals(cover) && price.getMaterialType().equals(mediaType))
+            if (price.getBinding().equals(binding) && price.getCover().equals(cover) && price.getMaterialType().equals(materialType))
                 return price;
         }
         return null;
