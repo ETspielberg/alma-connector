@@ -58,9 +58,11 @@ public class BubiPricesService {
             throw new PriceNotFoundException("no bubi data found!");
         else {
             BubiData bubiData = optional.get();
+            log.info(String.format("found bubidata with %d prices", bubiData.getBubiPrices().size()));
             if (bubiData.getBubiPrices().size() == 0)
                 this.createNewBubiPricesForVendorAccount(bubiData);
-            BubiPrice bubiPrice = bubiData.retrieveExecutionPrice(bubiOrderLine.getBinding(), bubiOrderLine.getCover(), bubiOrderLine.getMediaType().toUpperCase(Locale.ROOT));
+            log.info(String.format("retrieving execution price for binding %s, cover %s and media type %s", bubiOrderLine.getBinding().toUpperCase(Locale.ROOT), bubiOrderLine.getCover(), bubiOrderLine.getMediaType().toUpperCase(Locale.ROOT)));
+            BubiPrice bubiPrice = bubiData.retrieveExecutionPrice(bubiOrderLine.getBinding().toUpperCase(Locale.ROOT), bubiOrderLine.getCover(), bubiOrderLine.getMediaType().toUpperCase(Locale.ROOT));
             if (bubiPrice == null)
                 throw new PriceNotFoundException("execution price not found");
             price += bubiPrice.getPrice();
