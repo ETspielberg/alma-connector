@@ -176,7 +176,7 @@ public class HookService {
                             item.getHoldingData().tempLibrary(null);
                         }
                         log.debug("saving item:\n" + item);
-                        this.almaItemService.updateItem(mmsId, item.getHoldingData().getHoldingId(), itemPid, item);
+                        this.almaItemService.updateItem(item);
                     }
                 break;
             case "Neuerw. / 14 Tage":
@@ -195,7 +195,7 @@ public class HookService {
                     log.debug("resetting public note");
                     item.getItemData().setPublicNote("");
                 }
-                this.almaItemService.updateItem(mmsId, item.getHoldingData().getHoldingId(), itemPid, item);
+                this.almaItemService.updateItem(item);
                 break;
 
                     /*

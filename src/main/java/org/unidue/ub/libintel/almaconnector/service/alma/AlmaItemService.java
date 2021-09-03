@@ -92,6 +92,7 @@ public class AlmaItemService {
      * @return the item
      */
     public Item findItemByMmsAndItemId(String mmsId, String itemId) {
+        log.debug(String.format("retrieving item by mms id %s and item id %s", mmsId, itemId));
         return this.almaCatalogApiClient.getBibsMmsIdHoldingsHoldingIdItemsItemPid("application/json", mmsId, "ALL", itemId, "full", "", "");
     }
 
@@ -101,18 +102,6 @@ public class AlmaItemService {
      * @return the updated item
      */
     public Item updateItem(Item item) {
-        return this.almaItemsApiClient.updateItem("application/json", item.getBibData().getMmsId(), item.getHoldingData().getHoldingId(), item.getItemData().getPid(), item);
-    }
-
-    /**
-     * updates an item in Alma
-     * @param mmsId the mms id of the item
-     * @param holdingId the holding id of the item
-     * @param itemPid the item id of the item
-     * @param item the changed item
-     * @return the updated item
-     */
-    public Item updateItem(String mmsId, String holdingId, String itemPid, Item item) {
-        return this.almaItemsApiClient.updateItem("application/json", mmsId, holdingId, itemPid, item);
+        return this.almaCatalogApiClient.putBibsMmsIdHoldingsHoldingIdItemsItemPid(item.getBibData().getMmsId(), item.getHoldingData().getHoldingId(), item.getItemData().getPid(), item);
     }
 }
