@@ -87,6 +87,6 @@ public interface SetsApiClient {
    * @param idType The type of the identifier that is used to identify members. Optional.   For physical items: BARCODE.   For Bib records: SYSTEM_NUMBER, OCLC_NUMBER, ISBN, ISSN. For regular MMS-IDs no need to defined this parameter.   For users: any type that is defined in UserIdentifierTypes Code Table (optional, default to &quot;&quot;)
    * @return Object
    */
-  @RequestMapping(method = RequestMethod.POST, value ="/sets/{setId}/members")
+  @RequestMapping(method = RequestMethod.POST, value ="/sets/{setId}")
   Set postConfSetsSetId(@RequestBody Set body, @PathVariable("setId") String setId, @RequestParam("op") String op, @RequestParam("id_type") String idType);
 }
