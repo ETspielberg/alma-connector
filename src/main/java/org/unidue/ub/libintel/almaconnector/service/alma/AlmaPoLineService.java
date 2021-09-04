@@ -62,18 +62,22 @@ public class AlmaPoLineService {
         return this.almaPoLinesApiClient.postAcqPoLines(poLine, "application/json", "");
     }
 
+    /**
+     * updates an existing po line
+     * @param poLine the changed po line
+     * @return the updated po line
+     */
     public PoLine updatePoLine(PoLine poLine) {
         return this.almaPoLinesApiClient.putPoLinesPoLineId(poLine, "application/json", poLine.getNumber(),"false");
     }
 
+    /**
+     * retrieves an po line by its id
+     * @param poLineId the id of the po line to be retrieved
+     * @return the po line
+     */
     public PoLine getPoLine(String poLineId) {
         return this.almaPoLinesApiClient.getPoLinesPoLineId("application/json", poLineId);
-    }
-
-    public boolean closePoLine(PoLine poLine) {
-        poLine.setStatus(new PoLineStatus().value("CLOSED"));
-        poLine = this.almaPoLinesApiClient.putPoLinesPoLineId(poLine, "application/json", poLine.getNumber(), "false");
-        return "CLOSED".equals(poLine.getStatus().getValue());
     }
 
     /**

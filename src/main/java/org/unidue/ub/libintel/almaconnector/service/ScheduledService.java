@@ -22,6 +22,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * service controlling scheduled tasks.
+ */
 @Service
 @Slf4j
 public class ScheduledService {
@@ -201,18 +204,28 @@ public class ScheduledService {
         );
     }
 
+    /**
+     * runs the elisa import job on additional times during the week
+     */
     @Scheduled(cron = "0 0 7,11,15,19 * * 1,2,3,4,5")
     public void runElisaImportDuringWeek() {
         if (profile.equals("dev")) return;
         this.almaJobsService.runElisaImportJob();
     }
 
+    /**
+     * runs the elisa import job on additional times at the weekend
+     */
     @Scheduled(cron = "0 0 7 * * 6")
     public void runElisaImportAtWeekEnd() {
         if (profile.equals("dev")) return;
         this.almaJobsService.runElisaImportJob();
     }
 
+    /**
+     * updates the po ids of the packed po lines in the bubi orders
+     * @throws IOException thrown by the analytics client if the xsl transformation fails
+     */
     @Scheduled(cron = "0 0 8 * * *")
     public void updateBubiOrders() throws IOException {
         if (profile.equals("dev")) return;
@@ -222,6 +235,10 @@ public class ScheduledService {
         }
     }
 
+    /**
+     * retrieves the open requests and logs the corresponding information to be picked up by beats
+     * @throws IOException thrown by the analytics client if the xsl transformation fails
+     */
     @Scheduled(cron = "0 0 5 * * *")
     public void collectRequests() throws IOException {
         HashMap<String, SingleRequestData> allRequestData = new HashMap<>();

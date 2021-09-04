@@ -36,34 +36,31 @@ public class HookService {
 
     private final BubiOrderLineService bubiOrderLineService;
 
-    private final HookValidatorService hookValidatorService;
-
 
     /**
      * constructor based autowiring to the individual services
-     * @param almaUserService the alma user api feign client
-     * @param almaItemService the alma item api feign client
-     * @param almaCatalogService the alma bib api feign client
-     * @param bubiOrderLineService the bubi order line service
+     *
+     * @param almaUserService       the alma user api feign client
+     * @param almaItemService       the alma item api feign client
+     * @param almaCatalogService    the alma bib api feign client
+     * @param bubiOrderLineService  the bubi order line service
      * @param almaElectronicService the alma electronic api feign client
-     * @param hookValidatorService the hook validator service
      */
     HookService(AlmaUserService almaUserService,
                 AlmaItemService almaItemService,
                 AlmaCatalogService almaCatalogService,
                 BubiOrderLineService bubiOrderLineService,
-                AlmaElectronicService almaElectronicService,
-                HookValidatorService hookValidatorService) {
+                AlmaElectronicService almaElectronicService) {
         this.almaUserService = almaUserService;
         this.almaItemService = almaItemService;
         this.almaCatalogService = almaCatalogService;
         this.almaElectronicService = almaElectronicService;
         this.bubiOrderLineService = bubiOrderLineService;
-        this.hookValidatorService = hookValidatorService;
     }
 
     /**
      * processes a webhook for a request event sent by alma
+     *
      * @param hook the request webhook
      */
     @Async("threadPoolTaskExecutor")
@@ -122,6 +119,7 @@ public class HookService {
 
     /**
      * processes a webhook for a loan event sent by alma
+     *
      * @param hook the loan webhook
      */
     @Async("threadPoolTaskExecutor")
@@ -197,60 +195,13 @@ public class HookService {
                 }
                 this.almaItemService.updateItem(item);
                 break;
-
-                    /*
-            case "Handapparat":
-            case "Handapparat, 15 Ausleihen":
-            case "Handapparat, gemeinsamer":
-                log.info("got happ loan");
-                for (Address address : almaUser.getContactInfo().getAddress())
-                    if (address.getPreferred()) {
-                        log.debug(String.format("retrieve item with barcode %s", itemLoan.getItemBarcode()));
-                        String mmsId = itemLoan.getMmsId();
-                        String itemPid = itemLoan.getItemId();
-                        Item item = this.almaItemService.findItemByMmsAndItemId(mmsId, itemPid);
-                        log.debug(String.format("retrieved item:\n %s", item.toString()));
-                        // setting bib data to null in order to avoid problems with network-number / network_numbers....
-                        item.setBibData(null);
-                        if ("LOAN_CREATED".equals(hook.getEvent().getValue())) {
-                            log.debug(String.format("setting public note to %s", address.getLine1()));
-                            String library = itemLoan.getLibrary().getValue();
-                            item.getHoldingData().setInTempLocation(true);
-                            switch (library) {
-                                case "E0001": {
-                                    item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("EHA"));
-                                    item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("E0001"));
-                                    break;
-                                }
-                                case "D0001": {
-                                    item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("DHA"));
-                                    item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("D0001"));
-                                    break;
-                                }
-                                case "E0023": {
-                                    item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("MHA"));
-                                    item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("E0023"));
-                                    break;
-                                }
-                            }
-                            log.debug(String.format("retrieved item from library %s", library));
-                        } else if ("LOAN_RETURNED".equals(hook.getEvent().getValue())) {
-                            item.getHoldingData().setInTempLocation(false);
-                            item.getHoldingData().tempLocation(null);
-                            item.getHoldingData().tempLibrary(null);
-                        }
-                        log.debug("saving item:\n" + item);
-                        this.almaItemService.updateItem(mmsId, item.getHoldingData().getHoldingId(), itemPid, item);
-                    }
-                break;
-
-                     */
             default:
         }
     }
 
     /**
      * processes a webhook for an item event sent by alma
+     *
      * @param hook the item webhook
      */
     @Async("threadPoolTaskExecutor")
@@ -298,6 +249,7 @@ public class HookService {
 
     /**
      * processes a webhook for a bib event sent by alma
+     *
      * @param hook the bib webhook
      */
     @Async("threadPoolTaskExecutor")
@@ -338,6 +290,7 @@ public class HookService {
 
     /**
      * generalized method for processing any kind of hook
+     *
      * @param hook the string content of the webhook
      * @param type the typoe of webhook event
      */

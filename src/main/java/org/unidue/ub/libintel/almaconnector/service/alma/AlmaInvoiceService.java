@@ -135,6 +135,10 @@ public class AlmaInvoiceService {
         this.almaInvoicesApiClient.postInvoicesInvoiceIdLines(invoiceLine, "application/json", id);
     }
 
+    /**
+     * process an invoice
+     * @param id the id of the invoice to be processed
+     */
     public void processInvoice(String id) {
         this.almaInvoicesApiClient.postInvoicesInvoiceId(new Invoice(), "application/json", id, "process_invoice");
     }

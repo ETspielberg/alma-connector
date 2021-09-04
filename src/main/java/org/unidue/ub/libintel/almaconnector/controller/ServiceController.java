@@ -40,7 +40,7 @@ public class ServiceController {
 
     @PostMapping("/scan/{setId}")
     private ResponseEntity<?> receiveSet(@PathVariable String setId) {
-        boolean success = this.almaSetService.scanInSet(setId, true);
+        boolean success = this.almaSetService.scanInSetDone(setId);
         if (success)
             return ResponseEntity.ok().build();
         else

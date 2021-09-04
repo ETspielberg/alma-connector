@@ -10,6 +10,13 @@ import org.unidue.ub.libintel.almaconnector.clients.alma.conf.SetsApiClient;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * provides function for handling sets in alma
+ *
+ * @author Eike Spielberg
+ * @author eike.spielberg@uni-due.de
+ * @version 1.0
+ */
 @Service
 @Slf4j
 public class AlmaSetService {
@@ -18,11 +25,21 @@ public class AlmaSetService {
 
     private final AlmaItemService almaItemService;
 
+    /**
+     * constructor based autowiring to the sets api client and the item service
+     * @param setsApiClient the client for the sets api
+     * @param almaItemService the item service
+     */
     AlmaSetService(SetsApiClient setsApiClient, AlmaItemService almaItemService) {
         this.setsApiClient = setsApiClient;
         this.almaItemService = almaItemService;
     }
 
+    /**
+     * retreives the member of a set for a given id
+     * @param setId the id of the set
+     * @return a members object holding all members of the set
+     */
     public Members retrieveSetMembers(String setId) {
         try {
             int limit = 100;
@@ -42,18 +59,29 @@ public class AlmaSetService {
         }
     }
 
-    public boolean scanInSet(String setId, boolean ready) {
+    /**
+     * retrieves a set and performs a done scan for each item
+     * @param setId the id of the set of items
+     * @return true if all items were scanned correctly
+     */
+    public boolean scanInSetDone(String setId) {
         Members members = retrieveSetMembers(setId);
         if (members.getTotalRecordCount() == 0)
             return false;
         for (Member member: members.getMember()) {
-            Item item = this.almaItemService.scanInItem(member.getId(), ready);
+            Item item = this.almaItemService.scanInItemDone(member.getId());
             if (item.getItemData().getWorkOrderAt() != null)
                 log.warn(String.format("item with barcode %s still in work order department %s", member.getDescription(), item.getItemData().getWorkOrderAt().getValue()));
         }
         return true;
     }
 
+    /**
+     * creates a new set of items in alma
+     * @param setName the name of the set
+     * @param setDescription the description of the set
+     * @return the new set
+     */
     public Set createSet(String setName, String setDescription) {
         Set set = new Set()
                 .name(setName)
@@ -69,12 +97,25 @@ public class AlmaSetService {
         return this.setsApiClient.postConfSets(set, "", "", "", "", "", "");
     }
 
+    /**
+     * qdds an item to an existing set
+     * @param almaSetId the id of the set
+     * @param almaItemId the item pid of the item to be added
+     * @param itemDescription a description for this item
+     * @return the updated set
+     */
     public Set addMemberToSet(String almaSetId, String almaItemId, String itemDescription) {
         Member member = new Member().id(almaItemId).description(itemDescription);
         Set set = new Set().members(new Members().addMemberItem(member));
         return this.setsApiClient.postConfSetsSetId(set,almaSetId, "add_members", "" );
     }
 
+    /**
+     * removes an item from the set in alma
+     * @param almaSetId the id of the set holding the item to be removed
+     * @param almaItemId the pid of the item to be removed
+     * @return the updated set
+     */
     public Set removeMemberFromSet(String almaSetId, String almaItemId) {
         Member member = new Member().id(almaItemId);
         Set set = new Set().members(new Members().addMemberItem(member));

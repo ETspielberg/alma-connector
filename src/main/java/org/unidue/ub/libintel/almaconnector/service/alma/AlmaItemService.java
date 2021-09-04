@@ -41,7 +41,12 @@ public class AlmaItemService {
         return this.almaItemsApiClient.getItemByBarcode("application/json", barcode, "");
     }
 
-    public Item scanInItem(String barcode, boolean ready) {
+    /**
+     * scans in an item in its current position
+     * @param barcode teh barcode to be scanned
+     * @return the item after the scan-in
+     */
+    public Item scanInItemDone(String barcode) {
         Item item;
         try {
             item = findItemByBarcode(barcode);
@@ -73,7 +78,7 @@ public class AlmaItemService {
                         workorderType,
                         "",
                         "",
-                        String.valueOf(ready),
+                        "true",
                         "",
                         "",
                         "",
