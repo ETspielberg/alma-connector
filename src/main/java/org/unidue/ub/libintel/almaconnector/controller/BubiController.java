@@ -15,7 +15,7 @@ import java.util.List;
 
 
 /**
- * maps the bubi endpoints to the individual service options. in particular, this encludes paths for
+ * provides endpoints for the individual services for managing bookbinder orders. in particular, this encludes paths for
  * - the bubi data (/bubi/bubidata)
  * - the core data (/bubi/coredata)
  * - the order line (/bubi/orderline)
@@ -37,6 +37,15 @@ public class BubiController {
 
     private final PrimoService primoService;
 
+    /**
+     * constructor based autowiring of necessary dependencies
+     * @param primoService uses primo to search for data for a given shelfmark and location combination
+     * @param bubiOrderService handles the bookbinder orders
+     * @param bubiDataService handles the data about the bookbinders
+     * @param coreDataService handles the core data for each journal series
+     * @param bubiOrderLineService handles the bookbinder order lines
+     * @param bubiPricesService handles the prices of a given bookbinder and calculates prices for a given order line
+     */
     BubiController(PrimoService primoService,
                    BubiOrderService bubiOrderService,
                    BubiDataService bubiDataService,

@@ -23,30 +23,6 @@ public class AlmaSetService {
         this.almaItemService = almaItemService;
     }
 
-
-    public Set retrieveSet(String setId) {
-        try {
-            return this.setsApiClient.getSetsBySetId(setId);
-        } catch (FeignException fe) {
-            log.warn("could not retreive set " + setId, fe);
-            return null;
-        }
-    }
-
-    public Sets getBubiSets() {
-        int limit = 100;
-        int offset = 0;
-        Sets sets = this.setsApiClient.getConfSets("", "ITEMIZED", "name~Bubi", limit, offset, "UI");
-        List<Set> allSets = sets.getSet();
-        while (allSets.size() < sets.getTotalRecordCount()) {
-            offset += limit;
-            Sets newSets = this.setsApiClient.getConfSets("", "ITEMIZED", "name~Bubi", limit, offset, "UI");
-            allSets.addAll(newSets.getSet());
-        }
-        sets.setSet(allSets);
-        return sets;
-    }
-
     public Members retrieveSetMembers(String setId) {
         try {
             int limit = 100;
@@ -99,13 +75,9 @@ public class AlmaSetService {
         return this.setsApiClient.postConfSetsSetId(set,almaSetId, "add_members", "" );
     }
 
-    public Set addMembersToSet(String almaSetId, List<String> almaItemIds) {
-        Members members = new Members();
-        for (String almaItemId: almaItemIds) {
-            Member member = new Member().id(almaItemId);
-            members.addMemberItem(member);
-        }
-        Set set = new Set().members(members);
-        return this.setsApiClient.postConfSetsSetId(set,almaSetId, "add_members", "" );
+    public Set removeMemberFromSet(String almaSetId, String almaItemId) {
+        Member member = new Member().id(almaItemId);
+        Set set = new Set().members(new Members().addMemberItem(member));
+        return this.setsApiClient.postConfSetsSetId(set,almaSetId, "delete_members", "" );
     }
 }

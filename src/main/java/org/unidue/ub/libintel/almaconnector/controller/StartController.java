@@ -11,7 +11,7 @@ import org.springframework.web.servlet.ModelAndView;
 import java.net.UnknownHostException;
 
 /**
- * the simple page controllers
+ * provides the start page
  */
 @Controller
 public class StartController {

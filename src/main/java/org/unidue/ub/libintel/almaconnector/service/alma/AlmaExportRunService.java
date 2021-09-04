@@ -40,7 +40,7 @@ public class AlmaExportRunService {
         log.debug(String.format("collecting AlmaExportRun from database for date %s and owner %s",dateformat.format(date), owner));
         List<AlmaExportRun> savedRuns =  this.almaExportRunRepository.findByIdentifierStartsWithOrderByRunIndex(dateformat.format(date) + "-" + owner);
         if (savedRuns == null || savedRuns.size() == 0) {
-            log.debug("no results from alma run repository: " + savedRuns.size());
+            log.debug("no results from alma run repository");
             return new AlmaExportRun(date).withRunIndex(0).withInvoiceOwner(owner);
 
         } else {

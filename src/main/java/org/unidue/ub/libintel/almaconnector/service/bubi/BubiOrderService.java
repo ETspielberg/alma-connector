@@ -1,6 +1,5 @@
 package org.unidue.ub.libintel.almaconnector.service.bubi;
 
-import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.*;
@@ -13,10 +12,8 @@ import org.unidue.ub.libintel.almaconnector.model.bubi.*;
 import org.unidue.ub.libintel.almaconnector.model.bubi.dto.BubiOrderBriefDto;
 import org.unidue.ub.libintel.almaconnector.model.bubi.dto.BubiOrderFullDto;
 import org.unidue.ub.libintel.almaconnector.model.bubi.dto.BubiOrderShortDto;
-import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiData;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrder;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderLine;
-import org.unidue.ub.libintel.almaconnector.repository.BubiDataRepository;
 import org.unidue.ub.libintel.almaconnector.repository.BubiOrderLineRepository;
 import org.unidue.ub.libintel.almaconnector.repository.BubiOrderRepository;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaInvoiceService;
@@ -44,8 +41,6 @@ public class BubiOrderService {
 
     private final BubiOrderLineRepository bubiOrderLineRepository;
 
-    private final BubiDataRepository bubiDataRepository;
-
     private final AlmaPoLineService almaPoLineService;
 
     private final AlmaInvoiceService almaInvoiceService;
@@ -64,7 +59,6 @@ public class BubiOrderService {
      * @param almaPoLineService       the alma po line service
      * @param almaInvoiceService      the alma invoices service
      * @param almaItemService         the alma item service
-     * @param bubiDataRepository      the bubi data repository
      */
     public BubiOrderService(
             BubiOrderRepository bubiOrderRepository,
@@ -72,14 +66,12 @@ public class BubiOrderService {
             AlmaPoLineService almaPoLineService,
             AlmaInvoiceService almaInvoiceService,
             AlmaItemService almaItemService,
-            BubiDataRepository bubiDataRepository,
             AlmaSetService almaSetService) {
         this.bubiOrderLineRepository = bubiOrderLineRepository;
         this.bubiOrderRepository = bubiOrderRepository;
         this.almaPoLineService = almaPoLineService;
         this.almaInvoiceService = almaInvoiceService;
         this.almaItemService = almaItemService;
-        this.bubiDataRepository = bubiDataRepository;
         this.almaSetService = almaSetService;
     }
 
@@ -186,7 +178,6 @@ public class BubiOrderService {
             else {
                 long counter = this.bubiOrderRepository.countAllByVendorAccount(bubiOrderLine.getVendorAccount()) + 1;
                 BubiOrder bubiOrderInd = new BubiOrder(bubiOrderLine.getVendorAccount(), counter);
-                BubiData bubiData = this.bubiDataRepository.getByVendorAccount(bubiOrderLine.getVendorAccount());
                 bubiOrderInd.addBubiOrderLine(bubiOrderLine);
                 this.bubiOrderRepository.save(bubiOrderInd);
                 bubiOrderLine.setBubiOrder(bubiOrderInd);
@@ -201,6 +192,9 @@ public class BubiOrderService {
                     order.setBubiStatus(BubiStatus.NEW);
                     order.sortBubiOrderLines();
                     order.calculateTotalPrice();
+                    String date = new SimpleDateFormat(DATE_FORMAT_NOW).format(new Date());
+                    String description = order.getVendorAccount() + " " + date;
+                    org.unidue.ub.alma.shared.conf.Set set = this.almaSetService.createSet(order.getAlmaSetName(), description);
                     order.getBubiOrderLines().forEach(
                             orderline -> {
                                 Member member = new Member().id(orderline.getAlmaItemId()).description(orderline.getCollection() + " " + orderline.getShelfmark());
@@ -208,15 +202,9 @@ public class BubiOrderService {
                                 orderline.setStatus(BubiStatus.PACKED);
                                 orderline.setLastChange(new Date());
                                 this.bubiOrderLineRepository.save(orderline);
+                                this.almaSetService.addMemberToSet(set.getId(), orderline.getAlmaItemId(), orderline.getTitle());
                             });
                     this.bubiOrderRepository.save(order);
-                    String date = new SimpleDateFormat(DATE_FORMAT_NOW).format(new Date());
-                    String description = order.getVendorAccount() + " " + date;
-                    org.unidue.ub.alma.shared.conf.Set set = new Set()
-                            .additionalInfo(new SetAdditionalInfo().value(order.getBubiOrderId()))
-                            .description(description)
-                            .members(members);
-                    // almaSetService.save(set);
                 }
         );
         List<BubiOrderFullDto> orders = new ArrayList<>();
@@ -296,6 +284,8 @@ public class BubiOrderService {
         if (bubiOrderLine != null && bubiOrder != null) {
             bubiOrder.removeOrderline(bubiOrderLine);
             this.bubiOrderRepository.save(bubiOrder);
+            if (bubiOrder.getAlmaSetId() != null && !bubiOrder.getAlmaSetId().isEmpty())
+                this.almaSetService.removeMemberFromSet(bubiOrder.getAlmaSetId(), bubiOrderLine.getAlmaItemId());
             return new BubiOrderFullDto(bubiOrder);
         }
         return null;
@@ -312,7 +302,7 @@ public class BubiOrderService {
         BubiOrderLine bubiOrderLine = this.bubiOrderLineRepository.findById(bubiOrderlineId).orElse(null);
         BubiOrder bubiOrder = this.bubiOrderRepository.findById(bubiOrderId).orElse(null);
         if (bubiOrderLine != null && bubiOrder != null) {
-            this.almaSetService.addMemberToSet(bubiOrderLine.getAlmaItemId(), bubiOrder.getAlmaSetId(), "");
+            this.almaSetService.addMemberToSet(bubiOrder.getAlmaSetId(),bubiOrderLine.getAlmaItemId(), bubiOrderLine.getTitle());
             bubiOrder.addBubiOrderLine(bubiOrderLine);
             bubiOrderLine.setBubiOrder(bubiOrder);
             this.bubiOrderLineRepository.save(bubiOrderLine);

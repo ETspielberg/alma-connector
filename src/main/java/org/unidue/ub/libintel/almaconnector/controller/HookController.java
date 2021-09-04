@@ -15,6 +15,16 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 
+/**
+ * provides endpoints to handle webhooks sent from alma. Each endpoint consists of a GET endpoint with a challenge
+ * parameter, which is returned as Challenge object, and a POST endpoint receiving one of the following webhooks
+ *  - /userListener handles changes in alma users
+ *  - /jobListener handles messages from finished jobs
+ *  - /loanListener handles messages from loan events
+ *  - /requestListener handles messages from request events
+ *  - /itemListener handles messages for item changes like creation or modification
+ *  - /bibListener handles messages for bib record changes like creation or modification
+ */
 @Controller
 @RequestMapping("/hooks")
 @Slf4j

@@ -79,7 +79,7 @@ public class AlmaItemService {
                         "",
                         "");
             } catch (FeignException fe) {
-                log.warn("could not scn in item " + item.toString(), fe);
+                log.warn("could not scan in item " + item, fe);
             }
         }
         return item;

@@ -56,17 +56,20 @@ public class ServiceController {
     @GetMapping("/bereitstellungen")
     private String getHolds(String userId, Model model) throws UserIdInvalidException, UserNotFoundException {
         if ((userId == null) || !userId.trim().matches("[a-zA-Z0-9\\-]+")) {
-            throw new UserIdInvalidException();
+            throw new UserIdInvalidException("User ID is not valid");
         }
         AlmaUser almaUser = almaUserService.getUser(userId);
         if (almaUser == null)
-            throw new UserNotFoundException();
+            throw new UserNotFoundException("Alma User not found");
         return "bereitstellungen";
     }
 
-    private class UserIdInvalidException extends Throwable {
+    private static class UserIdInvalidException extends RuntimeException {
+        UserIdInvalidException(String message) { super(message); }
+
     }
 
-    private class UserNotFoundException extends Throwable {
+    private static class UserNotFoundException extends RuntimeException {
+        UserNotFoundException(String message) { super(message); }
     }
 }

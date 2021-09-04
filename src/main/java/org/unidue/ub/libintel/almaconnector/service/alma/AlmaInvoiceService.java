@@ -126,6 +126,11 @@ public class AlmaInvoiceService {
         this.almaInvoicesApiClient.postInvoicesInvoiceIdToUpdate(invoiceUpdate, "application/json", invoice.getId(), "paid");
     }
 
+    /**
+     * saves an invoice line in alma
+     * @param id the id of the invoice
+     * @param invoiceLine the invoice line to be added
+     */
     public void addInvoiceLine(String id, InvoiceLine invoiceLine) {
         this.almaInvoicesApiClient.postInvoicesInvoiceIdLines(invoiceLine, "application/json", id);
     }

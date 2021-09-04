@@ -35,7 +35,7 @@ import static org.unidue.ub.libintel.almaconnector.service.SapService.*;
  */
 @Controller
 @Slf4j
-public class InvoiceController {
+public class SapController {
 
     private final AlmaVendorService vendorService;
 
@@ -52,9 +52,9 @@ public class InvoiceController {
      * @param vendorService       the vendor service bean
      * @param sapService          the sap service
      */
-    InvoiceController(AlmaVendorService vendorService,
-                      SapService sapService,
-                      AlmaExportRunService almaExportRunService) {
+    SapController(AlmaVendorService vendorService,
+                  SapService sapService,
+                  AlmaExportRunService almaExportRunService) {
         this.vendorService = vendorService;
         this.almaExportRunService = almaExportRunService;
         this.sapService = sapService;

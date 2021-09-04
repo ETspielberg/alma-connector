@@ -6,6 +6,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.unidue.ub.libintel.almaconnector.clients.ApiKeyAuth;
 
+/**
+ * configures the retrieval of addresses from the HisInOne system
+ */
 @Configuration
 public class HisConfiguration {
 
