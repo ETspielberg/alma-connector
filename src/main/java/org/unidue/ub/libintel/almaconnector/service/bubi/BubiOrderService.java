@@ -298,6 +298,7 @@ public class BubiOrderService {
             bubiOrder.removeOrderline(bubiOrderLine);
             bubiOrderLine.setStatus(BubiStatus.INWORK);
             bubiOrderLine.setBubiOrder(null);
+            bubiOrderLine.setAlmaSetId(null);
             bubiOrder.setLastChange(new Date());
             this.bubiOrderLineRepository.save(bubiOrderLine);
             this.bubiOrderRepository.save(bubiOrder);
