@@ -18,12 +18,9 @@ import org.unidue.ub.libintel.almaconnector.repository.BubiOrderLineRepository;
 import org.unidue.ub.libintel.almaconnector.repository.BubiOrderRepository;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaInvoiceService;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaItemService;
-import org.unidue.ub.libintel.almaconnector.service.alma.AlmaPoLineService;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaSetService;
 
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.*;
 
 /**
@@ -41,8 +38,6 @@ public class BubiOrderService {
 
     private final BubiOrderLineRepository bubiOrderLineRepository;
 
-    private final AlmaPoLineService almaPoLineService;
-
     private final AlmaInvoiceService almaInvoiceService;
 
     private final AlmaItemService almaItemService;
@@ -56,20 +51,17 @@ public class BubiOrderService {
      *
      * @param bubiOrderRepository     the bubi order repository
      * @param bubiOrderLineRepository the bubi orderline repository
-     * @param almaPoLineService       the alma po line service
      * @param almaInvoiceService      the alma invoices service
      * @param almaItemService         the alma item service
      */
     public BubiOrderService(
             BubiOrderRepository bubiOrderRepository,
             BubiOrderLineRepository bubiOrderLineRepository,
-            AlmaPoLineService almaPoLineService,
             AlmaInvoiceService almaInvoiceService,
             AlmaItemService almaItemService,
             AlmaSetService almaSetService) {
         this.bubiOrderLineRepository = bubiOrderLineRepository;
         this.bubiOrderRepository = bubiOrderRepository;
-        this.almaPoLineService = almaPoLineService;
         this.almaInvoiceService = almaInvoiceService;
         this.almaItemService = almaItemService;
         this.almaSetService = almaSetService;
@@ -222,25 +214,16 @@ public class BubiOrderService {
     public BubiOrderFullDto collectBubiOrder(String bubiOrderId) {
         BubiOrder bubiOrder = this.bubiOrderRepository.findById(bubiOrderId).orElse(null);
         if (bubiOrder == null) return null;
-        LocalDate today = LocalDate.now();
-        LocalDate returnDate = today.plusDays(21);
-        ZoneId defaultZoneId = ZoneId.systemDefault();
-        bubiOrder.setCollectedOn(Date.from(today.atStartOfDay(defaultZoneId).toInstant()));
-        bubiOrder.setReturnedOn(Date.from(returnDate.atStartOfDay(defaultZoneId).toInstant()));
-        for (BubiOrderLine bubiOrderLine : bubiOrder.getBubiOrderLines()) {
-            PoLine poLine = almaPoLineService.buildPoLine(bubiOrderLine, returnDate);
-            poLine = almaPoLineService.savePoLine(poLine);
-            setTemporaryLocation(bubiOrderLine);
-            bubiOrderLine.setAlmaPoLineId(poLine.getNumber());
-            bubiOrderLine.setStatus(BubiStatus.AT_BUBI);
-            bubiOrderLine.setLastChange(new Date());
-            this.bubiOrderLineRepository.save(bubiOrderLine);
-        }
         bubiOrder.setBubiStatus(BubiStatus.AT_BUBI);
         bubiOrder.setLastChange(new Date());
         return new BubiOrderFullDto(bubiOrderRepository.save(bubiOrder));
     }
 
+    /**
+     * updates an existing bubi order with the data provided by the input
+     * @param bubiOrderUpdate the data transfer object holding the changed data
+     * @return the updated bubi order
+     */
     public BubiOrderFullDto updateBubiOrder(BubiOrderFullDto bubiOrderUpdate) {
         BubiOrder bubiOrder = this.bubiOrderRepository.findById(bubiOrderUpdate.getBubiOrderId()).orElse(null);
         if (bubiOrder == null)
