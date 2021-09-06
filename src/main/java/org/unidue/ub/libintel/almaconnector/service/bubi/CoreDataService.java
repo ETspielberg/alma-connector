@@ -164,7 +164,7 @@ public class CoreDataService {
                         coreDataInd.setAlmaHoldingId(foundDatum.holdingId);
                         coreDataInd.setTitle(foundDatum.title);
                         coreDataInd.setCollection(foundDatum.collection);
-                        coreData.calculateId();
+                        coreDataInd.calculateId();
                         this.coreDataRepository.save(coreDataInd);
                     }
                 } else {
