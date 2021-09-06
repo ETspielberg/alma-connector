@@ -190,6 +190,7 @@ public class BubiOrderService {
                     Members members = new Members();
                     this.bubiOrderRepository.save(order);
                     order.setBubiStatus(BubiStatus.NEW);
+                    order.setLastChange(new Date());
                     order.sortBubiOrderLines();
                     order.calculateTotalPrice();
                     String date = new SimpleDateFormat(DATE_FORMAT_NOW).format(new Date());
@@ -236,7 +237,17 @@ public class BubiOrderService {
             this.bubiOrderLineRepository.save(bubiOrderLine);
         }
         bubiOrder.setBubiStatus(BubiStatus.AT_BUBI);
+        bubiOrder.setLastChange(new Date());
         return new BubiOrderFullDto(bubiOrderRepository.save(bubiOrder));
+    }
+
+    public BubiOrderFullDto updateBubiOrder(BubiOrderFullDto bubiOrderUpdate) {
+        BubiOrder bubiOrder = this.bubiOrderRepository.findById(bubiOrderUpdate.getBubiOrderId()).orElse(null);
+        if (bubiOrder == null)
+            return null;
+        bubiOrderUpdate.update(bubiOrder);
+        this.bubiOrderRepository.save(bubiOrder);
+        return new BubiOrderFullDto(bubiOrder);
     }
 
     /**
@@ -249,6 +260,7 @@ public class BubiOrderService {
         BubiOrder bubiOrder = this.bubiOrderRepository.findById(bubiOrderId).orElse(null);
         if (bubiOrder == null) return null;
         bubiOrder.setBubiStatus(BubiStatus.RETURNED);
+        bubiOrder.setLastChange(new Date());
         return new BubiOrderFullDto(bubiOrderRepository.save(bubiOrder));
     }
 
@@ -268,6 +280,7 @@ public class BubiOrderService {
             this.almaInvoiceService.addInvoiceLine(invoice.getId(), invoiceLine);
         this.almaInvoiceService.processInvoice(invoice.getId());
         bubiOrder.setPaymentStatus(PaymentStatus.PAID);
+        bubiOrder.setLastChange(new Date());
         return new BubiOrderFullDto(this.bubiOrderRepository.save(bubiOrder));
     }
 
@@ -283,6 +296,10 @@ public class BubiOrderService {
         BubiOrder bubiOrder = this.bubiOrderRepository.findById(bubiOrderId).orElse(null);
         if (bubiOrderLine != null && bubiOrder != null) {
             bubiOrder.removeOrderline(bubiOrderLine);
+            bubiOrderLine.setStatus(BubiStatus.INWORK);
+            bubiOrderLine.setBubiOrder(null);
+            bubiOrder.setLastChange(new Date());
+            this.bubiOrderLineRepository.save(bubiOrderLine);
             this.bubiOrderRepository.save(bubiOrder);
             if (bubiOrder.getAlmaSetId() != null && !bubiOrder.getAlmaSetId().isEmpty())
                 this.almaSetService.removeMemberFromSet(bubiOrder.getAlmaSetId(), bubiOrderLine.getAlmaItemId());
@@ -305,6 +322,7 @@ public class BubiOrderService {
             this.almaSetService.addMemberToSet(bubiOrder.getAlmaSetId(),bubiOrderLine.getAlmaItemId(), bubiOrderLine.getTitle());
             bubiOrder.addBubiOrderLine(bubiOrderLine);
             bubiOrderLine.setBubiOrder(bubiOrder);
+            bubiOrder.setLastChange(new Date());
             this.bubiOrderLineRepository.save(bubiOrderLine);
             this.bubiOrderRepository.save(bubiOrder);
             return new BubiOrderFullDto(bubiOrder);
@@ -349,6 +367,12 @@ public class BubiOrderService {
         }
     }
 
+    /**
+     * creates a new bubi order based on a single order line
+     * @param orderName the name of the bubi order (corresponds to the set name in Alma)
+     * @param bubiOrderline the order line which will be part of the order
+     * @return the created bubi order
+     */
     public BubiOrder createNewBubiOrder(String orderName, BubiOrderLine bubiOrderline) {
         long counter = this.bubiOrderRepository.countAllByVendorAccount(bubiOrderline.getVendorAccount()) + 1;
         BubiOrder bubiOrder = new BubiOrder(bubiOrderline.getVendorAccount(), counter);

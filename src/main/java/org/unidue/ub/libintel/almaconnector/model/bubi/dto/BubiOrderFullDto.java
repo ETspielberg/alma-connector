@@ -57,6 +57,10 @@ public class BubiOrderFullDto {
     public BubiOrderFullDto() {
     }
 
+    /**
+     * creates a full bubi order data transfer object from a BubiOrder object
+     * @param bubiOrder the BubiOrder object
+     */
     public BubiOrderFullDto(BubiOrder bubiOrder) {
         this.vendorAccount = bubiOrder.getVendorAccount();
         this.counter = bubiOrder.getCounter();
@@ -77,5 +81,25 @@ public class BubiOrderFullDto {
         this.almaPoNumber = bubiOrder.getAlmaPoNumber();
         this.almaSetId = bubiOrder.getAlmaSetId();
         this.almaSetName = bubiOrder.getAlmaSetName();
+    }
+
+    /**
+     * updates the following fields from a submitted BubiOrderFullDto object:
+     *  - collected on
+     *  - returnwd
+     *  - comment
+     *  - invoice date
+     *  - invoice number
+     *  - total amount
+     * @param bubiOrder the BubiOrder object to be updated
+     */
+    public void update(BubiOrder bubiOrder) {
+        bubiOrder.setLastChange(new Date());
+        bubiOrder.setCollectedOn(this.collectedOn);
+        bubiOrder.setReturnedOn(this.returnedOn);
+        bubiOrder.setComment(this.comment);
+        bubiOrder.setInvoiceDate(this.invoiceDate);
+        bubiOrder.setInvoiceNumber(this.invoiceNumber);
+        bubiOrder.setTotalAmount(this.totalAmount);
     }
 }

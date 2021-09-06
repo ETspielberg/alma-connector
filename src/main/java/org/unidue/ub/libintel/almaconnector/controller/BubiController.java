@@ -216,6 +216,11 @@ public class BubiController {
         return ResponseEntity.ok(this.bubiOrderService.packBubiOrder(bubiOrder));
     }
 
+    @PutMapping("/order/update")
+    public ResponseEntity<BubiOrderFullDto> saveOrder(@RequestBody BubiOrderFullDto bubiOrder) {
+        return ResponseEntity.ok(this.bubiOrderService.updateBubiOrder(bubiOrder));
+    }
+
     @PostMapping("/order/collect/{bubiOrderId}")
     public ResponseEntity<BubiOrderFullDto> collectOrder(@PathVariable String bubiOrderId) {
         return ResponseEntity.ok(this.bubiOrderService.collectBubiOrder(bubiOrderId));
@@ -231,14 +236,14 @@ public class BubiController {
         return ResponseEntity.ok(this.bubiOrderService.payBubiOrder(bubiOrderId));
     }
 
-    @PutMapping("/order/removeOrderline/{bubiOrderLineid}")
-    public ResponseEntity<BubiOrderFullDto> removeOrderLine(@PathVariable String bubiOrderLineid, String bubiOrderLineId) {
-        return ResponseEntity.ok(this.bubiOrderService.removeOrderLine(bubiOrderLineid, bubiOrderLineId));
+    @PutMapping("/order/removeOrderline/{bubiOrderId}")
+    public ResponseEntity<BubiOrderFullDto> removeOrderLine(@PathVariable String bubiOrderId, String bubiOrderLineId) {
+        return ResponseEntity.ok(this.bubiOrderService.removeOrderLine(bubiOrderId, bubiOrderLineId));
     }
 
-    @PutMapping("/order/addOrderline/{bubiOrderLineid}")
-    public ResponseEntity<BubiOrderFullDto> addOrderLine(@PathVariable String bubiOrderLineid, String bubiOrderLineId) {
-        return ResponseEntity.ok(this.bubiOrderService.addOrderLine(bubiOrderLineid, bubiOrderLineId));
+    @PutMapping("/order/addOrderline/{bubiOrderId}")
+    public ResponseEntity<BubiOrderFullDto> addOrderLine(@PathVariable String bubiOrderId, String bubiOrderLineId) {
+        return ResponseEntity.ok(this.bubiOrderService.addOrderLine(bubiOrderId, bubiOrderLineId));
     }
 
     @PutMapping("/order/duplicateOrderline/{bubiOrderLineid}")
