@@ -55,6 +55,9 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
     @Column(name = "alma_item_id")
     private String almaItemId;
 
+    @Column(name = "alma_set_id")
+    private String almaSetId;
+
     @Column(name = "title")
     private String title;
 
@@ -491,6 +494,14 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         this.newSampleBoardNeeded = newSampleBoardNeeded;
     }
 
+    public String getAlmaSetId() {
+        return almaSetId;
+    }
+
+    public void setAlmaSetId(String almaSetId) {
+        this.almaSetId = almaSetId;
+    }
+
     @Override
     public int compareTo(BubiOrderLine other) {
         return (int) (other.counter - this.counter);
@@ -504,7 +515,6 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         clone.setBinding(this.binding);
         clone.setInternalNote(this.internalNote);
         clone.setStatus(this.status);
-        clone.setBubiOrder(bubiOrder);
         clone.setAlmaItemId(almaItemId);
         clone.setAlmaPoLineId(almaPoLineId);
         clone.setAlmaHoldingId(almaHoldingId);

@@ -15,6 +15,7 @@ import org.unidue.ub.libintel.almaconnector.repository.BubiOrderLineRepository;
 import org.unidue.ub.libintel.almaconnector.service.PriceNotFoundException;
 import org.unidue.ub.libintel.almaconnector.service.PrimoService;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaItemService;
+import org.unidue.ub.libintel.almaconnector.service.alma.AlmaSetService;
 
 import java.util.*;
 
@@ -45,6 +46,8 @@ public class BubiOrderLineService {
 
     private final AlmaItemService almaItemService;
 
+    private final AlmaSetService almaSetService;
+
     private final BubiPricesService bubiPricesService;
 
     private final BubiOrderLinePositionRepository bubiOrderLinePositionRepository;
@@ -66,6 +69,7 @@ public class BubiOrderLineService {
                          BubiDataService bubiDataService,
                          BubiPricesService bubiPricesService,
                          AlmaItemService almaItemService,
+                         AlmaSetService almaSetService,
                          PrimoService primoService) {
         this.bubiOrderService = bubiOrderService;
         this.bubiOrderLineRepository = bubiOrderLineRepository;
@@ -74,6 +78,7 @@ public class BubiOrderLineService {
         this.bubiDataService = bubiDataService;
         this.bubiPricesService = bubiPricesService;
         this.almaItemService = almaItemService;
+        this.almaSetService = almaSetService;
         this.primoService = primoService;
     }
 
@@ -112,6 +117,13 @@ public class BubiOrderLineService {
                 bubiOrder = this.bubiOrderService.createNewBubiOrder(bubiOrderLineFullDto.getBubiOrderId(), bubiOrderLine);
             bubiOrderLine.setBubiOrder(bubiOrder);
             bubiOrderLine.setStatus(BubiStatus.PACKED);
+            if (bubiOrder.getAlmaSetId() != null && !bubiOrder.getAlmaSetId().isEmpty()) {
+                String oldSetId = bubiOrderLine.getAlmaSetId();
+                if (oldSetId != null && !oldSetId.isEmpty() && !oldSetId.equals(bubiOrder.getAlmaSetId()))
+                    this.almaSetService.removeMemberFromSet(oldSetId, bubiOrderLine.getAlmaItemId());
+                this.almaSetService.addMemberToSet(bubiOrder.getAlmaSetId(), bubiOrderLine.getAlmaItemId(), bubiOrderLine.getTitle());
+                bubiOrderLine.setAlmaSetId(bubiOrder.getAlmaSetId());
+            }
         } else
             bubiOrderLine.setStatus(BubiStatus.WAITING);
         this.bubiOrderLineRepository.save(bubiOrderLine);
