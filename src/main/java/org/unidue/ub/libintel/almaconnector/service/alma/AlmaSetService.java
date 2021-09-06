@@ -60,23 +60,6 @@ public class AlmaSetService {
     }
 
     /**
-     * retrieves a set and performs a done scan for each item
-     * @param setId the id of the set of items
-     * @return true if all items were scanned correctly
-     */
-    public boolean scanInSetDone(String setId) {
-        Members members = retrieveSetMembers(setId);
-        if (members.getTotalRecordCount() == 0)
-            return false;
-        for (Member member: members.getMember()) {
-            Item item = this.almaItemService.scanInItemDone(member.getId());
-            if (item.getItemData().getWorkOrderAt() != null)
-                log.warn(String.format("item with barcode %s still in work order department %s", member.getDescription(), item.getItemData().getWorkOrderAt().getValue()));
-        }
-        return true;
-    }
-
-    /**
      * creates a new set of items in alma
      * @param setName the name of the set
      * @param setDescription the description of the set

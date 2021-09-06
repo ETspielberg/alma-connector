@@ -1,6 +1,7 @@
 package org.unidue.ub.libintel.almaconnector.service.bubi;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.*;
 import org.unidue.ub.alma.shared.bibs.HoldingDataTempLibrary;
@@ -333,24 +334,6 @@ public class BubiOrderService {
         return null;
     }
 
-    private void setTemporaryLocation(BubiOrderLine bubiOrderLine) {
-        Item item = almaItemService.findItemByMmsAndItemId(bubiOrderLine.getAlmaMmsId(), bubiOrderLine.getAlmaItemId());
-        item.getHoldingData().setInTempLocation(true);
-        item.getItemData().setPublicNote("Buchbinder");
-        switch (item.getItemData().getLibrary().getValue()) {
-            case "E0001": {
-                item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("EBB"));
-                item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("E0001"));
-                break;
-            }
-            case "D0001": {
-                item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("DBB"));
-                item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("D0001"));
-                break;
-            }
-        }
-    }
-
     /**
      * creates a new bubi order based on a single order line
      * @param orderName the name of the bubi order (corresponds to the set name in Alma)
@@ -365,5 +348,48 @@ public class BubiOrderService {
         this.almaSetService.addMemberToSet(set.getId(),bubiOrderline.getAlmaItemId(), bubiOrderline.getTitle());
         bubiOrder.setAlmaSetId(set.getId());
         return this.bubiOrderRepository.save(bubiOrder);
+    }
+
+    @Async
+    public void scanItems(String bubiOrderId) {
+        BubiOrder bubiOrder = this.bubiOrderRepository.findById(bubiOrderId).orElse(null);
+        if (bubiOrder == null || bubiOrder.getAlmaSetId() == null || bubiOrder.getAlmaSetId().isEmpty()) {
+            log.warn(String.format("cannot scan in items from bubi order %s: Order or set is empty/null", bubiOrderId));
+        } else {
+            java.util.Set<BubiOrderLine> bubiOrderLines = bubiOrder.getBubiOrderLines();
+            if (bubiOrderLines == null || bubiOrderLines.size() == 0)
+                log.warn(String.format("bubi order %s contains no order lines", bubiOrderId));
+            else {
+                bubiOrderLines.forEach(
+                        entry ->  {
+                            Item item = this.almaItemService.findItemByMmsAndItemId(entry.getAlmaMmsId(), entry.getAlmaItemId());
+                            if (item != null) {
+                                item = this.almaItemService.scanInItemDone(item);
+                                item = this.almaItemService.scanInItemHomeLocation(item);
+                                item = this.removeTemporaryLocation(item);
+                            }
+                            log.info("processed item " + item);
+                        }
+                );
+            }
+        }
+    }
+
+    private Item removeTemporaryLocation(Item item) {
+        item.getHoldingData().setInTempLocation(true);
+        item.getItemData().setPublicNote("");
+        switch (item.getItemData().getLibrary().getValue()) {
+            case "E0001": {
+                item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("ENP"));
+                item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("E0001"));
+                break;
+            }
+            case "D0001": {
+                item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("DNP"));
+                item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("D0001"));
+                break;
+            }
+        }
+        return this.almaItemService.updateItem(item);
     }
 }

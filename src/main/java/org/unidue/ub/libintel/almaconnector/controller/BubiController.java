@@ -231,6 +231,12 @@ public class BubiController {
         return ResponseEntity.ok(this.bubiOrderService.returnBubiOrder(bubiOrderId));
     }
 
+    @PostMapping("/order/scan/{bubiOrderId}")
+    public ResponseEntity<BubiOrderFullDto> scanItemsOfOrder(@PathVariable String bubiOrderId) {
+        this.bubiOrderService.scanItems(bubiOrderId);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/order/pay/{bubiOrderId}")
     public ResponseEntity<BubiOrderFullDto> payOrder(@PathVariable String bubiOrderId) {
         return ResponseEntity.ok(this.bubiOrderService.payBubiOrder(bubiOrderId));

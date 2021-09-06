@@ -24,7 +24,8 @@ public class AlmaItemService {
 
     /**
      * constructor based autowiring to the alma items api feign client and the alma bib api feign client
-     * @param almaItemsApiClient the alma item api feign client
+     *
+     * @param almaItemsApiClient   the alma item api feign client
      * @param almaCatalogApiClient the alma bib api feign client
      */
     public AlmaItemService(AlmaItemsApiClient almaItemsApiClient, AlmaCatalogApiClient almaCatalogApiClient) {
@@ -34,6 +35,7 @@ public class AlmaItemService {
 
     /**
      * retrieves an item by its barcode
+     *
      * @param barcode the barcode of the item
      * @return the item
      */
@@ -43,24 +45,17 @@ public class AlmaItemService {
 
     /**
      * scans in an item in its current position
-     * @param barcode teh barcode to be scanned
+     *
+     * @param item thw item to be scanned
      * @return the item after the scan-in
      */
-    public Item scanInItemDone(String barcode) {
-        Item item;
-        try {
-            item = findItemByBarcode(barcode);
-        } catch (FeignException fe) {
-            log.warn("could not retrieve item by barcode " + barcode, fe);
-            return null;
-        }
+    public Item scanInItemDone(Item item) {
         if (item.getItemData().getWorkOrderAt() != null) {
-            log.info(item.toString());
             String library = "";
             String mmsId = item.getBibData().getMmsId();
             String holdingId = item.getHoldingData().getHoldingId();
             String itemId = item.getItemData().getPid();
-            log.info(mmsId + " " + holdingId + " " + itemId);
+            log.info(String.format("perfoming scan on item (mmsId | holdingId | itemId ): | %s | %s | %s", mmsId, holdingId, itemId));
             String workorderDepartment = item.getItemData().getWorkOrderAt().getValue();
             String workorderType = item.getItemData().getWorkOrderType().getValue();
             if (workorderDepartment.contains("AcqDept"))
@@ -91,8 +86,35 @@ public class AlmaItemService {
     }
 
     /**
+     * scans an item at the default circulation desk of its home library
+     * @param item the item to be scanned-in
+     * @return the item after scan in
+     */
+    public Item scanInItemHomeLocation(Item item) {
+        item = this.almaCatalogApiClient.postBibsMmsIdHoldingsHoldingIdItemsItemPid(
+                item.getBibData().getMmsId(),
+                item.getHoldingData().getHoldingId(),
+                item.getItemData().getPid(),
+                "scan",
+                "",
+                item.getItemData().getLibrary().getValue(),
+                "DEFAULT_CIRC_DESK",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "true",
+                "",
+                "",
+                "");
+        return item;
+    }
+
+    /**
      * retrieves an item by its mms and item id
-     * @param mmsId the mms id of the bib record of the item
+     *
+     * @param mmsId  the mms id of the bib record of the item
      * @param itemId the item id of the bib record of the item
      * @return the item
      */
@@ -103,6 +125,7 @@ public class AlmaItemService {
 
     /**
      * updates an item in Alma
+     *
      * @param item the changed item
      * @return the updated item
      */
