@@ -17,7 +17,7 @@ public class UserWithFees {
     @Column(name = "cash_transaction_id")
     private String cashTransactionId;
 
-    @Column(name = "cash_transaction_id")
+    @Column(name = "cash_transaction_rec_key")
     private String cashTransactionRecKey;
 
     @Column(name = "cash_transaction_date")
@@ -38,14 +38,14 @@ public class UserWithFees {
     @Column(name = "cash_transaction_payment_date")
     private Date cashTransactionPaymentDate;
 
-    @Column(name = "cash_transaction_üayment_ip")
+    @Column(name = "cash_transaction_payment_ip")
     private String cashTransactionPaymentIP;
 
     @Column(name = "cash_transaction_payment_mode")
     private String cashTransactionPaymentMode;
 
-    @Column(name = "cash_transaction_payment_time_stamp")
-    private String cashTransactionPaymentTimeStamp;
+    @Column(name = "cash_transaction_payment_timestamp")
+    private String cashTransactionPaymentTimestamp;
 
     @Column(name = "cash_patron_name")
     private String cashPatronName;
