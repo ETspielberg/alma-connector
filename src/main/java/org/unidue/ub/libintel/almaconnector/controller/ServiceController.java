@@ -38,15 +38,6 @@ public class ServiceController {
         return "services/scan";
     }
 
-    @PostMapping("/scan/{setId}")
-    private ResponseEntity<?> receiveSet(@PathVariable String setId) {
-        boolean success = this.almaSetService.scanInSetDone(setId);
-        if (success)
-            return ResponseEntity.ok().build();
-        else
-            return ResponseEntity.badRequest().build();
-    }
-
     @GetMapping("/collectRequests")
     private ResponseEntity<?> collectRequests() throws IOException {
         this.scheduledService.collectRequests();
