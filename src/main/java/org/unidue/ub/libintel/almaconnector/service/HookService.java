@@ -206,6 +206,8 @@ public class HookService {
      */
     @Async("threadPoolTaskExecutor")
     public void processItemHook(ItemHook hook) {
+        if ("ITEM_DELETED".equals(hook.getAction()))
+            return;
         Item item = hook.getItem();
         log.debug("received item hook: " + item.toString());
         if (hook.getEvent() != null && hook.getEvent().getValue() != null) {
