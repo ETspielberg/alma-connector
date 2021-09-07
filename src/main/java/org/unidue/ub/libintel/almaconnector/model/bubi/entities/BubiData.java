@@ -36,6 +36,9 @@ public class BubiData {
     @Column(name="price_map_slide")
     private double priceMapSlide = 0.0;
 
+    @Column(name="price_map_slide_with_correction")
+    private double priceMapSlideWithCorrection = 0.0;
+
     @Column(name="price_security_strip")
     private double priceSecurityStrip = 0.0;
 
@@ -141,6 +144,14 @@ public class BubiData {
 
     public void setBubiPrices(List<BubiPrice> bubiPrices) {
         this.bubiPrices = bubiPrices;
+    }
+
+    public double getPriceMapSlideWithCorrection() {
+        return priceMapSlideWithCorrection;
+    }
+
+    public void setPriceMapSlideWithCorrection(double priceMapSlideWithCorrection) {
+        this.priceMapSlideWithCorrection = priceMapSlideWithCorrection;
     }
 
     public BubiPrice retrieveExecutionPrice(String binding, String cover, String materialType) {

@@ -82,6 +82,9 @@ public class BubiPricesService {
             //ggf. Sicherungsstreifen
             if (bubiOrderLine.getSecurityStrip())
                 price += bubiData.getPriceSecurityStrip();
+            //ggf. Kartentasche mit Buchrückenausgleich
+            if (bubiOrderLine.getMapSlideWithCorrection())
+                price += bubiData.getPriceMapSlideWithCorrection();
             price = price * bubiOrderLine.getBubiOrderlinePositions().size();
             bubiOrderLine.setPrice(price);
         }
@@ -103,7 +106,7 @@ public class BubiPricesService {
      * @param vendorAccount the vendor account id
      */
     public void deleteBubiPrices(String vendorAccount) {
-        this.bubiDataRepository.findById(vendorAccount).ifPresent(bubiData -> bubiData.getBubiPrices().forEach(this.bubiPricesRepository::delete));
+        this.bubiDataRepository.findById(vendorAccount).ifPresent(bubiData -> this.bubiPricesRepository.deleteAll(bubiData.getBubiPrices()));
     }
 
     /**

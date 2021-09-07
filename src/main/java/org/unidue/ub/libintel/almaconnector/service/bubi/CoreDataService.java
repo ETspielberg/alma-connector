@@ -125,10 +125,10 @@ public class CoreDataService {
             if (row.getCell(1) == null)
                 continue;
 
-            coreData.setCollection(row.getCell(0).getStringCellValue());
-            coreData.setMediaType(row.getCell(1).getStringCellValue());
+            coreData.setCollection(getValue(0, row));
+            coreData.setMediaType(getValue(1, row));
             coreData.calculateId();
-            coreData.setShelfmark(row.getCell(2).getStringCellValue());
+            coreData.setShelfmark(getValue(2, row));
             coreData.setMinting(getValue(3, row));
             coreData.setColor(getValue(4, row));
             coreData.setColorMinting(getValue(5, row));
@@ -143,8 +143,11 @@ public class CoreDataService {
             coreData.setVendorAccount(getValue(14, row));
             coreData.setInternalNote(getValue(15, row));
             coreData.setBubiNote(getValue(16, row));
-            coreData.setActive(row.getCell(17).getBooleanCellValue());
+            coreData.setActive(getBoolValue(17, row));
             coreData.setFund(getValue(18, row));
+            coreData.setCoverBack(getBoolValue(19, row));
+            coreData.setWithoutRemoval(getBoolValue(20, row));
+            coreData.setPositionDescription(getValue(21, row));
             coreDataImportRun.addCoreData(coreData);
             if (coreData.isActive()) {
                 AlmaItemData almaItemData = new AlmaItemData(coreData.getCollection(), coreData.getShelfmark());
@@ -174,6 +177,14 @@ public class CoreDataService {
             }
         }
         return coreDataImportRun;
+    }
+
+    private boolean getBoolValue(int column, XSSFRow row) {
+        try {
+            return row.getCell(column).getBooleanCellValue();
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private String getValue(int column, XSSFRow row) {

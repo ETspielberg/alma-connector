@@ -112,6 +112,9 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
     @Column(name="map_slide")
     private boolean mapSlide = false;
 
+    @Column(name="map_slide_with_correction")
+    private boolean mapSlideWithCorrection = false;
+
     @Column(name="bind_publisher_sleeve")
     private boolean bindPublisherSleeve = false;
 
@@ -512,6 +515,14 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
 
     public void setWithoutRemoval(boolean withoutRemoval) {
         this.withoutRemoval = withoutRemoval;
+    }
+
+    public boolean getMapSlideWithCorrection() {
+        return mapSlideWithCorrection;
+    }
+
+    public void setMapSlideWithCorrection(boolean mapSlideWithCorrection) {
+        this.mapSlideWithCorrection = mapSlideWithCorrection;
     }
 
     @Override
