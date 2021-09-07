@@ -322,7 +322,7 @@ public class SapService {
                         // set the value of the vat code to a value which is not empty
                         if (!"".equals(invoiceLineVatCode)) {
                             sapData.costType = invoiceLineVatCode;
-                            log.debug("set VAT code ot " + invoiceLineVatCode);
+                            log.debug("set VAT code to " + invoiceLineVatCode);
                         }
                         // if no vat code is set on the invoice line take the one from the invoice
                         else {
@@ -736,6 +736,9 @@ public class SapService {
                         sapData.comment = "Monographien";
                         break;
                     }
+                    case "68100010":
+                        sapData.comment = "Monographien, Verbrauch";
+                        break;
                     case "68100200": {
                         sapData.comment = "Zeitschriften-Abo";
                         break;
