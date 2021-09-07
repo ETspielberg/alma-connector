@@ -64,6 +64,8 @@ public class CoreDataFullDto {
 
     private boolean coverBack = false;
 
+    private boolean withouRemoval = false;
+
     private double hours = 0;
 
     private String internalNote = "";
@@ -96,6 +98,7 @@ public class CoreDataFullDto {
         this.mapSlide = coreData.getMapSlide();
         this.bindPublisherSleeve = coreData.getBindPublisherSleeve();
         this.coverBack = coreData.getCoverBack();
+        this.withouRemoval = coreData.getWithoutRemoval();
         this.hours = coreData.getHours();
         this.internalNote = coreData.getInternalNote();
         this.bubiNote = coreData.getBubiNote();
@@ -126,6 +129,7 @@ public class CoreDataFullDto {
         coreData.setStandard(this.standard);
         coreData.setSecurityStrip(this.securityStrip);
         coreData.setMapSlide(this.mapSlide);
+        coreData.setWithoutRemoval(this.withouRemoval);
         coreData.setBindPublisherSleeve(this.bindPublisherSleeve);
         coreData.setCoverBack(this.coverBack);
         coreData.setHours(this.hours);

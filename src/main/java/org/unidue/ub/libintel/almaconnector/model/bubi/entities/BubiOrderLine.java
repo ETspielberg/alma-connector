@@ -118,6 +118,9 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
     @Column(name="cover_back")
     private boolean coverBack = false;
 
+    @Column(name="without_removal")
+    private boolean withoutRemoval = false;
+
     @Column(name="hours")
     private double hours = 0;
 
@@ -187,6 +190,7 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         this.mapSlide = coredata.getMapSlide();
         this.bindPublisherSleeve = coredata.getBindPublisherSleeve();
         this.coverBack = coredata.getCoverBack();
+        this.withoutRemoval = coredata.getWithoutRemoval();
         this.hours = coredata.getHours();
         this.standard = coredata.getStandard();
     }
@@ -502,6 +506,14 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         this.almaSetId = almaSetId;
     }
 
+    public boolean getWithoutRemoval() {
+        return withoutRemoval;
+    }
+
+    public void setWithoutRemoval(boolean withoutRemoval) {
+        this.withoutRemoval = withoutRemoval;
+    }
+
     @Override
     public int compareTo(BubiOrderLine other) {
         return (int) (other.counter - this.counter);
@@ -530,6 +542,7 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         clone.setComment(this.comment);
         clone.setCover(this.cover);
         clone.setCoverBack(this.coverBack);
+        clone.setWithoutRemoval(this.withoutRemoval);
         clone.setHours(this.hours);
         clone.setCreated(new Date());
         clone.setLastChange(new Date());

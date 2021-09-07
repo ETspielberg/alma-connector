@@ -76,6 +76,8 @@ public class BubiOrderLineFullDto {
 
     private boolean coverBack = false;
 
+    private boolean withoutRemoval = false;
+
     private double hours = 0;
 
     private int numberItems = 1;
@@ -129,6 +131,7 @@ public class BubiOrderLineFullDto {
         this.status = bubiOrderLine.getStatus().name();
         this.title = bubiOrderLine.getTitle();
         this.vendorAccount = bubiOrderLine.getVendorAccount();
+        this.withoutRemoval = bubiOrderLine.getWithoutRemoval();
         this.bubiNote = bubiOrderLine.getBubiNote();
         this.internalNote = bubiOrderLine.getInternalNote();
         this.newSampleBoardNeeded = bubiOrderLine.getNewSampleBoardNeeded();
@@ -161,6 +164,7 @@ public class BubiOrderLineFullDto {
         bubiOrderLine.setInternalNote(this.internalNote);
         bubiOrderLine.setAlmaPoLineId(this.almaPoLineId);
         bubiOrderLine.setNewSampleBoardNeeded(this.newSampleBoardNeeded);
+        bubiOrderLine.setWithoutRemoval(this.withoutRemoval);
         return bubiOrderLine;
     }
 }

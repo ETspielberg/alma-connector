@@ -76,6 +76,9 @@ public class CoreData implements Cloneable {
     @Column(name="map_slide")
     private boolean mapSlide = false;
 
+    @Column(name="without_removal")
+    private boolean withoutRemoval = false;
+
     @Column(name="bind_publisher_sleeve")
     private boolean bindPublisherSleeve = false;
 
@@ -326,6 +329,14 @@ public class CoreData implements Cloneable {
         this.positionDescription = positionDescription;
     }
 
+    public boolean getWithoutRemoval() {
+        return withoutRemoval;
+    }
+
+    public void setWithoutRemoval(boolean withoutRemoval) {
+        this.withoutRemoval = withoutRemoval;
+    }
+
     @Override
     public CoreData clone() {
         CoreData clone = new CoreData();
@@ -347,6 +358,7 @@ public class CoreData implements Cloneable {
         clone.setSecurityStrip(this.securityStrip);
         clone.setMapSlide(this.mapSlide);
         clone.setBindPublisherSleeve(this.bindPublisherSleeve);
+        clone.setWithoutRemoval(this.withoutRemoval);
         clone.setCoverBack(this.coverBack);
         clone.setHours(this.hours);
         clone.setInternalNote(this.internalNote);
