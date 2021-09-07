@@ -736,9 +736,10 @@ public class SapService {
                         sapData.comment = "Monographien";
                         break;
                     }
-                    case "68100010":
+                    case "68100010": {
                         sapData.comment = "Monographien, Verbrauch";
                         break;
+                    }
                     case "68100200": {
                         sapData.comment = "Zeitschriften-Abo";
                         break;
