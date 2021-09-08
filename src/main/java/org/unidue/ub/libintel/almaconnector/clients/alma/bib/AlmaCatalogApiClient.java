@@ -293,11 +293,11 @@ public interface AlmaCatalogApiClient {
    * @param mmsId The Bib Record ID. (required)
    * @param holdingId The Holding Record ID. (required)
    * @param itemPid The Item ID. (required)
-   * @param body This method takes an Item object. See [here](/alma/apis/docs/xsd/rest_item.xsd?tags&#x3D;PUT) (required)
+   * @param item This method takes an Item object. See [here](/alma/apis/docs/xsd/rest_item.xsd?tags&#x3D;PUT) (required)
    * @return Object
    */
   @RequestMapping(method= RequestMethod.PUT, value="/{mmsId}/holdings/{holdingId}/items/{itemPid}", consumes = MediaType.APPLICATION_XML_VALUE)
-  Item putBibsMmsIdHoldingsHoldingIdItemsItemPid(@RequestParam("mms_id") String mmsId, @RequestParam("holding_id") String holdingId, @RequestParam("item_pid") String itemPid, Object body);
+  Item putBibsMmsIdHoldingsHoldingIdItemsItemPid(@RequestParam("mmsId") String mmsId, @RequestParam("holdingId") String holdingId, @RequestParam("itemPid") String itemPid, @RequestBody Item item);
 
   /**
    * Update Portfolio for a Bib
