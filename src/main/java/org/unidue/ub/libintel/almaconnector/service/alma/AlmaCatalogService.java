@@ -38,7 +38,15 @@ public class AlmaCatalogService {
         log.debug(holding.getRecord().getLeader());
         // initialize boolean indicating whether a particular field has been set.
         boolean isSet = false;
-
+        for (MarcDatafield field : holding.getRecord().getDatafield()) {
+            if ("990".equals(field.getTag())) {
+                for (MarcSubfield subfield : field.getSubfield())
+                    if ("a".equals(subfield.getCode())) {
+                        if (subfield.getValue().contains("ZDB") || "ZDB".equals(subfield.getValue()))
+                            return;
+                    }
+            }
+        }
         // check fields
         for (MarcDatafield field : holding.getRecord().getDatafield()) {
             if ("852".equals(field.getTag())) {
