@@ -31,8 +31,15 @@ public class BubiOrderlinePosition {
     @Column(name = "internal_note")
     private String internalNote = "";
 
+    @Column(name = "alma_mms_id")
+    private String almaMmsId;
+
+    @Column(name = "alma_holding_id")
+    private String almaHoldingId;
+
     @Column(name = "alma_item_id")
     private String almaItemId;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bubi_order_line_id")
@@ -66,6 +73,21 @@ public class BubiOrderlinePosition {
 
     public BubiOrderlinePosition withBubiNote(String bubiNote) {
         this.bubiNote = bubiNote;
+        return this;
+    }
+
+    public BubiOrderlinePosition withMmsId(String mmsId) {
+        this.almaMmsId = mmsId;
+        return this;
+    }
+
+    public BubiOrderlinePosition withHoldingId(String holdingId) {
+        this.almaHoldingId = holdingId;
+        return this;
+    }
+
+    public BubiOrderlinePosition withItemId(String itemId) {
+        this.almaItemId = itemId;
         return this;
     }
 
@@ -139,5 +161,21 @@ public class BubiOrderlinePosition {
 
     public void setInternalNote(String internalNote) {
         this.internalNote = internalNote;
+    }
+
+    public String getAlmaMmsId() {
+        return almaMmsId;
+    }
+
+    public void setAlmaMmsId(String almaMmsId) {
+        this.almaMmsId = almaMmsId;
+    }
+
+    public String getAlmaHoldingId() {
+        return almaHoldingId;
+    }
+
+    public void setAlmaHoldingId(String almaHoldingId) {
+        this.almaHoldingId = almaHoldingId;
     }
 }

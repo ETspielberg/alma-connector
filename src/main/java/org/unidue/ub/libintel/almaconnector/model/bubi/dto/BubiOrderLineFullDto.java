@@ -72,6 +72,8 @@ public class BubiOrderLineFullDto {
 
     private boolean mapSlide = false;
 
+    private boolean mapSlideWithCorrection = false;
+
     private boolean bindPublisherSleeve = false;
 
     private boolean coverBack = false;
@@ -95,9 +97,7 @@ public class BubiOrderLineFullDto {
     public BubiOrderLineFullDto() {}
 
     public BubiOrderLineFullDto(BubiOrderLine bubiOrderLine) {
-        this.almaHoldingId = bubiOrderLine.getAlmaHoldingId();
         this.almaMmsId = bubiOrderLine.getAlmaMmsId();
-        this.almaItemId = bubiOrderLine.getAlmaItemId();
         this.bubiOrderLineId = bubiOrderLine.getBubiOrderLineId();
         this.binding = bubiOrderLine.getBinding();
         this.bindingsFollow = bubiOrderLine.getBindingsFollow();
@@ -136,9 +136,10 @@ public class BubiOrderLineFullDto {
         this.internalNote = bubiOrderLine.getInternalNote();
         this.newSampleBoardNeeded = bubiOrderLine.getNewSampleBoardNeeded();
         this.almaPoLineId = bubiOrderLine.getAlmaPoLineId();
+        this.mapSlideWithCorrection = bubiOrderLine.getMapSlideWithCorrection();
     }
 
-    public BubiOrderLine updateBubiOrderLine(BubiOrderLine bubiOrderLine) {
+    public void updateBubiOrderLine(BubiOrderLine bubiOrderLine) {
         bubiOrderLine.setBinding(this.binding);
         bubiOrderLine.setBindingsFollow(this.bindingsFollow);
         bubiOrderLine.setBindPublisherSleeve(this.bindPublisherSleeve);
@@ -165,6 +166,6 @@ public class BubiOrderLineFullDto {
         bubiOrderLine.setAlmaPoLineId(this.almaPoLineId);
         bubiOrderLine.setNewSampleBoardNeeded(this.newSampleBoardNeeded);
         bubiOrderLine.setWithoutRemoval(this.withoutRemoval);
-        return bubiOrderLine;
+        bubiOrderLine.setMapSlideWithCorrection(this.mapSlideWithCorrection);
     }
 }

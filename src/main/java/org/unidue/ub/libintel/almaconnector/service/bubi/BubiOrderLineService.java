@@ -18,6 +18,7 @@ import org.unidue.ub.libintel.almaconnector.service.alma.AlmaItemService;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaSetService;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * offers functions around bubi order lines
@@ -56,11 +57,12 @@ public class BubiOrderLineService {
 
     /**
      * constructor based autowiring of the necessary services
+     *
      * @param bubiOrderLineRepository the bubi orderline repository
-     * @param coreDataService the core data service
-     * @param bubiDataService the bubi data service
-     * @param almaItemService the alma item service
-     * @param primoService the primo service
+     * @param coreDataService         the core data service
+     * @param bubiDataService         the bubi data service
+     * @param almaItemService         the alma item service
+     * @param primoService            the primo service
      */
     BubiOrderLineService(BubiOrderService bubiOrderService,
                          BubiOrderLineRepository bubiOrderLineRepository,
@@ -84,12 +86,13 @@ public class BubiOrderLineService {
 
     /**
      * saves a bubi orderline to the repositroy
+     *
      * @param bubiOrderLine the bubi orderline to be saved
      * @return the saved bubi orderline
      */
     public BubiOrderLine saveBubiOrderLine(BubiOrderLine bubiOrderLine) {
         bubiOrderLine.setLastChange(new Date());
-        for (BubiOrderlinePosition bubiOrderlinePosition: bubiOrderLine.getBubiOrderlinePositions()) {
+        for (BubiOrderlinePosition bubiOrderlinePosition : bubiOrderLine.getBubiOrderlinePositions()) {
             bubiOrderlinePosition = bubiOrderLinePositionRepository.save(bubiOrderlinePosition);
             bubiOrderlinePosition.setBubiOrderLine(bubiOrderLine);
         }
@@ -100,7 +103,7 @@ public class BubiOrderLineService {
     public BubiOrderLine saveBubiOrderLineFullDTO(BubiOrderLineFullDto bubiOrderLineFullDto) {
         BubiOrderLine bubiOrderLine = bubiOrderLineRepository.getBubiOrderLineByBubiOrderLineIdOrderByMinting(bubiOrderLineFullDto.getBubiOrderLineId());
         bubiOrderLineFullDto.updateBubiOrderLine(bubiOrderLine);
-        for (BubiOrderlinePosition bubiOrderlinePosition: bubiOrderLine.getBubiOrderlinePositions()) {
+        for (BubiOrderlinePosition bubiOrderlinePosition : bubiOrderLine.getBubiOrderlinePositions()) {
             bubiOrderlinePosition.setBubiOrderLine(bubiOrderLine);
             this.bubiOrderLinePositionRepository.save(bubiOrderlinePosition);
         }
@@ -120,8 +123,10 @@ public class BubiOrderLineService {
             if (bubiOrder.getAlmaSetId() != null && !bubiOrder.getAlmaSetId().isEmpty()) {
                 String oldSetId = bubiOrderLine.getAlmaSetId();
                 if (oldSetId != null && !oldSetId.isEmpty() && !oldSetId.equals(bubiOrder.getAlmaSetId()))
-                    this.almaSetService.removeMemberFromSet(oldSetId, bubiOrderLine.getAlmaItemId());
-                this.almaSetService.addMemberToSet(bubiOrder.getAlmaSetId(), bubiOrderLine.getAlmaItemId(), bubiOrderLine.getTitle());
+                    for (BubiOrderlinePosition bubiOrderlinePosition : bubiOrderLine.getBubiOrderlinePositions()) {
+                        this.almaSetService.removeMemberFromSet(oldSetId, bubiOrderlinePosition.getAlmaItemId());
+                        this.almaSetService.addMemberToSet(bubiOrder.getAlmaSetId(), bubiOrderlinePosition.getAlmaItemId(), bubiOrderLine.getTitle());
+                    }
                 bubiOrderLine.setAlmaSetId(bubiOrder.getAlmaSetId());
             }
         } else
@@ -132,6 +137,7 @@ public class BubiOrderLineService {
 
     /**
      * retreives all bubi orderlines by a given mode
+     *
      * @param mode the mode for which bubi orderlines shall be retrieved. implemented so far:
      *             'all': retrieves all bubi orderlines
      *             'packed': retrieves all bubi orderlines packed into a bubi order
@@ -164,6 +170,7 @@ public class BubiOrderLineService {
 
     /**
      * retrieves a bubi orderline by its identifier
+     *
      * @param identifier the identifier of the bubi orderline
      * @return the bubi orderline
      */
@@ -179,6 +186,7 @@ public class BubiOrderLineService {
 
     /**
      * retrieves all bubi orderlines for a vendor
+     *
      * @param vendorId the id of the vendor
      * @return the list of bubi orderlines for this vendor
      */
@@ -190,6 +198,7 @@ public class BubiOrderLineService {
 
     /**
      * retrieves a bubi orderline by the barcode of an item
+     *
      * @param barcode the barcode of the bubi orderline item
      * @return the bubi orderline
      */
@@ -203,8 +212,9 @@ public class BubiOrderLineService {
 
     /**
      * retrieves a bubi orderline by the collection and shelfmark of an item
+     *
      * @param collection the collection of the item
-     * @param shelfmark the shelfmark of the item
+     * @param shelfmark  the shelfmark of the item
      * @return the bubi orderline for the item
      */
     public BubiOrderLine expandBubiOrderLineFromShelfmark(String collection, String shelfmark) {
@@ -216,6 +226,7 @@ public class BubiOrderLineService {
 
     /**
      * builds a bubi orderline for an item
+     *
      * @param item the item to create a bubi orderline for
      * @return the bubi orderline
      */
@@ -241,16 +252,84 @@ public class BubiOrderLineService {
             coredata = this.coreDataService.findDefaultForMaterial(material, campus);
             bubiOrderLine.setTitle(item.getBibData().getTitle());
             bubiOrderLine.setAlmaMmsId(item.getBibData().getMmsId());
-            bubiOrderLine.setAlmaHoldingId(item.getHoldingData().getHoldingId());
-            bubiOrderLine.setAlmaItemId(item.getItemData().getPid());
+            bubiOrderLine.getBubiOrderlinePositions().forEach(position -> {
+                position.setInternalNote(collection + ": " + shelfmark);
+                position.setDescription(item.getBibData().getTitle());
+                position.setAlmaMmsId(item.getBibData().getMmsId());
+                position.setAlmaHoldingId(item.getHoldingData().getHoldingId());
+                position.setAlmaItemId(item.getItemData().getPid());
+            });
             bubiOrderLine.addCoreData(coredata, true);
         } else {
             log.debug("found core data");
             bubiOrderLine.addCoreData(coredata, false);
+            bubiOrderLine.getBubiOrderlinePositions().forEach(position -> position.setAlmaItemId(item.getItemData().getPid()));
         }
         addDataFromVendor(bubiOrderLine);
         this.bubiOrderLineRepository.save(bubiOrderLine);
         return bubiOrderLine;
+    }
+
+    /**
+     * removes an orderline position from its parent orderline. If it is not a standard orderline, the position is just deleted
+     * Otherwise, the orderline is cloned in the status NEW and the position is attached
+     * @param bubiOrderLineId the id of the orderline from which the position is to be removed
+     * @param bubiOrderlinePositionId the id of the position which shall be removed
+     * @return the updated bubi orderline data transfer object without the removed position
+     */
+    public BubiOrderLineFullDto removedOrderlinePosition(String bubiOrderLineId, long bubiOrderlinePositionId) {
+        // retrieve orderline from repository
+        BubiOrderLine bubiOrderLine = this.bubiOrderLineRepository.findById(bubiOrderLineId).orElse(null);
+        if (bubiOrderLine == null)
+            return null;
+        // get the desired position to be removed
+        BubiOrderlinePosition positionToBeRemoved = bubiOrderLine.getBubiOrderlinePositions()
+                .stream()
+                .filter(entry -> entry.getBubiOrderPositionId() == bubiOrderlinePositionId)
+                .collect(Collectors.toSet())
+                .stream()
+                .findFirst()
+                .orElse(null);
+        if (positionToBeRemoved == null)
+            return null;
+        // remove the position from the set of positions in the orderline
+        bubiOrderLine.setBubiOrderlinePositions(bubiOrderLine.getBubiOrderlinePositions()
+                .stream()
+                .filter(entry -> entry.getBubiOrderPositionId() != bubiOrderlinePositionId)
+                .collect(Collectors.toSet()));
+        bubiOrderLine.setLastChange(new Date());
+        bubiOrderLine = this.bubiOrderLineRepository.save(bubiOrderLine);
+
+        // if the position has an alma item id and if the orderline is part of a bubi order (that is a corresponding
+        // set exists), the item is removed from that set.
+        if (positionToBeRemoved.getAlmaItemId() != null && !positionToBeRemoved.getAlmaItemId().isEmpty() && bubiOrderLine.getBubiOrder() != null) {
+            this.almaSetService.removeMemberFromSet(positionToBeRemoved.getAlmaItemId(), bubiOrderLine.getBubiOrder().getAlmaSetId());
+        }
+        // if the position to be removed comes from a standard orderline, a new standard orderline is created and the position attached.
+        if (bubiOrderLine.getStandard()) {
+            BubiOrderLine newBubiOrderLine = bubiOrderLine.clone();
+            // calculate the new counter
+            long counter = this.bubiOrderLineRepository.countAllByShelfmarkAndCollection(bubiOrderLine.getShelfmark(), bubiOrderLine.getCollection());
+            newBubiOrderLine.setCounter(counter + 1);
+            // detach the orderline from the order and reset the status to NEW
+            newBubiOrderLine.setBubiOrder(null);
+            newBubiOrderLine.setStatus(BubiStatus.NEW);
+            // set the position of the orderline
+            Set<BubiOrderlinePosition> positions = new HashSet<>();
+            positions.add(positionToBeRemoved);
+            newBubiOrderLine.setBubiOrderlinePositions(positions);
+            // recalulate the price
+            this.bubiPricesService.calculatePriceForOrderline(newBubiOrderLine);
+            // save the new orderline, attach it to the position and save the position
+            this.bubiOrderLineRepository.save(newBubiOrderLine);
+            positionToBeRemoved.setBubiOrderLine(newBubiOrderLine);
+            this.bubiOrderLinePositionRepository.save(positionToBeRemoved);
+        }
+        // if it is not a standard orderline, the position is just deleted
+        else {
+            this.bubiOrderLinePositionRepository.delete(positionToBeRemoved);
+        }
+        return new BubiOrderLineFullDto(bubiOrderLine);
     }
 
     private boolean addCoreData(BubiOrderLine bubiOrderLine) {

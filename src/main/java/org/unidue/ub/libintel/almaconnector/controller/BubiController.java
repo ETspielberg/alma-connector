@@ -193,6 +193,11 @@ public class BubiController {
         return ResponseEntity.ok(this.bubiOrderLineService.getAllBubiOrderLinesForBubi(vendorAccount));
     }
 
+    @PostMapping("/orderline/{orderLineId}/removePosition/{bubiOrderlinePositionId}")
+    public ResponseEntity<BubiOrderLineFullDto> removePositionfromOrderline(@PathVariable String orderLineId, @PathVariable long bubiOrderlinePositionId) {
+        return ResponseEntity.ok(this.bubiOrderLineService.removedOrderlinePosition(orderLineId, bubiOrderlinePositionId));
+    }
+
 
     // ---------------------- bubi order endpoints ----------------------
 

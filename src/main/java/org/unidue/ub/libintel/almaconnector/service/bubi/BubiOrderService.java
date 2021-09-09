@@ -7,7 +7,6 @@ import org.unidue.ub.alma.shared.acq.*;
 import org.unidue.ub.alma.shared.bibs.HoldingDataTempLibrary;
 import org.unidue.ub.alma.shared.bibs.HoldingDataTempLocation;
 import org.unidue.ub.alma.shared.bibs.Item;
-import org.unidue.ub.alma.shared.conf.*;
 import org.unidue.ub.alma.shared.conf.Set;
 import org.unidue.ub.libintel.almaconnector.model.bubi.*;
 import org.unidue.ub.libintel.almaconnector.model.bubi.dto.BubiOrderBriefDto;
@@ -180,7 +179,6 @@ public class BubiOrderService {
         }
         bubiOrders.forEach(
                 (key, order) -> {
-                    Members members = new Members();
                     this.bubiOrderRepository.save(order);
                     order.setBubiStatus(BubiStatus.NEW);
                     order.setLastChange(new Date());
@@ -191,12 +189,17 @@ public class BubiOrderService {
                     org.unidue.ub.alma.shared.conf.Set set = this.almaSetService.createSet(order.getAlmaSetName(), description);
                     order.getBubiOrderLines().forEach(
                             orderline -> {
-                                Member member = new Member().id(orderline.getAlmaItemId()).description(orderline.getCollection() + " " + orderline.getShelfmark());
-                                members.addMemberItem(member);
+                                orderline.getBubiOrderlinePositions().forEach(
+                                  orderlinePosition -> {
+                                      if (orderlinePosition.getAlmaItemId() != null && !orderlinePosition.getAlmaItemId().isEmpty()) {
+                                          this.almaSetService.addMemberToSet(set.getId(), orderlinePosition.getAlmaItemId(), orderline.getTitle());
+                                      }
+                                  }
+                                );
                                 orderline.setStatus(BubiStatus.PACKED);
                                 orderline.setLastChange(new Date());
                                 this.bubiOrderLineRepository.save(orderline);
-                                this.almaSetService.addMemberToSet(set.getId(), orderline.getAlmaItemId(), orderline.getTitle());
+
                             });
                     this.bubiOrderRepository.save(order);
                 }
@@ -287,7 +290,10 @@ public class BubiOrderService {
             this.bubiOrderLineRepository.save(bubiOrderLine);
             this.bubiOrderRepository.save(bubiOrder);
             if (bubiOrder.getAlmaSetId() != null && !bubiOrder.getAlmaSetId().isEmpty())
-                this.almaSetService.removeMemberFromSet(bubiOrder.getAlmaSetId(), bubiOrderLine.getAlmaItemId());
+                bubiOrderLine.getBubiOrderlinePositions().forEach(
+                        bubiOrderlinePosition -> this.almaSetService.removeMemberFromSet(bubiOrder.getAlmaSetId(), bubiOrderlinePosition.getAlmaItemId())
+                );
+
             return new BubiOrderFullDto(bubiOrder);
         }
         return null;
@@ -304,9 +310,13 @@ public class BubiOrderService {
         BubiOrderLine bubiOrderLine = this.bubiOrderLineRepository.findById(bubiOrderlineId).orElse(null);
         BubiOrder bubiOrder = this.bubiOrderRepository.findById(bubiOrderId).orElse(null);
         if (bubiOrderLine != null && bubiOrder != null) {
-            this.almaSetService.addMemberToSet(bubiOrder.getAlmaSetId(),bubiOrderLine.getAlmaItemId(), bubiOrderLine.getTitle());
+            bubiOrderLine.getBubiOrderlinePositions().forEach(
+                    bubiOrderlinePosition -> this.almaSetService.addMemberToSet(bubiOrder.getAlmaSetId(), bubiOrderlinePosition.getAlmaItemId(), bubiOrderLine.getTitle())
+            );
             bubiOrder.addBubiOrderLine(bubiOrderLine);
             bubiOrderLine.setBubiOrder(bubiOrder);
+            if (bubiOrderLine.getStandard())
+                bubiOrderLine.setTitle("Sammelauftrag");
             bubiOrder.setLastChange(new Date());
             this.bubiOrderLineRepository.save(bubiOrderLine);
             this.bubiOrderRepository.save(bubiOrder);
@@ -345,7 +355,9 @@ public class BubiOrderService {
         BubiOrder bubiOrder = new BubiOrder(bubiOrderline.getVendorAccount(), counter);
         bubiOrder.setAlmaSetName(orderName);
         Set set = this.almaSetService.createSet(orderName, bubiOrder.getComment());
-        this.almaSetService.addMemberToSet(set.getId(),bubiOrderline.getAlmaItemId(), bubiOrderline.getTitle());
+        bubiOrderline.getBubiOrderlinePositions().forEach(
+                bubiOrderlinePosition -> this.almaSetService.addMemberToSet(bubiOrder.getAlmaSetId(), bubiOrderlinePosition.getAlmaItemId(), bubiOrderline.getTitle())
+        );
         bubiOrder.setAlmaSetId(set.getId());
         return this.bubiOrderRepository.save(bubiOrder);
     }
@@ -361,15 +373,17 @@ public class BubiOrderService {
                 log.warn(String.format("bubi order %s contains no order lines", bubiOrderId));
             else {
                 bubiOrderLines.forEach(
-                        entry ->  {
-                            Item item = this.almaItemService.findItemByMmsAndItemId(entry.getAlmaMmsId(), entry.getAlmaItemId());
-                            if (item != null) {
-                                item = this.almaItemService.scanInItemDone(item);
-                                item = this.almaItemService.scanInItemHomeLocation(item);
-                                item = this.removeTemporaryLocation(item);
-                            }
-                            log.info("processed item " + item);
-                        }
+                        orderline -> orderline.getBubiOrderlinePositions().forEach(
+                                position -> {
+                                    Item item = this.almaItemService.findItemByMmsAndItemId(orderline.getAlmaMmsId(), position.getAlmaItemId());
+                                    if (item != null) {
+                                        item = this.almaItemService.scanInItemDone(item);
+                                        item = this.almaItemService.scanInItemHomeLocation(item);
+                                        item = this.removeTemporaryLocation(item);
+                                    }
+                                    log.info("processed item " + item);
+                                }
+                        )
                 );
             }
         }

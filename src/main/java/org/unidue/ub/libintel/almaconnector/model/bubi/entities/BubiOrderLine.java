@@ -49,12 +49,6 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
     @Column(name= "alma_mms_id")
     private String almaMmsId;
 
-    @Column(name= "alma_holding_id")
-    private String almaHoldingId;
-
-    @Column(name = "alma_item_id")
-    private String almaItemId;
-
     @Column(name = "alma_set_id")
     private String almaSetId;
 
@@ -181,13 +175,13 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         }
         if (this.almaMmsId == null)
             this.almaMmsId = coredata.getAlmaMmsId();
-        if (this.almaHoldingId == null)
-            this.almaHoldingId = coredata.getAlmaHoldingId();
         BubiOrderlinePosition bubiOrderlinePosition = new BubiOrderlinePosition()
                 .withVolume(coredata.getPositionVolume())
                 .withDescription(coredata.getPositionDescription())
                 .withPart(coredata.getPositionPart())
-                .withYear(coredata.getPositionYear());
+                .withYear(coredata.getPositionYear())
+                .withMmsId(coredata.getAlmaMmsId())
+                .withHoldingId(coredata.getAlmaHoldingId());
         this.bubiOrderlinePositions.add(bubiOrderlinePosition);
         this.securityStrip = coredata.getSecurityStrip();
         this.mapSlide = coredata.getMapSlide();
@@ -202,7 +196,6 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         this.lastChange = new Date();
         this.title = almaItemData.title;
         this.almaMmsId = almaItemData.mmsId;
-        this.almaHoldingId = almaItemData.holdingId;
     }
 
     public String getShelfmark() {
@@ -336,14 +329,6 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         this.almaMmsId = almaMmsId;
     }
 
-    public String getAlmaHoldingId() {
-        return almaHoldingId;
-    }
-
-    public void setAlmaHoldingId(String almaHoldingId) {
-        this.almaHoldingId = almaHoldingId;
-    }
-
     public String getBindingsFollow() {
         return bindingsFollow;
     }
@@ -398,14 +383,6 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
 
     public void setMediaType(String mediaType) {
         this.mediaType = mediaType;
-    }
-
-    public String getAlmaItemId() {
-        return almaItemId;
-    }
-
-    public void setAlmaItemId(String almaItemId) {
-        this.almaItemId = almaItemId;
     }
 
 
@@ -538,9 +515,7 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         clone.setBinding(this.binding);
         clone.setInternalNote(this.internalNote);
         clone.setStatus(this.status);
-        clone.setAlmaItemId(almaItemId);
         clone.setAlmaPoLineId(almaPoLineId);
-        clone.setAlmaHoldingId(almaHoldingId);
         clone.setAlmaMmsId(almaMmsId);
         clone.setBinding(binding);
         clone.setBindingsFollow(bindingsFollow);
@@ -567,5 +542,9 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         clone.setVendorAccount(this.vendorAccount);
         clone.setTitle(this.title);
         return clone;
+    }
+
+    public void addPositions(Set<BubiOrderlinePosition> bubiOrderlinePositions) {
+        this.bubiOrderlinePositions.addAll(bubiOrderlinePositions);
     }
 }

@@ -8,6 +8,7 @@ import org.unidue.ub.libintel.almaconnector.model.bubi.PaymentStatus;
 
 import javax.persistence.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name="bubi_order")
@@ -51,9 +52,6 @@ public class BubiOrder {
 
     @Column(name="total_amount")
     private Double totalAmount;
-
-    @Transient
-    private Vendor bubiData;
 
     @Column(name="created")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -124,14 +122,6 @@ public class BubiOrder {
         this.bubiOrderId = bubiOrderId;
     }
 
-    public Vendor getBubiData() {
-        return bubiData;
-    }
-
-    public void setBubiData(Vendor bubiData) {
-        this.bubiData = bubiData;
-    }
-
     public Set<BubiOrderLine> getBubiOrderLines() {
         return bubiOrderLines;
     }
@@ -143,8 +133,13 @@ public class BubiOrder {
     }
 
     public void addBubiOrderLine(BubiOrderLine bubiOrderLine) {
-        this.bubiOrderLines.add(bubiOrderLine);
-        bubiOrderLine.setBubiOrder(this);
+        if (bubiOrderLine.getStandard()) {
+            this.retrieveStandardOrderline().addPositions(bubiOrderLine.getBubiOrderlinePositions());
+        } else {
+            this.bubiOrderLines.add(bubiOrderLine);
+            bubiOrderLine.setBubiOrder(this);
+            bubiOrderLine.setPositionalNumber(this.getCurrentIndex() + 1);
+        }
         this.totalAmount += bubiOrderLine.getPrice();
     }
 
@@ -268,28 +263,22 @@ public class BubiOrder {
         this.almaSetName = almaSetName;
     }
 
-    public Map<String, List<BubiOrderLine>> returnOrderLinesByMediatype() {
-        Map<String, List<BubiOrderLine>> typedOrderlines = new HashMap<>();
-        typedOrderlines.put("standard", new ArrayList<>());
-        typedOrderlines.put("book", new ArrayList<>());
-        typedOrderlines.put("journal", new ArrayList<>());
-        for (BubiOrderLine bubiOrderLine: this.bubiOrderLines) {
-            if (bubiOrderLine.getStandard())
-                typedOrderlines.get("standard").add(bubiOrderLine);
-            else
-                typedOrderlines.get(bubiOrderLine.getMediaType()).add(bubiOrderLine);
-        }
-        return typedOrderlines;
+    public BubiOrderLine retrieveStandardOrderline() {
+        List<BubiOrderLine> standardOrderlines = this.bubiOrderLines.stream().filter(BubiOrderLine::getStandard).collect(Collectors.toList());
+        if (standardOrderlines.size() == 0)
+            return null;
+        else
+            return standardOrderlines.get(0);
     }
 
-    public List<BubiOrderLine> collectMonographOrderLines() {
-        List<BubiOrderLine> monographOrderLines = new ArrayList<>();
-        for (BubiOrderLine bubiOrderLine: this.bubiOrderLines) {
-            if ("book".equals(bubiOrderLine.getMediaType()))
-                monographOrderLines.add(bubiOrderLine);
-        }
-        return monographOrderLines;
+    public List<BubiOrderLine> retrieveOrderlines() {
+        return this.bubiOrderLines.stream().filter(entry -> !entry.getStandard()).collect(Collectors.toList());
     }
+
+    public long getCurrentIndex() {
+        return this.retrieveOrderlines().size();
+    }
+
 
     public double calculateTotalPrice() {
         this.totalAmount = 0.00;
@@ -315,6 +304,5 @@ public class BubiOrder {
         BubiOrderLine bubiOrderLineNew = bubiOrderLine.clone();
         this.bubiOrderLines.add(bubiOrderLineNew);
         return bubiOrderLineNew;
-
     }
 }
