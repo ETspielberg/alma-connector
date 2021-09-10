@@ -231,6 +231,7 @@ public class BubiOrderLineService {
      * @return the bubi orderline
      */
     public BubiOrderLine expandBubiOrderLineFromItem(Item item) {
+        // determine collection, shelfmark and campus from item data
         String collection = item.getItemData().getLocation().getDesc().toUpperCase(Locale.ROOT);
         String shelfmark = item.getHoldingData().getCallNumber().toUpperCase(Locale.ROOT);
         String campus = "E0001";
@@ -240,14 +241,19 @@ public class BubiOrderLineService {
             if (collection.startsWith("D"))
                 campus = "D0001";
         }
+        // determine material type
         String material = MediaType.BOOK.name();
         if ("ISSBD".equals(item.getItemData().getPhysicalMaterialType().getValue()))
             material = MediaType.JOURNAL.name();
+        // determine counter and create new orderline
         long counter = this.bubiOrderLineRepository.countAllByShelfmarkAndCollection(shelfmark, collection);
         BubiOrderLine bubiOrderLine = new BubiOrderLine(collection, shelfmark, counter);
+        // search for appropriate core data
         log.info(String.format("retrieving core data for collection %s and shelfmark %s", bubiOrderLine.getCollection(), bubiOrderLine.getShelfmark()));
         CoreData coredata = this.coreDataService.getForCollectionAndShelfmark(collection, shelfmark);
+        // if no core data are found (usually for monographs), build standard collective orderline
         if (coredata == null) {
+            // first retrieve the standard coredata
             log.info(String.format("no core data available - applying standard values for campus %s and material type %s", campus, material));
             coredata = this.coreDataService.findDefaultForMaterial(material, campus);
             bubiOrderLine.setTitle(item.getBibData().getTitle());
@@ -261,10 +267,13 @@ public class BubiOrderLineService {
             });
             bubiOrderLine.addCoreData(coredata, true);
         } else {
+            // if coredata are found, the properties for execution (cover, binding etc.) are added from the core data.
+            // in addition, the mms and holding ids are set in the position
             log.debug("found core data");
             bubiOrderLine.addCoreData(coredata, false);
             bubiOrderLine.getBubiOrderlinePositions().forEach(position -> position.setAlmaItemId(item.getItemData().getPid()));
         }
+
         addDataFromVendor(bubiOrderLine);
         this.bubiOrderLineRepository.save(bubiOrderLine);
         return bubiOrderLine;
@@ -277,7 +286,7 @@ public class BubiOrderLineService {
      * @param bubiOrderlinePositionId the id of the position which shall be removed
      * @return the updated bubi orderline data transfer object without the removed position
      */
-    public BubiOrderLineFullDto removedOrderlinePosition(String bubiOrderLineId, long bubiOrderlinePositionId) {
+    public BubiOrderLineFullDto removeOrderlinePosition(String bubiOrderLineId, long bubiOrderlinePositionId) {
         // retrieve orderline from repository
         BubiOrderLine bubiOrderLine = this.bubiOrderLineRepository.findById(bubiOrderLineId).orElse(null);
         if (bubiOrderLine == null)
@@ -290,8 +299,9 @@ public class BubiOrderLineService {
                 .stream()
                 .findFirst()
                 .orElse(null);
+        // if no position with the provided id is found, return teh original orderline
         if (positionToBeRemoved == null)
-            return null;
+            return new BubiOrderLineFullDto(bubiOrderLine);
         // remove the position from the set of positions in the orderline
         bubiOrderLine.setBubiOrderlinePositions(bubiOrderLine.getBubiOrderlinePositions()
                 .stream()
@@ -318,7 +328,7 @@ public class BubiOrderLineService {
             Set<BubiOrderlinePosition> positions = new HashSet<>();
             positions.add(positionToBeRemoved);
             newBubiOrderLine.setBubiOrderlinePositions(positions);
-            // recalulate the price
+            // recalculate the price
             this.bubiPricesService.calculatePriceForOrderline(newBubiOrderLine);
             // save the new orderline, attach it to the position and save the position
             this.bubiOrderLineRepository.save(newBubiOrderLine);

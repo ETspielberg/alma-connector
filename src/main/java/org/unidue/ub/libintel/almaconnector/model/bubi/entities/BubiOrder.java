@@ -134,7 +134,13 @@ public class BubiOrder {
 
     public void addBubiOrderLine(BubiOrderLine bubiOrderLine) {
         if (bubiOrderLine.getStandard()) {
-            this.retrieveStandardOrderline().addPositions(bubiOrderLine.getBubiOrderlinePositions());
+            BubiOrderLine standardBubiOrderline = this.retrieveStandardOrderline();
+            if (standardBubiOrderline != null)
+                    standardBubiOrderline.addPositions(bubiOrderLine.getBubiOrderlinePositions());
+            else {
+                bubiOrderLine.setTitle("Sammelauftrag");
+                bubiOrderLines.add(bubiOrderLine);
+            }
         } else {
             this.bubiOrderLines.add(bubiOrderLine);
             bubiOrderLine.setBubiOrder(this);
