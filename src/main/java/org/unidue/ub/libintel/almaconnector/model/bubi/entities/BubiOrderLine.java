@@ -547,4 +547,11 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
     public void addPositions(Set<BubiOrderlinePosition> bubiOrderlinePositions) {
         this.bubiOrderlinePositions.addAll(bubiOrderlinePositions);
     }
+
+    public void addComment(String comment) {
+        if (this.comment == null || this.comment.isEmpty())
+            this.comment = comment;
+        else
+            this.comment += comment;
+    }
 }

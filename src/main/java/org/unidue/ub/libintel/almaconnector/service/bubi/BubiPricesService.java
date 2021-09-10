@@ -9,8 +9,6 @@ import org.unidue.ub.libintel.almaconnector.repository.BubiDataRepository;
 import org.unidue.ub.libintel.almaconnector.repository.BubiPricesRepository;
 import org.unidue.ub.libintel.almaconnector.service.PriceNotFoundException;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -58,15 +56,16 @@ public class BubiPricesService {
             throw new PriceNotFoundException("no bubi data found!");
         else {
             BubiData bubiData = optional.get();
-            log.info(String.format("found bubidata with %d prices", bubiData.getBubiPrices().size()));
-            if (bubiData.getBubiPrices().size() == 0)
-                this.createNewBubiPricesForVendorAccount(bubiData);
+            log.debug(String.format("found bubidata with %d prices", bubiData.getBubiPrices().size()));
+            // if there are the appropriate execution costs, add the corresponding price. If not, write a comment, that
+            // the price is missing
             log.info(String.format("retrieving execution price for binding %s, cover %s and media type %s", bubiOrderLine.getBinding().toUpperCase(Locale.ROOT), bubiOrderLine.getCover(), bubiOrderLine.getMediaType().toUpperCase(Locale.ROOT)));
             BubiPrice bubiPrice = bubiData.retrieveExecutionPrice(bubiOrderLine.getBinding().toUpperCase(Locale.ROOT), bubiOrderLine.getCover(), bubiOrderLine.getMediaType().toUpperCase(Locale.ROOT));
-            if (bubiPrice == null)
-                throw new PriceNotFoundException("execution price not found");
-            price += bubiPrice.getPrice();
-
+            if (bubiPrice == null) {
+                bubiOrderLine.addComment("Keine Preisangaben für die Ausführung in den Buchbinderdaten gefunden!\n");
+            } else {
+                price += bubiPrice.getPrice();
+            }
             // ggf. Arbeitskosten
             if (bubiOrderLine.getHours() != 0.0)
                 price += bubiOrderLine.getHours() * bubiData.getPricePerHour();
@@ -107,46 +106,5 @@ public class BubiPricesService {
      */
     public void deleteBubiPrices(String vendorAccount) {
         this.bubiDataRepository.findById(vendorAccount).ifPresent(bubiData -> this.bubiPricesRepository.deleteAll(bubiData.getBubiPrices()));
-    }
-
-    /**
-     * generates a set of new bubi prices for a new vendor account
-     *
-     * @param bubiData the bubi data
-     */
-    public void createNewBubiPricesForVendorAccount(BubiData bubiData) {
-        List<BubiPrice> bubiPrices = new ArrayList<>();
-
-        // create execution prices for books
-        bubiPrices.add(new BubiPrice().withPrice(13.0).withCover("GW").withBinding("K").withMaterialType("BOOK").withBubiData(bubiData));
-        bubiPrices.add(new BubiPrice().withPrice(13.0).withCover("GW").withBinding("F").withMaterialType("BOOK").withBubiData(bubiData));
-        bubiPrices.add(new BubiPrice().withPrice(13.0).withCover("StoPr").withBinding("K").withMaterialType("BOOK").withBubiData(bubiData));
-        bubiPrices.add(new BubiPrice().withPrice(13.0).withCover("StoPr").withBinding("F").withMaterialType("BOOK").withBubiData(bubiData));
-        bubiPrices.add(new BubiPrice().withPrice(13.0).withCover("HPB").withBinding("K").withMaterialType("BOOK").withBubiData(bubiData));
-        bubiPrices.add(new BubiPrice().withPrice(13.0).withCover("HPB").withBinding("F").withMaterialType("BOOK").withBubiData(bubiData));
-        bubiPrices.add(new BubiPrice().withPrice(13.0).withCover("StmPr").withBinding("K").withMaterialType("BOOK").withBubiData(bubiData));
-        bubiPrices.add(new BubiPrice().withPrice(13.0).withCover("StmPr").withBinding("F").withMaterialType("BOOK").withBubiData(bubiData));
-
-        // create execution prices for journal
-        bubiPrices.add(new BubiPrice().withPrice(13.0).withCover("GW").withBinding("K").withMaterialType("JOURNAL").withBubiData(bubiData));
-        bubiPrices.add(new BubiPrice().withPrice(13.0).withCover("GW").withBinding("F").withMaterialType("JOURNAL").withBubiData(bubiData));
-        bubiPrices.add(new BubiPrice().withPrice(13.0).withCover("StoPr").withBinding("K").withMaterialType("JOURNAL").withBubiData(bubiData));
-        bubiPrices.add(new BubiPrice().withPrice(13.0).withCover("StoPr").withBinding("F").withMaterialType("JOURNAL").withBubiData(bubiData));
-        bubiPrices.add(new BubiPrice().withPrice(13.0).withCover("HPB").withBinding("K").withMaterialType("JOURNAL").withBubiData(bubiData));
-        bubiPrices.add(new BubiPrice().withPrice(13.0).withCover("HPB").withBinding("F").withMaterialType("JOURNAL").withBubiData(bubiData));
-        bubiPrices.add(new BubiPrice().withPrice(13.0).withCover("StmPr").withBinding("K").withMaterialType("JOURNAL").withBubiData(bubiData));
-        bubiPrices.add(new BubiPrice().withPrice(13.0).withCover("StmPr").withBinding("F").withMaterialType("JOURNAL").withBubiData(bubiData));
-
-        // create execution prices for series
-        bubiPrices.add(new BubiPrice().withPrice(13.0).withCover("GW").withBinding("K").withMaterialType("SERIAL").withBubiData(bubiData));
-        bubiPrices.add(new BubiPrice().withPrice(13.0).withCover("GW").withBinding("F").withMaterialType("SERIAL").withBubiData(bubiData));
-        bubiPrices.add(new BubiPrice().withPrice(13.0).withCover("StoPr").withBinding("K").withMaterialType("SERIAL").withBubiData(bubiData));
-        bubiPrices.add(new BubiPrice().withPrice(13.0).withCover("StoPr").withBinding("F").withMaterialType("SERIAL").withBubiData(bubiData));
-        bubiPrices.add(new BubiPrice().withPrice(13.0).withCover("HPB").withBinding("K").withMaterialType("SERIAL").withBubiData(bubiData));
-        bubiPrices.add(new BubiPrice().withPrice(13.0).withCover("HPB").withBinding("F").withMaterialType("SERIAL").withBubiData(bubiData));
-        bubiPrices.add(new BubiPrice().withPrice(13.0).withCover("StmPr").withBinding("K").withMaterialType("SERIAL").withBubiData(bubiData));
-        bubiPrices.add(new BubiPrice().withPrice(13.0).withCover("StmPr").withBinding("F").withMaterialType("SERIAL").withBubiData(bubiData));
-
-        this.bubiPricesRepository.saveAll(bubiPrices);
     }
 }
