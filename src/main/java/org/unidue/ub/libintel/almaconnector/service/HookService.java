@@ -85,6 +85,7 @@ public class HookService {
                     this.bubiOrderLineService.saveBubiOrderLine(bubiOrderLine);
 
                     item.getItemData().setPublicNote("wird gebunden");
+                    /*
                     String library = item.getItemData().getLibrary().getValue();
                     item.getHoldingData().setInTempLocation(false);
 
@@ -101,6 +102,7 @@ public class HookService {
                             break;
                         }
                     }
+                     */
                     this.almaItemService.updateItem(item);
                     log.info(String.format("created new bubi order line %s for %s: %s", bubiOrderLine.getBubiOrderLineId(), bubiOrderLine.getCollection(), bubiOrderLine.getShelfmark()));
                     break;
