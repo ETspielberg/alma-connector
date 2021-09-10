@@ -283,7 +283,7 @@ public class BubiOrderService {
         BubiOrder bubiOrder = this.bubiOrderRepository.findById(bubiOrderId).orElse(null);
         if (bubiOrderLine != null && bubiOrder != null) {
             bubiOrder.removeOrderline(bubiOrderLine);
-            bubiOrderLine.setStatus(BubiStatus.INWORK);
+            bubiOrderLine.setStatus(BubiStatus.NEW);
             bubiOrderLine.setBubiOrder(null);
             bubiOrderLine.setAlmaSetId(null);
             bubiOrder.setLastChange(new Date());
@@ -293,7 +293,6 @@ public class BubiOrderService {
                 bubiOrderLine.getBubiOrderlinePositions().forEach(
                         bubiOrderlinePosition -> this.almaSetService.removeMemberFromSet(bubiOrder.getAlmaSetId(), bubiOrderlinePosition.getAlmaItemId())
                 );
-
             return new BubiOrderFullDto(bubiOrder);
         }
         return null;
@@ -310,9 +309,7 @@ public class BubiOrderService {
         BubiOrderLine bubiOrderLine = this.bubiOrderLineRepository.findById(bubiOrderlineId).orElse(null);
         BubiOrder bubiOrder = this.bubiOrderRepository.findById(bubiOrderId).orElse(null);
         if (bubiOrderLine != null && bubiOrder != null) {
-            bubiOrderLine.getBubiOrderlinePositions().forEach(
-                    bubiOrderlinePosition -> this.almaSetService.addMemberToSet(bubiOrder.getAlmaSetId(), bubiOrderlinePosition.getAlmaItemId(), bubiOrderLine.getTitle())
-            );
+            this.almaSetService.addPositionsToSet(bubiOrder.getAlmaSetId(), bubiOrderLine);
             bubiOrder.addBubiOrderLine(bubiOrderLine);
             bubiOrderLine.setBubiOrder(bubiOrder);
             if (bubiOrderLine.getStandard())
