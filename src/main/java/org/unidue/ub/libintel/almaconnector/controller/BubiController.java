@@ -195,7 +195,7 @@ public class BubiController {
 
     @PostMapping("/orderline/{orderLineId}/removePosition/{bubiOrderlinePositionId}")
     public ResponseEntity<BubiOrderLineFullDto> removePositionfromOrderline(@PathVariable String orderLineId, @PathVariable long bubiOrderlinePositionId) {
-        return ResponseEntity.ok(this.bubiOrderLineService.removedOrderlinePosition(orderLineId, bubiOrderlinePositionId));
+        return ResponseEntity.ok(this.bubiOrderLineService.removeOrderlinePosition(orderLineId, bubiOrderlinePositionId));
     }
 
 
