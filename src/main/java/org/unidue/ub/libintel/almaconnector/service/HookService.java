@@ -81,11 +81,16 @@ public class HookService {
                         log.info("Buchbinder request not for book or bounded issue: " + userRequest.getMaterialType().getValue());
                         break;
                     }
-                    BubiOrderLine bubiOrderLine = this.bubiOrderLineService.expandBubiOrderLineFromItem(item);
-                    this.bubiOrderLineService.saveBubiOrderLine(bubiOrderLine);
-
                     item.getItemData().setPublicNote("wird gebunden");
-                    /*
+                    this.almaItemService.updateItem(item);
+                    try {
+                        BubiOrderLine bubiOrderLine = this.bubiOrderLineService.expandBubiOrderLineFromItem(item);
+                        this.bubiOrderLineService.saveBubiOrderLine(bubiOrderLine);
+                        log.info(String.format("created new bubi order line %s for %s: %s", bubiOrderLine.getBubiOrderLineId(), bubiOrderLine.getCollection(), bubiOrderLine.getShelfmark()));
+
+                    } catch (Exception exception ) {
+                        log.error("could not create bubi order line", exception);
+                    }
                     String library = item.getItemData().getLibrary().getValue();
                     item.getHoldingData().setInTempLocation(false);
 
@@ -102,10 +107,7 @@ public class HookService {
                             break;
                         }
                     }
-                     */
-                    this.almaItemService.updateItem(item);
-                    log.info(String.format("created new bubi order line %s for %s: %s", bubiOrderLine.getBubiOrderLineId(), bubiOrderLine.getCollection(), bubiOrderLine.getShelfmark()));
-                    break;
+                     break;
                 }
                 case "Aussonderung": {
                     log.info("retrieved internal work order for Aussonderung");

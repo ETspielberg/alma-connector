@@ -2,7 +2,6 @@ package org.unidue.ub.libintel.almaconnector.model.bubi.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.unidue.ub.alma.shared.acq.Vendor;
 import org.unidue.ub.libintel.almaconnector.model.bubi.BubiStatus;
 import org.unidue.ub.libintel.almaconnector.model.bubi.PaymentStatus;
 
