@@ -82,15 +82,6 @@ public class HookService {
                         break;
                     }
                     item.getItemData().setPublicNote("wird gebunden");
-                    this.almaItemService.updateItem(item);
-                    try {
-                        BubiOrderLine bubiOrderLine = this.bubiOrderLineService.expandBubiOrderLineFromItem(item);
-                        this.bubiOrderLineService.saveBubiOrderLine(bubiOrderLine);
-                        log.info(String.format("created new bubi order line %s for %s: %s", bubiOrderLine.getBubiOrderLineId(), bubiOrderLine.getCollection(), bubiOrderLine.getShelfmark()));
-
-                    } catch (Exception exception ) {
-                        log.error("could not create bubi order line", exception);
-                    }
                     String library = item.getItemData().getLibrary().getValue();
                     item.getHoldingData().setInTempLocation(false);
 
@@ -106,6 +97,15 @@ public class HookService {
                             item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("D0001"));
                             break;
                         }
+                    }
+                    this.almaItemService.updateItem(item);
+                    try {
+                        BubiOrderLine bubiOrderLine = this.bubiOrderLineService.expandBubiOrderLineFromItem(item);
+                        this.bubiOrderLineService.saveBubiOrderLine(bubiOrderLine);
+                        log.info(String.format("created new bubi order line %s for %s: %s", bubiOrderLine.getBubiOrderLineId(), bubiOrderLine.getCollection(), bubiOrderLine.getShelfmark()));
+
+                    } catch (Exception exception ) {
+                        log.error("could not create bubi order line", exception);
                     }
                      break;
                 }
