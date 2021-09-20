@@ -58,6 +58,8 @@ public class BubiOrderFullDto {
 
     private String additionalCostsComment;
 
+    private String additionalCostsFund;
+
     public BubiOrderFullDto() {
     }
 
@@ -87,6 +89,8 @@ public class BubiOrderFullDto {
         this.almaSetName = bubiOrder.getAlmaSetName();
         this.additionalCosts = bubiOrder.getAdditionalCosts();
         this.additionalCostsComment = bubiOrder.getAdditionalCostsComment();
+        this.additionalCostsFund = bubiOrder.getAdditionalCostsFund();
+
     }
 
     /**
@@ -109,5 +113,6 @@ public class BubiOrderFullDto {
         bubiOrder.setTotalAmount(this.totalAmount);
         bubiOrder.setAdditionalCosts(this.additionalCosts);
         bubiOrder.setAdditionalCostsComment(this.additionalCostsComment);
+        bubiOrder.setAdditionalCostsFund(this.additionalCostsFund);
     }
 }
