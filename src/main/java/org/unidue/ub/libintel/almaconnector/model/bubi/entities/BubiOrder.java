@@ -52,6 +52,12 @@ public class BubiOrder {
     @Column(name="total_amount")
     private Double totalAmount;
 
+    @Column(name="additional_costs")
+    private Double additionalCosts;
+
+    @Column(name="additional_costs_comment")
+    private String additionalCostsComment;
+
     @Column(name="created")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -266,6 +272,22 @@ public class BubiOrder {
 
     public void setAlmaSetName(String almaSetName) {
         this.almaSetName = almaSetName;
+    }
+
+    public Double getAdditionalCosts() {
+        return additionalCosts;
+    }
+
+    public void setAdditionalCosts(Double additionalCosts) {
+        this.additionalCosts = additionalCosts;
+    }
+
+    public String getAdditionalCostsComment() {
+        return additionalCostsComment;
+    }
+
+    public void setAdditionalCostsComment(String additionalCostsComment) {
+        this.additionalCostsComment = additionalCostsComment;
     }
 
     public BubiOrderLine retrieveStandardOrderline() {

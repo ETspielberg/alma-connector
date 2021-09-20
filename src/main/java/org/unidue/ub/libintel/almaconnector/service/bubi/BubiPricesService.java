@@ -44,11 +44,11 @@ public class BubiPricesService {
      * @param bubiOrderLine the bubi orderline for which the price is to be calculated
      */
     public void calculatePriceForOrderline(BubiOrderLine bubiOrderLine) throws PriceNotFoundException {
-        double price = 0.0;
+        double price = bubiOrderLine.getPriceCorrection();
         String vendorAccount = bubiOrderLine.getVendorAccount();
         log.debug(String.format("calculating prices for order %s with vendor %s", bubiOrderLine.getBubiOrderLineId(), bubiOrderLine.getVendorAccount()));
         if (vendorAccount == null) {
-            bubiOrderLine.setPrice(0.0);
+            bubiOrderLine.setPrice(price);
             return;
         }
         Optional<BubiData> optional = this.bubiDataRepository.findById(vendorAccount);

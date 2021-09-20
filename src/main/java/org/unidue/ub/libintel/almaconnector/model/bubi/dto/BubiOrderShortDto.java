@@ -14,12 +14,15 @@ public class BubiOrderShortDto {
 
     private double price;
 
+    private long numberOrderlines;
+
     public BubiOrderShortDto() {}
 
     public BubiOrderShortDto(BubiOrder bubiOrder) {
         this.bubiOrderId = bubiOrder.getBubiOrderId();
         this.vendorAccount = bubiOrder.getVendorAccount();
         this.price = bubiOrder.calculateTotalPrice();
+        this.numberOrderlines = bubiOrder.getBubiOrderLines().size();
         if (bubiOrder.getAlmaSetName() == null)
             this.name = "";
         else

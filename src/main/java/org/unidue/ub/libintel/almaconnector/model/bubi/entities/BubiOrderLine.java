@@ -83,6 +83,12 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
     @Column(name = "bindings_follow")
     private String bindingsFollow;
 
+    @Column(name = "price_correction")
+    private double priceCorrection;
+
+    @Column(name = "price_correction_comment")
+    private String priceCorrectionComment;
+
     @Column(name = "created")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -500,6 +506,22 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
 
     public void setMapSlideWithCorrection(boolean mapSlideWithCorrection) {
         this.mapSlideWithCorrection = mapSlideWithCorrection;
+    }
+
+    public double getPriceCorrection() {
+        return priceCorrection;
+    }
+
+    public void setPriceCorrection(double priceCorrection) {
+        this.priceCorrection = priceCorrection;
+    }
+
+    public String getPriceCorrectionComment() {
+        return priceCorrectionComment;
+    }
+
+    public void setPriceCorrectionComment(String priceCorrectionComment) {
+        this.priceCorrectionComment = priceCorrectionComment;
     }
 
     @Override

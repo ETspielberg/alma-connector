@@ -54,6 +54,10 @@ public class BubiOrderFullDto {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date returnedOn;
 
+    private double additionalCosts;
+
+    private String additionalCostsComment;
+
     public BubiOrderFullDto() {
     }
 
@@ -81,6 +85,8 @@ public class BubiOrderFullDto {
         this.almaPoNumber = bubiOrder.getAlmaPoNumber();
         this.almaSetId = bubiOrder.getAlmaSetId();
         this.almaSetName = bubiOrder.getAlmaSetName();
+        this.additionalCosts = bubiOrder.getAdditionalCosts();
+        this.additionalCostsComment = bubiOrder.getAdditionalCostsComment();
     }
 
     /**
@@ -101,5 +107,7 @@ public class BubiOrderFullDto {
         bubiOrder.setInvoiceDate(this.invoiceDate);
         bubiOrder.setInvoiceNumber(this.invoiceNumber);
         bubiOrder.setTotalAmount(this.totalAmount);
+        bubiOrder.setAdditionalCosts(this.additionalCosts);
+        bubiOrder.setAdditionalCostsComment(this.additionalCostsComment);
     }
 }
