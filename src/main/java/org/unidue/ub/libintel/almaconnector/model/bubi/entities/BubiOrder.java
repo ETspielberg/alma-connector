@@ -58,6 +58,9 @@ public class BubiOrder {
     @Column(name="additional_costs_comment")
     private String additionalCostsComment;
 
+    @Column(name="additional_costs_fund")
+    private String additionalCostsFund;
+
     @Column(name="created")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -288,6 +291,14 @@ public class BubiOrder {
 
     public void setAdditionalCostsComment(String additionalCostsComment) {
         this.additionalCostsComment = additionalCostsComment;
+    }
+
+    public String getAdditionalCostsFund() {
+        return additionalCostsFund;
+    }
+
+    public void setAdditionalCostsFund(String additionalCostsFund) {
+        this.additionalCostsFund = additionalCostsFund;
     }
 
     public BubiOrderLine retrieveStandardOrderline() {

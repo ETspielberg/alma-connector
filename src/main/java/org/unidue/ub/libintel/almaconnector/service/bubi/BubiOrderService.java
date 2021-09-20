@@ -270,13 +270,14 @@ public class BubiOrderService {
         return null;
         long numberofLines = bubiOrder.getBubiOrderLines().size();
         bubiOrder.getBubiOrderLines().forEach(bubiOrderLine -> {
-            bubiOrderLine.setPriceCorrection(bubiOrderLine.getPriceCorrection() + (bubiOrder.getAdditionalCosts()/numberofLines));
+            if (distribute)
+                bubiOrderLine.setPriceCorrection(bubiOrderLine.getPriceCorrection() + (bubiOrder.getAdditionalCosts()/numberofLines));
             bubiOrderLine.setPriceCorrectionComment(bubiOrder.getAdditionalCostsComment());
             bubiOrderLine = this.bubiOrderLineRepository.save(bubiOrderLine);
             PoLine poLine = this.almaPoLineService.buildPoLine(bubiOrderLine);
         });
         // ToDo: pack po lines into po
-        Invoice invoice = this.almaInvoiceService.buildInvoiceForBubiOrder(bubiOrder);
+        Invoice invoice = this.almaInvoiceService.buildInvoiceForBubiOrder(bubiOrder, distribute);
         bubiOrder.setPaymentStatus(PaymentStatus.PAID);
         bubiOrder.setLastChange(new Date());
         return new BubiOrderFullDto(this.bubiOrderRepository.save(bubiOrder));

@@ -214,10 +214,27 @@ public class AlmaInvoiceService {
      * @param bubiOrder the bubi order holding the individual bubi order lines
      * @return a list of Alma InvoiceLine-objects
      */
-    public List<InvoiceLine> getInvoiceLinesForBubiOrder(BubiOrder bubiOrder) {
+    public List<InvoiceLine> getInvoiceLinesForBubiOrder(BubiOrder bubiOrder, boolean distribute) {
         // create new list of order lines
         List<InvoiceLine> invoiceLines = new ArrayList<>();
         bubiOrder.getBubiOrderLines().forEach(bubiOrderLine -> invoiceLines.add(this.createInvoiceLine(bubiOrderLine)));
+        if (!distribute) {
+            InvoiceLineVat invoiceLineVat = new InvoiceLineVat().vatCode(new InvoiceLineVatVatCode().value("H8"));
+
+            // set the fund distribution
+            FundDistributionFundCode fundDistributionFundCode = new FundDistributionFundCode().value(bubiOrder.getAdditionalCostsFund());
+            FundDistribution fundDistribution = new FundDistribution().fundCode(fundDistributionFundCode).amount(bubiOrder.getAdditionalCosts());
+            List<FundDistribution> fundDistributionList = new ArrayList<>();
+            fundDistributionList.add(fundDistribution);
+
+            // create invoice line with all information and add it to the list
+            invoiceLines.add(new InvoiceLine()
+                    .fullyInvoiced(true)
+                    .totalPrice(bubiOrder.getAdditionalCosts())
+                    .invoiceLineVat(invoiceLineVat)
+                    .fundDistribution(fundDistributionList));
+        }
+
         return invoiceLines;
     }
 
@@ -239,10 +256,10 @@ public class AlmaInvoiceService {
                 .fundDistribution(fundDistributionList);
     }
 
-    public Invoice buildInvoiceForBubiOrder(BubiOrder bubiOrder) {
+    public Invoice buildInvoiceForBubiOrder(BubiOrder bubiOrder, boolean distribute) {
         Invoice invoice = this.getInvoiceForBubiOrder(bubiOrder);
         invoice = this.saveInvoice(invoice);
-        List<InvoiceLine> invoiceLines = this.getInvoiceLinesForBubiOrder(bubiOrder);
+        List<InvoiceLine> invoiceLines = this.getInvoiceLinesForBubiOrder(bubiOrder, distribute);
         for (InvoiceLine invoiceLine : invoiceLines)
             this.addInvoiceLine(invoice.getId(), invoiceLine);
         this.processInvoice(invoice.getId());
