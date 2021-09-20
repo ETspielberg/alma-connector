@@ -38,15 +38,8 @@ public class AlmaCatalogService {
         log.debug(holding.getRecord().getLeader());
         // initialize boolean indicating whether a particular field has been set.
         boolean isSet = false;
-        for (MarcDatafield field : holding.getRecord().getDatafield()) {
-            if ("990".equals(field.getTag())) {
-                for (MarcSubfield subfield : field.getSubfield())
-                    if ("a".equals(subfield.getCode())) {
-                        if (subfield.getValue().contains("ZDB") || "ZDB".equals(subfield.getValue()))
-                            return;
-                    }
-            }
-        }
+        // check if it is a ZDB holding. If it is, just quit
+        if (isZdbHolding(holding)) return;
         // check fields
         for (MarcDatafield field : holding.getRecord().getDatafield()) {
             if ("852".equals(field.getTag())) {
@@ -97,5 +90,18 @@ public class AlmaCatalogService {
      */
     public long getNumberOfItems(String mmsId, String holdingId) {
         return this.almaCatalogApiClient.getBibsMmsIdHoldingsHoldingIdItems(mmsId, holdingId, 1,0,"","","","","","","","","","","","","","","","").getTotalRecordCount();
+    }
+
+    private boolean isZdbHolding(HoldingWithRecord holding) {
+        for (MarcDatafield field : holding.getRecord().getDatafield()) {
+            if ("990".equals(field.getTag())) {
+                for (MarcSubfield subfield : field.getSubfield())
+                    if ("a".equals(subfield.getCode())) {
+                        if (subfield.getValue().contains("ZDB") || "ZDB".equals(subfield.getValue()))
+                            return true;
+                    }
+            }
+        }
+        return false;
     }
 }
