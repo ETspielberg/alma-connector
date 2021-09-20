@@ -94,6 +94,10 @@ public class BubiOrderLineFullDto {
 
     private boolean newSampleBoardNeeded;
 
+    private double priceCorrection;
+
+    private String priceCorrectionComment;
+
     public BubiOrderLineFullDto() {}
 
     public BubiOrderLineFullDto(BubiOrderLine bubiOrderLine) {
@@ -137,6 +141,8 @@ public class BubiOrderLineFullDto {
         this.newSampleBoardNeeded = bubiOrderLine.getNewSampleBoardNeeded();
         this.almaPoLineId = bubiOrderLine.getAlmaPoLineId();
         this.mapSlideWithCorrection = bubiOrderLine.getMapSlideWithCorrection();
+        this.priceCorrection = bubiOrderLine.getPriceCorrection();
+        this.priceCorrectionComment = bubiOrderLine.getPriceCorrectionComment();
     }
 
     public void updateBubiOrderLine(BubiOrderLine bubiOrderLine) {
@@ -167,5 +173,7 @@ public class BubiOrderLineFullDto {
         bubiOrderLine.setNewSampleBoardNeeded(this.newSampleBoardNeeded);
         bubiOrderLine.setWithoutRemoval(this.withoutRemoval);
         bubiOrderLine.setMapSlideWithCorrection(this.mapSlideWithCorrection);
+        bubiOrderLine.setPriceCorrection(this.priceCorrection);
+        bubiOrderLine.setPriceCorrectionComment(this.priceCorrectionComment);
     }
 }
