@@ -9,6 +9,7 @@ import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderLine;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -86,9 +87,9 @@ public class AlmaPoLineService {
      * @param bubiOrderLine the bubi order line from which the Alma PO Line is created
      * @return an Alma PoLine object
      */
-    public PoLine buildPoLine(BubiOrderLine bubiOrderLine, LocalDate expectedOn) {
+    public PoLine buildPoLine(BubiOrderLine bubiOrderLine) {
         PoLineOwner poLineOwner;
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        //DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
         // set the owner depending on the collection
         if (bubiOrderLine.getCollection().startsWith("D"))
@@ -112,10 +113,9 @@ public class AlmaPoLineService {
                 .mmsId(new ResourceMetadataMmsId().value(bubiOrderLine.getAlmaMmsId()));
                 //.title(bubiOrderLine.getTitle());
 
-        // sets the status to a auto packaging
+        // sets the status to auto packaging
         PoLineStatus status = new PoLineStatus().value("AUTO_PACKAGING").desc("Auto Packaging");
-        Note note = new Note().noteText(String.format("Zurückerwartet am %s", formatter.format(expectedOn)));
-        return new PoLine()
+        PoLine poLine = new PoLine()
                 .reclaimInterval("21")
                 .vendorReferenceNumber(String.format("%s - %S:%s)", bubiOrderLine.getFund(),
                         bubiOrderLine.getCollection(),
@@ -123,15 +123,16 @@ public class AlmaPoLineService {
                 .sourceType(new PoLineSourceType().value("MANUALENTRY"))
                 .type(new PoLineType().value("OTHER_SERVICES_OT"))
                 .status(status)
+                //.addNoteItem(note)
                 .price(amount)
                 .baseStatus(PoLine.BaseStatusEnum.ACTIVE)
                 .owner(poLineOwner)
                 .resourceMetadata(resourceMetadata)
                 .vendor(new PoLineVendor().value(bubiOrderLine.getVendorAccount()))
                 .vendorAccount(bubiOrderLine.getVendorAccount())
-                .fundDistribution(fundList)
-                .addNoteItem(note);
-    }
+                .fundDistribution(fundList);
+        return this.almaPoLinesApiClient.postAcqPoLines(poLine, "application/json", "");
+   }
 
     /**
      * updates a po line by the data from a bubi order line

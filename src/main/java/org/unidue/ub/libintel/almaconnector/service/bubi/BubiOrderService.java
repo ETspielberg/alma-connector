@@ -18,6 +18,7 @@ import org.unidue.ub.libintel.almaconnector.repository.BubiOrderLineRepository;
 import org.unidue.ub.libintel.almaconnector.repository.BubiOrderRepository;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaInvoiceService;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaItemService;
+import org.unidue.ub.libintel.almaconnector.service.alma.AlmaPoLineService;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaSetService;
 
 import java.text.SimpleDateFormat;
@@ -44,6 +45,8 @@ public class BubiOrderService {
 
     private final AlmaSetService almaSetService;
 
+    private final AlmaPoLineService almaPoLineService;
+
     public static final String DATE_FORMAT_NOW = "yyyy-MM-dd HH:mm:ss";
 
     /**
@@ -59,12 +62,14 @@ public class BubiOrderService {
             BubiOrderLineRepository bubiOrderLineRepository,
             AlmaInvoiceService almaInvoiceService,
             AlmaItemService almaItemService,
-            AlmaSetService almaSetService) {
+            AlmaSetService almaSetService,
+            AlmaPoLineService almaPoLineService) {
         this.bubiOrderLineRepository = bubiOrderLineRepository;
         this.bubiOrderRepository = bubiOrderRepository;
         this.almaInvoiceService = almaInvoiceService;
         this.almaItemService = almaItemService;
         this.almaSetService = almaSetService;
+        this.almaPoLineService = almaPoLineService;
     }
 
     /**
@@ -246,6 +251,7 @@ public class BubiOrderService {
     public BubiOrderFullDto returnBubiOrder(String bubiOrderId) {
         BubiOrder bubiOrder = this.bubiOrderRepository.findById(bubiOrderId).orElse(null);
         if (bubiOrder == null) return null;
+        this.scanItems(bubiOrderId);
         bubiOrder.setBubiStatus(BubiStatus.RETURNED);
         bubiOrder.setLastChange(new Date());
         return new BubiOrderFullDto(bubiOrderRepository.save(bubiOrder));
@@ -260,6 +266,12 @@ public class BubiOrderService {
     public BubiOrderFullDto payBubiOrder(String bubiOrderId) {
         BubiOrder bubiOrder = this.bubiOrderRepository.findById(bubiOrderId).orElse(null);
         if (bubiOrder == null) return null;
+        bubiOrder.getBubiOrderLines().forEach(
+                orderline -> {
+                    PoLine poLine = this.almaPoLineService.buildPoLine(orderline);
+                }
+        );
+        // ToDo: pack po lines into po
         Invoice invoice = this.almaInvoiceService.getInvoiceForBubiOrder(bubiOrder);
         invoice = this.almaInvoiceService.saveInvoice(invoice);
         List<InvoiceLine> invoiceLines = this.almaInvoiceService.getInvoiceLinesForBubiOrder(bubiOrder);
