@@ -231,24 +231,35 @@ public class HookService {
             case "KEYS":
                 break;
             default: {
+                boolean isItemUpdated = false;
                 log.info(String.format("got item with  call number %s and item call number %s", item.getHoldingData().getCallNumber(), item.getItemData().getAlternativeCallNumber()));
                 if (item.getHoldingData().getCallNumber() == null) {
                     log.warn("holding call number is null for item " + item.getItemData().getPid());
                     return;
                 }
+
+                // check for barcode with blanks
+                String barcode = item.getItemData().getBarcode();
+                if (barcode.contains(" ")) {
+                    item.getItemData().setBarcode(item.getItemData().getBarcode().strip());
+                    isItemUpdated = true;
+                }
+                // check shelfmark
                 String itemCallNo = item.getItemData().getAlternativeCallNumber().strip();
                 if (!itemCallNo.isEmpty()) {
+                    // check for call number type if it is not "other" (value 8) set it accordingly
                     ItemDataAlternativeCallNumberType itemDataAlternativeCallNumberType = item.getItemData().getAlternativeCallNumberType();
                     if (itemDataAlternativeCallNumberType == null || itemDataAlternativeCallNumberType.getValue().isEmpty()) {
                         item.getItemData().setAlternativeCallNumberType(new ItemDataAlternativeCallNumberType().value("8"));
-                        this.almaItemService.updateItem(item);
+                        isItemUpdated = true;
                     }
                     String callNo = itemCallNo.replaceAll("\\+\\d+", "");
                     String holdingCallNo = item.getHoldingData().getCallNumber().strip();
-                    if (callNo.equals(holdingCallNo))
-                        return;
-                    this.almaCatalogService.updateCallNoInHolding(item.getBibData().getMmsId(), item.getHoldingData().getHoldingId(), callNo);
+                    if (!callNo.equals(holdingCallNo))
+                        this.almaCatalogService.updateCallNoInHolding(item.getBibData().getMmsId(), item.getHoldingData().getHoldingId(), callNo);
                 }
+                // update item if changes have been made
+                if (isItemUpdated) this.almaItemService.updateItem(item);
             }
         }
     }
