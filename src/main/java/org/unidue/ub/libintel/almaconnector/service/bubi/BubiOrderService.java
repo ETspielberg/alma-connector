@@ -263,21 +263,20 @@ public class BubiOrderService {
      * @param bubiOrderId the id of the bubi order to be paid
      * @return the updated bubi order
      */
-    public BubiOrderFullDto payBubiOrder(String bubiOrderId) {
+    public BubiOrderFullDto payBubiOrder(String bubiOrderId, boolean distribute) {
         BubiOrder bubiOrder = this.bubiOrderRepository.findById(bubiOrderId).orElse(null);
         if (bubiOrder == null) return null;
-        bubiOrder.getBubiOrderLines().forEach(
-                orderline -> {
-                    PoLine poLine = this.almaPoLineService.buildPoLine(orderline);
-                }
-        );
+        if (bubiOrder.getBubiOrderLines() == null || bubiOrder.getBubiOrderLines().size() == 0)
+        return null;
+        long numberofLines = bubiOrder.getBubiOrderLines().size();
+        bubiOrder.getBubiOrderLines().forEach(bubiOrderLine -> {
+            bubiOrderLine.setPriceCorrection(bubiOrderLine.getPriceCorrection() + (bubiOrder.getAdditionalCosts()/numberofLines));
+            bubiOrderLine.setPriceCorrectionComment(bubiOrder.getAdditionalCostsComment());
+            bubiOrderLine = this.bubiOrderLineRepository.save(bubiOrderLine);
+            PoLine poLine = this.almaPoLineService.buildPoLine(bubiOrderLine);
+        });
         // ToDo: pack po lines into po
-        Invoice invoice = this.almaInvoiceService.getInvoiceForBubiOrder(bubiOrder);
-        invoice = this.almaInvoiceService.saveInvoice(invoice);
-        List<InvoiceLine> invoiceLines = this.almaInvoiceService.getInvoiceLinesForBubiOrder(bubiOrder);
-        for (InvoiceLine invoiceLine : invoiceLines)
-            this.almaInvoiceService.addInvoiceLine(invoice.getId(), invoiceLine);
-        this.almaInvoiceService.processInvoice(invoice.getId());
+        Invoice invoice = this.almaInvoiceService.buildInvoiceForBubiOrder(bubiOrder);
         bubiOrder.setPaymentStatus(PaymentStatus.PAID);
         bubiOrder.setLastChange(new Date());
         return new BubiOrderFullDto(this.bubiOrderRepository.save(bubiOrder));

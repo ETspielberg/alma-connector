@@ -243,8 +243,8 @@ public class BubiController {
     }
 
     @PostMapping("/order/pay/{bubiOrderId}")
-    public ResponseEntity<BubiOrderFullDto> payOrder(@PathVariable String bubiOrderId) {
-        return ResponseEntity.ok(this.bubiOrderService.payBubiOrder(bubiOrderId));
+    public ResponseEntity<BubiOrderFullDto> payOrder(@PathVariable String bubiOrderId, boolean distribute) {
+        return ResponseEntity.ok(this.bubiOrderService.payBubiOrder(bubiOrderId, distribute));
     }
 
     @PutMapping("/order/removeOrderline/{bubiOrderId}")

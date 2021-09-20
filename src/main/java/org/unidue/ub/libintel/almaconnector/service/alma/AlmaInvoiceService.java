@@ -238,4 +238,14 @@ public class AlmaInvoiceService {
                 .invoiceLineVat(invoiceLineVat)
                 .fundDistribution(fundDistributionList);
     }
+
+    public Invoice buildInvoiceForBubiOrder(BubiOrder bubiOrder) {
+        Invoice invoice = this.getInvoiceForBubiOrder(bubiOrder);
+        invoice = this.saveInvoice(invoice);
+        List<InvoiceLine> invoiceLines = this.getInvoiceLinesForBubiOrder(bubiOrder);
+        for (InvoiceLine invoiceLine : invoiceLines)
+            this.addInvoiceLine(invoice.getId(), invoiceLine);
+        this.processInvoice(invoice.getId());
+        return invoice;
+    }
 }
