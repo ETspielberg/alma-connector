@@ -130,6 +130,10 @@ public class AlmaItemService {
      * @return the updated item
      */
     public Item updateItem(Item item) {
-        return this.almaCatalogApiClient.putBibsMmsIdHoldingsHoldingIdItemsItemPid(item.getBibData().getMmsId(), item.getHoldingData().getHoldingId(), item.getItemData().getPid(), item);
+        String mmsId = item.getBibData().getMmsId();
+        String holdingId = item.getHoldingData().getHoldingId();
+        String itemPid = item.getItemData().getPid();
+        log.debug(String.format("updating item MMS-ID, Holding-ID, Item-ID | %s | %s | %s", mmsId, holdingId, itemPid));
+        return this.almaCatalogApiClient.putBibsMmsIdHoldingsHoldingIdItemsItemPid(mmsId, holdingId, itemPid, item);
     }
 }

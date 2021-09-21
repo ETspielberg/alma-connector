@@ -297,7 +297,7 @@ public interface AlmaCatalogApiClient {
    * @return Object
    */
   @RequestMapping(method= RequestMethod.PUT, value="/{mmsId}/holdings/{holdingId}/items/{itemPid}", consumes = MediaType.APPLICATION_XML_VALUE)
-  Item putBibsMmsIdHoldingsHoldingIdItemsItemPid(@RequestParam("mmsId") String mmsId, @RequestParam("holdingId") String holdingId, @RequestParam("itemPid") String itemPid, @RequestBody Item item);
+  Item putBibsMmsIdHoldingsHoldingIdItemsItemPid(@PathVariable("mmsId") String mmsId, @PathVariable("holdingId") String holdingId, @PathVariable("itemPid") String itemPid, @RequestBody Item item);
 
   /**
    * Update Portfolio for a Bib
@@ -308,5 +308,5 @@ public interface AlmaCatalogApiClient {
    * @return Object
    */
   @RequestMapping(method= RequestMethod.PUT, value="/{mmsId}/portfolios/{portfolioId}")
-  Portfolio putBibsMmsIdPortfoliosPortfolioId(@RequestParam("mms_id") String mmsId, @RequestParam("portfolio_id") String portfolioId, Object body);
+  Portfolio putBibsMmsIdPortfoliosPortfolioId(@PathVariable("mmsId") String mmsId, @PathVariable("portfolioId") String portfolioId, Object body);
 }
