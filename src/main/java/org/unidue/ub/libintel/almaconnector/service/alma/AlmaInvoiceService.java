@@ -218,24 +218,28 @@ public class AlmaInvoiceService {
         // create new list of order lines
         List<InvoiceLine> invoiceLines = new ArrayList<>();
         bubiOrder.getBubiOrderLines().forEach(bubiOrderLine -> invoiceLines.add(this.createInvoiceLine(bubiOrderLine)));
-        if (!distribute) {
-            InvoiceLineVat invoiceLineVat = new InvoiceLineVat().vatCode(new InvoiceLineVatVatCode().value("H8"));
-
-            // set the fund distribution
-            FundDistributionFundCode fundDistributionFundCode = new FundDistributionFundCode().value(bubiOrder.getAdditionalCostsFund());
-            FundDistribution fundDistribution = new FundDistribution().fundCode(fundDistributionFundCode).amount(bubiOrder.getAdditionalCosts());
-            List<FundDistribution> fundDistributionList = new ArrayList<>();
-            fundDistributionList.add(fundDistribution);
-
-            // create invoice line with all information and add it to the list
-            invoiceLines.add(new InvoiceLine()
-                    .fullyInvoiced(true)
-                    .totalPrice(bubiOrder.getAdditionalCosts())
-                    .invoiceLineVat(invoiceLineVat)
-                    .fundDistribution(fundDistributionList));
-        }
-
+        if (!distribute)
+            invoiceLines.add(getAdditionalCostsLine(bubiOrder));
         return invoiceLines;
+    }
+
+    private InvoiceLine getAdditionalCostsLine(BubiOrder bubiOrder) {
+        InvoiceLineVat invoiceLineVat = new InvoiceLineVat().vatCode(new InvoiceLineVatVatCode().value("H8"));
+
+        // set the fund distribution
+        FundDistributionFundCode fundDistributionFundCode = new FundDistributionFundCode().value(bubiOrder.getAdditionalCostsFund());
+        FundDistribution fundDistribution = new FundDistribution().fundCode(fundDistributionFundCode).amount(bubiOrder.getAdditionalCosts());
+        List<FundDistribution> fundDistributionList = new ArrayList<>();
+        fundDistributionList.add(fundDistribution);
+
+        // create invoice line with all information and add it to the list
+        return new InvoiceLine()
+                .fullyInvoiced(true)
+                .type(new InvoiceLineType().value("OTHER"))
+                .totalPrice(bubiOrder.getAdditionalCosts())
+                .priceNote(bubiOrder.getAdditionalCostsComment())
+                .invoiceLineVat(invoiceLineVat)
+                .fundDistribution(fundDistributionList);
     }
 
     private InvoiceLine createInvoiceLine(BubiOrderLine bubiOrderLine) {

@@ -36,7 +36,7 @@ public class HookService {
 
     private final BubiOrderLineService bubiOrderLineService;
 
-
+    private final ElasticsearchService elasticsearchService;
     /**
      * constructor based autowiring to the individual services
      *
@@ -50,12 +50,14 @@ public class HookService {
                 AlmaItemService almaItemService,
                 AlmaCatalogService almaCatalogService,
                 BubiOrderLineService bubiOrderLineService,
-                AlmaElectronicService almaElectronicService) {
+                AlmaElectronicService almaElectronicService,
+                ElasticsearchService elasticsearchService) {
         this.almaUserService = almaUserService;
         this.almaItemService = almaItemService;
         this.almaCatalogService = almaCatalogService;
         this.almaElectronicService = almaElectronicService;
         this.bubiOrderLineService = bubiOrderLineService;
+        this.elasticsearchService = elasticsearchService;
     }
 
     /**
@@ -273,11 +275,12 @@ public class HookService {
     public void processBibHook(BibHook hook) {
         BibWithRecord bib = hook.getBib();
         log.debug("received bib hook: " + bib.toString());
+        String mmsId = bib.getMmsId();
+        BibWithRecord bibWithRecord = this.almaCatalogService.getRecord(mmsId);
+
         if ("Universität Duisburg-Essen".equals(bib.getPublisherConst())) {
-            String mmsId = bib.getMmsId();
             if (this.almaCatalogService.isPortfolios(mmsId))
                 return;
-            BibWithRecord bibWithRecord = this.almaCatalogService.getRecord(mmsId);
             boolean isOnline = false;
             boolean isDiss = false;
             String url = "";
