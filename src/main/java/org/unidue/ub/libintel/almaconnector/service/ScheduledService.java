@@ -241,6 +241,7 @@ public class ScheduledService {
      */
     @Scheduled(cron = "0 0 5 * * *")
     public void collectRequests() throws IOException {
+        if (profile.equals("dev")) return;
         HashMap<String, SingleRequestData> allRequestData = new HashMap<>();
         List<RequestsItem> result = this.almaAnalyticsReportClient.getReport(RequestsReport.PATH, RequestsReport.class).getRows();
         for (RequestsItem requestsItem : result) {

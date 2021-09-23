@@ -215,7 +215,9 @@ public class HookService {
         if ("ITEM_DELETED".equals(hook.getEvent().getValue()))
             return;
         Item item = hook.getItem();
-        log.debug("received item hook: " + item.toString());
+        if (item.getItemData().getCallNo().size()> 0 && !item.getItemData().getBarcode().isEmpty())
+            elasticsearchService.index(item);
+        log.debug("received item hook: " + item);
         if (hook.getEvent() != null && hook.getEvent().getValue() != null) {
             log.info(String.format("received item hook with event %s (%s)", hook.getEvent().getDesc(), hook.getEvent().getValue()));
         }
@@ -277,6 +279,9 @@ public class HookService {
         log.debug("received bib hook: " + bib.toString());
         String mmsId = bib.getMmsId();
         BibWithRecord bibWithRecord = this.almaCatalogService.getRecord(mmsId);
+        if ("BIB_CREATED".equals(hook.getEvent().getValue())) {
+            int status = this.elasticsearchService.index(bib);
+        }
 
         if ("Universität Duisburg-Essen".equals(bib.getPublisherConst())) {
             if (this.almaCatalogService.isPortfolios(mmsId))
