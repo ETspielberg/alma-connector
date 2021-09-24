@@ -131,9 +131,14 @@ public class ScheduledService {
                                     double reducedPrice = price * (100 - discount) / 100;
                                     String currency = poLine.getPrice().getCurrency().getValue();
                                     if (reducedPrice != 0.0) {
-                                        item.getItemData().setInventoryPrice(String.format("%.2f %s", reducedPrice, currency));
+                                        String newPrice;
+                                        if ("EUR".equals(currency))
+                                            newPrice = String.format("%.2f", reducedPrice);
+                                        else
+                                            newPrice = String.format("%.2f %s", price, currency);
+                                        item.getItemData().setInventoryPrice(newPrice);
                                         itemUpdated = true;
-                                        log.debug(String.format("updated item inventory price to %.2f %s", reducedPrice, currency));
+                                        log.debug(String.format("updated item inventory price to %s", newPrice));
                                     }
                                 } catch (Exception e) {
                                     log.warn(String.format("could not calculate reduced price because: %s", e.getMessage()));
