@@ -133,6 +133,15 @@ public class BubiOrderService {
     private List<BubiOrder> getBubiOrderEntites(String mode) {
         List<BubiOrder> orderEntities = new ArrayList<>();
         switch (mode) {
+            case "JOURNAL":
+                orderEntities.addAll(this.bubiOrderRepository.findAllByMediaTypeOrderByBubiOrderId("JOURNAL"));
+                break;
+            case "BOOK":
+                orderEntities.addAll(this.bubiOrderRepository.findAllByMediaTypeOrderByBubiOrderId("BOOK"));
+                break;
+            case "SERIES":
+                orderEntities.addAll(this.bubiOrderRepository.findAllByMediaTypeOrderByBubiOrderId("SERIES"));
+                break;
             case "all":
                 this.bubiOrderRepository.findAll().forEach(orderEntities::add);
                 break;
@@ -321,9 +330,11 @@ public class BubiOrderService {
         BubiOrderLine bubiOrderLine = this.bubiOrderLineRepository.findById(bubiOrderlineId).orElse(null);
         BubiOrder bubiOrder = this.bubiOrderRepository.findById(bubiOrderId).orElse(null);
         if (bubiOrderLine != null && bubiOrder != null) {
+            long positionalNumber = bubiOrder.getBubiOrderLines().size() + 1;
             this.almaSetService.addPositionsToSet(bubiOrder.getAlmaSetId(), bubiOrderLine);
             bubiOrder.addBubiOrderLine(bubiOrderLine);
             bubiOrderLine.setBubiOrder(bubiOrder);
+            bubiOrderLine.setPositionalNumber(positionalNumber);
             if (bubiOrderLine.getStandard())
                 bubiOrderLine.setTitle("Sammelauftrag");
             bubiOrder.setLastChange(new Date());

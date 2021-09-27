@@ -118,8 +118,10 @@ public class BubiOrderLineService {
             log.info("retrieving bubi order " + bubiOrderId);
             if (bubiOrder == null)
                 bubiOrder = this.bubiOrderService.createNewBubiOrder(bubiOrderLineFullDto.getBubiOrderId(), bubiOrderLine);
+            bubiOrderLine.setPositionalNumber(bubiOrder.getBubiOrderLines().size() +1);
             bubiOrderLine.setBubiOrder(bubiOrder);
             bubiOrderLine.setStatus(BubiStatus.PACKED);
+
             if (bubiOrder.getAlmaSetId() != null && !bubiOrder.getAlmaSetId().isEmpty()) {
                 String oldSetId = bubiOrderLine.getAlmaSetId();
                 if (oldSetId != null && !oldSetId.isEmpty() && !oldSetId.equals(bubiOrder.getAlmaSetId()))

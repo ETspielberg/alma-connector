@@ -45,6 +45,9 @@ public class BubiData {
     @Column(name="price_per_hour")
     private double pricePerHour = 0.0;
 
+    @Column(name="price_preserve_front_pages")
+    private double pricePreserveFrontPages = 0.0;
+
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "bubiData")
     private List<BubiPrice> bubiPrices = new ArrayList<>();
 
@@ -152,6 +155,14 @@ public class BubiData {
 
     public void setPriceMapSlideWithCorrection(double priceMapSlideWithCorrection) {
         this.priceMapSlideWithCorrection = priceMapSlideWithCorrection;
+    }
+
+    public double getPricePreserveFrontPages() {
+        return pricePreserveFrontPages;
+    }
+
+    public void setPricePreserveFrontPages(double pricePreserveFrontPages) {
+        this.pricePreserveFrontPages = pricePreserveFrontPages;
     }
 
     public BubiPrice retrieveExecutionPrice(String binding, String cover, String materialType) {

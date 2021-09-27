@@ -80,6 +80,8 @@ public class BubiOrderLineFullDto {
 
     private boolean withoutRemoval = false;
 
+    private boolean preserveFrontPages = false;
+
     private double hours = 0;
 
     private int numberItems = 1;
@@ -143,6 +145,7 @@ public class BubiOrderLineFullDto {
         this.mapSlideWithCorrection = bubiOrderLine.getMapSlideWithCorrection();
         this.priceCorrection = bubiOrderLine.getPriceCorrection();
         this.priceCorrectionComment = bubiOrderLine.getPriceCorrectionComment();
+        this.preserveFrontPages = bubiOrderLine.getPreserveFrontPages();
     }
 
     public void updateBubiOrderLine(BubiOrderLine bubiOrderLine) {
@@ -175,5 +178,6 @@ public class BubiOrderLineFullDto {
         bubiOrderLine.setMapSlideWithCorrection(this.mapSlideWithCorrection);
         bubiOrderLine.setPriceCorrection(this.priceCorrection);
         bubiOrderLine.setPriceCorrectionComment(this.priceCorrectionComment);
+        bubiOrderLine.setPreserveFrontPages(this.preserveFrontPages);
     }
 }

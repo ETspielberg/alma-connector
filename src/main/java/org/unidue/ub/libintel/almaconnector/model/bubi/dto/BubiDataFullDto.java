@@ -33,6 +33,8 @@ public class BubiDataFullDto {
 
     private double pricePerHour = 0.0;
 
+    private double pricePreserveFrontPages = 0.0;
+
     private List<BubiPrice> prices = new ArrayList<>();
 
     public BubiDataFullDto() {
@@ -51,6 +53,7 @@ public class BubiDataFullDto {
         this.priceSecurityStrip = bubiData.getPriceSecurityStrip();
         this.pricePerHour = bubiData.getPricePerHour();
         this.prices = bubiData.getBubiPrices();
+        this.pricePreserveFrontPages = bubiData.getPricePreserveFrontPages();
     }
 
     public void updateBubidata(BubiData bubiData) {
@@ -65,5 +68,6 @@ public class BubiDataFullDto {
         bubiData.setPriceSecurityStrip(this.priceSecurityStrip);
         bubiData.setPricePerHour(this.pricePerHour);
         bubiData.setBubiPrices(this.prices);
+        bubiData.setPricePreserveFrontPages(this.pricePreserveFrontPages);
     }
 }

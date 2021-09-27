@@ -60,11 +60,14 @@ public class BubiOrderFullDto {
 
     private String additionalCostsFund;
 
+    public String mediaType;
+
     public BubiOrderFullDto() {
     }
 
     /**
      * creates a full bubi order data transfer object from a BubiOrder object
+     *
      * @param bubiOrder the BubiOrder object
      */
     public BubiOrderFullDto(BubiOrder bubiOrder) {
@@ -90,17 +93,18 @@ public class BubiOrderFullDto {
         this.additionalCosts = bubiOrder.getAdditionalCosts();
         this.additionalCostsComment = bubiOrder.getAdditionalCostsComment();
         this.additionalCostsFund = bubiOrder.getAdditionalCostsFund();
-
+        this.mediaType = bubiOrder.getMediaType();
     }
 
     /**
      * updates the following fields from a submitted BubiOrderFullDto object:
-     *  - collected on
-     *  - returnwd
-     *  - comment
-     *  - invoice date
-     *  - invoice number
-     *  - total amount
+     * - collected on
+     * - returnwd
+     * - comment
+     * - invoice date
+     * - invoice number
+     * - total amount
+     *
      * @param bubiOrder the BubiOrder object to be updated
      */
     public void update(BubiOrder bubiOrder) {

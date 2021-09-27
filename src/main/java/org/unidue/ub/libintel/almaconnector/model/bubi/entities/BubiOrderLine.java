@@ -124,6 +124,9 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
     @Column(name="without_removal")
     private boolean withoutRemoval = false;
 
+    @Column(name="preserve_front_pages")
+    private boolean preserveFrontPages = false;
+
     @Column(name="hours")
     private double hours = 0;
 
@@ -522,6 +525,14 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
 
     public void setPriceCorrectionComment(String priceCorrectionComment) {
         this.priceCorrectionComment = priceCorrectionComment;
+    }
+
+    public boolean getPreserveFrontPages() {
+        return preserveFrontPages;
+    }
+
+    public void setPreserveFrontPages(boolean preserveFrontPages) {
+        this.preserveFrontPages = preserveFrontPages;
     }
 
     @Override

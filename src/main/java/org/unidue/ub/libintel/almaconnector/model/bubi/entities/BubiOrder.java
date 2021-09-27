@@ -86,6 +86,9 @@ public class BubiOrder {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date returnedOn;
 
+    @Column(name = "media_type")
+    private String mediaType;
+
     public BubiOrder() {
         this.bubiOrderLines = new HashSet<>();
         this.counter = 0;
@@ -317,6 +320,13 @@ public class BubiOrder {
         return this.retrieveOrderlines().size();
     }
 
+    public String getMediaType() {
+        return mediaType;
+    }
+
+    public void setMediaType(String mediaType) {
+        this.mediaType = mediaType;
+    }
 
     public double calculateTotalPrice() {
         this.totalAmount = 0.00;

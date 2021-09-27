@@ -12,5 +12,7 @@ public interface BubiOrderRepository  extends CrudRepository<BubiOrder, String> 
 
     List<BubiOrder> findAllByBubiStatusOrderByBubiOrderId(BubiStatus BubiStatus);
 
+    List<BubiOrder> findAllByMediaTypeOrderByBubiOrderId(String mediaType);
+
     long countAllByVendorAccount(String vendorAccount);
 }
