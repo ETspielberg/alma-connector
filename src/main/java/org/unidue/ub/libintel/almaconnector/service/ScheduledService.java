@@ -17,10 +17,7 @@ import org.unidue.ub.libintel.almaconnector.model.usage.SingleRequestData;
 import org.unidue.ub.libintel.almaconnector.service.alma.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * service controlling scheduled tasks.
@@ -133,9 +130,9 @@ public class ScheduledService {
                                     if (reducedPrice != 0.0) {
                                         String newPrice;
                                         if ("EUR".equals(currency))
-                                            newPrice = String.format("%.2f", reducedPrice);
+                                            newPrice = String.format(Locale.GERMAN,"%.2f", reducedPrice);
                                         else
-                                            newPrice = String.format("%.2f %s", price, currency);
+                                            newPrice = String.format(Locale.GERMAN,"%.2f %s", price, currency);
                                         item.getItemData().setInventoryPrice(newPrice);
                                         itemUpdated = true;
                                         log.debug(String.format("updated item inventory price to %s", newPrice));
