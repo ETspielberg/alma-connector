@@ -209,17 +209,8 @@ public class ScheduledService {
     /**
      * runs the elisa import job on additional times during the week
      */
-    @Scheduled(cron = "0 0 7,11,15,19 * * 1,2,3,4,5")
+    @Scheduled(cron = "0 0 7,15 * * 1,2,3,4,5")
     public void runElisaImportDuringWeek() {
-        if (profile.equals("dev")) return;
-        this.almaJobsService.runElisaImportJob();
-    }
-
-    /**
-     * runs the elisa import job on additional times at the weekend
-     */
-    @Scheduled(cron = "0 0 7 * * 6")
-    public void runElisaImportAtWeekEnd() {
         if (profile.equals("dev")) return;
         this.almaJobsService.runElisaImportJob();
     }
