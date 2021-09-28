@@ -112,9 +112,7 @@ public class HookService {
                         // try to create bubi order line
                         try {
                             BubiOrderLine bubiOrderLine = this.bubiOrderLineService.expandBubiOrderLineFromItem(item);
-                            this.bubiOrderLineService.saveBubiOrderLine(bubiOrderLine);
                             log.info(String.format("created new bubi order line %s for %s: %s", bubiOrderLine.getBubiOrderLineId(), bubiOrderLine.getCollection(), bubiOrderLine.getShelfmark()));
-
                         } catch (Exception exception) {
                             log.error("could not create bubi order line", exception);
                         }
