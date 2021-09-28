@@ -23,6 +23,7 @@ import org.unidue.ub.libintel.almaconnector.service.alma.AlmaSetService;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * offers functions around bubi orders
@@ -113,21 +114,18 @@ public class BubiOrderService {
     }
 
     /**
-     * retrieves a list of bubi orders by a given mode
+     * retrieves a list of bubi orders by a given media type and vendor account
      *
-     * @param mode the mode for which the bubi orders are to be retrieved. currently supported:
-     *             'all': retrieves all bubi orders from the repository
-     *             'sent': retrieves all sent, but not yet returned bubi orders
-     *             'complaint': retrieves all bubi orders with complaints
-     *             'closed': retrieves all bubi orders which are already closed
-     *             in all other cases all active bubi orders are retrieved (all except closed
+     * @param mediaType the media tye for which the bubi orders are to be retrieved. currently supported:
+     *             'BOOK': retrieves all bubi orders from the repository
+     *             'JOURNAL': retrieves all sent, but not yet returned bubi orders
+     *             'SERIES': retrieves all bubi orders with complaints
+     * @param vendorAccount the vendorAccount for which the orders are to be retrieved
      * @return a list of bubi order
      */
-    public List<BubiOrderShortDto> getShortBubiOrders(String mode) {
-        List<BubiOrder> orderEntities = getBubiOrderEntites(mode);
-        List<BubiOrderShortDto> orders = new ArrayList<>();
-        orderEntities.forEach(entry -> orders.add(new BubiOrderShortDto(entry)));
-        return orders;
+    public List<BubiOrderShortDto> getShortBubiOrders(String mediaType, String vendorAccount) {
+        List<BubiOrder> orderEntities = this.bubiOrderRepository.findAllByMediaTypeAndVendorAccountOrderByBubiOrderId(mediaType, vendorAccount);
+        return orderEntities.stream().map(BubiOrderShortDto::new).collect(Collectors.toList());
     }
 
     private List<BubiOrder> getBubiOrderEntites(String mode) {

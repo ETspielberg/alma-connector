@@ -244,9 +244,11 @@ public class BubiOrderLineService {
                 campus = "D0001";
         }
         // determine material type
-        String material = MediaType.BOOK.name();
+        String material;
         if ("ISSBD".equals(item.getItemData().getPhysicalMaterialType().getValue()))
             material = MediaType.JOURNAL.name();
+        else
+            material = MediaType.BOOK.name();
         // determine counter and create new orderline
         long counter = this.bubiOrderLineRepository.countAllByShelfmarkAndCollection(shelfmark, collection);
         BubiOrderLine bubiOrderLine = new BubiOrderLine(collection, shelfmark, counter);
@@ -269,16 +271,19 @@ public class BubiOrderLineService {
             position.setBubiOrderLine(bubiOrderLine);
             this.bubiOrderLinePositionRepository.save(position);
             bubiOrderLine.addPosition(position);
-            bubiOrderLine.addCoreData(coredata, true);
+            bubiOrderLine.addCoreData(coredata);
         } else {
             // if coredata are found, the properties for execution (cover, binding etc.) are added from the core data.
-            // in addition, the mms and holding ids are set in the position
             log.debug("found core data");
-            bubiOrderLine.addCoreData(coredata, false);
-            bubiOrderLine.addPositionCoredata(coredata);
+            bubiOrderLine.addCoreData(coredata);
+            // in addition, the mms and holding ids are set in the position
+            bubiOrderLine.addPositionFromCoredata(coredata);
         }
+        // data concerning the vendor are added
         addDataFromVendor(bubiOrderLine);
+        // the price ist calculated
         this.bubiPricesService.calculatePriceForOrderline(bubiOrderLine);
+        // the orderline is saved
         this.bubiOrderLineRepository.save(bubiOrderLine);
         return bubiOrderLine;
     }
@@ -349,7 +354,7 @@ public class BubiOrderLineService {
     private boolean addCoreData(BubiOrderLine bubiOrderLine) {
         CoreData coredata = this.coreDataService.getForCollectionAndShelfmark(bubiOrderLine.getCollection(), bubiOrderLine.getShelfmark());
         if (coredata != null) {
-            bubiOrderLine.addCoreData(coredata, false);
+            bubiOrderLine.addCoreData(coredata);
             return true;
         }
         return false;

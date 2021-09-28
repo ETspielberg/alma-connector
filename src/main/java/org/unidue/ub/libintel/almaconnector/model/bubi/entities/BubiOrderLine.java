@@ -163,7 +163,7 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         this.updateBubiOrderLineId();
     }
 
-    public void addCoreData(CoreData coredata, boolean standard) {
+    public void addCoreData(CoreData coredata) {
         if (coredata == null)
             return;
         this.lastChange = new Date();
@@ -174,7 +174,7 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         this.cover = coredata.getCover();
         if (this.mediaType == null)
             this.mediaType = coredata.getMediaType();
-        this.standard = standard;
+        this.standard = coredata.getStandard();
         this.minting = coredata.getMinting();
         if (this.title == null) {
             if (coredata.getTitle() != null)
@@ -194,7 +194,7 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         this.vendorAccount = coredata.getVendorAccount();
     }
 
-    public void addPositionCoredata(CoreData coredata) {
+    public void addPositionFromCoredata(CoreData coredata) {
         BubiOrderlinePosition bubiOrderlinePosition = new BubiOrderlinePosition()
                 .withVolume(coredata.getPositionVolume())
                 .withDescription(coredata.getPositionDescription())

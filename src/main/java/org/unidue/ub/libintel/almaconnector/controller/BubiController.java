@@ -207,8 +207,8 @@ public class BubiController {
     }
 
     @GetMapping("/order/list")
-    public ResponseEntity<List<BubiOrderShortDto>> getOrderOverview(String mode) {
-        return ResponseEntity.ok(this.bubiOrderService.getShortBubiOrders(mode));
+    public ResponseEntity<List<BubiOrderShortDto>> getOrderOverview(String mediaType, String vendorAccount) {
+        return ResponseEntity.ok(this.bubiOrderService.getShortBubiOrders(mediaType, vendorAccount));
     }
 
     @GetMapping("/order/retrieve")
