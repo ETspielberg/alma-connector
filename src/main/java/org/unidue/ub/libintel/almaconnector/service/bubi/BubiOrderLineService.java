@@ -260,28 +260,22 @@ public class BubiOrderLineService {
             coredata = this.coreDataService.findDefaultForMaterial(material, campus);
             bubiOrderLine.setTitle(item.getBibData().getTitle());
             bubiOrderLine.setAlmaMmsId(item.getBibData().getMmsId());
-            bubiOrderLine.getBubiOrderlinePositions().forEach(position -> {
-                position.setInternalNote(collection + ": " + shelfmark);
-                position.setDescription(item.getBibData().getTitle());
-                position.setAlmaMmsId(item.getBibData().getMmsId());
-                position.setAlmaHoldingId(item.getHoldingData().getHoldingId());
-                position.setAlmaItemId(item.getItemData().getPid());
-                position.setBubiOrderLine(bubiOrderLine);
-                this.bubiOrderLinePositionRepository.save(position);
-            });
+            BubiOrderlinePosition position = new BubiOrderlinePosition()
+                    .withDescription(item.getBibData().getTitle())
+                    .withInternalNote(collection + ": " + shelfmark)
+                    .withMmsId(item.getBibData().getMmsId())
+                    .withHoldingId(item.getHoldingData().getHoldingId())
+                    .withItemId(item.getItemData().getPid());
+            position.setBubiOrderLine(bubiOrderLine);
+            this.bubiOrderLinePositionRepository.save(position);
+            bubiOrderLine.addPosition(position);
             bubiOrderLine.addCoreData(coredata, true);
         } else {
             // if coredata are found, the properties for execution (cover, binding etc.) are added from the core data.
             // in addition, the mms and holding ids are set in the position
             log.debug("found core data");
             bubiOrderLine.addCoreData(coredata, false);
-            bubiOrderLine.getBubiOrderlinePositions().forEach(position -> {
-                position.setAlmaMmsId(item.getBibData().getMmsId());
-                position.setAlmaHoldingId(item.getHoldingData().getHoldingId());
-                position.setAlmaItemId(item.getItemData().getPid());
-                position.setBubiOrderLine(bubiOrderLine);
-                this.bubiOrderLinePositionRepository.save(position);
-            });
+            bubiOrderLine.addPositionCoredata(coredata);
         }
         addDataFromVendor(bubiOrderLine);
         this.bubiPricesService.calculatePriceForOrderline(bubiOrderLine);

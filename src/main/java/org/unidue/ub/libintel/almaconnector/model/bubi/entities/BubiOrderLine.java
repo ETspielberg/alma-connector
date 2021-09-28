@@ -184,6 +184,17 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
         }
         if (this.almaMmsId == null)
             this.almaMmsId = coredata.getAlmaMmsId();
+        this.securityStrip = coredata.getSecurityStrip();
+        this.mapSlide = coredata.getMapSlide();
+        this.bindPublisherSleeve = coredata.getBindPublisherSleeve();
+        this.coverBack = coredata.getCoverBack();
+        this.withoutRemoval = coredata.getWithoutRemoval();
+        this.hours = coredata.getHours();
+        this.standard = coredata.getStandard();
+        this.vendorAccount = coredata.getVendorAccount();
+    }
+
+    public void addPositionCoredata(CoreData coredata) {
         BubiOrderlinePosition bubiOrderlinePosition = new BubiOrderlinePosition()
                 .withVolume(coredata.getPositionVolume())
                 .withDescription(coredata.getPositionDescription())
@@ -192,13 +203,6 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
                 .withMmsId(coredata.getAlmaMmsId())
                 .withHoldingId(coredata.getAlmaHoldingId());
         this.bubiOrderlinePositions.add(bubiOrderlinePosition);
-        this.securityStrip = coredata.getSecurityStrip();
-        this.mapSlide = coredata.getMapSlide();
-        this.bindPublisherSleeve = coredata.getBindPublisherSleeve();
-        this.coverBack = coredata.getCoverBack();
-        this.withoutRemoval = coredata.getWithoutRemoval();
-        this.hours = coredata.getHours();
-        this.standard = coredata.getStandard();
     }
 
     public void addAlmaItemData(AlmaItemData almaItemData) {
@@ -579,6 +583,10 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
 
     public void addPositions(Set<BubiOrderlinePosition> bubiOrderlinePositions) {
         this.bubiOrderlinePositions.addAll(bubiOrderlinePositions);
+    }
+
+    public void addPosition(BubiOrderlinePosition bubiOrderlinePosition) {
+        this.bubiOrderlinePositions.add(bubiOrderlinePosition);
     }
 
     public void addComment(String comment) {
