@@ -63,7 +63,7 @@ public class HookService {
     @Async("threadPoolTaskExecutor")
     public void processRequestHook(RequestHook hook) {
         HookUserRequest userRequest = hook.getUserRequest();
-        log.info("received user request: " + userRequest.toString());
+        log.debug("received user request: " + userRequest.toString());
         if ("WORK_ORDER".equals(userRequest.getRequestType()) && "Int".equals(userRequest.getRequestSubType().getValue())) {
             switch (userRequest.getTargetDestination().getValue()) {
                 case "Buchbinder": {
@@ -80,12 +80,21 @@ public class HookService {
                         break;
                     }
 
+                    // determine library for further temporary locations
+                    String library = item.getItemData().getLibrary().getValue();
 
+                    // handle request creation
                     if (HookEventTypes.REQUEST_CREATED.name().equals(hook.getEvent().getValue())) {
-                        item.getItemData().setPublicNote("wird gebunden");
-                        String library = item.getItemData().getLibrary().getValue();
-                        item.getHoldingData().setInTempLocation(false);
 
+                        // attach "wird gebunden" to note
+                        String note = item.getItemData().getPublicNote();
+                        if (note == null || note.isEmpty())
+                            item.getItemData().setPublicNote("wird gebunden");
+                        else
+                            item.getItemData().setPublicNote(note + " wird gebunden");
+
+                        // set temporary location to Buchbinder
+                        item.getHoldingData().setInTempLocation(false);
                         switch (library) {
                             case "E0001":
                             case "E0023": {
@@ -100,20 +109,44 @@ public class HookService {
                             }
                         }
 
+                        // try to create bubi order line
+                        try {
+                            BubiOrderLine bubiOrderLine = this.bubiOrderLineService.expandBubiOrderLineFromItem(item);
+                            this.bubiOrderLineService.saveBubiOrderLine(bubiOrderLine);
+                            log.info(String.format("created new bubi order line %s for %s: %s", bubiOrderLine.getBubiOrderLineId(), bubiOrderLine.getCollection(), bubiOrderLine.getShelfmark()));
+
+                        } catch (Exception exception) {
+                            log.error("could not create bubi order line", exception);
+                        }
+
+                    // handle closing of request (return from bubi
                     } else if (HookEventTypes.REQUEST_CLOSED.name().equals(hook.getEvent().getValue())) {
-                        item.getItemData().setPublicNote("");
-                        item.getHoldingData().setInTempLocation(false);
+                        // remove "wird gebunden" from note
+                        item.getItemData().setPublicNote(item.getItemData().getPublicNote().replace("wird gebunden", "").strip());
+                        // if it is bound issue, set it to the non-publishing temporary location
+                        if ("ISSBD".equals(userRequest.getMaterialType().getValue())) {
+                            item.getHoldingData().setInTempLocation(true);
+                            switch (library) {
+                                case "E0001":
+                                case "E0023": {
+                                    item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("ENP"));
+                                    item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("E0001"));
+                                    break;
+                                }
+                                case "D0001": {
+                                    item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("DNP"));
+                                    item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("D0001"));
+                                    break;
+                                }
+                            }
+                        } else {
+                            item.getHoldingData().setInTempLocation(false);
+                            item.getHoldingData().tempLocation(null);
+                            item.getHoldingData().tempLibrary(null);
+                        }
                     }
                     this.almaItemService.updateItem(item);
-                    try {
-                        BubiOrderLine bubiOrderLine = this.bubiOrderLineService.expandBubiOrderLineFromItem(item);
-                        this.bubiOrderLineService.saveBubiOrderLine(bubiOrderLine);
-                        log.info(String.format("created new bubi order line %s for %s: %s", bubiOrderLine.getBubiOrderLineId(), bubiOrderLine.getCollection(), bubiOrderLine.getShelfmark()));
-
-                    } catch (Exception exception ) {
-                        log.error("could not create bubi order line", exception);
-                    }
-                     break;
+                    break;
                 }
                 case "Aussonderung": {
                     log.info("retrieved internal work order for Aussonderung");
