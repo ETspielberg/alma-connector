@@ -376,7 +376,10 @@ public class BubiOrderService {
         bubiOrder.setAlmaSetName(orderName);
         Set set = this.almaSetService.createSet(orderName, bubiOrder.getComment());
         bubiOrderline.getBubiOrderlinePositions().forEach(
-                bubiOrderlinePosition -> this.almaSetService.addMemberToSet(bubiOrder.getAlmaSetId(), bubiOrderlinePosition.getAlmaItemId(), bubiOrderline.getTitle())
+                bubiOrderlinePosition -> {
+                    if (bubiOrderlinePosition.getAlmaItemId() != null && !bubiOrderlinePosition.getAlmaItemId().isEmpty())
+                        this.almaSetService.addMemberToSet(bubiOrder.getAlmaSetId(), bubiOrderlinePosition.getAlmaItemId(), bubiOrderline.getTitle());
+                }
         );
         bubiOrder.setAlmaSetId(set.getId());
         return this.bubiOrderRepository.save(bubiOrder);

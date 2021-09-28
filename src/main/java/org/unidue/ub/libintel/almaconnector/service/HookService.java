@@ -8,10 +8,7 @@ import org.unidue.ub.alma.shared.bibs.*;
 import org.unidue.ub.alma.shared.user.Address;
 import org.unidue.ub.alma.shared.user.AlmaUser;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderLine;
-import org.unidue.ub.libintel.almaconnector.model.hook.BibHook;
-import org.unidue.ub.libintel.almaconnector.model.hook.ItemHook;
-import org.unidue.ub.libintel.almaconnector.model.hook.LoanHook;
-import org.unidue.ub.libintel.almaconnector.model.hook.RequestHook;
+import org.unidue.ub.libintel.almaconnector.model.hook.*;
 import org.unidue.ub.libintel.almaconnector.service.alma.*;
 import org.unidue.ub.libintel.almaconnector.service.bubi.BubiOrderLineService;
 
@@ -66,10 +63,11 @@ public class HookService {
     @Async("threadPoolTaskExecutor")
     public void processRequestHook(RequestHook hook) {
         HookUserRequest userRequest = hook.getUserRequest();
-        log.debug("received user request: " + userRequest.toString());
+        log.info("received user request: " + userRequest.toString());
         if ("WORK_ORDER".equals(userRequest.getRequestType()) && "Int".equals(userRequest.getRequestSubType().getValue())) {
             switch (userRequest.getTargetDestination().getValue()) {
                 case "Buchbinder": {
+                    //first: retrieve item if it is a book or bound issue
                     Item item;
                     if ("BOOK".equals(userRequest.getMaterialType().getValue())) {
                         log.debug(String.format("retrieving barcode %s", userRequest.getBarcode()));
@@ -81,22 +79,30 @@ public class HookService {
                         log.info("Buchbinder request not for book or bounded issue: " + userRequest.getMaterialType().getValue());
                         break;
                     }
-                    item.getItemData().setPublicNote("wird gebunden");
-                    String library = item.getItemData().getLibrary().getValue();
-                    item.getHoldingData().setInTempLocation(false);
 
-                    switch (library) {
-                        case "E0001":
-                        case "E0023": {
-                            item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("EBB"));
-                            item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("E0001"));
-                            break;
+
+                    if (HookEventTypes.REQUEST_CREATED.name().equals(hook.getEvent().getValue())) {
+                        item.getItemData().setPublicNote("wird gebunden");
+                        String library = item.getItemData().getLibrary().getValue();
+                        item.getHoldingData().setInTempLocation(false);
+
+                        switch (library) {
+                            case "E0001":
+                            case "E0023": {
+                                item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("EBB"));
+                                item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("E0001"));
+                                break;
+                            }
+                            case "D0001": {
+                                item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("DBB"));
+                                item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("D0001"));
+                                break;
+                            }
                         }
-                        case "D0001": {
-                            item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("DBB"));
-                            item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("D0001"));
-                            break;
-                        }
+
+                    } else if (HookEventTypes.REQUEST_CLOSED.name().equals(hook.getEvent().getValue())) {
+                        item.getItemData().setPublicNote("");
+                        item.getHoldingData().setInTempLocation(false);
                     }
                     this.almaItemService.updateItem(item);
                     try {
