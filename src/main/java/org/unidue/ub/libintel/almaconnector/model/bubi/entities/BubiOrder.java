@@ -53,13 +53,13 @@ public class BubiOrder {
     private Double totalAmount;
 
     @Column(name="additional_costs")
-    private Double additionalCosts;
+    private Double additionalCosts = 0.0;
 
     @Column(name="additional_costs_comment")
-    private String additionalCostsComment;
+    private String additionalCostsComment = "";
 
     @Column(name="additional_costs_fund")
-    private String additionalCostsFund;
+    private String additionalCostsFund = "";
 
     @Column(name="created")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")

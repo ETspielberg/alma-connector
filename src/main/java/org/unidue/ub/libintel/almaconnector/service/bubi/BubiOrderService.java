@@ -374,6 +374,7 @@ public class BubiOrderService {
         long counter = this.bubiOrderRepository.countAllByVendorAccount(bubiOrderline.getVendorAccount()) + 1;
         BubiOrder bubiOrder = new BubiOrder(bubiOrderline.getVendorAccount(), counter);
         bubiOrder.setAlmaSetName(orderName);
+        bubiOrder.setMediaType(bubiOrderline.getMediaType());
         Set set = this.almaSetService.createSet(orderName, bubiOrder.getComment());
         bubiOrderline.getBubiOrderlinePositions().forEach(
                 bubiOrderlinePosition -> {

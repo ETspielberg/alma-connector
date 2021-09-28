@@ -266,6 +266,8 @@ public class BubiOrderLineService {
                 position.setAlmaMmsId(item.getBibData().getMmsId());
                 position.setAlmaHoldingId(item.getHoldingData().getHoldingId());
                 position.setAlmaItemId(item.getItemData().getPid());
+                position.setBubiOrderLine(bubiOrderLine);
+                this.bubiOrderLinePositionRepository.save(position);
             });
             bubiOrderLine.addCoreData(coredata, true);
         } else {
@@ -277,6 +279,8 @@ public class BubiOrderLineService {
                 position.setAlmaMmsId(item.getBibData().getMmsId());
                 position.setAlmaHoldingId(item.getHoldingData().getHoldingId());
                 position.setAlmaItemId(item.getItemData().getPid());
+                position.setBubiOrderLine(bubiOrderLine);
+                this.bubiOrderLinePositionRepository.save(position);
             });
         }
         addDataFromVendor(bubiOrderLine);
