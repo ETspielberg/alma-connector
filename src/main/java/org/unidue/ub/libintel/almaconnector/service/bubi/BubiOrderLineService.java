@@ -273,10 +273,14 @@ public class BubiOrderLineService {
             // in addition, the mms and holding ids are set in the position
             log.debug("found core data");
             bubiOrderLine.addCoreData(coredata, false);
-            bubiOrderLine.getBubiOrderlinePositions().forEach(position -> position.setAlmaItemId(item.getItemData().getPid()));
+            bubiOrderLine.getBubiOrderlinePositions().forEach(position -> {
+                position.setAlmaMmsId(item.getBibData().getMmsId());
+                position.setAlmaHoldingId(item.getHoldingData().getHoldingId());
+                position.setAlmaItemId(item.getItemData().getPid());
+            });
         }
-
         addDataFromVendor(bubiOrderLine);
+        this.bubiPricesService.calculatePriceForOrderline(bubiOrderLine);
         this.bubiOrderLineRepository.save(bubiOrderLine);
         return bubiOrderLine;
     }
