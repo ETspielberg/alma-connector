@@ -269,9 +269,11 @@ public class BubiOrderLineService {
                     .withHoldingId(item.getHoldingData().getHoldingId())
                     .withItemId(item.getItemData().getPid());
             position.setBubiOrderLine(bubiOrderLine);
-            this.bubiOrderLinePositionRepository.save(position);
             bubiOrderLine.addPosition(position);
             bubiOrderLine.addCoreData(coredata);
+            this.bubiOrderLineRepository.save(bubiOrderLine);
+            this.bubiOrderLinePositionRepository.save(position);
+
         } else {
             // if coredata are found, the properties for execution (cover, binding etc.) are added from the core data.
             log.debug("found core data");
