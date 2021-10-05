@@ -333,8 +333,6 @@ public class BubiOrderService {
             bubiOrder.addBubiOrderLine(bubiOrderLine);
             bubiOrderLine.setBubiOrder(bubiOrder);
             bubiOrderLine.setPositionalNumber(positionalNumber);
-            if (bubiOrderLine.getStandard())
-                bubiOrderLine.setTitle("Sammelauftrag");
             bubiOrder.setLastChange(new Date());
             this.bubiOrderLineRepository.save(bubiOrderLine);
             this.bubiOrderRepository.save(bubiOrder);

@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.unidue.ub.libintel.almaconnector.model.bubi.dto.*;
+import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderLine;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiPrice;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrder;
 import org.unidue.ub.libintel.almaconnector.service.PrimoService;
@@ -219,6 +220,11 @@ public class BubiController {
     @PostMapping("/order/pack")
     public ResponseEntity<List<BubiOrderFullDto>> packOrders(@RequestBody BubiOrder bubiOrder) {
         return ResponseEntity.ok(this.bubiOrderService.packBubiOrder(bubiOrder));
+    }
+
+    @PostMapping("/order/{orderId}/add")
+    public ResponseEntity<BubiOrderFullDto> addOrderlineToOrder(@PathVariable String orderId, @RequestBody BubiOrderLineBriefDto bubiOrderline) {
+        return ResponseEntity.ok(this.bubiOrderService.addOrderLine(orderId, bubiOrderline.getBubiOrderLineId()));
     }
 
     @PutMapping("/order/update")

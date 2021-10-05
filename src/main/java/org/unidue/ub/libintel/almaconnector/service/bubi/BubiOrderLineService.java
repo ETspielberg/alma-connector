@@ -85,21 +85,11 @@ public class BubiOrderLineService {
     }
 
     /**
-     * saves a bubi orderline to the repositroy
+     * saves a bubi orderline full DTO to the repositroy, adds positions to set
      *
-     * @param bubiOrderLine the bubi orderline to be saved
+     * @param bubiOrderLineFullDto the bubi orderline full DTO to be saved
      * @return the saved bubi orderline
      */
-    public BubiOrderLine saveBubiOrderLine(BubiOrderLine bubiOrderLine) {
-        bubiOrderLine.setLastChange(new Date());
-        for (BubiOrderlinePosition bubiOrderlinePosition : bubiOrderLine.getBubiOrderlinePositions()) {
-            bubiOrderlinePosition = bubiOrderLinePositionRepository.save(bubiOrderlinePosition);
-            bubiOrderlinePosition.setBubiOrderLine(bubiOrderLine);
-        }
-        bubiOrderLine = this.bubiOrderLineRepository.save(bubiOrderLine);
-        return bubiOrderLine;
-    }
-
     public BubiOrderLine saveBubiOrderLineFullDTO(BubiOrderLineFullDto bubiOrderLineFullDto) {
         BubiOrderLine bubiOrderLine = bubiOrderLineRepository.getBubiOrderLineByBubiOrderLineIdOrderByMinting(bubiOrderLineFullDto.getBubiOrderLineId());
         bubiOrderLineFullDto.updateBubiOrderLine(bubiOrderLine);
@@ -118,18 +108,23 @@ public class BubiOrderLineService {
             log.info("retrieving bubi order " + bubiOrderId);
             if (bubiOrder == null)
                 bubiOrder = this.bubiOrderService.createNewBubiOrder(bubiOrderLineFullDto.getBubiOrderId(), bubiOrderLine);
-            bubiOrderLine.setPositionalNumber(bubiOrder.getBubiOrderLines().size() +1);
+            bubiOrderLine.setPositionalNumber(bubiOrder.getBubiOrderLines().size() + 1);
             bubiOrderLine.setBubiOrder(bubiOrder);
             bubiOrderLine.setStatus(BubiStatus.PACKED);
 
             if (bubiOrder.getAlmaSetId() != null && !bubiOrder.getAlmaSetId().isEmpty()) {
                 String oldSetId = bubiOrderLine.getAlmaSetId();
-                if (oldSetId != null && !oldSetId.isEmpty() && !oldSetId.equals(bubiOrder.getAlmaSetId()))
-                    for (BubiOrderlinePosition bubiOrderlinePosition : bubiOrderLine.getBubiOrderlinePositions()) {
-                        this.almaSetService.removeMemberFromSet(oldSetId, bubiOrderlinePosition.getAlmaItemId());
-                        this.almaSetService.addMemberToSet(bubiOrder.getAlmaSetId(), bubiOrderlinePosition.getAlmaItemId(), bubiOrderLine.getTitle());
+                if (oldSetId != null && !oldSetId.isEmpty()) {
+                    if (!oldSetId.equals(bubiOrder.getAlmaSetId())) {
+                        for (BubiOrderlinePosition bubiOrderlinePosition : bubiOrderLine.getBubiOrderlinePositions()) {
+                            this.almaSetService.removeMemberFromSet(oldSetId, bubiOrderlinePosition.getAlmaItemId());
+                            this.almaSetService.addMemberToSet(bubiOrder.getAlmaSetId(), bubiOrderlinePosition.getAlmaItemId(), bubiOrderLine.getTitle());
+                        }
+                        bubiOrderLine.setAlmaSetId(bubiOrder.getAlmaSetId());
+                    } else {
+                        this.almaSetService.addPositionsToSet(oldSetId, bubiOrderLine);
                     }
-                bubiOrderLine.setAlmaSetId(bubiOrder.getAlmaSetId());
+                }
             }
         } else
             bubiOrderLine.setStatus(BubiStatus.WAITING);
@@ -293,7 +288,8 @@ public class BubiOrderLineService {
     /**
      * removes an orderline position from its parent orderline. If it is not a standard orderline, the position is just deleted
      * Otherwise, the orderline is cloned in the status NEW and the position is attached
-     * @param bubiOrderLineId the id of the orderline from which the position is to be removed
+     *
+     * @param bubiOrderLineId         the id of the orderline from which the position is to be removed
      * @param bubiOrderlinePositionId the id of the position which shall be removed
      * @return the updated bubi orderline data transfer object without the removed position
      */
