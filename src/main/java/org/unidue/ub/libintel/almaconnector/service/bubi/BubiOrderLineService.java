@@ -140,7 +140,7 @@ public class BubiOrderLineService {
                     this.almaSetService.removePositionsFromSet(oldSetId, bubiOrderLine);
 
                 // add the positions to the new set
-                this.almaSetService.addPositionsToSet(oldSetId, bubiOrderLine);
+                this.almaSetService.addPositionsToSet(bubiOrder.getAlmaSetId(), bubiOrderLine);
 
                 // set the new set id
                 bubiOrderLine.setAlmaSetId(bubiOrder.getAlmaSetId());
