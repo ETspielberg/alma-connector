@@ -91,40 +91,59 @@ public class BubiOrderLineService {
      * @return the saved bubi orderline
      */
     public BubiOrderLine saveBubiOrderLineFullDTO(BubiOrderLineFullDto bubiOrderLineFullDto) {
+        // load the existing orderline from the database
         BubiOrderLine bubiOrderLine = bubiOrderLineRepository.getBubiOrderLineByBubiOrderLineIdOrderByMinting(bubiOrderLineFullDto.getBubiOrderLineId());
+
+        //update the changed fields retrieved by the DTO
         bubiOrderLineFullDto.updateBubiOrderLine(bubiOrderLine);
+
+        // set the connection between the positions and the orderline and save the positions
         for (BubiOrderlinePosition bubiOrderlinePosition : bubiOrderLine.getBubiOrderlinePositions()) {
             bubiOrderlinePosition.setBubiOrderLine(bubiOrderLine);
             this.bubiOrderLinePositionRepository.save(bubiOrderlinePosition);
         }
+
+        // try to calculate the price for the orderline
         try {
             this.bubiPricesService.calculatePriceForOrderline(bubiOrderLine);
         } catch (PriceNotFoundException pnfe) {
             log.warn("could not calculate price - no price information available", pnfe);
         }
+
+        // retrieve the order id
         String bubiOrderId = bubiOrderLineFullDto.getBubiOrderId();
+
+        // if an order is given (id not null and not empty) retrieve the order and do the connections and set processing
         if (bubiOrderId != null && !bubiOrderId.isEmpty()) {
+
+            // retrieve the order
             BubiOrder bubiOrder = this.bubiOrderService.getBubiOrder(bubiOrderId);
-            log.info("retrieving bubi order " + bubiOrderId);
+
+            // if there is no corresponding order, create a new one using the non-existing orderId as new order (and set) name
             if (bubiOrder == null)
                 bubiOrder = this.bubiOrderService.createNewBubiOrder(bubiOrderLineFullDto.getBubiOrderId(), bubiOrderLine);
+
+            log.info(String.format("retrieving bubi order | orderId: %s, almaSetName: %s, almaSetId: %s", bubiOrderId, bubiOrder.getAlmaSetName(), bubiOrder.getAlmaSetId()));
+
+            // set the positional number, the bubi order, and the status for the orderline
             bubiOrderLine.setPositionalNumber(bubiOrder.getBubiOrderLines().size() + 1);
             bubiOrderLine.setBubiOrder(bubiOrder);
             bubiOrderLine.setStatus(BubiStatus.PACKED);
 
+            // handle the set operations, if the bubiOrder has a set id
             if (bubiOrder.getAlmaSetId() != null && !bubiOrder.getAlmaSetId().isEmpty()) {
+                // the stored orderline has still the set id of the old order (the set id is not updated by the DTO)
                 String oldSetId = bubiOrderLine.getAlmaSetId();
-                if (oldSetId != null && !oldSetId.isEmpty()) {
-                    if (!oldSetId.equals(bubiOrder.getAlmaSetId())) {
-                        for (BubiOrderlinePosition bubiOrderlinePosition : bubiOrderLine.getBubiOrderlinePositions()) {
-                            this.almaSetService.removeMemberFromSet(oldSetId, bubiOrderlinePosition.getAlmaItemId());
-                            this.almaSetService.addMemberToSet(bubiOrder.getAlmaSetId(), bubiOrderlinePosition.getAlmaItemId(), bubiOrderLine.getTitle());
-                        }
-                        bubiOrderLine.setAlmaSetId(bubiOrder.getAlmaSetId());
-                    } else {
-                        this.almaSetService.addPositionsToSet(oldSetId, bubiOrderLine);
-                    }
-                }
+
+                // compare the old set id from the retreived orderline with the set id from the order. if it is not the same (not null and not empty), remove the items from the old set. Then add the items to the new set.
+                if (oldSetId != null && !oldSetId.isEmpty() && !oldSetId.equals(bubiOrder.getAlmaSetId()))
+                    this.almaSetService.removePositionsFromSet(oldSetId, bubiOrderLine);
+
+                // add the positions to the new set
+                this.almaSetService.addPositionsToSet(oldSetId, bubiOrderLine);
+
+                // set the new set id
+                bubiOrderLine.setAlmaSetId(bubiOrder.getAlmaSetId());
             }
         } else
             bubiOrderLine.setStatus(BubiStatus.WAITING);
