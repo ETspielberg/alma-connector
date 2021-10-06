@@ -3,7 +3,6 @@ package org.unidue.ub.libintel.almaconnector.service.alma;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.unidue.ub.alma.shared.bibs.Item;
 import org.unidue.ub.alma.shared.conf.*;
 import org.unidue.ub.libintel.almaconnector.clients.alma.conf.SetsApiClient;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderLine;
@@ -24,17 +23,13 @@ public class AlmaSetService {
 
     private final SetsApiClient setsApiClient;
 
-    private final AlmaItemService almaItemService;
-
     /**
      * constructor based autowiring to the sets api client and the item service
      *
      * @param setsApiClient   the client for the sets api
-     * @param almaItemService the item service
      */
-    AlmaSetService(SetsApiClient setsApiClient, AlmaItemService almaItemService) {
+    AlmaSetService(SetsApiClient setsApiClient) {
         this.setsApiClient = setsApiClient;
-        this.almaItemService = almaItemService;
     }
 
     /**
@@ -90,12 +85,15 @@ public class AlmaSetService {
      * @param almaSetId       the id of the set
      * @param almaItemId      the item pid of the item to be added
      * @param itemDescription a description for this item
-     * @return the updated set
      */
-    public Set addMemberToSet(String almaSetId, String almaItemId, String itemDescription) {
+    public void addMemberToSet(String almaSetId, String almaItemId, String itemDescription) {
         Member member = new Member().id(almaItemId).description(itemDescription);
         Set set = new Set().members(new Members().addMemberItem(member));
-        return this.setsApiClient.postConfSetsSetId(set, almaSetId, "add_members", "");
+        try {
+            this.setsApiClient.postConfSetsSetId(set, almaSetId, "add_members", "");
+        } catch (FeignException fe){
+            log.warn(String.format("could not add item to set | setId: %s, itemId: %s, message: %s", almaSetId, almaItemId, fe.getMessage()));
+        }
     }
 
     /**
@@ -126,11 +124,10 @@ public class AlmaSetService {
      *
      * @param almaSetId  the id of the set holding the item to be removed
      * @param almaItemId the pid of the item to be removed
-     * @return the updated set
      */
-    public Set removeMemberFromSet(String almaSetId, String almaItemId) {
+    public void removeMemberFromSet(String almaSetId, String almaItemId) {
         Member member = new Member().id(almaItemId);
         Set set = new Set().members(new Members().addMemberItem(member));
-        return this.setsApiClient.postConfSetsSetId(set, almaSetId, "delete_members", "");
+        this.setsApiClient.postConfSetsSetId(set, almaSetId, "delete_members", "");
     }
 }
