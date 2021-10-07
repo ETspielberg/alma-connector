@@ -26,7 +26,7 @@ public class AlmaSetService {
     /**
      * constructor based autowiring to the sets api client and the item service
      *
-     * @param setsApiClient   the client for the sets api
+     * @param setsApiClient the client for the sets api
      */
     AlmaSetService(SetsApiClient setsApiClient) {
         this.setsApiClient = setsApiClient;
@@ -87,18 +87,21 @@ public class AlmaSetService {
      * @param itemDescription a description for this item
      */
     public void addMemberToSet(String almaSetId, String almaItemId, String itemDescription) {
+        if (almaItemId == null || almaItemId.isEmpty())
+            return;
         Member member = new Member().id(almaItemId).description(itemDescription);
         Set set = new Set().members(new Members().addMemberItem(member));
         try {
             this.setsApiClient.postConfSetsSetId(set, almaSetId, "add_members", "");
-        } catch (FeignException fe){
+        } catch (FeignException fe) {
             log.warn(String.format("could not add item to set | setId: %s, itemId: %s, message: %s", almaSetId, almaItemId, fe.getMessage()));
         }
     }
 
     /**
      * adds all items from the positions of an orderline
-     * @param almaSetId the id of the alma set
+     *
+     * @param almaSetId     the id of the alma set
      * @param bubiOrderLine the orderline holding the positions
      */
     public void addPositionsToSet(String almaSetId, BubiOrderLine bubiOrderLine) {
@@ -110,7 +113,8 @@ public class AlmaSetService {
 
     /**
      * removes all items from the positions of an orderline
-     * @param almaSetId the id of the alma set
+     *
+     * @param almaSetId     the id of the alma set
      * @param bubiOrderLine the orderline holding the positions
      */
     public void removePositionsFromSet(String almaSetId, BubiOrderLine bubiOrderLine) {
@@ -126,6 +130,8 @@ public class AlmaSetService {
      * @param almaItemId the pid of the item to be removed
      */
     public void removeMemberFromSet(String almaSetId, String almaItemId) {
+        if (almaItemId == null || almaItemId.isEmpty())
+            return;
         Member member = new Member().id(almaItemId);
         Set set = new Set().members(new Members().addMemberItem(member));
         this.setsApiClient.postConfSetsSetId(set, almaSetId, "delete_members", "");
