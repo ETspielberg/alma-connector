@@ -446,6 +446,7 @@ public class BubiOrderService {
             log.warn("no library given in item " + item.getItemData().getPid());
             return item;
         }
+        log.info(item.getItemData().getLibrary().getValue());
         switch (item.getItemData().getLibrary().getValue()) {
             case "E0001": {
                 item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("ENP"));
