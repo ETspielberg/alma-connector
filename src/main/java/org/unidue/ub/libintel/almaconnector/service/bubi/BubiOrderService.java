@@ -442,11 +442,10 @@ public class BubiOrderService {
     private Item removeTemporaryLocation(Item item) {
         item.getHoldingData().setInTempLocation(true);
         item.getItemData().setPublicNote("");
-        if (item.getItemData().getLibrary() == null) {
+        if (item.getItemData().getLibrary() == null || item.getItemData().getLibrary().getValue() == null) {
             log.warn("no library given in item " + item.getItemData().getPid());
             return item;
         }
-        log.info(item.getItemData().getLibrary().getValue());
         switch (item.getItemData().getLibrary().getValue()) {
             case "E0001": {
                 item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("ENP"));
