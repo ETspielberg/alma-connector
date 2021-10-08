@@ -401,7 +401,7 @@ public class BubiOrderService {
                                             item = this.almaItemService.scanInItemDone(item);
                                             item = this.removeTemporaryLocation(item);
                                         }
-                                        log.info("processed item " + item);
+                                        log.debug("processed item " + item);
                                     }
                                 }
                         )
@@ -426,11 +426,10 @@ public class BubiOrderService {
                                     if (position.getAlmaItemId() != null && !position.getAlmaItemId().isEmpty()) {
                                         Item item = this.almaItemService.findItemByMmsAndItemId(orderline.getAlmaMmsId(), position.getAlmaItemId());
                                         if (item != null) {
-                                            item = this.almaItemService.scanInItemDone(item);
                                             item = this.almaItemService.scanInItemHomeLocation(item);
                                             item = this.removeTemporaryLocation(item);
                                         }
-                                        log.info("processed item " + item);
+                                        log.debug("processed item " + item);
                                     }
                                 }
                         )
