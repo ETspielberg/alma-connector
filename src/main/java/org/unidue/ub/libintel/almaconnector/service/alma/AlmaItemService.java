@@ -91,6 +91,13 @@ public class AlmaItemService {
      * @return the item after scan in
      */
     public Item scanInItemHomeLocation(Item item) {
+        if (item.getItemData().getLibrary().getValue() == null) {
+            String collection = item.getItemData().getLocation().getValue();
+            if (collection == null || collection.isEmpty())
+                return item;
+            else
+                item.getItemData().getLibrary().setValue(collection.charAt(0) + "0001");
+        }
         item = this.almaCatalogApiClient.postBibsMmsIdHoldingsHoldingIdItemsItemPid(
                 item.getBibData().getMmsId(),
                 item.getHoldingData().getHoldingId(),
