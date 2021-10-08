@@ -245,7 +245,7 @@ public interface AlmaCatalogApiClient {
    * @return Object
    */
   @RequestMapping(method= RequestMethod.POST, value="/{mmsId}/holdings/{holdingId}/items/{itemPid}")
-  Item postBibsMmsIdHoldingsHoldingIdItemsItemPid(@RequestParam("mmsId") String mmsId, @RequestParam("holdingId") String holdingId, @RequestParam("itemPid") String itemPid, @RequestParam("op") String op, @RequestParam("request_id") String requestId, @RequestParam("library") String library, @RequestParam("circ_desk") String circDesk, @RequestParam("department") String department, @RequestParam("work_order_type") String workOrderType, @RequestParam("status") String status, @RequestParam("external_id") String externalId, @RequestParam("done") String done, @RequestParam("auto_print_slip") String autoPrintSlip, @RequestParam("place_on_hold_shelf") String placeOnHoldShelf, @RequestParam("confirm") String confirm, @RequestParam("register_in_house_use") String registerInHouseUse);
+  Item postBibsMmsIdHoldingsHoldingIdItemsItemPid(@PathVariable("mmsId") String mmsId, @PathVariable("holdingId") String holdingId, @PathVariable("itemPid") String itemPid, @RequestParam("op") String op, @RequestParam("request_id") String requestId, @RequestParam("library") String library, @RequestParam("circ_desk") String circDesk, @RequestParam("department") String department, @RequestParam("work_order_type") String workOrderType, @RequestParam("status") String status, @RequestParam("external_id") String externalId, @RequestParam("done") String done, @RequestParam("auto_print_slip") String autoPrintSlip, @RequestParam("place_on_hold_shelf") String placeOnHoldShelf, @RequestParam("confirm") String confirm, @RequestParam("register_in_house_use") String registerInHouseUse);
 
 
   /**

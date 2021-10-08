@@ -395,12 +395,43 @@ public class BubiOrderService {
                 bubiOrderLines.forEach(
                         orderline -> orderline.getBubiOrderlinePositions().forEach(
                                 position -> {
-                                    Item item = this.almaItemService.findItemByMmsAndItemId(orderline.getAlmaMmsId(), position.getAlmaItemId());
-                                    if (item != null) {
-                                        item = this.almaItemService.scanInItemDone(item);
-                                        item = this.removeTemporaryLocation(item);
+                                    if (position.getAlmaItemId() != null && !position.getAlmaItemId().isEmpty()) {
+                                        Item item = this.almaItemService.findItemByMmsAndItemId(orderline.getAlmaMmsId(), position.getAlmaItemId());
+                                        if (item != null) {
+                                            item = this.almaItemService.scanInItemDone(item);
+                                            item = this.removeTemporaryLocation(item);
+                                        }
+                                        log.info("processed item " + item);
                                     }
-                                    log.info("processed item " + item);
+                                }
+                        )
+                );
+            }
+        }
+    }
+
+    @Async
+    public void scanItemsInPlace(String bubiOrderId) {
+        BubiOrder bubiOrder = this.bubiOrderRepository.findById(bubiOrderId).orElse(null);
+        if (bubiOrder == null || bubiOrder.getAlmaSetId() == null || bubiOrder.getAlmaSetId().isEmpty()) {
+            log.warn(String.format("cannot scan in items from bubi order %s: Order or set is empty/null", bubiOrderId));
+        } else {
+            java.util.Set<BubiOrderLine> bubiOrderLines = bubiOrder.getBubiOrderLines();
+            if (bubiOrderLines == null || bubiOrderLines.size() == 0)
+                log.warn(String.format("bubi order %s contains no order lines", bubiOrderId));
+            else {
+                bubiOrderLines.forEach(
+                        orderline -> orderline.getBubiOrderlinePositions().forEach(
+                                position -> {
+                                    if (position.getAlmaItemId() != null && !position.getAlmaItemId().isEmpty()) {
+                                        Item item = this.almaItemService.findItemByMmsAndItemId(orderline.getAlmaMmsId(), position.getAlmaItemId());
+                                        if (item != null) {
+                                            item = this.almaItemService.scanInItemDone(item);
+                                            item = this.almaItemService.scanInItemHomeLocation(item);
+                                            item = this.removeTemporaryLocation(item);
+                                        }
+                                        log.info("processed item " + item);
+                                    }
                                 }
                         )
                 );
