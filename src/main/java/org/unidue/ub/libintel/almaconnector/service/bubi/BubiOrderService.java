@@ -398,7 +398,6 @@ public class BubiOrderService {
                                     Item item = this.almaItemService.findItemByMmsAndItemId(orderline.getAlmaMmsId(), position.getAlmaItemId());
                                     if (item != null) {
                                         item = this.almaItemService.scanInItemDone(item);
-                                        item = this.almaItemService.scanInItemHomeLocation(item);
                                         item = this.removeTemporaryLocation(item);
                                     }
                                     log.info("processed item " + item);
