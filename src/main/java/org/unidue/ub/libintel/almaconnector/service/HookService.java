@@ -4,13 +4,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.unidue.ub.alma.shared.acq.Invoice;
+import org.unidue.ub.alma.shared.acq.InvoiceLine;
 import org.unidue.ub.alma.shared.bibs.*;
 import org.unidue.ub.alma.shared.user.Address;
 import org.unidue.ub.alma.shared.user.AlmaUser;
+import org.unidue.ub.libintel.almaconnector.configuration.MappingTables;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderLine;
 import org.unidue.ub.libintel.almaconnector.model.hook.*;
 import org.unidue.ub.libintel.almaconnector.service.alma.*;
 import org.unidue.ub.libintel.almaconnector.service.bubi.BubiOrderLineService;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * offers functions for processing different types of alma web hooks
@@ -33,6 +39,9 @@ public class HookService {
 
     private final BubiOrderLineService bubiOrderLineService;
 
+    private final MappingTables mappingTables;
+
+    private final AlmaInvoiceService almaInvoiceService;
 
     /**
      * constructor based autowiring to the individual services
@@ -47,12 +56,16 @@ public class HookService {
                 AlmaItemService almaItemService,
                 AlmaCatalogService almaCatalogService,
                 BubiOrderLineService bubiOrderLineService,
-                AlmaElectronicService almaElectronicService) {
+                AlmaElectronicService almaElectronicService,
+                MappingTables mappingTables,
+                AlmaInvoiceService almaInvoiceService) {
         this.almaUserService = almaUserService;
         this.almaItemService = almaItemService;
         this.almaCatalogService = almaCatalogService;
         this.almaElectronicService = almaElectronicService;
         this.bubiOrderLineService = bubiOrderLineService;
+        this.mappingTables = mappingTables;
+        this.almaInvoiceService = almaInvoiceService;
     }
 
     /**
@@ -342,6 +355,36 @@ public class HookService {
         }
     }
 
+
+    /**
+     * processes a webhook for a bib event sent by alma
+     *
+     * @param hook the bib webhook
+     */
+    @Async("threadPoolTaskExecutor")
+    public void processJobHook(JobHook hook) {
+        String jobName = hook.getJobInstance().getName();
+        if (jobName.contains("EDI - Load Files")) {
+            String vendorId = jobName.replace("EDI - Load Files", "").strip();
+            List<Invoice> invoices = this.almaInvoiceService.getEdiInvoices(vendorId);
+            for (Invoice invoice : invoices) {
+                String vatCode = invoice.getInvoiceVat().getVatCode().getValue();
+                double vatAmount = invoice.getInvoiceVat().getVatAmount();
+
+                invoice.getInvoiceVat().setVatPerInvoiceLine(true);
+                for (InvoiceLine invoiceLine : invoice.getInvoiceLines().getInvoiceLine()) {
+                    invoiceLine.setPriceNote(invoiceLine.getNote());
+                    invoiceLine.setNote("");
+                    invoiceLine.getInvoiceLineVat().getVatCode().setValue(vatCode);
+                    invoiceLine.getInvoiceLineVat().setVatAmount(vatAmount);
+                }
+                this.almaInvoiceService.updateInvoice(invoice);
+            }
+        }
+
+    }
+
+
     /**
      * generalized method for processing any kind of hook
      *
@@ -368,6 +411,10 @@ public class HookService {
                 case "item": {
                     ItemHook itemHook = mapper.readValue(hook, ItemHook.class);
                     processItemHook(itemHook);
+                }
+                case "job": {
+                    JobHook jobHook = mapper.readValue(hook, JobHook.class);
+                    processJobHook(jobHook);
                 }
             }
         } catch (Exception e) {

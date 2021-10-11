@@ -75,11 +75,20 @@ public class AlmaInvoiceService {
 
     /**
      * saves a new invoice to Alma
-     * @param invoice the invoide to be saved
+     * @param invoice the invoice to be saved
      * @return the saved invoice
      */
     public Invoice saveInvoice(Invoice invoice) {
         return this.almaInvoicesApiClient.postAcqInvoices(invoice, "application/json");
+    }
+
+    /**
+     * updates an invoice in Alma
+     * @param invoice the invoice to be updated
+     * @return the saved invoice
+     */
+    public Invoice updateInvoice(Invoice invoice) {
+        return this.almaInvoicesApiClient.putInvoicesInvoiceId(invoice, "application/json", invoice.getId());
     }
 
     /**
@@ -264,5 +273,32 @@ public class AlmaInvoiceService {
             this.addInvoiceLine(invoice.getId(), invoiceLine);
         this.processInvoice(invoice.getId());
         return invoice;
+    }
+
+    public List<Invoice> getEdiInvoices(String vendorId) {
+        int limit = 100;
+        int offset = 0;
+        Invoices inovices = this.almaInvoicesApiClient.getInvoices("application/json",
+                "ACTIVE",
+                "InReview",
+                "", "EDI",
+                "vendor_code~" + vendorId,
+                limit,
+                offset,
+                "");
+        List<Invoice> allInvoices = new ArrayList<>(inovices.getInvoice());
+        while (allInvoices.size() < inovices.getTotalRecordCount()) {
+            offset += limit;
+            Invoices additionalInovices = this.almaInvoicesApiClient.getInvoices("application/json",
+                    "ACTIVE",
+                    "InReview",
+                    "", "EDI",
+                    "vendor_code~" + vendorId,
+                    limit,
+                    offset,
+                    "");
+            allInvoices.addAll(additionalInovices.getInvoice());
+        }
+        return allInvoices;
     }
 }

@@ -46,7 +46,6 @@ public class ScheduledService {
     @Value("${libintel.happ.users}")
     private List<String> happUsers;
 
-
     @Value("${libintel.magazin.locations}")
     private List<String> magazinLocations;
 
