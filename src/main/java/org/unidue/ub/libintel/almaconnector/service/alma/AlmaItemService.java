@@ -143,4 +143,17 @@ public class AlmaItemService {
         log.debug(String.format("updating item MMS-ID, Holding-ID, Item-ID | %s | %s | %s", mmsId, holdingId, itemPid));
         return this.almaCatalogApiClient.putBibsMmsIdHoldingsHoldingIdItemsItemPid(mmsId, holdingId, itemPid, item);
     }
+
+    /**
+     * updates an item in Alma
+     *
+     * @param item the changed item
+     * @return the updated item
+     */
+    public Item updateItem(String mmsId, Item item) {
+        String holdingId = item.getHoldingData().getHoldingId();
+        String itemPid = item.getItemData().getPid();
+        log.debug(String.format("updating item MMS-ID, Holding-ID, Item-ID | %s | %s | %s", mmsId, holdingId, itemPid));
+        return this.almaCatalogApiClient.putBibsMmsIdHoldingsHoldingIdItemsItemPid(mmsId, holdingId, itemPid, item);
+    }
 }

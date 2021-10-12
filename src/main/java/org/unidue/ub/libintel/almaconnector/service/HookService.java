@@ -228,7 +228,7 @@ public class HookService {
                             item.getHoldingData().tempLibrary(null);
                         }
                         log.debug("saving item:\n" + item);
-                        this.almaItemService.updateItem(item);
+                        this.almaItemService.updateItem(mmsId, item);
                     }
                 break;
             case "Neuerw. / 14 Tage":
