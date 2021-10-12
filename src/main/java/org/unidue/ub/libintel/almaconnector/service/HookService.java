@@ -363,7 +363,7 @@ public class HookService {
      */
     @Async("threadPoolTaskExecutor")
     public void processJobHook(JobHook hook) {
-        String jobName = hook.getJobInstance().getName();
+        String jobName = hook.getJobInstance().getJobInfo().getName();
         if (jobName.contains("EDI - Load Files")) {
             String vendorId = jobName.replace("EDI - Load Files", "").strip();
             List<Invoice> invoices = this.almaInvoiceService.getEdiInvoices(vendorId);
