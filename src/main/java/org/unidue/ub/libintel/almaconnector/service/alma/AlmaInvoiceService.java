@@ -301,4 +301,21 @@ public class AlmaInvoiceService {
         }
         return allInvoices;
     }
+
+    public void updateEdiInvoices(String vendorId) {
+        List<Invoice> invoices = this.getEdiInvoices(vendorId);
+        for (Invoice invoice : invoices) {
+            String vatCode = invoice.getInvoiceVat().getVatCode().getValue();
+            double vatAmount = invoice.getInvoiceVat().getVatAmount();
+
+            invoice.getInvoiceVat().setVatPerInvoiceLine(true);
+            for (InvoiceLine invoiceLine : invoice.getInvoiceLines().getInvoiceLine()) {
+                invoiceLine.setPriceNote(invoiceLine.getNote());
+                invoiceLine.setNote("");
+                invoiceLine.getInvoiceLineVat().getVatCode().setValue(vatCode);
+                invoiceLine.getInvoiceLineVat().setVatAmount(vatAmount);
+            }
+            this.updateInvoice(invoice);
+        }
+    }
 }

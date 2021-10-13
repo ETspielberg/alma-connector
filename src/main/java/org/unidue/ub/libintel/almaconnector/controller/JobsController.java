@@ -6,9 +6,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.unidue.ub.libintel.almaconnector.model.jobs.JobIdWithDescription;
 import org.unidue.ub.libintel.almaconnector.service.ScheduledService;
+import org.unidue.ub.libintel.almaconnector.service.alma.AlmaInvoiceService;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaJobsService;
 
-import java.io.IOException;
 import java.util.List;
 
 
@@ -23,10 +23,14 @@ public class JobsController {
 
     private final ScheduledService scheduledService;
 
+    private final AlmaInvoiceService almaInvoiceService;
+
     JobsController(AlmaJobsService almaJobsService,
-                   ScheduledService scheduledService) {
+                   ScheduledService scheduledService,
+                   AlmaInvoiceService almaInvoiceService) {
         this.almaJobsService = almaJobsService;
         this.scheduledService = scheduledService;
+        this.almaInvoiceService = almaInvoiceService;
     }
 
     @GetMapping("/updateList")
@@ -49,6 +53,12 @@ public class JobsController {
     @GetMapping("/updateStatistics")
     public ResponseEntity<?> updateStatistics() {
         this.scheduledService.updateStatisticField();
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/updateEdiInvoices")
+    public ResponseEntity<?> updateEdiInvoices(String vendorId) {
+        this.almaInvoiceService.updateEdiInvoices(vendorId);
         return ResponseEntity.ok().build();
     }
 }

@@ -366,20 +366,7 @@ public class HookService {
         String jobName = hook.getJobInstance().getJobInfo().getName();
         if (jobName.contains("EDI - Load Files")) {
             String vendorId = jobName.replace("EDI - Load Files", "").strip();
-            List<Invoice> invoices = this.almaInvoiceService.getEdiInvoices(vendorId);
-            for (Invoice invoice : invoices) {
-                String vatCode = invoice.getInvoiceVat().getVatCode().getValue();
-                double vatAmount = invoice.getInvoiceVat().getVatAmount();
-
-                invoice.getInvoiceVat().setVatPerInvoiceLine(true);
-                for (InvoiceLine invoiceLine : invoice.getInvoiceLines().getInvoiceLine()) {
-                    invoiceLine.setPriceNote(invoiceLine.getNote());
-                    invoiceLine.setNote("");
-                    invoiceLine.getInvoiceLineVat().getVatCode().setValue(vatCode);
-                    invoiceLine.getInvoiceLineVat().setVatAmount(vatAmount);
-                }
-                this.almaInvoiceService.updateInvoice(invoice);
-            }
+            this.almaInvoiceService.updateEdiInvoices(vendorId);
         }
 
     }
