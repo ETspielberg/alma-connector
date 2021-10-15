@@ -108,20 +108,6 @@ public class HookService {
 
                         // set temporary location to Buchbinder
                         item.getHoldingData().setInTempLocation(false);
-                        switch (library) {
-                            case "E0001":
-                            case "E0023": {
-                                item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("EBB"));
-                                item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("E0001"));
-                                break;
-                            }
-                            case "D0001": {
-                                item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("DBB"));
-                                item.getHoldingData().tempLibrary(new HoldingDataTempLibrary().value("D0001"));
-                                break;
-                            }
-                        }
-
                         // try to create bubi order line
                         try {
                             BubiOrderLine bubiOrderLine = this.bubiOrderLineService.expandBubiOrderLineFromItem(item);
@@ -201,7 +187,12 @@ public class HookService {
                             log.debug(String.format("setting public note to %s", address.getLine1()));
                             item.getItemData().setPublicNote(address.getLine1());
                             String library = itemLoan.getLibrary().getValue();
-                            item.getHoldingData().setInTempLocation(true);
+                            if (address.getLine1().contains("LK") || address.getLine1().contains("BA") || address.getLine1().contains("BA"))
+                                library = "D0001";
+                            else if (address.getLine1().contains("MNT") || address.getLine1().contains("MNT"))
+                                library = "E0001";
+                            else if (address.getLine1().contains("Med"))
+                                library = "E0023";
                             switch (library) {
                                 case "E0001": {
                                     item.getHoldingData().tempLocation(new HoldingDataTempLocation().value("ESA"));
