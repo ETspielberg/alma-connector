@@ -314,8 +314,13 @@ public class AlmaInvoiceService {
                 invoiceLine.setNote("");
                 invoiceLine.getInvoiceLineVat().getVatCode().setValue(vatCode);
                 invoiceLine.getInvoiceLineVat().setVatAmount(vatAmount);
+                this.updateInvoiceLine(invoice.getId(), invoiceLine);
             }
             this.updateInvoice(invoice);
         }
+    }
+
+    private void updateInvoiceLine(String invoiceId, InvoiceLine invoiceLine) {
+        this.almaInvoicesApiClient.putInvoicesInvoiceIdLinesInvoiceLineId(invoiceLine, "application/json", invoiceId,invoiceLine.getId());
     }
 }
