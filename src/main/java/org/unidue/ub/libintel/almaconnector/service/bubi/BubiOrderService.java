@@ -124,7 +124,7 @@ public class BubiOrderService {
      * @return a list of bubi order
      */
     public List<BubiOrderShortDto> getShortBubiOrders(String mediaType, String vendorAccount) {
-        List<BubiOrder> orderEntities = this.bubiOrderRepository.findAllByMediaTypeAndVendorAccountOrderByBubiOrderId(mediaType, vendorAccount);
+        List<BubiOrder> orderEntities = this.bubiOrderRepository.findAllByMediaTypeAndVendorAccountAndBubiStatusOrderByBubiOrderId(mediaType, vendorAccount, BubiStatus.NEW);
         return orderEntities.stream().map(BubiOrderShortDto::new).collect(Collectors.toList());
     }
 
