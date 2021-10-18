@@ -279,7 +279,7 @@ public class BubiOrderLineService {
             bubiOrderLine.setAlmaMmsId(item.getBibData().getMmsId());
             BubiOrderlinePosition position = new BubiOrderlinePosition()
                     .withDescription(item.getBibData().getTitle())
-                    .withInternalNote(collection + ": " + shelfmark)
+                    .withInternalNote(collection + ": " + item.getItemData().getAlternativeCallNumber())
                     .withMmsId(item.getBibData().getMmsId())
                     .withHoldingId(item.getHoldingData().getHoldingId())
                     .withItemId(item.getItemData().getPid());
