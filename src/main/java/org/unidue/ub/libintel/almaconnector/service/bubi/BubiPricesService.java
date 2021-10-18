@@ -46,8 +46,9 @@ public class BubiPricesService {
     public void calculatePriceForOrderline(BubiOrderLine bubiOrderLine) throws PriceNotFoundException {
         double price = bubiOrderLine.getPriceCorrection();
         String vendorAccount = bubiOrderLine.getVendorAccount();
+
         log.debug(String.format("calculating prices for order %s with vendor %s", bubiOrderLine.getBubiOrderLineId(), bubiOrderLine.getVendorAccount()));
-        if (vendorAccount == null) {
+        if (vendorAccount == null || bubiOrderLine.getMediaType() == null || bubiOrderLine.getBinding() == null || bubiOrderLine.getCover() == null) {
             bubiOrderLine.setPrice(price);
             return;
         }
