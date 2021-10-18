@@ -4,19 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.unidue.ub.alma.shared.acq.Invoice;
-import org.unidue.ub.alma.shared.acq.InvoiceLine;
 import org.unidue.ub.alma.shared.bibs.*;
 import org.unidue.ub.alma.shared.user.Address;
 import org.unidue.ub.alma.shared.user.AlmaUser;
-import org.unidue.ub.libintel.almaconnector.configuration.MappingTables;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderLine;
 import org.unidue.ub.libintel.almaconnector.model.hook.*;
 import org.unidue.ub.libintel.almaconnector.service.alma.*;
 import org.unidue.ub.libintel.almaconnector.service.bubi.BubiOrderLineService;
 
-import java.util.List;
-import java.util.Map;
 
 /**
  * offers functions for processing different types of alma web hooks
@@ -39,8 +34,6 @@ public class HookService {
 
     private final BubiOrderLineService bubiOrderLineService;
 
-    private final MappingTables mappingTables;
-
     private final AlmaInvoiceService almaInvoiceService;
 
     /**
@@ -57,14 +50,12 @@ public class HookService {
                 AlmaCatalogService almaCatalogService,
                 BubiOrderLineService bubiOrderLineService,
                 AlmaElectronicService almaElectronicService,
-                MappingTables mappingTables,
                 AlmaInvoiceService almaInvoiceService) {
         this.almaUserService = almaUserService;
         this.almaItemService = almaItemService;
         this.almaCatalogService = almaCatalogService;
         this.almaElectronicService = almaElectronicService;
         this.bubiOrderLineService = bubiOrderLineService;
-        this.mappingTables = mappingTables;
         this.almaInvoiceService = almaInvoiceService;
     }
 
