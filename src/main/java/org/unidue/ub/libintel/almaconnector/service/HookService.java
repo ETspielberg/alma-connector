@@ -176,11 +176,12 @@ public class HookService {
 
                         if ("LOAN_CREATED".equals(hook.getEvent().getValue())) {
                             log.debug(String.format("setting public note to %s", address.getLine1()));
+                            item.getHoldingData().setInTempLocation(true);
                             item.getItemData().setPublicNote(address.getLine1());
                             String library = itemLoan.getLibrary().getValue();
-                            if (address.getLine1().contains("LK") || address.getLine1().contains("BA") || address.getLine1().contains("BA"))
+                            if (address.getLine1().contains("LK") || address.getLine1().contains("BA") || address.getLine1().contains("MC"))
                                 library = "D0001";
-                            else if (address.getLine1().contains("MNT") || address.getLine1().contains("MNT"))
+                            else if (address.getLine1().contains("GW/GSW") || address.getLine1().contains("MNT"))
                                 library = "E0001";
                             else if (address.getLine1().contains("Med"))
                                 library = "E0023";
