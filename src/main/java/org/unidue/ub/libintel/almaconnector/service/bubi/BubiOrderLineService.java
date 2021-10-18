@@ -125,8 +125,9 @@ public class BubiOrderLineService {
 
             log.info(String.format("retrieving bubi order | orderId: %s, almaSetName: %s, almaSetId: %s", bubiOrderId, bubiOrder.getAlmaSetName(), bubiOrder.getAlmaSetId()));
 
-            // set the positional number, the bubi order, and the status for the orderline
-            bubiOrderLine.setPositionalNumber(bubiOrder.getBubiOrderLines().size() + 1);
+            // set the positional number (if not already set), the bubi order, and the status for the orderline
+            if (bubiOrderLine.getPositionalNumber() <= 0)
+                bubiOrderLine.setPositionalNumber(bubiOrder.getBubiOrderLines().size() + 1);
             bubiOrderLine.setBubiOrder(bubiOrder);
             bubiOrderLine.setStatus(BubiStatus.PACKED);
 
