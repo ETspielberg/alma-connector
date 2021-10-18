@@ -413,6 +413,7 @@ public class BubiOrderLineService {
         allOpenOrderlines.addAll(this.bubiOrderLineRepository.findAllByStatusOrderByMinting(BubiStatus.NEW));
         allOpenOrderlines.addAll(this.bubiOrderLineRepository.findAllByStatusOrderByMinting(BubiStatus.WAITING));
         allOpenOrderlines.addAll(this.bubiOrderLineRepository.findAllByStatusOrderByMinting(BubiStatus.INWORK));
+        allOpenOrderlines.addAll(this.bubiOrderLineRepository.findAllByStatusOrderByMinting(BubiStatus.PACKED));
         return allOpenOrderlines;
     }
 
