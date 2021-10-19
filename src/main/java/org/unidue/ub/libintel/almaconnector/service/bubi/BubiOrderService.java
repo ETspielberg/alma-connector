@@ -240,7 +240,7 @@ public class BubiOrderService {
                     String publicNote = item.getItemData().getPublicNote();
                     if (publicNote == null || publicNote.isEmpty())
                         publicNote = "wird gebunden";
-                    else if (publicNote.contains("win der Einbandstelle"))
+                    else if (publicNote.contains("in der Einbandstelle"))
                         publicNote = publicNote.replace("in der Einbandstelle", "wird gebunden");
                     else
                         publicNote += " wird gebunden";
