@@ -12,6 +12,8 @@ import org.unidue.ub.libintel.almaconnector.model.hook.*;
 import org.unidue.ub.libintel.almaconnector.service.alma.*;
 import org.unidue.ub.libintel.almaconnector.service.bubi.BubiOrderLineService;
 
+import java.util.concurrent.TimeUnit;
+
 
 /**
  * offers functions for processing different types of alma web hooks
@@ -224,11 +226,23 @@ public class HookService {
                         }
                         log.debug("saving item:\n" + item);
                         this.almaItemService.updateItem(mmsId, item);
-                        if (needScan)
+                        if (needScan) {
+                            try {
+                                TimeUnit.SECONDS.sleep(5);
+                                this.almaItemService.scanInItemAtLocation(tempLibrary, item);
+                            } catch (InterruptedException ie) {
+                                log.warn("I cannot sleep for 5 seconds here...", ie);
+                            }
                             this.almaItemService.scanInItemAtLocation(tempLibrary, item);
+                        }
                     }
                 break;
             case "Neuerw. / 14 Tage":
+                try {
+                    TimeUnit.SECONDS.sleep(5);
+                } catch (InterruptedException ie) {
+                    log.warn("I cannot sleep for 5 seconds here...", ie);
+                }
                 log.info("got neuerwerbungs loan");
                 log.debug(String.format("retrieve item with barcode %s", itemLoan.getItemBarcode()));
                 String mmsId = itemLoan.getMmsId();
