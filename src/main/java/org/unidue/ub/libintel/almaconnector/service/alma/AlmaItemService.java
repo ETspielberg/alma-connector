@@ -156,4 +156,24 @@ public class AlmaItemService {
         log.debug(String.format("updating item MMS-ID, Holding-ID, Item-ID | %s | %s | %s", mmsId, holdingId, itemPid));
         return this.almaCatalogApiClient.putBibsMmsIdHoldingsHoldingIdItemsItemPid(mmsId, holdingId, itemPid, item);
     }
+
+    public void scanInItemAtLocation(String library, Item item) {
+        this.almaCatalogApiClient.postBibsMmsIdHoldingsHoldingIdItemsItemPid(
+                item.getBibData().getMmsId(),
+                item.getHoldingData().getHoldingId(),
+                item.getItemData().getPid(),
+                "scan",
+                "",
+                library,
+                "DEFAULT_CIRC_DESK",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "true",
+                "",
+                "",
+                "");
+    }
 }

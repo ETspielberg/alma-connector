@@ -162,6 +162,8 @@ public class HookService {
         log.debug("received item loan: " + itemLoan.toString());
         log.debug(String.format("retrieving user %s", itemLoan.getUserId()));
         AlmaUser almaUser = this.almaUserService.getUser(itemLoan.getUserId());
+        boolean needScan = false;
+        String tempLibrary = "";
         switch (almaUser.getUserGroup().getDesc()) {
             case "Semesterapparat":
                 log.info("got sem app loan");
@@ -208,6 +210,9 @@ public class HookService {
                             log.debug(String.format("retrieved item from library %s", library));
                         } else if ("LOAN_RETURNED".equals(hook.getEvent().getValue())) {
                             log.debug("resetting public note");
+                            if (item.getHoldingData().getTempLibrary() != null && item.getHoldingData().getTempLibrary().getValue() != null)
+                                tempLibrary = item.getHoldingData().getTempLibrary().getValue();
+                            needScan = !tempLibrary.equals(item.getItemData().getLibrary().getValue());
                             item.getItemData().setPublicNote("");
                             item.getHoldingData().setInTempLocation(false);
                             item.getHoldingData().tempLocation(null);
@@ -215,6 +220,8 @@ public class HookService {
                         }
                         log.debug("saving item:\n" + item);
                         this.almaItemService.updateItem(mmsId, item);
+                        if (needScan)
+                            this.almaItemService.scanInItemAtLocation(tempLibrary, item);
                     }
                 break;
             case "Neuerw. / 14 Tage":
@@ -233,7 +240,7 @@ public class HookService {
                     log.debug("resetting public note");
                     item.getItemData().setPublicNote("");
                 }
-                this.almaItemService.updateItem(item);
+                this.almaItemService.updateItem(mmsId, item);
                 break;
             default:
         }
