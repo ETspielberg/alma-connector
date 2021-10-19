@@ -93,9 +93,9 @@ public class HookService {
                         // attach "wird gebunden" to note
                         String note = item.getItemData().getPublicNote();
                         if (note == null || note.isEmpty())
-                            item.getItemData().setPublicNote("wird gebunden");
+                            item.getItemData().setPublicNote("in der Einbandstelle");
                         else
-                            item.getItemData().setPublicNote(note + " wird gebunden");
+                            item.getItemData().setPublicNote(note + " in der Einbandstelle");
 
                         // set temporary location to Buchbinder
                         item.getHoldingData().setInTempLocation(false);
@@ -110,7 +110,10 @@ public class HookService {
                     // handle closing of request (return from bubi
                     } else if (HookEventTypes.REQUEST_CLOSED.name().equals(hook.getEvent().getValue())) {
                         // remove "wird gebunden" from note
-                        item.getItemData().setPublicNote(item.getItemData().getPublicNote().replace("wird gebunden", "").strip());
+                        item.getItemData().setPublicNote(item.getItemData().getPublicNote()
+                                .replace("wird gebunden", "")
+                                .replace("in der Einbandstelle", "")
+                                .strip());
                         // if it is bound issue, set it to the non-publishing temporary location
                         if ("ISSBD".equals(userRequest.getMaterialType().getValue())) {
                             item.getHoldingData().setInTempLocation(true);

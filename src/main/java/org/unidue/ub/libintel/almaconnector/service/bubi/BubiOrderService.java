@@ -14,6 +14,7 @@ import org.unidue.ub.libintel.almaconnector.model.bubi.dto.BubiOrderFullDto;
 import org.unidue.ub.libintel.almaconnector.model.bubi.dto.BubiOrderShortDto;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrder;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderLine;
+import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderlinePosition;
 import org.unidue.ub.libintel.almaconnector.repository.BubiOrderLineRepository;
 import org.unidue.ub.libintel.almaconnector.repository.BubiOrderRepository;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaInvoiceService;
@@ -222,7 +223,7 @@ public class BubiOrderService {
     }
 
     /**
-     * marks a bubi order and the corresponding bubi order lines as collected, sets the corresponding dates and creates the alma po lines
+     * marks a bubi order and the corresponding bubi order lines as collected, sets the corresponding dates and adds a corresponding note to the items
      *
      * @param bubiOrderId the bubi order to be collected
      * @return the updated bubi order object
@@ -232,6 +233,22 @@ public class BubiOrderService {
         if (bubiOrder == null) return null;
         bubiOrder.setBubiStatus(BubiStatus.AT_BUBI);
         bubiOrder.setLastChange(new Date());
+        for (BubiOrderLine orderline: bubiOrder.getBubiOrderLines()) {
+            for (BubiOrderlinePosition position: orderline.getBubiOrderlinePositions()) {
+                if (position.getAlmaItemId() != null && position.getAlmaMmsId() != null && !position.getAlmaMmsId().isEmpty() && !position.getAlmaItemId().isEmpty()) {
+                    Item item = this.almaItemService.findItemByMmsAndItemId(position.getAlmaMmsId(), position.getAlmaItemId());
+                    String publicNote = item.getItemData().getPublicNote();
+                    if (publicNote == null || publicNote.isEmpty())
+                        publicNote = "wird gebunden";
+                    else if (publicNote.contains("win der Einbandstelle"))
+                        publicNote = publicNote.replace("in der Einbandstelle", "wird gebunden");
+                    else
+                        publicNote += " wird gebunden";
+                    item.getItemData().setPublicNote(publicNote.strip());
+                    this.almaItemService.updateItem(position.getAlmaMmsId(), item);
+                }
+            }
+        }
         return new BubiOrderFullDto(bubiOrderRepository.save(bubiOrder));
     }
 
