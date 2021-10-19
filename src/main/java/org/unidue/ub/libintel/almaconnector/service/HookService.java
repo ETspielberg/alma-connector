@@ -109,7 +109,7 @@ public class HookService {
                             log.error("could not create bubi order line", exception);
                         }
 
-                    // handle closing of request (return from bubi
+                        // handle closing of request (return from bubi
                     } else if (HookEventTypes.REQUEST_CLOSED.name().equals(hook.getEvent().getValue())) {
                         // remove "wird gebunden" from note
                         item.getItemData().setPublicNote(item.getItemData().getPublicNote()
@@ -240,6 +240,7 @@ public class HookService {
             case "Neuerw. / 14 Tage":
                 try {
                     TimeUnit.SECONDS.sleep(5);
+                    log.debug("We wait for a few seconds to give Alma enough time to handle all the updates: collect the item from the basement, carry it to the desk, change the status and bring it back to the basement...");
                 } catch (InterruptedException ie) {
                     log.warn("I cannot sleep for 5 seconds here...", ie);
                 }
