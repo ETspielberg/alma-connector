@@ -168,6 +168,7 @@ public class HookService {
         String tempLibrary = "";
         switch (almaUser.getUserGroup().getDesc()) {
             case "Semesterapparat":
+                waitForAlma();
                 log.info("got sem app loan");
                 log.debug(almaUser.getContactInfo().toString());
                 for (Address address : almaUser.getContactInfo().getAddress())
@@ -227,23 +228,13 @@ public class HookService {
                         log.debug("saving item:\n" + item);
                         this.almaItemService.updateItem(mmsId, item);
                         if (needScan) {
-                            try {
-                                TimeUnit.SECONDS.sleep(5);
-                                this.almaItemService.scanInItemAtLocation(tempLibrary, item);
-                            } catch (InterruptedException ie) {
-                                log.warn("I cannot sleep for 5 seconds here...", ie);
-                            }
+                            waitForAlma();
                             this.almaItemService.scanInItemAtLocation(tempLibrary, item);
                         }
                     }
                 break;
             case "Neuerw. / 14 Tage":
-                try {
-                    TimeUnit.SECONDS.sleep(5);
-                    log.debug("We wait for a few seconds to give Alma enough time to handle all the updates: collect the item from the basement, carry it to the desk, change the status and bring it back to the basement...");
-                } catch (InterruptedException ie) {
-                    log.warn("I cannot sleep for 5 seconds here...", ie);
-                }
+                waitForAlma();
                 log.info("got neuerwerbungs loan");
                 log.debug(String.format("retrieve item with barcode %s", itemLoan.getItemBarcode()));
                 String mmsId = itemLoan.getMmsId();
@@ -418,6 +409,15 @@ public class HookService {
             }
         } catch (Exception e) {
             log.warn("");
+        }
+    }
+
+    private void waitForAlma() {
+        try {
+            TimeUnit.SECONDS.sleep(5);
+            log.debug("We wait for a few seconds to give Alma enough time to handle all the updates: collect the item from the basement, carry it to the desk, change the status and bring it back to the basement...");
+        } catch (InterruptedException ie) {
+            log.warn("I cannot sleep for 5 seconds here...", ie);
         }
     }
 }
