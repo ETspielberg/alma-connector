@@ -210,9 +210,13 @@ public class HookService {
                             log.debug(String.format("retrieved item from library %s", library));
                         } else if ("LOAN_RETURNED".equals(hook.getEvent().getValue())) {
                             log.debug("resetting public note");
-                            if (item.getHoldingData().getTempLibrary() != null && item.getHoldingData().getTempLibrary().getValue() != null)
+                            if (item.getHoldingData().getTempLibrary() != null &&
+                                    item.getHoldingData().getTempLibrary().getValue() != null &&
+                                    item.getItemData().getLibrary() != null &&
+                                    item.getItemData().getLibrary().getValue() != null) {
                                 tempLibrary = item.getHoldingData().getTempLibrary().getValue();
-                            needScan = !tempLibrary.equals(item.getItemData().getLibrary().getValue());
+                                needScan = !tempLibrary.equals(item.getItemData().getLibrary().getValue());
+                            }
                             item.getItemData().setPublicNote("");
                             item.getHoldingData().setInTempLocation(false);
                             item.getHoldingData().tempLocation(null);
