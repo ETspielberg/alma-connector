@@ -9,6 +9,7 @@ import org.unidue.ub.alma.shared.user.Address;
 import org.unidue.ub.alma.shared.user.AlmaUser;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderLine;
 import org.unidue.ub.libintel.almaconnector.model.hook.*;
+import org.unidue.ub.libintel.almaconnector.model.media.Manifestation;
 import org.unidue.ub.libintel.almaconnector.service.alma.*;
 import org.unidue.ub.libintel.almaconnector.service.bubi.BubiOrderLineService;
 
@@ -70,18 +71,13 @@ public class HookService {
     public void processRequestHook(RequestHook hook) {
         HookUserRequest userRequest = hook.getUserRequest();
         log.debug("received user request: " + userRequest.toString());
+        waitForAlma(3);
+        Item item = this.almaItemService.findItemByMmsAndItemId(userRequest.getMmsId(), userRequest.getItemId());
         if ("WORK_ORDER".equals(userRequest.getRequestType()) && "Int".equals(userRequest.getRequestSubType().getValue())) {
             switch (userRequest.getTargetDestination().getValue()) {
                 case "Buchbinder": {
-                    //first: retrieve item if it is a book or bound issue
-                    Item item;
-                    if ("BOOK".equals(userRequest.getMaterialType().getValue())) {
-                        log.debug(String.format("retrieving barcode %s", userRequest.getBarcode()));
-                        item = this.almaItemService.findItemByBarcode(userRequest.getBarcode());
-                    } else if ("ISSBD".equals(userRequest.getMaterialType().getValue())) {
-                        log.debug(String.format("retrieving mms and item id %s, %s", userRequest.getMmsId(), userRequest.getItemId()));
-                        item = this.almaItemService.findItemByMmsAndItemId(userRequest.getMmsId(), userRequest.getItemId());
-                    } else {
+                    String materialType = userRequest.getMaterialType().getValue();
+                    if (!("BOOK".equals(materialType) || "ISSBD".equals(materialType))) {
                         log.info("Buchbinder request not for book or bounded issue: " + userRequest.getMaterialType().getValue());
                         break;
                     }
@@ -150,6 +146,8 @@ public class HookService {
                     break;
                 }
             }
+        } else {
+            // ToDo: save user request to Alma
         }
     }
 
@@ -168,7 +166,7 @@ public class HookService {
         String tempLibrary = "";
         switch (almaUser.getUserGroup().getDesc()) {
             case "Semesterapparat":
-                waitForAlma();
+                waitForAlma(5);
                 log.info("got sem app loan");
                 log.debug(almaUser.getContactInfo().toString());
                 for (Address address : almaUser.getContactInfo().getAddress())
@@ -228,13 +226,13 @@ public class HookService {
                         log.debug("saving item:\n" + item);
                         this.almaItemService.updateItem(mmsId, item);
                         if (needScan) {
-                            waitForAlma();
+                            waitForAlma(5);
                             this.almaItemService.scanInItemAtLocation(tempLibrary, item);
                         }
                     }
                 break;
             case "Neuerw. / 14 Tage":
-                waitForAlma();
+                waitForAlma(5);
                 log.info("got neuerwerbungs loan");
                 log.debug(String.format("retrieve item with barcode %s", itemLoan.getItemBarcode()));
                 String mmsId = itemLoan.getMmsId();
@@ -264,6 +262,7 @@ public class HookService {
     @Async("threadPoolTaskExecutor")
     public void processItemHook(ItemHook hook) {
         if ("ITEM_DELETED".equals(hook.getEvent().getValue()))
+            // ToDo: set deletion date and Event to Elasticsearch
             return;
         Item item = hook.getItem();
         log.debug("received item hook: " + item.toString());
@@ -272,7 +271,7 @@ public class HookService {
         }
         switch (item.getItemData().getPhysicalMaterialType().getValue()) {
             case "ISSUE": {
-                log.info(String.format("deleting temporary location for received issue %s for shelfmark %s", item.getItemData().getBarcode(), item.getHoldingData().getCallNumber()));
+                log.debug(String.format("deleting temporary location for received issue %s for shelfmark %s", item.getItemData().getBarcode(), item.getHoldingData().getCallNumber()));
                 if (!"ACQ".equals(item.getItemData().getProcessType().getValue())) {
                     item.getHoldingData().setInTempLocation(false);
                     item.getHoldingData().tempLocation(null);
@@ -297,7 +296,7 @@ public class HookService {
                     item.getItemData().setBarcode(item.getItemData().getBarcode().strip());
                     isItemUpdated = true;
                 }
-                // check shelfmark
+                // check holding shelfmark
                 String itemCallNo = item.getItemData().getAlternativeCallNumber().strip();
                 if (!itemCallNo.isEmpty()) {
                     // check for call number type if it is not "other" (value 8) set it accordingly
@@ -306,6 +305,7 @@ public class HookService {
                         item.getItemData().setAlternativeCallNumberType(new ItemDataAlternativeCallNumberType().value("8"));
                         isItemUpdated = true;
                     }
+                    // check whether holding signature needs to be updated
                     String callNo = itemCallNo.replaceAll("\\+\\d+", "");
                     String holdingCallNo = item.getHoldingData().getCallNumber().strip();
                     if (!callNo.equals(holdingCallNo))
@@ -326,6 +326,9 @@ public class HookService {
     public void processBibHook(BibHook hook) {
         BibWithRecord bib = hook.getBib();
         log.debug("received bib hook: " + bib.toString());
+        if (HookEventTypes.BIB_CREATED.name().equals(hook.getEvent().getValue())) {
+            Manifestation manifestation = new Manifestation(bib);
+        }
         if ("Universität Duisburg-Essen".equals(bib.getPublisherConst())) {
             String mmsId = bib.getMmsId();
             if (this.almaCatalogService.isPortfolios(mmsId))
@@ -371,7 +374,6 @@ public class HookService {
             String vendorId = jobName.replace("EDI - Load Files", "").strip();
             this.almaInvoiceService.updateEdiInvoices(vendorId);
         }
-
     }
 
 
@@ -388,22 +390,27 @@ public class HookService {
             switch (type) {
                 case "loan": {
                     LoanHook loanHook = mapper.readValue(hook, LoanHook.class);
+                    log.info(String.format("revceived hook of type %s and event %s", loanHook.getAction(), loanHook.getEvent().getValue()));
                     processLoanHook(loanHook);
                 }
                 case "request": {
                     RequestHook requestHook = mapper.readValue(hook, RequestHook.class);
+                    log.info(String.format("revceived hook of type %s and event %s", requestHook.getAction(), requestHook.getEvent().getValue()));
                     processRequestHook(requestHook);
                 }
                 case "bib": {
                     BibHook bibHook = mapper.readValue(hook, BibHook.class);
+                    log.info(String.format("revceived hook of type %s and event %s", bibHook.getAction(), bibHook.getEvent().getValue()));
                     processBibHook(bibHook);
                 }
                 case "item": {
                     ItemHook itemHook = mapper.readValue(hook, ItemHook.class);
+                    log.info(String.format("revceived hook of type %s and event %s", itemHook.getAction(), itemHook.getEvent().getValue()));
                     processItemHook(itemHook);
                 }
                 case "job": {
                     JobHook jobHook = mapper.readValue(hook, JobHook.class);
+                    log.info(String.format("revceived job hook of type %s and event %s", jobHook.getAction(), jobHook.getEvent().getValue()));
                     processJobHook(jobHook);
                 }
             }
@@ -412,12 +419,12 @@ public class HookService {
         }
     }
 
-    private void waitForAlma() {
+    private void waitForAlma(int timeout) {
         try {
-            TimeUnit.SECONDS.sleep(5);
+            TimeUnit.SECONDS.sleep(timeout);
             log.debug("We wait for a few seconds to give Alma enough time to handle all the updates: collect the item from the basement, carry it to the desk, change the status and bring it back to the basement...");
         } catch (InterruptedException ie) {
-            log.warn("I cannot sleep for 5 seconds here...", ie);
+            log.warn(String.format("I cannot sleep for %d seconds here...", timeout), ie);
         }
     }
 }

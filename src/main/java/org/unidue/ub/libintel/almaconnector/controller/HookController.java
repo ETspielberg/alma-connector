@@ -54,7 +54,7 @@ public class HookController {
 
     @PostMapping("/userListener")
     public ResponseEntity<?> receiveUserHook(@RequestBody UserHook hookContent, @RequestHeader("X-Exl-Signature") String signature) {
-        log.info(String.format("revceived hook of type %s", hookContent.getAction()));
+        log.info(String.format("revceived hook of type %s and event %s", hookContent.getAction(), hookContent.getEvent().getValue()));
         return ResponseEntity.ok().build();
     }
 
@@ -66,7 +66,7 @@ public class HookController {
 
     @PostMapping("/jobListener")
     public ResponseEntity<?> receiveJobHook(@RequestBody JobHook hookContent, @RequestHeader("X-Exl-Signature") String signature) {
-        log.info(String.format("revceived hook of type %s", hookContent.getAction()));
+        log.info(String.format("revceived hook of type %s and event %s", hookContent.getAction(), hookContent.getEvent().getValue()));
         this.jobLoggerService.logJob(hookContent.getJobInstance());
         this.hookService.processJobHook(hookContent);
         return ResponseEntity.ok().build();
@@ -80,7 +80,8 @@ public class HookController {
 
     @PostMapping("/itemListener")
     public ResponseEntity<?> receiveItemHook(@RequestBody ItemHook hookContent, @RequestHeader("X-Exl-Signature") String signature) {
-        log.info(String.format("revceived hook of type %s", hookContent.getAction()));
+        log.info(String.format("revceived hook of type %s and event %s", hookContent.getAction(), hookContent.getEvent().getValue()));
+        log.debug(hookContent.toString());
         this.hookService.processItemHook(hookContent);
         return ResponseEntity.ok().build();
     }
@@ -92,7 +93,8 @@ public class HookController {
 
     @PostMapping("/bibListener")
     public ResponseEntity<?> receiveBibHook(@RequestBody BibHook hookContent, @RequestHeader("X-Exl-Signature") String signature) {
-        log.info(String.format("revceived hook of type %s", hookContent.getAction()));
+        log.info(String.format("revceived hook of type %s and event %s", hookContent.getAction(), hookContent.getEvent().getValue()));
+        log.debug(hookContent.toString());
         this.hookService.processBibHook(hookContent);
         return ResponseEntity.ok().build();
     }
@@ -105,6 +107,7 @@ public class HookController {
     @PostMapping("/requestsListener")
     public ResponseEntity<?> receiveRequestHook(@RequestBody RequestHook hookContent, @RequestHeader("X-Exl-Signature") String signature) {
         log.info(String.format("revceived hook of type %s and event %s", hookContent.getAction(), hookContent.getEvent().getValue()));
+        log.debug(hookContent.toString());
         this.hookService.processRequestHook(hookContent);
         return ResponseEntity.ok().build();
     }
@@ -116,7 +119,8 @@ public class HookController {
 
     @PostMapping("/loanListener")
     public ResponseEntity<?> receiveLoanHook(@RequestBody LoanHook hookContent, @RequestHeader("X-Exl-Signature") String signature) {
-        log.info(String.format("revceived hook of type %s", hookContent.getAction()));
+        log.info(String.format("revceived hook of type %s and event %s", hookContent.getAction(), hookContent.getEvent().getValue()));
+        log.debug(hookContent.toString());
         this.hookService.processLoanHook(hookContent);
         return ResponseEntity.ok().build();
     }
@@ -127,7 +131,7 @@ public class HookController {
     }
 
     @PostMapping("/listener/{hookType}")
-    public ResponseEntity<?> receiveLoan(@PathVariable String hookType, @RequestBody String hookContent, @RequestHeader("X-Exl-Signature") String signature) throws NoSuchAlgorithmException, NoSuchProviderException, JsonProcessingException, InvalidKeyException {
+    public ResponseEntity<?> receiveLoan(@PathVariable String hookType, @RequestBody String hookContent, @RequestHeader("X-Exl-Signature") String signature) throws NoSuchAlgorithmException, InvalidKeyException {
         if (this.hookValidatorService.isValid(hookContent, signature)) {
             this.hookService.processHook(hookContent, hookType);
             return ResponseEntity.ok().build();
