@@ -6,7 +6,6 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.unidue.ub.alma.shared.bibs.BibWithRecord;
-import org.unidue.ub.alma.shared.bibs.HoldingWithRecord;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -27,6 +26,7 @@ public class Manifestation implements Cloneable, Comparable<Manifestation> {
 
 	private final static Pattern editionFinder = Pattern.compile(".*\\((\\d+)\\).*");
 
+	@Field(analyzer = "keyword")
 	private String almaId = "";
 
 	@Id
@@ -48,14 +48,6 @@ public class Manifestation implements Cloneable, Comparable<Manifestation> {
 	@Field(type = FieldType.Nested, includeInParent = true)
 	private BibliographicInformation bibliographicInformation;
 
-	private Set<String> collections;
-
-	private Set<String> materials;
-
-	private Set<String> usergroups;
-
-	private Set<String> subLibraries;
-
 	public Manifestation() {
 	}
 
@@ -67,19 +59,11 @@ public class Manifestation implements Cloneable, Comparable<Manifestation> {
 
 	public Manifestation(String titleID) {
 		this.titleID = titleID;
-		collections = new HashSet<>();
-		materials = new HashSet<>();
-		usergroups = new HashSet<>();
-		subLibraries = new HashSet<>();
 	}
 
 	public Manifestation(String titleID, String almaId) {
 		this.titleID = titleID;
 		this.almaId = almaId;
-		collections = new HashSet<>();
-		materials = new HashSet<>();
-		usergroups = new HashSet<>();
-		subLibraries = new HashSet<>();
 	}
 
 
@@ -111,16 +95,6 @@ public class Manifestation implements Cloneable, Comparable<Manifestation> {
 		return edition;
 	}
 
-	public List<String> getCollections() {
-		return new ArrayList<>(collections);
-	}
-
-	public List<String> getMaterials() { return new ArrayList<>(materials); }
-
-	public List<String> getUsergroups() {return new ArrayList<>(usergroups); }
-
-	public List<String> getSubLibraries() {return new ArrayList<>(subLibraries); }
-
 	public static Pattern getEditionFinder() {
 		return editionFinder;
 	}
@@ -141,31 +115,9 @@ public class Manifestation implements Cloneable, Comparable<Manifestation> {
 		this.edition = edition;
 	}
 
-	public void setCollections(Set<String> collections) {
-		this.collections = collections;
-	}
-
-	public void setMaterials(Set<String> materials) {
-		this.materials = materials;
-	}
-
-	public void setUsergroups(Set<String> usergroups) {
-		this.usergroups = usergroups;
-	}
-
-	public void setSubLibraries(Set<String> subLibraries) {
-		this.subLibraries = subLibraries;
-	}
-
 	public void addItem(Item item) {
 		items.add(item);
 		addItemShelfmarkIfNew(item);
-		if (!collections.contains(item.getCollection()))
-		collections.add(item.getCollection());
-		if (!materials.contains(item.getMaterial()))
-			materials.add(item.getMaterial());
-		if (!subLibraries.contains(item.getSubLibrary()))
-			subLibraries.add(item.getSubLibrary());
 	}
 
 	public void addItems(List<Item> items) {
@@ -206,15 +158,6 @@ public class Manifestation implements Cloneable, Comparable<Manifestation> {
 			events.addAll(item.getEvents());
 		Collections.sort(events);
 		return events;
-	}
-
-	public void buildUsergroupList() {
-		for (Event event : getEvents()) {
-			if (event.getBorrowerStatus() != null) {
-				if (!usergroups.contains(event.getBorrowerStatus()))
-					usergroups.add(event.getBorrowerStatus());
-			}
-		}
 	}
 
 	@Override

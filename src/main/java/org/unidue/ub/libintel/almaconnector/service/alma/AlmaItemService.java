@@ -176,4 +176,8 @@ public class AlmaItemService {
                 "",
                 "");
     }
+
+    public Item refreshItem(Item item) {
+        return this.findItemByMmsAndItemId(item.getBibData().getMmsId(), item.getItemData().getPid());
+    }
 }

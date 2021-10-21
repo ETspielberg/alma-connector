@@ -13,6 +13,7 @@ import org.unidue.ub.libintel.almaconnector.model.media.Manifestation;
 import org.unidue.ub.libintel.almaconnector.service.alma.*;
 import org.unidue.ub.libintel.almaconnector.service.bubi.BubiOrderLineService;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 
@@ -39,6 +40,8 @@ public class HookService {
 
     private final AlmaInvoiceService almaInvoiceService;
 
+    private final RegalfinderService regalfinderService;
+
     /**
      * constructor based autowiring to the individual services
      *
@@ -53,13 +56,15 @@ public class HookService {
                 AlmaCatalogService almaCatalogService,
                 BubiOrderLineService bubiOrderLineService,
                 AlmaElectronicService almaElectronicService,
-                AlmaInvoiceService almaInvoiceService) {
+                AlmaInvoiceService almaInvoiceService,
+                RegalfinderService regalfinderService) {
         this.almaUserService = almaUserService;
         this.almaItemService = almaItemService;
         this.almaCatalogService = almaCatalogService;
         this.almaElectronicService = almaElectronicService;
         this.bubiOrderLineService = bubiOrderLineService;
         this.almaInvoiceService = almaInvoiceService;
+        this.regalfinderService = regalfinderService;
     }
 
     /**
@@ -261,58 +266,80 @@ public class HookService {
      */
     @Async("threadPoolTaskExecutor")
     public void processItemHook(ItemHook hook) {
+        if (hook.getEvent() == null || hook.getEvent().getValue() == null) {
+            log.warn("no hook event type given");
+            return;
+        }
+        log.info(String.format("received item hook with event %s (%s)", hook.getEvent().getDesc(), hook.getEvent().getValue()));
+
         if ("ITEM_DELETED".equals(hook.getEvent().getValue()))
             // ToDo: set deletion date and Event to Elasticsearch
             return;
         Item item = hook.getItem();
         log.debug("received item hook: " + item.toString());
-        if (hook.getEvent() != null && hook.getEvent().getValue() != null) {
-            log.info(String.format("received item hook with event %s (%s)", hook.getEvent().getDesc(), hook.getEvent().getValue()));
-        }
-        switch (item.getItemData().getPhysicalMaterialType().getValue()) {
-            case "ISSUE": {
-                log.debug(String.format("deleting temporary location for received issue %s for shelfmark %s", item.getItemData().getBarcode(), item.getHoldingData().getCallNumber()));
-                if (!"ACQ".equals(item.getItemData().getProcessType().getValue())) {
-                    item.getHoldingData().setInTempLocation(false);
-                    item.getHoldingData().tempLocation(null);
-                    item.getHoldingData().tempLibrary(null);
+        if (HookEventTypes.ITEM_UPDATED.name().equals(hook.getEvent().getValue())) {
+            /*
+            try {
+                boolean isInRegalfinder = this.regalfinderService.checkRegalfinder(item.getItemData().getLocation().getValue(), item.getItemData().getAlternativeCallNumber());
+                if (!isInRegalfinder) {
+                    log.warn(String.format("item is not in regalfinder: %s, %s %s", item.getBibData().getMmsId(), item.getItemData().getPid(), item.getItemData().getAlternativeCallNumber()));
                 }
-                break;
+            } catch (IOException ioe) {
+                log.warn("could not check regalfinder", ioe);
             }
-            case "ISSBD":
-            case "KEYS":
-                break;
-            default: {
-                boolean isItemUpdated = false;
-                log.info(String.format("got item with  call number %s and item call number %s", item.getHoldingData().getCallNumber(), item.getItemData().getAlternativeCallNumber()));
-                if (item.getHoldingData().getCallNumber() == null) {
-                    log.warn("holding call number is null for item " + item.getItemData().getPid());
-                    return;
-                }
+             */
 
-                // check for barcode with blanks
-                String barcode = item.getItemData().getBarcode();
-                if (barcode.contains(" ")) {
-                    item.getItemData().setBarcode(item.getItemData().getBarcode().strip());
-                    isItemUpdated = true;
-                }
-                // check holding shelfmark
-                String itemCallNo = item.getItemData().getAlternativeCallNumber().strip();
-                if (!itemCallNo.isEmpty()) {
-                    // check for call number type if it is not "other" (value 8) set it accordingly
-                    ItemDataAlternativeCallNumberType itemDataAlternativeCallNumberType = item.getItemData().getAlternativeCallNumberType();
-                    if (itemDataAlternativeCallNumberType == null || itemDataAlternativeCallNumberType.getValue().isEmpty()) {
-                        item.getItemData().setAlternativeCallNumberType(new ItemDataAlternativeCallNumberType().value("8"));
-                        isItemUpdated = true;
+
+            switch (item.getItemData().getPhysicalMaterialType().getValue()) {
+                case "ISSUE": {
+                    log.debug(String.format("deleting temporary location for received issue %s for shelfmark %s", item.getItemData().getBarcode(), item.getHoldingData().getCallNumber()));
+                    if (!"ACQ".equals(item.getItemData().getProcessType().getValue())) {
+                        item.getHoldingData().setInTempLocation(false);
+                        item.getHoldingData().tempLocation(null);
+                        item.getHoldingData().tempLibrary(null);
                     }
-                    // check whether holding signature needs to be updated
-                    String callNo = itemCallNo.replaceAll("\\+\\d+", "");
-                    String holdingCallNo = item.getHoldingData().getCallNumber().strip();
-                    if (!callNo.equals(holdingCallNo))
-                        this.almaCatalogService.updateCallNoInHolding(item.getBibData().getMmsId(), item.getHoldingData().getHoldingId(), callNo);
+                    break;
                 }
-                // update item if changes have been made
-                if (isItemUpdated) this.almaItemService.updateItem(item);
+                case "ISSBD":
+                case "KEYS":
+                    break;
+                default: {
+                    log.info(String.format("got item with  call number %s and item call number %s", item.getHoldingData().getCallNumber(), item.getItemData().getAlternativeCallNumber()));
+                    if (item.getHoldingData().getCallNumber() == null) {
+                        log.warn("holding call number is null for item " + item.getItemData().getPid());
+                        return;
+                    }
+
+                    // check for barcode with blanks
+                    String barcode = item.getItemData().getBarcode();
+                    if (barcode.contains(" ")) {
+                        waitForAlma(3);
+                        item = this.almaItemService.refreshItem(item);
+                        item.getItemData().setBarcode(item.getItemData().getBarcode().strip());
+                        item = this.almaItemService.updateItem(item);
+                    }
+                    // check holding shelfmark
+                    String itemCallNo = item.getItemData().getAlternativeCallNumber().strip();
+                    if (!itemCallNo.isEmpty()) {
+                        // check for call number type if it is not "other" (value 8) set it accordingly
+                        ItemDataAlternativeCallNumberType itemDataAlternativeCallNumberType = item.getItemData().getAlternativeCallNumberType();
+                        if (itemDataAlternativeCallNumberType == null || itemDataAlternativeCallNumberType.getValue().isEmpty()) {
+                            waitForAlma(3);
+                            item = this.almaItemService.refreshItem(item);
+                            item.getItemData().setAlternativeCallNumberType(new ItemDataAlternativeCallNumberType().value("8"));
+                            item = this.almaItemService.updateItem(item);
+                        }
+                        // check whether holding signature needs to be updated
+                        String callNo = itemCallNo.replaceAll("\\+\\d+", "");
+                        String holdingCallNo = item.getHoldingData().getCallNumber().strip();
+                        if (!callNo.equals(holdingCallNo)) {
+                            waitForAlma(3);
+                            item = this.almaItemService.refreshItem(item);
+                            this.almaCatalogService.updateCallNoInHolding(item.getBibData().getMmsId(), item.getHoldingData().getHoldingId(), callNo);
+                            this.almaItemService.updateItem(item);
+                        }
+                    }
+                }
             }
         }
     }
@@ -410,7 +437,7 @@ public class HookService {
                 }
                 case "job": {
                     JobHook jobHook = mapper.readValue(hook, JobHook.class);
-                    log.info(String.format("revceived job hook of type %s and event %s", jobHook.getAction(), jobHook.getEvent().getValue()));
+                    log.info(String.format("revceived job hook of type %s", jobHook.getAction()));
                     processJobHook(jobHook);
                 }
             }

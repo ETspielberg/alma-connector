@@ -66,7 +66,7 @@ public class HookController {
 
     @PostMapping("/jobListener")
     public ResponseEntity<?> receiveJobHook(@RequestBody JobHook hookContent, @RequestHeader("X-Exl-Signature") String signature) {
-        log.info(String.format("revceived hook of type %s and event %s", hookContent.getAction(), hookContent.getEvent().getValue()));
+        log.info(String.format("revceived hook of type %s", hookContent.getAction()));
         this.jobLoggerService.logJob(hookContent.getJobInstance());
         this.hookService.processJobHook(hookContent);
         return ResponseEntity.ok().build();

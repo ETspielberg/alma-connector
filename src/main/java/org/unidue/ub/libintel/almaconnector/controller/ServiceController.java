@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.unidue.ub.alma.shared.user.AlmaUser;
+import org.unidue.ub.libintel.almaconnector.service.RegalfinderService;
 import org.unidue.ub.libintel.almaconnector.service.ScheduledService;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaSetService;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaUserService;
@@ -24,12 +25,16 @@ public class ServiceController {
 
     private final ScheduledService scheduledService;
 
+    private final RegalfinderService regalfinderService;
+
     ServiceController(AlmaSetService almaSetService,
                       AlmaUserService almaUserService,
-                      ScheduledService scheduledService) {
+                      ScheduledService scheduledService,
+                      RegalfinderService regalfinderService) {
         this.almaSetService = almaSetService;
         this.almaUserService = almaUserService;
         this.scheduledService = scheduledService;
+        this.regalfinderService = regalfinderService;
     }
 
     @GetMapping("/scan")
@@ -42,6 +47,12 @@ public class ServiceController {
     private ResponseEntity<?> collectRequests() throws IOException {
         this.scheduledService.collectRequests();
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/testRegalfinder")
+    private ResponseEntity<?> testRegalfinder(String collection, String shelfmark) throws IOException {
+        boolean response = this.regalfinderService.checkRegalfinder(collection, shelfmark);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/bereitstellungen")
