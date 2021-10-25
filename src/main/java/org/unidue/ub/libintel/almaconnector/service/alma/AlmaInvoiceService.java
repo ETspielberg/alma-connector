@@ -305,6 +305,7 @@ public class AlmaInvoiceService {
     public void updateEdiInvoices(String vendorId) {
         List<Invoice> invoices = this.getEdiInvoices(vendorId);
         for (Invoice invoice : invoices) {
+            invoice = this.almaInvoicesApiClient.getInvoicesInvoiceId("application/json", invoice.getId(), "");
             String vatCode = invoice.getInvoiceVat().getVatCode().getValue();
             double vatAmount = invoice.getInvoiceVat().getVatAmount();
 
@@ -314,7 +315,11 @@ public class AlmaInvoiceService {
                 invoiceLine.setNote("");
                 invoiceLine.getInvoiceLineVat().getVatCode().setValue(vatCode);
                 invoiceLine.getInvoiceLineVat().setVatAmount(vatAmount);
-                this.updateInvoiceLine(invoice.getId(), invoiceLine);
+                try {
+                    this.updateInvoiceLine(invoice.getId(), invoiceLine);
+                } catch (Exception e) {
+                    log.warn("could not update invoice " + invoice.getId(), e);
+                }
             }
             this.updateInvoice(invoice);
         }
