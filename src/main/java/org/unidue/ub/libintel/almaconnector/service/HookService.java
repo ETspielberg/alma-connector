@@ -398,6 +398,7 @@ public class HookService {
     public void processJobHook(JobHook hook) {
         String jobName = hook.getJobInstance().getJobInfo().getName();
         if (jobName.contains("EDI - Load Files")) {
+            waitForAlma(30);
             String vendorId = jobName.replace("EDI - Load Files", "").strip();
             this.almaInvoiceService.updateEdiInvoices(vendorId);
         }
