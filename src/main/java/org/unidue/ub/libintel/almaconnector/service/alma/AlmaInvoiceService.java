@@ -34,7 +34,6 @@ public class AlmaInvoiceService {
     }
 
 
-
     /**
      * retrieves the open invoices from the Alma API.
      *
@@ -75,6 +74,7 @@ public class AlmaInvoiceService {
 
     /**
      * saves a new invoice to Alma
+     *
      * @param invoice the invoice to be saved
      * @return the saved invoice
      */
@@ -84,6 +84,7 @@ public class AlmaInvoiceService {
 
     /**
      * updates an invoice in Alma
+     *
      * @param invoice the invoice to be updated
      * @return the saved invoice
      */
@@ -93,6 +94,7 @@ public class AlmaInvoiceService {
 
     /**
      * retrieved an invoice by the invoice id
+     *
      * @param invoiceNumber the invoice id
      * @return the invoice
      */
@@ -102,6 +104,7 @@ public class AlmaInvoiceService {
 
     /**
      * retrieves an invoice by the invoice number
+     *
      * @param invoiceNumber the invoice number
      * @return the an <class>Invoices</class> object, holding all invoices with that invoice number
      */
@@ -116,6 +119,7 @@ public class AlmaInvoiceService {
 
     /**
      * adds payment information for a partial payment
+     *
      * @param invoice the invoice to be updated
      * @param payment the information for the partial payment
      */
@@ -126,6 +130,7 @@ public class AlmaInvoiceService {
 
     /**
      * adds payment information for a full payment
+     *
      * @param invoice the invoice to be updated
      * @param payment the information for the full payment
      */
@@ -137,7 +142,8 @@ public class AlmaInvoiceService {
 
     /**
      * saves an invoice line in alma
-     * @param id the id of the invoice
+     *
+     * @param id          the id of the invoice
      * @param invoiceLine the invoice line to be added
      */
     public void addInvoiceLine(String id, InvoiceLine invoiceLine) {
@@ -146,6 +152,7 @@ public class AlmaInvoiceService {
 
     /**
      * process an invoice
+     *
      * @param id the id of the invoice to be processed
      */
     public void processInvoice(String id) {
@@ -209,9 +216,9 @@ public class AlmaInvoiceService {
         if (option.isPresent()) {
 
             if (option.get().getCollection().startsWith("D"))
-            invoice.setOwner(new InvoiceOwner().value("D0001"));
-        else
-            invoice.setOwner(new InvoiceOwner().value("E0001"));
+                invoice.setOwner(new InvoiceOwner().value("D0001"));
+            else
+                invoice.setOwner(new InvoiceOwner().value("E0001"));
         } else
             invoice.setOwner(new InvoiceOwner().value("E0001"));
         return invoice;
@@ -306,12 +313,11 @@ public class AlmaInvoiceService {
         List<Invoice> invoices = this.getEdiInvoices(vendorId);
         for (Invoice invoice : invoices) {
             invoice = this.almaInvoicesApiClient.getInvoicesInvoiceId("application/json", invoice.getId(), "");
-            String vatCode = invoice.getInvoiceVat().getVatCode().getValue();
+            String vatCode = calculateVatCode(invoice);
             double vatAmount = invoice.getInvoiceVat().getVatAmount();
 
             invoice.getInvoiceVat().setVatPerInvoiceLine(true);
             for (InvoiceLine invoiceLine : invoice.getInvoiceLines().getInvoiceLine()) {
-                invoiceLine.setPriceNote(invoiceLine.getNote());
                 invoiceLine.setNote("");
                 invoiceLine.getInvoiceLineVat().getVatCode().setValue(vatCode);
                 invoiceLine.getInvoiceLineVat().setVatAmount(vatAmount);
@@ -325,7 +331,18 @@ public class AlmaInvoiceService {
         }
     }
 
+    private String calculateVatCode(Invoice invoice) {
+        String vatCode = invoice.getInvoiceVat().getVatCode().getValue();
+        if (vatCode.isEmpty()) {
+            if (invoice.getInvoiceVat() != null && invoice.getInvoiceVat().getPercentage() != null) {
+                if (invoice.getInvoiceVat().getPercentage() == 5.0)
+                    return "C9";
+            }
+        }
+        return "H9";
+    }
+
     private void updateInvoiceLine(String invoiceId, InvoiceLine invoiceLine) {
-        this.almaInvoicesApiClient.putInvoicesInvoiceIdLinesInvoiceLineId(invoiceLine, "application/json", invoiceId,invoiceLine.getId());
+        this.almaInvoicesApiClient.putInvoicesInvoiceIdLinesInvoiceLineId(invoiceLine, "application/json", invoiceId, invoiceLine.getId());
     }
 }
