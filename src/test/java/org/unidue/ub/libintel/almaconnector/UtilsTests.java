@@ -205,7 +205,7 @@ public class UtilsTests {
     @Before
     public void setupTestInvoice() {
         try {
-            Date testInvoiceDate = testDateformatter.parse("01.05.2020");
+            Date testInvoiceDate = testDateformatter.parse("01-05-2020");
             testInvoice = new Invoice().invoiceDate(testInvoiceDate);
         } catch (ParseException pe) {
             pe.printStackTrace();
