@@ -170,6 +170,7 @@ public class HookService {
         log.debug("received item loan: " + itemLoan.toString());
         log.debug(String.format("retrieving user %s", itemLoan.getUserId()));
         AlmaUser almaUser = this.almaUserService.getUser(itemLoan.getUserId());
+        waitForAlma(5);
         if (HookEventTypes.LOAN_CREATED.name().equals(hook.getEvent().getValue()) || HookEventTypes.LOAN_RETURNED.name().equals(hook.getEvent().getValue())) {
             Item item = this.almaItemService.findItemByMmsAndItemId(itemLoan.getMmsId(), itemLoan.getItemId());
             this.elasticsearchService.indexLoan(hook, item, almaUser);
@@ -178,7 +179,6 @@ public class HookService {
         String tempLibrary = "";
         switch (almaUser.getUserGroup().getDesc()) {
             case "Semesterapparat":
-                waitForAlma(5);
                 log.info("got sem app loan");
                 log.debug(almaUser.getContactInfo().toString());
                 for (Address address : almaUser.getContactInfo().getAddress())
@@ -243,7 +243,6 @@ public class HookService {
                     }
                 break;
             case "Neuerw. / 14 Tage":
-                waitForAlma(5);
                 log.info("got neuerwerbungs loan");
                 log.debug(String.format("retrieve item with barcode %s", itemLoan.getItemBarcode()));
                 String mmsId = itemLoan.getMmsId();
@@ -277,8 +276,9 @@ public class HookService {
             return;
         }
         log.info(String.format("received item hook with event %s (%s)", hook.getEvent().getDesc(), hook.getEvent().getValue()));
+        waitForAlma(5);
+        Item item = this.almaItemService.findItemByMmsAndItemId(hook.getItem().getBibData().getMmsId(), hook.getItem().getItemData().getPid());
 
-        Item item = hook.getItem();
         log.debug("received item hook: " + item.toString());
         if ("ITEM_DELETED".equals(hook.getEvent().getValue())) {
             this.elasticsearchService.deleteItem(item, hook.getTime());
@@ -354,6 +354,7 @@ public class HookService {
             String mmsId = bib.getMmsId();
             if (this.almaCatalogService.isPortfolios(mmsId))
                 return;
+
             BibWithRecord bibWithRecord = this.almaCatalogService.getRecord(mmsId);
             boolean isOnline = false;
             boolean isDiss = false;
