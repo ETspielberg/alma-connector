@@ -52,9 +52,9 @@ public class Manifestation implements Cloneable, Comparable<Manifestation> {
 	}
 
 	public Manifestation(BibWithRecord bib) {
-		this.titleID = bib.getMmsId();
-		this.almaId = bib.getMmsId();
-		this.bibliographicInformation = new BibliographicInformation(bib);
+			this.titleID = bib.getMmsId();
+			this.almaId = bib.getMmsId();
+			this.bibliographicInformation = new BibliographicInformation(bib);
 	}
 
 	public Manifestation(String titleID) {
@@ -134,6 +134,20 @@ public class Manifestation implements Cloneable, Comparable<Manifestation> {
 	public Item getItem(String itemId) {
 		for (Item item : items)
 			if (item.getItemId().equals(itemId))
+				return item;
+		return null;
+	}
+
+	public Item getItemByShelfmark(String shelfmark) {
+		for (Item item : items)
+			if (item.getShelfmark().equals(shelfmark))
+				return item;
+		return null;
+	}
+
+	public Item getItemByBarcode(String barcode) {
+		for (Item item : items)
+			if (item.getBarcode().equals(barcode))
 				return item;
 		return null;
 	}
@@ -231,4 +245,13 @@ public class Manifestation implements Cloneable, Comparable<Manifestation> {
 	public boolean contains(String shelfmark) {
 		return this.shelfmark.contains(shelfmark);
 }
+
+    public Item findCorrespindingItem(org.unidue.ub.alma.shared.bibs.Item almaItem) {
+		Item item = this.getItem(almaItem.getItemData().getPid());
+		if (item == null)
+			item = this.getItemByBarcode(almaItem.getItemData().getBarcode());
+		if (item == null)
+			item = this.getItemByShelfmark(almaItem.getItemData().getAlternativeCallNumber());
+		return item;
+    }
 }

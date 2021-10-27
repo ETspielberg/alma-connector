@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Exemplar nicht im Regalfinder</title>
+    <style>
+        .text {
+            color: black;
+        }
+        .title{
+            color: #004c93
+        }
+    </style>
+</head>
+<body>
+
+<h1 class="title" th:case="user">
+    Exemplar nicht im Regalfinder
+</h1>
+
+<p>Liebes Regalfinder-Team</p>
+<p>Das folgende Exemplar wurde nicht im Regalfinder gefunden: </p>
+<p class="text"><span th:text="${collection}"></span>: <span th:text="${shelfmark}"></span></p>
+<p class="text"><span th:text="${author}"></span>: <span th:text="${title}"></span></p>
+
+<div>
+<a th:href="@{'https://primo.uni-due.de/permalink/49HBZ_UDE/1uttatt/alma'+${mmsId}}"><button>Titel in Primo anzeigen</button></a>
+</div>
+
+<p>Viele Grüße,</p>
+<p><b>Lib</b> <i>intel</i></p>
+</body>
+</html>

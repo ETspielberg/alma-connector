@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.unidue.ub.libintel.almaconnector.model.hook.HookEventTypes;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -32,18 +34,12 @@ public class Item {
 	private String processStatus;
 
 	@Field(type=FieldType.Date)
-	private String inventoryDate;
+	private Date inventoryDate;
 
 	@Field(type=FieldType.Date)
-	private String deletionDate;
-
-	@Field(type=FieldType.Float)
-	private String price;
+	private Date deletionDate;
 
 	private String itemId;
-
-	@Field(analyzer = "keyword")
-	private String etat;
 
 	private String noteOpac;
 
@@ -52,121 +48,17 @@ public class Item {
 
 	@JsonManagedReference
 	@Field(type = FieldType.Nested, includeInParent = true)
-	private List<Event> events = new ArrayList<Event>();
+	private List<Event> events = new ArrayList<>();
 
-	/**
-	 * Creates a new <code>Item</code>.
-	 * 
-	 * 
-	 * @param collection
-	 *            the collection this item belongs to
-	 * @param shelfmark
-	 *            the shelfmark of this item
-	 * @param subLibrary
-	 *            the sublibrary this item is located in
-	 * @param material
-	 *            the type of material of this item (book, cd-rom etc.)
-	 * @param itemStatus
-	 *            the status of this item
-	 * @param processStatus
-	 *            the process status of this item
-	 * @param inventoryDate
-	 *            the date this item was inventoried
-	 * @param deletionDate
-	 *            the date when this item was de-inventoried
-	 * @param price
-	 *            the price of this item
-	 */
-	public Item(String itemId, String collection, String shelfmark, String subLibrary, String material,
-                String itemStatus, String processStatus, String inventoryDate, String deletionDate, String price) {
-		this(itemId, subLibrary, material, inventoryDate, deletionDate, price);
-
-		if ((itemStatus != null) && !itemStatus.trim().isEmpty())
-			this.itemStatus = itemStatus;
-		if ((processStatus != null) && !processStatus.trim().isEmpty())
-			this.processStatus = processStatus;
-
-		if ((collection != null) && !collection.isEmpty())
-			this.collection = collection.trim();
-
-		if ((shelfmark != null) && !shelfmark.isEmpty())
-			this.shelfmark = shelfmark;
-		this.itemId = itemId;
-	}
-
-	public Item(String itemId, String collection, String shelfmark, String subLibrary, String material,
-                String itemStatus, String processStatus, String inventoryDate, String deletionDate, String price, String noteOpac) {
-		this(itemId, collection, shelfmark, subLibrary, material,itemStatus, processStatus, inventoryDate, deletionDate, price);
-		this.noteOpac = noteOpac;
-	}
-
-	public Item(String itemId, String collection, String shelfmark, String subLibrary, String material,
-                String itemStatus, String processStatus, String inventoryDate, String deletionDate, String price, String noteOpac, String barcode) {
-		this(itemId, collection, shelfmark, subLibrary, material,itemStatus, processStatus, inventoryDate, deletionDate, price);
-		this.noteOpac = noteOpac;
-		this.barcode = barcode;
-	}
-
-	/**
-	 * Creates a new <code>Item</code>.
-	 * 
-	 * 
-	 * @param subLibrary
-	 *            the sublibrary this item is located in
-	 * @param material
-	 *            the type of material of this item (book, cd-rom etc.)
-	 * @param inventoryDate
-	 *            the date this item was inventoried
-	 * @param deletionDate
-	 *            the date when this item was de-inventoried
-	 * @param price
-	 *            the price of this item
-	 */
-	public Item(String itemId, String subLibrary, String material, String inventoryDate, String deletionDate,
-                String price) {
-		this.itemId = (itemId.length() > 15) ? itemId.substring(0,15) : itemId;
-		this.subLibrary = subLibrary;
-		this.material = material.trim();
-		this.inventoryDate = inventoryDate;
-		this.deletionDate = deletionDate;
-		this.collection = UNKNOWN;
-		this.shelfmark = UNKNOWN;
-		this.itemStatus = "xx";
-		this.price = price;
-	}
-
-	public Item(org.unidue.ub.alma.shared.bibs.Item almaItem) {
+	public Item(org.unidue.ub.alma.shared.bibs.Item almaItem, Date inventoryDate) {
 		this.itemId = almaItem.getItemData().getPid();
 		this.subLibrary = almaItem.getItemData().getLibrary().getValue();
 		this.material = almaItem.getItemData().getPhysicalMaterialType().getValue();
-		// this.inventoryDate = almaItem.getItemData().getInventoryDate();
+		this.inventoryDate = inventoryDate;
 		this.shelfmark = almaItem.getItemData().getAlternativeCallNumber();
-		this.price = almaItem.getItemData().getInventoryPrice();
 		this.noteOpac = almaItem.getItemData().getPublicNote();
 		this.barcode = almaItem.getItemData().getBarcode();
-
-	}
-
-	/**
-	 * Creates a new <code>Item</code>.
-	 * 
-	 * 
-	 * @param subLibrary
-	 *            the sublibrary this item is located in
-	 * @param material
-	 *            the type of material of this item (book, cd-rom etc.)
-	 */
-	Item(String itemId, String subLibrary, String material) {
-		this.itemId = (itemId.length() > 15) ? itemId.substring(0,15) : itemId;
-		this.subLibrary = subLibrary;
-		this.material = material.trim();
-		this.collection = UNKNOWN;
-		this.shelfmark = UNKNOWN;
-		this.itemStatus = "xx";
-	}
-	
-	public Item() {
-		
+		this.events.add(new Event(this, inventoryDate, EventTypes.INVENTORY.name(), "library", +1));
 	}
 
 
@@ -177,25 +69,6 @@ public class Item {
 
 	public void setNoteOpac(String noteOpac) {
 		this.noteOpac = noteOpac;
-	}
-
-	/**
-	 * returns the code of the budget this item was paid for.
-	 *
-	 * @return etat the budget code
-	 */
-	public String getEtat() {
-		return etat;
-	}
-
-	/**
-	 * sets the code of the budget this item was paid for.
-	 *
-	 * @param etat
-	 *            the budget code
-	 */
-	public void setEtat(String etat) {
-		this.etat = etat;
 	}
 
 	/**
@@ -267,7 +140,7 @@ public class Item {
 	 *
 	 * @return inventoryDate the date of inventory
 	 */
-	public String getInventoryDate() {
+	public Date getInventoryDate() {
 		return inventoryDate;
 	}
 
@@ -276,7 +149,7 @@ public class Item {
 	 *
 	 * @return deletionDate the date of de-inventory
 	 */
-	public String getDeletionDate() {
+	public Date getDeletionDate() {
 		return deletionDate;
 	}
 
@@ -298,15 +171,6 @@ public class Item {
 	 */
 	public List<Event> getEvents() {
 		return events;
-	}
-
-	/**
-	 * returns the price of this item
-	 *
-	 * @return price the price
-	 */
-	public String getPrice() {
-		return price;
 	}
 
 	/**
@@ -361,22 +225,15 @@ public class Item {
 	/**
 	 * @param inventoryDate the inventoryDate to set
 	 */
-	public void setInventoryDate(String inventoryDate) {
+	public void setInventoryDate(Date inventoryDate) {
 		this.inventoryDate = inventoryDate;
 	}
 
 	/**
 	 * @param deletionDate the deletionDate to set
 	 */
-	public void setDeletionDate(String deletionDate) {
+	public void setDeletionDate(Date deletionDate) {
 		this.deletionDate = deletionDate;
-	}
-
-	/**
-	 * @param price the price to set
-	 */
-	public void setPrice(String price) {
-		this.price = price;
 	}
 
 	/**
@@ -394,13 +251,29 @@ public class Item {
 		this.barcode = barcode;
 	}
 
-	@JsonIgnore
-	public int getItemSequence() {
-		String sequenceString = "";
-		if (itemId.length() > 9)
-			sequenceString= itemId.substring(9);
-		else
-			sequenceString = "0";
-		return Integer.parseInt(sequenceString);
+
+    public void delete(Date date) {
+		this.setDeletionDate(date);
+		for (Event event: events) {
+			if (event.getType().equals("inventory")) {
+				event.setEndEvent(new Event(this, date, "deletion", "library", -1));
+			}
+		}
+    }
+
+	public void update(org.unidue.ub.alma.shared.bibs.Item almaItem) {
+		this.itemId = almaItem.getItemData().getPid();
+		this.subLibrary = almaItem.getItemData().getLibrary().getValue();
+		this.material = almaItem.getItemData().getPhysicalMaterialType().getValue();
+		this.shelfmark = almaItem.getItemData().getAlternativeCallNumber();
+		this.noteOpac = almaItem.getItemData().getPublicNote();
+		this.barcode = almaItem.getItemData().getBarcode();
+	}
+
+	public void closeLoan(Event endEvent) {
+		for (Event event: this.events) {
+			if (HookEventTypes.LOAN_CREATED.name().equals(event.getType()) && event.getEndEvent() == null)
+				event.setEndEvent(endEvent);
+		}
 	}
 }

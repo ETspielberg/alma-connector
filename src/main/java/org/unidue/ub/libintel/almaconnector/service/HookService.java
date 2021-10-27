@@ -9,11 +9,9 @@ import org.unidue.ub.alma.shared.user.Address;
 import org.unidue.ub.alma.shared.user.AlmaUser;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderLine;
 import org.unidue.ub.libintel.almaconnector.model.hook.*;
-import org.unidue.ub.libintel.almaconnector.model.media.Manifestation;
 import org.unidue.ub.libintel.almaconnector.service.alma.*;
 import org.unidue.ub.libintel.almaconnector.service.bubi.BubiOrderLineService;
 
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 
@@ -42,6 +40,8 @@ public class HookService {
 
     private final RegalfinderService regalfinderService;
 
+    private final ElasticsearchService elasticsearchService;
+
     /**
      * constructor based autowiring to the individual services
      *
@@ -57,7 +57,8 @@ public class HookService {
                 BubiOrderLineService bubiOrderLineService,
                 AlmaElectronicService almaElectronicService,
                 AlmaInvoiceService almaInvoiceService,
-                RegalfinderService regalfinderService) {
+                RegalfinderService regalfinderService,
+                ElasticsearchService elasticsearchService) {
         this.almaUserService = almaUserService;
         this.almaItemService = almaItemService;
         this.almaCatalogService = almaCatalogService;
@@ -65,6 +66,7 @@ public class HookService {
         this.bubiOrderLineService = bubiOrderLineService;
         this.almaInvoiceService = almaInvoiceService;
         this.regalfinderService = regalfinderService;
+        this.elasticsearchService = elasticsearchService;
     }
 
     /**
@@ -78,6 +80,7 @@ public class HookService {
         log.debug("received user request: " + userRequest.toString());
         waitForAlma(3);
         Item item = this.almaItemService.findItemByMmsAndItemId(userRequest.getMmsId(), userRequest.getItemId());
+        elasticsearchService.indexRequest(hook, item);
         if ("WORK_ORDER".equals(userRequest.getRequestType()) && "Int".equals(userRequest.getRequestSubType().getValue())) {
             switch (userRequest.getTargetDestination().getValue()) {
                 case "Buchbinder": {
@@ -167,6 +170,10 @@ public class HookService {
         log.debug("received item loan: " + itemLoan.toString());
         log.debug(String.format("retrieving user %s", itemLoan.getUserId()));
         AlmaUser almaUser = this.almaUserService.getUser(itemLoan.getUserId());
+        if (HookEventTypes.LOAN_CREATED.name().equals(hook.getEvent().getValue()) || HookEventTypes.LOAN_RETURNED.name().equals(hook.getEvent().getValue())) {
+            Item item = this.almaItemService.findItemByMmsAndItemId(itemLoan.getMmsId(), itemLoan.getItemId());
+            this.elasticsearchService.indexLoan(hook, item, almaUser);
+        }
         boolean needScan = false;
         String tempLibrary = "";
         switch (almaUser.getUserGroup().getDesc()) {
@@ -183,7 +190,6 @@ public class HookService {
                         log.debug(String.format("retrieved item:\n %s", item.toString()));
                         // setting bib data to null in order to avoid problems with network-number / network_numbers....
                         item.setBibData(null);
-
 
                         if ("LOAN_CREATED".equals(hook.getEvent().getValue())) {
                             log.debug(String.format("setting public note to %s", address.getLine1()));
@@ -272,24 +278,15 @@ public class HookService {
         }
         log.info(String.format("received item hook with event %s (%s)", hook.getEvent().getDesc(), hook.getEvent().getValue()));
 
-        if ("ITEM_DELETED".equals(hook.getEvent().getValue()))
-            // ToDo: set deletion date and Event to Elasticsearch
-            return;
         Item item = hook.getItem();
         log.debug("received item hook: " + item.toString());
-        if (HookEventTypes.ITEM_UPDATED.name().equals(hook.getEvent().getValue())) {
-            /*
-            try {
-                boolean isInRegalfinder = this.regalfinderService.checkRegalfinder(item.getItemData().getLocation().getValue(), item.getItemData().getAlternativeCallNumber());
-                if (!isInRegalfinder) {
-                    log.warn(String.format("item is not in regalfinder: %s, %s %s", item.getBibData().getMmsId(), item.getItemData().getPid(), item.getItemData().getAlternativeCallNumber()));
-                }
-            } catch (IOException ioe) {
-                log.warn("could not check regalfinder", ioe);
-            }
-             */
-
-
+        if ("ITEM_DELETED".equals(hook.getEvent().getValue())) {
+            this.elasticsearchService.deleteItem(item, hook.getTime());
+        } else if (HookEventTypes.ITEM_CREATED.name().equals(hook.getEvent().getValue())) {
+            this.elasticsearchService.index(item, hook.getTime());
+        } else if (HookEventTypes.ITEM_UPDATED.name().equals(hook.getEvent().getValue())) {
+            this.regalfinderService.checkRegalfinder(item);
+            this.elasticsearchService.updateItem(item, hook.getTime());
             switch (item.getItemData().getPhysicalMaterialType().getValue()) {
                 case "ISSUE": {
                     log.debug(String.format("deleting temporary location for received issue %s for shelfmark %s", item.getItemData().getBarcode(), item.getHoldingData().getCallNumber()));
@@ -353,9 +350,6 @@ public class HookService {
     public void processBibHook(BibHook hook) {
         BibWithRecord bib = hook.getBib();
         log.debug("received bib hook: " + bib.toString());
-        if (HookEventTypes.BIB_CREATED.name().equals(hook.getEvent().getValue())) {
-            Manifestation manifestation = new Manifestation(bib);
-        }
         if ("Universität Duisburg-Essen".equals(bib.getPublisherConst())) {
             String mmsId = bib.getMmsId();
             if (this.almaCatalogService.isPortfolios(mmsId))
