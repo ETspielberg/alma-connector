@@ -108,7 +108,7 @@ public class ElasticsearchService {
         sourceBuilder.timeout(new TimeValue(60, TimeUnit.SECONDS));
         sourceBuilder.query(QueryBuilders.termQuery("mmsId", mmsId));
         SearchRequest searchRequest = new SearchRequest();
-        searchRequest.indices("posts");
+        searchRequest.indices(indexName);
         searchRequest.source(sourceBuilder);
         SearchResponse searchResponse;
         try {
