@@ -93,7 +93,8 @@ public class ElasticsearchService {
 
     public void updateManifestation(Manifestation manifestation) {
         Map<String, Object> documentMapper = objectMapper.convertValue(manifestation, Map.class);
-        UpdateRequest updateRequest = new UpdateRequest(indexName, "_doc", manifestation.getTitleID()).upsert(documentMapper);
+        UpdateRequest updateRequest = new UpdateRequest(indexName, "_doc", manifestation.getTitleID())
+                .doc(documentMapper).docAsUpsert(true);
         try {
             elasticsearchClient.update(updateRequest, RequestOptions.DEFAULT);
         } catch (IOException ioe) {
