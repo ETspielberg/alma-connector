@@ -42,6 +42,8 @@ public class HookService {
 
     private final ElasticsearchService elasticsearchService;
 
+    private final BlockedIdService blockedIdService;
+
     /**
      * constructor based autowiring to the individual services
      *
@@ -58,7 +60,8 @@ public class HookService {
                 AlmaElectronicService almaElectronicService,
                 AlmaInvoiceService almaInvoiceService,
                 RegalfinderService regalfinderService,
-                ElasticsearchService elasticsearchService) {
+                ElasticsearchService elasticsearchService,
+                BlockedIdService blockedIdService) {
         this.almaUserService = almaUserService;
         this.almaItemService = almaItemService;
         this.almaCatalogService = almaCatalogService;
@@ -67,6 +70,7 @@ public class HookService {
         this.almaInvoiceService = almaInvoiceService;
         this.regalfinderService = regalfinderService;
         this.elasticsearchService = elasticsearchService;
+        this.blockedIdService = blockedIdService;
     }
 
     /**
@@ -166,6 +170,7 @@ public class HookService {
      */
     @Async("threadPoolTaskExecutor")
     public void processLoanHook(LoanHook hook) {
+        this.blockedIdService.blockId(hook.getItemLoan().getItemId());
         HookItemLoan itemLoan = hook.getItemLoan();
         log.debug("received item loan: " + itemLoan.toString());
         log.debug(String.format("retrieving user %s", itemLoan.getUserId()));
@@ -301,6 +306,8 @@ public class HookService {
                 case "KEYS":
                     break;
                 default: {
+                    if (blockedIdService.check(item.getItemData().getPid()))
+                        return;
                     log.info(String.format("got item with  call number %s and item call number %s", item.getHoldingData().getCallNumber(), item.getItemData().getAlternativeCallNumber()));
                     if (item.getHoldingData().getCallNumber() == null) {
                         log.warn("holding call number is null for item " + item.getItemData().getPid());
