@@ -15,7 +15,7 @@ public class ApiKeyAuth implements RequestInterceptor {
     /**
      * adds the necessary authentication parameter to the API call
      * @param location the place where to put the authentication data. possible values are 'query', 'header' or 'cookie'
-     * @param paramName the pparametername for the authentication data, i.e. the query parameter, header or cookie name.
+     * @param paramName the parameter name for the authentication data, i.e. the query parameter, header or cookie name.
      */
     public ApiKeyAuth(String location, String paramName) {
         this.location = location;
