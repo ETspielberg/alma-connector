@@ -1,10 +1,9 @@
-package org.unidue.ub.libintel.almaconnector.model.media;
+package org.unidue.ub.libintel.almaconnector.model.media.elasticsearch;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
-import org.unidue.ub.libintel.almaconnector.model.hook.HookEventTypes;
+import org.unidue.ub.alma.shared.bibs.Item;
+import org.unidue.ub.libintel.almaconnector.model.EventType;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -16,9 +15,7 @@ import java.util.List;
  * @author Frank L\u00FCtzenkirchen, Eike Spielberg
  * @version 1
  */
-public class Item {
-
-	final static String UNKNOWN = "???";
+public class EsItem {
 
 	private String collection;
 
@@ -46,11 +43,10 @@ public class Item {
 	@Field(analyzer = "keyword")
 	private String barcode;
 
-	@JsonManagedReference
 	@Field(type = FieldType.Nested, includeInParent = true)
-	private List<Event> events = new ArrayList<>();
+	private List<EsEvent> esEvents = new ArrayList<>();
 
-	public Item(org.unidue.ub.alma.shared.bibs.Item almaItem, Date inventoryDate) {
+	public EsItem(Item almaItem, Date inventoryDate) {
 		this.itemId = almaItem.getItemData().getPid();
 		this.subLibrary = almaItem.getItemData().getLibrary().getValue();
 		this.material = almaItem.getItemData().getPhysicalMaterialType().getValue();
@@ -58,7 +54,7 @@ public class Item {
 		this.shelfmark = almaItem.getItemData().getAlternativeCallNumber();
 		this.noteOpac = almaItem.getItemData().getPublicNote();
 		this.barcode = almaItem.getItemData().getBarcode();
-		this.events.add(new Event(this, inventoryDate, EventTypes.INVENTORY.name(), "library", +1));
+		this.esEvents.add(new EsEvent(itemId, inventoryDate, null, EventType.INVENTORY, "library"));
 	}
 
 
@@ -157,11 +153,11 @@ public class Item {
 	 * adds an <code>Event</code>-object to the list of events associated with
 	 * this item.
 	 *
-	 * @param event
+	 * @param esEvent
 	 *            an <code>Event</code>-object
 	 */
-	public void addEvent(Event event) {
-		events.add(event);
+	public void addEvent(EsEvent esEvent) {
+		esEvents.add(esEvent);
 	}
 
 	/**
@@ -169,8 +165,8 @@ public class Item {
 	 *
 	 * @return events list of events
 	 */
-	public List<Event> getEvents() {
-		return events;
+	public List<EsEvent> getEvents() {
+		return esEvents;
 	}
 
 	/**
@@ -237,10 +233,10 @@ public class Item {
 	}
 
 	/**
-	 * @param events the events to set
+	 * @param esEvents the events to set
 	 */
-	public void setEvents(List<Event> events) {
-		this.events = events;
+	public void setEvents(List<EsEvent> esEvents) {
+		this.esEvents = esEvents;
 	}
 
 	public String getBarcode() {
@@ -254,9 +250,9 @@ public class Item {
 
     public void delete(Date date) {
 		this.setDeletionDate(date);
-		for (Event event: events) {
-			if (event.getType().equals("inventory")) {
-				event.setEndEvent(new Event(this, date, "deletion", "library", -1));
+		for (EsEvent esEvent : esEvents) {
+			if (esEvent.getType().equals(EventType.INVENTORY)) {
+				esEvent.setEndDate(date);
 			}
 		}
     }
@@ -270,10 +266,10 @@ public class Item {
 		this.barcode = almaItem.getItemData().getBarcode();
 	}
 
-	public void closeLoan(Event endEvent) {
-		for (Event event: this.events) {
-			if (HookEventTypes.LOAN_CREATED.name().equals(event.getType()) && event.getEndEvent() == null)
-				event.setEndEvent(endEvent);
+	public void closeLoan(Date closeDate) {
+		for (EsEvent esEvent : this.esEvents) {
+			if (EventType.LOAN.equals(esEvent.getType()) && esEvent.getEndDate() == null)
+				esEvent.setEndDate(closeDate);
 		}
 	}
 }

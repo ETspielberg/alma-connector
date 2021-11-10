@@ -6,11 +6,17 @@ import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.elasticsearch.config.AbstractElasticsearchConfiguration;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
+import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 
 @Slf4j
 @Configuration
+@EnableElasticsearchRepositories(basePackages = "org.unidue.ub.libintel.almaconnector.repository.elasticsearch")
+@ComponentScan(basePackages = { "org.unidue.ub.libintel.almaconnector.model.media.elasticsearch" })
 public class ElasticsearchConfiguration extends AbstractElasticsearchConfiguration {
 
     @Value("${elasticsearch.host:localhost}")
@@ -30,5 +36,10 @@ public class ElasticsearchConfiguration extends AbstractElasticsearchConfigurati
                         new HttpHost(elasticsearchHost, elasticsearchPort, elasticsearchProtocol)
                 )
         );
+    }
+
+    @Bean
+    public ElasticsearchOperations elasticsearchTemplate() {
+        return new ElasticsearchRestTemplate(elasticsearchClient());
     }
 }

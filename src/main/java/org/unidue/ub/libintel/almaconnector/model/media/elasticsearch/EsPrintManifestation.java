@@ -1,4 +1,4 @@
-package org.unidue.ub.libintel.almaconnector.model.media;
+package org.unidue.ub.libintel.almaconnector.model.media.elasticsearch;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.data.annotation.Id;
@@ -22,9 +22,7 @@ import java.util.regex.Pattern;
  * @version 1
  */
 @Document(indexName = "manifestation_v1")
-public class Manifestation implements Cloneable, Comparable<Manifestation> {
-
-	private final static Pattern editionFinder = Pattern.compile(".*\\((\\d+)\\).*");
+public class EsPrintManifestation implements Cloneable, Comparable<EsPrintManifestation> {
 
 	@Field(analyzer = "keyword")
 	private String almaId = "";
@@ -40,28 +38,28 @@ public class Manifestation implements Cloneable, Comparable<Manifestation> {
 	private String shelfmarkBase = "";
 
 	@Field(type = FieldType.Nested, includeInParent = true)
-	private List<Item> items = new ArrayList<>();
+	private List<EsItem> esItems = new ArrayList<>();
 
 	@Field(type = FieldType.Integer)
 	private int edition = 1;
 
 	@Field(type = FieldType.Nested, includeInParent = true)
-	private BibliographicInformation bibliographicInformation;
+	private EsBibliographicInformation esBibliographicInformation;
 
-	public Manifestation() {
+	public EsPrintManifestation() {
 	}
 
-	public Manifestation(BibWithRecord bib) {
+	public EsPrintManifestation(BibWithRecord bib) {
 			this.titleID = bib.getMmsId();
 			this.almaId = bib.getMmsId();
-			this.bibliographicInformation = new BibliographicInformation(bib);
+			this.esBibliographicInformation = new EsBibliographicInformation(bib);
 	}
 
-	public Manifestation(String titleID) {
+	public EsPrintManifestation(String titleID) {
 		this.titleID = titleID;
 	}
 
-	public Manifestation(String titleID, String almaId) {
+	public EsPrintManifestation(String titleID, String almaId) {
 		this.titleID = titleID;
 		this.almaId = almaId;
 	}
@@ -95,10 +93,6 @@ public class Manifestation implements Cloneable, Comparable<Manifestation> {
 		return edition;
 	}
 
-	public static Pattern getEditionFinder() {
-		return editionFinder;
-	}
-
 	public String getAlmaId() {
 		return almaId;
 	}
@@ -107,76 +101,76 @@ public class Manifestation implements Cloneable, Comparable<Manifestation> {
 		this.almaId = almaId;
 	}
 
-	public void setItems(List<Item> items) {
-		this.items = items;
+	public void setItems(List<EsItem> esItems) {
+		this.esItems = esItems;
 	}
 
 	public void setEdition(int edition) {
 		this.edition = edition;
 	}
 
-	public void addItem(Item item) {
-		items.add(item);
-		addItemShelfmarkIfNew(item);
+	public void addItem(EsItem esItem) {
+		esItems.add(esItem);
+		addItemShelfmarkIfNew(esItem);
 	}
 
-	public void addItems(List<Item> items) {
-		for (Item item : items) {
-			addItem(item);
+	public void addItems(List<EsItem> esItems) {
+		for (EsItem esItem : esItems) {
+			addItem(esItem);
 		}
 	}
 
 
-	public List<Item> getItems() {
-		return items;
+	public List<EsItem> getItems() {
+		return esItems;
 	}
 
-	public Item getItem(String itemId) {
-		for (Item item : items)
-			if (item.getItemId().equals(itemId))
-				return item;
+	public EsItem getItem(String itemId) {
+		for (EsItem esItem : esItems)
+			if (esItem.getItemId().equals(itemId))
+				return esItem;
 		return null;
 	}
 
-	public Item getItemByShelfmark(String shelfmark) {
-		for (Item item : items)
-			if (item.getShelfmark().equals(shelfmark))
-				return item;
+	public EsItem getItemByShelfmark(String shelfmark) {
+		for (EsItem esItem : esItems)
+			if (esItem.getShelfmark().equals(shelfmark))
+				return esItem;
 		return null;
 	}
 
-	public Item getItemByBarcode(String barcode) {
-		for (Item item : items)
-			if (item.getBarcode().equals(barcode))
-				return item;
+	public EsItem getItemByBarcode(String barcode) {
+		for (EsItem esItem : esItems)
+			if (esItem.getBarcode().equals(barcode))
+				return esItem;
 		return null;
 	}
 
 
-	public void setItmes(List<Item> items) {
-		this.items = items;
+	public void setItmes(List<EsItem> esItems) {
+		this.esItems = esItems;
 	}
 
-	public BibliographicInformation getBibliographicInformation() {
-		return bibliographicInformation;
+	public EsBibliographicInformation getBibliographicInformation() {
+		return esBibliographicInformation;
 	}
 
-	public void setBibliographicInformation(BibliographicInformation bibliographicInformation) {
-		this.bibliographicInformation = bibliographicInformation;
+	public void setBibliographicInformation(EsBibliographicInformation esBibliographicInformation) {
+		this.esBibliographicInformation = esBibliographicInformation;
 	}
 
 	@JsonIgnore
-	public List<Event> getEvents() {
-		List<Event> events = new ArrayList<>();
-		for (Item item : getItems())
-			events.addAll(item.getEvents());
-		Collections.sort(events);
-		return events;
+	public List<EsEvent> getEvents() {
+		List<EsEvent> esEvents = new ArrayList<>();
+		for (EsItem esItem : getItems())
+			esEvents.addAll(esItem.getEvents());
+		Collections.sort(esEvents);
+		return esEvents;
 	}
 
 	@Override
 	public boolean equals(Object other) {
-		return shelfmark.equals(((Manifestation) other).shelfmark);
+		return shelfmark.equals(((EsPrintManifestation) other).shelfmark);
 	}
 
 	@Override
@@ -184,32 +178,32 @@ public class Manifestation implements Cloneable, Comparable<Manifestation> {
 		return titleID.trim().hashCode();
 	}
 
-	public Manifestation clone() {
-		Manifestation clone = new Manifestation(shelfmark);
-		for (Item item : items)
-			clone.addItem(item);
+	public EsPrintManifestation clone() {
+		EsPrintManifestation clone = new EsPrintManifestation(shelfmark);
+		for (EsItem esItem : esItems)
+			clone.addItem(esItem);
 		return clone;
 	}
 
-	@JsonIgnore
+
 	public String[] getShelfmarks() {
 		return shelfmark.split(", ");
 	}
 
-	@JsonIgnore
+
 	public List<String> getBarcodes() {
 		List<String> barcodes = new ArrayList<>();
-		for (Item item : this.items) {
-			if (item.getBarcode() != null && !"".equals(item.getBarcode()))
-				barcodes.add(item.getBarcode());
+		for (EsItem esItem : this.esItems) {
+			if (esItem.getBarcode() != null && !"".equals(esItem.getBarcode()))
+				barcodes.add(esItem.getBarcode());
 		}
 		return barcodes;
 	}
 
 
-	private void addItemShelfmarkIfNew(Item item) {
-		String shelfmarkItem = item.getShelfmark().replaceAll("\\+\\d+", "");
-		if ((shelfmarkItem == null) || (shelfmarkItem.equals(Item.UNKNOWN)) || shelfmarkItem.isEmpty()) {
+	private void addItemShelfmarkIfNew(EsItem esItem) {
+		String shelfmarkItem = esItem.getShelfmark().replaceAll("\\+\\d+", "");
+		if ((shelfmarkItem == null) || (shelfmarkItem.equals("???")) || shelfmarkItem.isEmpty()) {
 			return;
 		} else if (!shelfmark.contains(shelfmarkItem))
 			addShelfmark(shelfmarkItem);
@@ -224,19 +218,21 @@ public class Manifestation implements Cloneable, Comparable<Manifestation> {
 	}
 
 	private void buildShelfmarkBase(String shelfmark) {
+		Pattern editionFinder = Pattern.compile(".*\\((\\d+)\\).*");
 		shelfmarkBase = editionFinder.matcher(shelfmark).matches() ? shelfmark.replaceAll("\\((\\d+)\\)", "") : shelfmark;
 	}
 
 	private void buildEdition(String shelfmark) {
+		Pattern editionFinder = Pattern.compile(".*\\((\\d+)\\).*");
 		Matcher m = editionFinder.matcher(shelfmark);
 		try {
-			edition = m.matches() ? Integer.valueOf(m.group(1)) : 1;
+			edition = m.matches() ? Integer.parseInt(m.group(1)) : 1;
 		} catch (Exception exception) {
 			edition = 1;
 		}
 	}
 
-	public int compareTo(Manifestation other) {
+	public int compareTo(EsPrintManifestation other) {
 		if (this.edition > other.getEdition())
 			return 1;
 		else return -1;
@@ -246,12 +242,12 @@ public class Manifestation implements Cloneable, Comparable<Manifestation> {
 		return this.shelfmark.contains(shelfmark);
 }
 
-    public Item findCorrespindingItem(org.unidue.ub.alma.shared.bibs.Item almaItem) {
-		Item item = this.getItem(almaItem.getItemData().getPid());
-		if (item == null)
-			item = this.getItemByBarcode(almaItem.getItemData().getBarcode());
-		if (item == null)
-			item = this.getItemByShelfmark(almaItem.getItemData().getAlternativeCallNumber());
-		return item;
+    public EsItem findCorrespindingItem(org.unidue.ub.alma.shared.bibs.Item almaItem) {
+		EsItem esItem = this.getItem(almaItem.getItemData().getPid());
+		if (esItem == null)
+			esItem = this.getItemByBarcode(almaItem.getItemData().getBarcode());
+		if (esItem == null)
+			esItem = this.getItemByShelfmark(almaItem.getItemData().getAlternativeCallNumber());
+		return esItem;
     }
 }

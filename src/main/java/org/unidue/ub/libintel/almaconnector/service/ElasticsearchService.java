@@ -1,208 +1,142 @@
 package org.unidue.ub.libintel.almaconnector.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.action.get.GetRequest;
-import org.elasticsearch.action.get.GetResponse;
-import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.update.UpdateRequest;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.bibs.BibWithRecord;
+import org.unidue.ub.alma.shared.bibs.HookUserRequest;
 import org.unidue.ub.alma.shared.bibs.Item;
 import org.unidue.ub.alma.shared.user.AlmaUser;
 import org.unidue.ub.libintel.almaconnector.model.hook.HookEventTypes;
 import org.unidue.ub.libintel.almaconnector.model.hook.LoanHook;
 import org.unidue.ub.libintel.almaconnector.model.hook.RequestHook;
-import org.unidue.ub.libintel.almaconnector.model.media.Event;
-import org.unidue.ub.libintel.almaconnector.model.media.Manifestation;
+import org.unidue.ub.libintel.almaconnector.model.EventType;
+import org.unidue.ub.libintel.almaconnector.model.media.elasticsearch.EsEvent;
+import org.unidue.ub.libintel.almaconnector.model.media.elasticsearch.EsItem;
+import org.unidue.ub.libintel.almaconnector.model.media.elasticsearch.EsPrintManifestation;
+import org.unidue.ub.libintel.almaconnector.repository.elasticsearch.ManifestationRepository;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaCatalogService;
 
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
 
 @Slf4j
 @Service
 public class ElasticsearchService {
 
-    private final RestHighLevelClient elasticsearchClient;
+    private final ManifestationRepository manifestationRepository;
 
     private final AlmaCatalogService almaCatalogService;
 
-    private final ObjectMapper objectMapper;
-
-    @Value("${elasticsearch.manifestation.index:manifestation}")
-    private String indexName;
-
-    ElasticsearchService(RestHighLevelClient elasticsearchClient,
-                         ObjectMapper objectMapper,
+    ElasticsearchService(ManifestationRepository manifestationRepository,
                          AlmaCatalogService almaCatalogService) {
-        this.elasticsearchClient = elasticsearchClient;
-        this.objectMapper = objectMapper;
         this.almaCatalogService = almaCatalogService;
+        this.manifestationRepository = manifestationRepository;
     }
 
-    public int index(Manifestation manifestation, String id) {
-        Map<String, Object> documentMapper = objectMapper.convertValue(manifestation, Map.class);
-        IndexRequest indexRequest = new IndexRequest(indexName, "_doc", id)
-                .source(documentMapper);
-        try {
-            IndexResponse indexResponse = elasticsearchClient.index(indexRequest, RequestOptions.DEFAULT);
-            log.info(String.format("index request returned status %d", indexResponse.status().getStatus()));
-            log.info("indexed new document " + id);
-            return indexResponse.status().getStatus();
-        } catch (IOException ioe) {
-            log.warn("Problem indexing manifestation, ", ioe);
-        }
-        return 0;
+    public void index(EsPrintManifestation esPrintManifestation) {
+        this.manifestationRepository.save(esPrintManifestation);
     }
 
-    public int index(Item almaItem, Date inventoryDate) {
+    public void index(Item almaItem, Date updateDate) {
         String mmsId = almaItem.getBibData().getMmsId();
-        org.unidue.ub.libintel.almaconnector.model.media.Item item = new org.unidue.ub.libintel.almaconnector.model.media.Item(almaItem, inventoryDate);
-        Manifestation manifestation = retrieveManifestation(mmsId);
-        if (manifestation == null)
-            manifestation = findManifestationByMmsId(mmsId);
-        if (manifestation == null) {
+
+        // set inventory date from item. if there is no inventory date set, use the update date as taken from the webhook
+        Date inventoryDate = almaItem.getItemData().getInventoryDate();
+        if (inventoryDate == null)
+            inventoryDate = updateDate;
+        EsItem esItem = new EsItem(almaItem, inventoryDate);
+        EsPrintManifestation esPrintManifestation = findManifestationByMmsId(mmsId);
+        if (esPrintManifestation == null) {
             BibWithRecord bib = this.almaCatalogService.getRecord(almaItem.getBibData().getMmsId());
             if (bib == null) {
                 log.error("no record available for mms id " + mmsId);
-                return 0;
+                return;
             }
-            manifestation = new Manifestation(bib);
+            esPrintManifestation = new EsPrintManifestation(bib);
         }
-        manifestation.addItem(item);
-        int response = index(manifestation, mmsId);
-        log.info(String.format("index request returned status %d", response));
-        log.info(String.format("indexed new item %s to document %s ", almaItem.getItemData().getPid(), mmsId));
-        return response;
+        esPrintManifestation.addItem(esItem);
+        index(esPrintManifestation);
     }
 
-    public void updateManifestation(Manifestation manifestation) {
-        Map<String, Object> documentMapper = objectMapper.convertValue(manifestation, Map.class);
-        UpdateRequest updateRequest = new UpdateRequest(indexName, "_doc", manifestation.getTitleID())
-                .doc(documentMapper).docAsUpsert(true);
-        try {
-            elasticsearchClient.update(updateRequest, RequestOptions.DEFAULT);
-        } catch (IOException ioe) {
-            log.warn("error on trying to updating entry " + manifestation.getTitleID(), ioe);
-        }
+    public void updateManifestation(EsPrintManifestation esPrintManifestation) {
+        this.manifestationRepository.save(esPrintManifestation);
     }
 
-    private Manifestation findManifestationByMmsId(String mmsId) {
-        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-        sourceBuilder.from(0);
-        sourceBuilder.size(5);
-        sourceBuilder.timeout(new TimeValue(60, TimeUnit.SECONDS));
-        sourceBuilder.query(QueryBuilders.termQuery("mmsId", mmsId));
-        SearchRequest searchRequest = new SearchRequest();
-        searchRequest.indices(indexName);
-        searchRequest.source(sourceBuilder);
-        SearchResponse searchResponse;
-        try {
-            searchResponse = elasticsearchClient.search(searchRequest, RequestOptions.DEFAULT);
-        } catch (IOException ioe) {
-            log.warn("Problem indexing manifestation, ", ioe);
-            return null;
-        }
-        SearchHits hits = searchResponse.getHits();
-        if (hits.totalHits == 1) {
-            SearchHit searchHit = Arrays.stream(hits.getHits()).findFirst().orElse(null);
-            if (searchHit == null)
-                return null;
-            return retrieveManifestation(searchHit.getId());
-        } else
-            return null;
-    }
-
-    public Manifestation retrieveManifestation(String id) {
-        GetRequest getRequest = new GetRequest(indexName, "_doc", id);
-        try {
-            final GetResponse response = elasticsearchClient.get(getRequest, RequestOptions.DEFAULT);
-            return objectMapper.readValue(response.getSourceAsBytes(), Manifestation.class);
-        } catch (IOException ioe) {
-            log.warn("Problem indexing manifestation, ", ioe);
-            return null;
-        }
+    private EsPrintManifestation findManifestationByMmsId(String mmsId) {
+        List<EsPrintManifestation> hits = this.manifestationRepository.findManifestationByTitleIDOrAlmaId(mmsId, mmsId);
+        return (hits.size() == 0) ? null : hits.get(0);
     }
 
     public void deleteItem(Item almaItem, Date date) {
         String mmsId = almaItem.getBibData().getMmsId();
-        Manifestation manifestation = retrieveManifestation(mmsId);
-        org.unidue.ub.libintel.almaconnector.model.media.Item item = manifestation.getItem(almaItem.getItemData().getPid());
-        item.delete(date);
-        this.updateManifestation(manifestation);
+        EsPrintManifestation esPrintManifestation = retrieveOrBuildManifestation(mmsId, almaItem, date);
+        if (esPrintManifestation == null)
+            return;
+        EsItem esItem = esPrintManifestation.getItem(almaItem.getItemData().getPid());
+        esItem.delete(date);
+        this.updateManifestation(esPrintManifestation);
     }
 
     public void updateItem(Item almaItem, Date updateDate) {
         String mmsId = almaItem.getBibData().getMmsId();
-        Manifestation manifestation = retrieveManifestation(mmsId);
-        org.unidue.ub.libintel.almaconnector.model.media.Item item = manifestation.findCorrespindingItem(almaItem);
-        if (item == null) {
+        EsPrintManifestation esPrintManifestation = retrieveOrBuildManifestation(mmsId, almaItem, updateDate);
+        if (esPrintManifestation == null)
+            return;
+        EsItem esItem = esPrintManifestation.findCorrespindingItem(almaItem);
+        if (esItem == null) {
             this.index(almaItem, updateDate);
-        }
-        else {
-            item.update(almaItem);
-            this.updateManifestation(manifestation);
+        } else {
+            esItem.update(almaItem);
+            this.updateManifestation(esPrintManifestation);
         }
     }
 
     public void indexRequest(RequestHook hook, Item almaItem) {
         String eventType = hook.getEvent().getValue();
-        String mmsId = hook.getUserRequest().getMmsId();
-        Manifestation manifestation = retrieveOrBuildManifestation(mmsId, almaItem, hook.getTime());
-        if (manifestation == null)
+        HookUserRequest userRequest = hook.getUserRequest();
+        String mmsId = userRequest.getMmsId();
+        Date requestDate = userRequest.getRequestDate();
+        EsPrintManifestation esPrintManifestation = retrieveOrBuildManifestation(mmsId, almaItem, hook.getTime());
+        if (esPrintManifestation == null)
             return;
-        org.unidue.ub.libintel.almaconnector.model.media.Item item = manifestation.getItem(almaItem.getItemData().getPid());
-        item.addEvent(new Event(item, hook.getTime(), eventType, "", getDelta(eventType)));
-        this.updateManifestation(manifestation);
+        EsItem esItem = esPrintManifestation.getItem(almaItem.getItemData().getPid());
+        if (EventType.REQUEST_CREATED.name().equals(eventType))
+            esItem.addEvent(new EsEvent(userRequest.getRequestid(), requestDate, null, EventType.REQUEST, ""));
+        else if (HookEventTypes.REQUEST_CLOSED.name().equals(eventType))
+        this.updateManifestation(esPrintManifestation);
     }
 
     public void indexLoan(LoanHook hook, Item almaItem, AlmaUser user) {
         String eventType = hook.getEvent().getValue();
         String mmsId = hook.getItemLoan().getMmsId();
-        Manifestation manifestation = retrieveOrBuildManifestation(mmsId, almaItem, hook.getTime());
-        if (manifestation == null)
+        EsPrintManifestation esPrintManifestation = retrieveOrBuildManifestation(mmsId, almaItem, hook.getTime());
+        if (esPrintManifestation == null)
             return;
-        org.unidue.ub.libintel.almaconnector.model.media.Item item = manifestation.getItem(almaItem.getItemData().getPid());
-        Event event = new Event(item, hook.getTime(), eventType, user.getUserGroup().getValue() , getDelta(eventType));
+        EsItem esItem = esPrintManifestation.getItem(almaItem.getItemData().getPid());
         if (HookEventTypes.LOAN_CREATED.name().equals(eventType))
-            item.addEvent(event);
+            esItem.addEvent(new EsEvent(hook.getItemLoan().getLoanId(), new Date(hook.getItemLoan().getLoanDate().toInstant().toEpochMilli()), null, EventType.LOAN, user.getUserGroup().getValue()));
         else if (HookEventTypes.LOAN_RETURNED.name().equals(eventType))
-            item.closeLoan(event);
-        this.updateManifestation(manifestation);
+            esItem.closeLoan(new Date(hook.getItemLoan().getLoanDate().toInstant().toEpochMilli()));
+        this.updateManifestation(esPrintManifestation);
     }
 
-    private Manifestation retrieveOrBuildManifestation(String mmsId, Item almaItem, Date updateDate) {
-        Manifestation manifestation = findManifestationByMmsId(mmsId);
-        if (manifestation == null) {
+    private EsPrintManifestation retrieveOrBuildManifestation(String mmsId, Item almaItem, Date updateDate) {
+        EsPrintManifestation esPrintManifestation = findManifestationByMmsId(mmsId);
+        if (esPrintManifestation == null) {
             BibWithRecord bib = this.almaCatalogService.getRecord(mmsId);
             if (bib == null) {
                 log.error("no record available for mms id " + mmsId);
                 return null;
             }
-            manifestation = new Manifestation(bib);
+            esPrintManifestation = new EsPrintManifestation(bib);
         }
-        org.unidue.ub.libintel.almaconnector.model.media.Item item = manifestation.findCorrespindingItem(almaItem);
-        if (item == null) {
-            item = new org.unidue.ub.libintel.almaconnector.model.media.Item(almaItem, updateDate);
-            manifestation.addItem(item);
-            this.index(manifestation, mmsId);
+        EsItem esItem = esPrintManifestation.findCorrespindingItem(almaItem);
+        if (esItem == null) {
+            esItem = new EsItem(almaItem, updateDate);
+            esPrintManifestation.addItem(esItem);
+            this.index(esPrintManifestation);
         }
-        return manifestation;
+        return esPrintManifestation;
     }
 
     private int getDelta(String eventType) {

@@ -1,5 +1,8 @@
 package org.unidue.ub.libintel.almaconnector.model.media;
 
+import org.unidue.ub.libintel.almaconnector.model.media.elasticsearch.*;
+
+import javax.swing.text.Element;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -16,7 +19,9 @@ public class Expression implements Cloneable {
 
 	private String shelfmarkBase;
 
-	private List<Manifestation> manifestations = new ArrayList<>();
+	private List<EsPrintManifestation> esPrintManifestations = new ArrayList<>();
+
+	private  List<EsElectronicManifestation> esElectronicManifestations = new ArrayList<>();
 
 	public String getId() {
 		return id;
@@ -26,14 +31,21 @@ public class Expression implements Cloneable {
 		this.id = id;
 	}
 
-	public String calculateId() {
-		StringBuilder builder = new StringBuilder();
-		for (Manifestation manifestation: this.manifestations) {
-			builder.append(manifestation.getTitleID()).append("; ");
-		}
-		String rawId = builder.toString();
-		this.id = rawId.substring(0, rawId.lastIndexOf(";"));
-		return this.id;
+
+	public List<EsPrintManifestation> getEsPrintManifestations() {
+		return esPrintManifestations;
+	}
+
+	public void setEsPrintManifestations(List<EsPrintManifestation> esPrintManifestations) {
+		this.esPrintManifestations = esPrintManifestations;
+	}
+
+	public List<EsElectronicManifestation> getEsElectronicManifestations() {
+		return esElectronicManifestations;
+	}
+
+	public void setEsElectronicManifestations(List<EsElectronicManifestation> esElectronicManifestations) {
+		this.esElectronicManifestations = esElectronicManifestations;
 	}
 
 	/**
@@ -72,19 +84,19 @@ public class Expression implements Cloneable {
 	 * @param document
 	 *            the document to be added
 	 */
-	public void addManifestation(Manifestation document) {
-		manifestations.add(document);
+	public void addManifestation(EsPrintManifestation document) {
+		esPrintManifestations.add(document);
 	}
 
 	/**
 	 * checks whether a document is already in this work
 	 *
 	 * @return boolean true if work contains document
-	 * @param manifestation
+	 * @param esPrintManifestation
 	 *            the document to be tested
 	 */
-	public boolean contains(Manifestation manifestation) {
-		return manifestation.getShelfmarkBase().equals(this.shelfmarkBase);
+	public boolean contains(EsPrintManifestation esPrintManifestation) {
+		return esPrintManifestation.getShelfmarkBase().equals(this.shelfmarkBase);
 	}
 
 	/**
@@ -93,8 +105,8 @@ public class Expression implements Cloneable {
 	 * @return documents the list of documents
 	 */
 
-	public List<Manifestation> getManifestations() {
-		return manifestations;
+	public List<EsPrintManifestation> getManifestations() {
+		return esPrintManifestations;
 	}
 
 	/**
@@ -102,19 +114,14 @@ public class Expression implements Cloneable {
 	 *
 	 * @return events the list of events
 	 */
-	public List<Event> getEvents() {
-		List<Event> events = new ArrayList<>();
-		for (Manifestation manifestation : manifestations) {
-			List<Event> eventsManifestation = manifestation.getEvents();
-			for (Event event : eventsManifestation) {
-				events.add(event);
-				if (event.getEndEvent() != null)
-					events.add(event.getEndEvent());
-			}
-
+	public List<EsEvent> getEvents() {
+		List<EsEvent> esEvents = new ArrayList<>();
+		for (EsPrintManifestation esPrintManifestation : esPrintManifestations) {
+			List<EsEvent> eventsManifestation = esPrintManifestation.getEvents();
+			esEvents.addAll(eventsManifestation);
 		}
-		Collections.sort(events);
-		return events;
+		Collections.sort(esEvents);
+		return esEvents;
 	}
 
 	/**
@@ -122,12 +129,12 @@ public class Expression implements Cloneable {
 	 *
 	 * @return items the list of items
 	 */
-	public List<Item> getItems() {
-		List<Item> items = new ArrayList<>();
-		for (Manifestation document : manifestations) {
-			items.addAll(document.getItems());
+	public List<EsItem> getItems() {
+		List<EsItem> esItems = new ArrayList<>();
+		for (EsPrintManifestation document : esPrintManifestations) {
+			esItems.addAll(document.getItems());
 		}
-		return items;
+		return esItems;
 	}
 
 	/**
@@ -137,8 +144,8 @@ public class Expression implements Cloneable {
 	 *            the document number of a document within the work
 	 * @return document the document with the corresponding document number
 	 */
-	public Manifestation getDocument(String titleID) {
-		for (Manifestation document : manifestations)
+	public EsPrintManifestation getDocument(String titleID) {
+		for (EsPrintManifestation document : esPrintManifestations)
 			if (document.getTitleID().equals(titleID))
 				return document;
 		return null;
@@ -169,9 +176,9 @@ public class Expression implements Cloneable {
 	/**
 	 * @return the bibliographicInformation
 	 */
-	public BibliographicInformation getBibliographicInformation() {
-		Collections.sort(manifestations);
-		BibliographicInformation information = manifestations.get(manifestations.size()-1).getBibliographicInformation();
+	public EsBibliographicInformation getBibliographicInformation() {
+		Collections.sort(esPrintManifestations);
+		EsBibliographicInformation information = esPrintManifestations.get(esPrintManifestations.size()-1).getBibliographicInformation();
 		return information;
 	}
 
@@ -179,8 +186,8 @@ public class Expression implements Cloneable {
 	/**
 	 * @param documents the documents to set
 	 */
-	public void setDocuments(List<Manifestation> documents) {
-		this.manifestations = documents;
+	public void setDocuments(List<EsPrintManifestation> documents) {
+		this.esPrintManifestations = documents;
 	}
 
 	/**
@@ -190,7 +197,7 @@ public class Expression implements Cloneable {
 	 */
 	public Expression clone() {
 	    Expression clone = new Expression(shelfmarkBase);
-	    for (Manifestation document : manifestations)
+	    for (EsPrintManifestation document : esPrintManifestations)
 	        clone.addManifestation(document);
 	    return clone;
 	}
