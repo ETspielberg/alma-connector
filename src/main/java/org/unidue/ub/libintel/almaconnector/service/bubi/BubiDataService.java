@@ -9,8 +9,8 @@ import org.unidue.ub.libintel.almaconnector.model.bubi.dto.BubiDataBriefDto;
 import org.unidue.ub.libintel.almaconnector.model.bubi.dto.BubiDataFullDto;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiData;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiPrice;
-import org.unidue.ub.libintel.almaconnector.repository.BubiDataRepository;
-import org.unidue.ub.libintel.almaconnector.repository.BubiPricesRepository;
+import org.unidue.ub.libintel.almaconnector.repository.jpa.BubiDataRepository;
+import org.unidue.ub.libintel.almaconnector.repository.jpa.BubiPricesRepository;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaVendorService;
 
 import java.util.ArrayList;

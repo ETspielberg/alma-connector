@@ -22,7 +22,7 @@ import javax.sql.DataSource;
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
-        basePackages = {"org.unidue.ub.libintel.almaconnector.repository"}
+        basePackages = {"org.unidue.ub.libintel.almaconnector.repository.jpa"}
 )
 public class SettingsDatabaseConfiguration {
 

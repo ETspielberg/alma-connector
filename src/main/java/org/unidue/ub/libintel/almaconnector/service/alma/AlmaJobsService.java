@@ -7,7 +7,7 @@ import org.unidue.ub.alma.shared.conf.Job;
 import org.unidue.ub.alma.shared.conf.Jobs;
 import org.unidue.ub.libintel.almaconnector.clients.alma.conf.AlmaJobsApiClient;
 import org.unidue.ub.libintel.almaconnector.model.jobs.JobIdWithDescription;
-import org.unidue.ub.libintel.almaconnector.repository.JobIdWithDescriptionRepository;
+import org.unidue.ub.libintel.almaconnector.repository.jpa.JobIdWithDescriptionRepository;
 
 import java.util.ArrayList;
 import java.util.List;

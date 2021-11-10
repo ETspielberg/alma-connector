@@ -5,8 +5,8 @@ import org.springframework.stereotype.Service;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiData;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderLine;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiPrice;
-import org.unidue.ub.libintel.almaconnector.repository.BubiDataRepository;
-import org.unidue.ub.libintel.almaconnector.repository.BubiPricesRepository;
+import org.unidue.ub.libintel.almaconnector.repository.jpa.BubiDataRepository;
+import org.unidue.ub.libintel.almaconnector.repository.jpa.BubiPricesRepository;
 import org.unidue.ub.libintel.almaconnector.service.PriceNotFoundException;
 
 import java.util.Locale;

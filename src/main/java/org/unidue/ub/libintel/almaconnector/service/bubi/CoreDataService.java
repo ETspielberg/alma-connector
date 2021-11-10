@@ -11,7 +11,7 @@ import org.unidue.ub.libintel.almaconnector.model.bubi.dto.CoreDataBriefDto;
 import org.unidue.ub.libintel.almaconnector.model.bubi.dto.CoreDataFullDto;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.CoreData;
 import org.unidue.ub.libintel.almaconnector.model.bubi.dto.CoreDataImportRun;
-import org.unidue.ub.libintel.almaconnector.repository.CoreDataRepository;
+import org.unidue.ub.libintel.almaconnector.repository.jpa.CoreDataRepository;
 import org.unidue.ub.libintel.almaconnector.service.PrimoService;
 
 import java.util.ArrayList;

@@ -16,7 +16,7 @@ import org.unidue.ub.libintel.almaconnector.model.run.SapResponseRun;
 import org.unidue.ub.libintel.almaconnector.model.sap.SapAccountData;
 import org.unidue.ub.libintel.almaconnector.model.sap.SapData;
 import org.unidue.ub.libintel.almaconnector.model.sap.SapResponse;
-import org.unidue.ub.libintel.almaconnector.repository.AlmaExportRunRepository;
+import org.unidue.ub.libintel.almaconnector.repository.jpa.AlmaExportRunRepository;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaInvoiceService;
 
 import java.io.*;

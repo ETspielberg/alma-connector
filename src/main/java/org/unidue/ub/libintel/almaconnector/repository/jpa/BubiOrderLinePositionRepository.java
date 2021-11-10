@@ -1,4 +1,4 @@
-package org.unidue.ub.libintel.almaconnector.repository;
+package org.unidue.ub.libintel.almaconnector.repository.jpa;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;

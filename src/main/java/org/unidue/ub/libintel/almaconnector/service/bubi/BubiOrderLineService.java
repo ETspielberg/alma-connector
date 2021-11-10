@@ -10,8 +10,8 @@ import org.unidue.ub.libintel.almaconnector.model.bubi.dto.BubiOrderLineBriefDto
 import org.unidue.ub.libintel.almaconnector.model.bubi.dto.BubiOrderLineFullDto;
 import org.unidue.ub.libintel.almaconnector.model.bubi.dto.CoreDataFullDto;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.*;
-import org.unidue.ub.libintel.almaconnector.repository.BubiOrderLinePositionRepository;
-import org.unidue.ub.libintel.almaconnector.repository.BubiOrderLineRepository;
+import org.unidue.ub.libintel.almaconnector.repository.jpa.BubiOrderLinePositionRepository;
+import org.unidue.ub.libintel.almaconnector.repository.jpa.BubiOrderLineRepository;
 import org.unidue.ub.libintel.almaconnector.service.PriceNotFoundException;
 import org.unidue.ub.libintel.almaconnector.service.PrimoService;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaItemService;
