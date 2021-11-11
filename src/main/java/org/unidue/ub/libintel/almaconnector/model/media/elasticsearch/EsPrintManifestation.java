@@ -133,22 +133,19 @@ public class EsPrintManifestation implements Cloneable, Comparable<EsPrintManife
 	}
 
 	public EsItem getItemByShelfmark(String shelfmark) {
+		if (shelfmark == null) return null;
 		for (EsItem esItem : esItems)
-			if (esItem.getShelfmark().equals(shelfmark))
+			if (shelfmark.equals(esItem.getShelfmark()))
 				return esItem;
 		return null;
 	}
 
 	public EsItem getItemByBarcode(String barcode) {
+		if (barcode == null) return null;
 		for (EsItem esItem : esItems)
-			if (esItem.getBarcode().equals(barcode))
+			if (barcode.equals(esItem.getBarcode()))
 				return esItem;
 		return null;
-	}
-
-
-	public void setItmes(List<EsItem> esItems) {
-		this.esItems = esItems;
 	}
 
 	public EsBibliographicInformation getBibliographicInformation() {
