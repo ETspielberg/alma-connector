@@ -173,8 +173,6 @@ public class ScheduledService {
                                         } catch (FeignException fe) {
                                             log.warn(String.format("could not retrieve user %s: ", userId), fe);
                                         }
-                                        interestedUser.setNotifyReceivingActivation(false);
-                                        interestedUser.setHoldItem(true);
                                         polineUpdated = true;
                                     }
                                 }

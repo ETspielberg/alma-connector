@@ -57,7 +57,7 @@ public class EsItem {
 		this.esEvents.add(new EsEvent(itemId, inventoryDate, null, EventType.INVENTORY, "library"));
 	}
 
-
+    public EsItem() {}
 
 	public String getNoteOpac() {
 		return noteOpac;

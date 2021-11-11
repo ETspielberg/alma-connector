@@ -8,6 +8,8 @@ public class Chapter {
 
     private List<Counter> usageCounters;
 
+    public Chapter() {}
+
     public Long getPages() {
         return pages;
     }

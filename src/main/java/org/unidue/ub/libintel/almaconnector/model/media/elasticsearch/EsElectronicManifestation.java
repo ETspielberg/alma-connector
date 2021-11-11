@@ -11,6 +11,8 @@ public class EsElectronicManifestation {
 
     private List<Chapter> chapters;
 
+    public EsElectronicManifestation() {}
+
     public EsBibliographicInformation getBibliographicInformation() {
         return bibliographicInformation;
     }
