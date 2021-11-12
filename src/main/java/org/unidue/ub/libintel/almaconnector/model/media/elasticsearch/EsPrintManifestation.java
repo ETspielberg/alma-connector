@@ -120,7 +120,6 @@ public class EsPrintManifestation implements Cloneable, Comparable<EsPrintManife
 		}
 	}
 
-
 	public List<EsItem> getItems() {
 		return esItems;
 	}

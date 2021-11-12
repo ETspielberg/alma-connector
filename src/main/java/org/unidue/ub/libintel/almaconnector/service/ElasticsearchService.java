@@ -72,7 +72,7 @@ public class ElasticsearchService {
         EsPrintManifestation esPrintManifestation = retrieveOrBuildManifestation(mmsId, almaItem, date);
         if (esPrintManifestation == null)
             return;
-        EsItem esItem = esPrintManifestation.getItem(almaItem.getItemData().getPid());
+        EsItem esItem = esPrintManifestation.findCorrespindingItem(almaItem);
         esItem.delete(date);
         this.updateManifestation(esPrintManifestation);
     }
@@ -86,8 +86,9 @@ public class ElasticsearchService {
         if (esItem == null) {
             this.index(almaItem, updateDate);
         } else {
-            esItem.update(almaItem);
-            this.updateManifestation(esPrintManifestation);
+            boolean isChanged  = esItem.update(almaItem);
+            if (isChanged)
+                this.updateManifestation(esPrintManifestation);
         }
     }
 
@@ -99,10 +100,11 @@ public class ElasticsearchService {
         EsPrintManifestation esPrintManifestation = retrieveOrBuildManifestation(mmsId, almaItem, hook.getTime());
         if (esPrintManifestation == null)
             return;
-        EsItem esItem = esPrintManifestation.getItem(almaItem.getItemData().getPid());
+        EsItem esItem = esPrintManifestation.findCorrespindingItem(almaItem);
         if (EventType.REQUEST_CREATED.name().equals(eventType))
             esItem.addEvent(new EsEvent(userRequest.getRequestid(), requestDate, null, EventType.REQUEST, ""));
         else if (HookEventTypes.REQUEST_CLOSED.name().equals(eventType))
+            esItem.closeRequest(new Date(hook.getUserRequest().getRequestDate().getTime()));
         this.updateManifestation(esPrintManifestation);
     }
 
@@ -112,7 +114,7 @@ public class ElasticsearchService {
         EsPrintManifestation esPrintManifestation = retrieveOrBuildManifestation(mmsId, almaItem, hook.getTime());
         if (esPrintManifestation == null)
             return;
-        EsItem esItem = esPrintManifestation.getItem(almaItem.getItemData().getPid());
+        EsItem esItem = esPrintManifestation.findCorrespindingItem(almaItem);
         if (HookEventTypes.LOAN_CREATED.name().equals(eventType))
             esItem.addEvent(new EsEvent(hook.getItemLoan().getLoanId(), new Date(hook.getItemLoan().getLoanDate().toInstant().toEpochMilli()), null, EventType.LOAN, user.getUserGroup().getValue()));
         else if (HookEventTypes.LOAN_RETURNED.name().equals(eventType))
@@ -138,23 +140,4 @@ public class ElasticsearchService {
         }
         return esPrintManifestation;
     }
-
-    private int getDelta(String eventType) {
-        switch (eventType) {
-            case "BIB_CREATED":
-            case "ITEM_CREATED":
-            case "LOAN_CREATED":
-            case "REQUEST_CREATED":
-                return 1;
-            case "BIB_DELETED":
-            case "ITEM_DELETED":
-            case "REQUEST_CLOSED":
-            case "LOAN_RETURNED":
-                return -1;
-            default:
-                return 0;
-        }
-    }
-
-
 }
