@@ -33,8 +33,8 @@ public class ElasticsearchService {
         this.manifestationRepository = manifestationRepository;
     }
 
-    public void index(EsPrintManifestation esPrintManifestation) {
-        this.manifestationRepository.save(esPrintManifestation);
+    public EsPrintManifestation index(EsPrintManifestation esPrintManifestation) {
+        return this.manifestationRepository.save(esPrintManifestation);
     }
 
     public void index(Item almaItem, Date updateDate) {
@@ -58,12 +58,9 @@ public class ElasticsearchService {
         index(esPrintManifestation);
     }
 
-    public void updateManifestation(EsPrintManifestation esPrintManifestation) {
-        this.manifestationRepository.save(esPrintManifestation);
-    }
-
     private EsPrintManifestation findManifestationByMmsId(String mmsId) {
         List<EsPrintManifestation> hits = this.manifestationRepository.findManifestationByTitleIDOrAlmaId(mmsId, mmsId);
+        log.debug(String.format("manifestations with %s found to be updated: %d", mmsId, hits.size()));
         return (hits.size() == 0) ? null : hits.get(0);
     }
 
@@ -74,7 +71,7 @@ public class ElasticsearchService {
             return;
         EsItem esItem = esPrintManifestation.findCorrespindingItem(almaItem);
         esItem.delete(date);
-        this.updateManifestation(esPrintManifestation);
+        this.index(esPrintManifestation);
     }
 
     public void updateItem(Item almaItem, Date updateDate) {
@@ -88,7 +85,7 @@ public class ElasticsearchService {
         } else {
             boolean isChanged  = esItem.update(almaItem);
             if (isChanged)
-                this.updateManifestation(esPrintManifestation);
+                this.index(esPrintManifestation);
         }
     }
 
@@ -105,7 +102,7 @@ public class ElasticsearchService {
             esItem.addEvent(new EsEvent(userRequest.getRequestid(), requestDate, null, EventType.REQUEST, ""));
         else if (HookEventTypes.REQUEST_CLOSED.name().equals(eventType))
             esItem.closeRequest(new Date(hook.getUserRequest().getRequestDate().getTime()));
-        this.updateManifestation(esPrintManifestation);
+        this.index(esPrintManifestation);
     }
 
     public void indexLoan(LoanHook hook, Item almaItem, AlmaUser user) {
@@ -119,12 +116,14 @@ public class ElasticsearchService {
             esItem.addEvent(new EsEvent(hook.getItemLoan().getLoanId(), new Date(hook.getItemLoan().getLoanDate().toInstant().toEpochMilli()), null, EventType.LOAN, user.getUserGroup().getValue()));
         else if (HookEventTypes.LOAN_RETURNED.name().equals(eventType))
             esItem.closeLoan(new Date(hook.getItemLoan().getLoanDate().toInstant().toEpochMilli()));
-        this.updateManifestation(esPrintManifestation);
+        this.index(esPrintManifestation);
     }
 
     private EsPrintManifestation retrieveOrBuildManifestation(String mmsId, Item almaItem, Date updateDate) {
-        EsPrintManifestation esPrintManifestation = findManifestationByMmsId(mmsId);
+        EsPrintManifestation esPrintManifestation = this.findManifestationByMmsId(mmsId);
+
         if (esPrintManifestation == null) {
+            log.debug("retrieved manifestation from elasticsearch is null. Building new manifestation from mms id " + mmsId);
             BibWithRecord bib = this.almaCatalogService.getRecord(mmsId);
             if (bib == null) {
                 log.error("no record available for mms id " + mmsId);
@@ -132,11 +131,13 @@ public class ElasticsearchService {
             }
             esPrintManifestation = new EsPrintManifestation(bib);
         }
+        log.debug("retrieved manifestation from elasticsearch: " + esPrintManifestation.getTitleID());
         EsItem esItem = esPrintManifestation.findCorrespindingItem(almaItem);
         if (esItem == null) {
+            log.debug("could not find corresponding item in manifestation. Building new one.");
             esItem = new EsItem(almaItem, updateDate);
             esPrintManifestation.addItem(esItem);
-            this.index(esPrintManifestation);
+            esPrintManifestation = this.index(esPrintManifestation);
         }
         return esPrintManifestation;
     }
