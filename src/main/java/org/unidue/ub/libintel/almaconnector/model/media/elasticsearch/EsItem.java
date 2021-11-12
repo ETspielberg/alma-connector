@@ -257,13 +257,33 @@ public class EsItem {
 		}
     }
 
-	public void update(org.unidue.ub.alma.shared.bibs.Item almaItem) {
-		this.itemId = almaItem.getItemData().getPid();
-		this.subLibrary = almaItem.getItemData().getLibrary().getValue();
-		this.material = almaItem.getItemData().getPhysicalMaterialType().getValue();
-		this.shelfmark = almaItem.getItemData().getAlternativeCallNumber();
-		this.noteOpac = almaItem.getItemData().getPublicNote();
-		this.barcode = almaItem.getItemData().getBarcode();
+	public boolean update(Item almaItem) {
+		boolean isChanged = false;
+		if (!this.itemId.equals(almaItem.getItemData().getPid())) {
+			this.itemId = almaItem.getItemData().getPid();
+			isChanged = true;
+		}
+		if (!this.subLibrary.equals(almaItem.getItemData().getLibrary().getValue())) {
+			this.subLibrary = almaItem.getItemData().getLibrary().getValue();
+			isChanged = true;
+		}
+		if (!this.material.equals(almaItem.getItemData().getPhysicalMaterialType().getValue())) {
+			this.material = almaItem.getItemData().getPhysicalMaterialType().getValue();
+			isChanged = true;
+		}
+		if (!this.shelfmark.equals(almaItem.getItemData().getAlternativeCallNumber())) {
+			this.shelfmark = almaItem.getItemData().getAlternativeCallNumber();
+			isChanged = true;
+		}
+		if (!this.noteOpac.equals(almaItem.getItemData().getPublicNote())) {
+			this.noteOpac = almaItem.getItemData().getPublicNote();
+			isChanged = true;
+		}
+		if (!this.barcode.equals(almaItem.getItemData().getBarcode())) {
+			this.barcode = almaItem.getItemData().getBarcode();
+			isChanged = true;
+		}
+		return isChanged;
 	}
 
 	public void closeLoan(Date closeDate) {
@@ -271,5 +291,8 @@ public class EsItem {
 			if (EventType.LOAN.equals(esEvent.getType()) && esEvent.getEndDate() == null)
 				esEvent.setEndDate(closeDate);
 		}
+	}
+
+	public void closeRequest(Date date) {
 	}
 }
