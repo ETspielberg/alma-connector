@@ -282,7 +282,7 @@ public class HookService {
         }
         log.info(String.format("received item hook with event %s (%s)", hook.getEvent().getDesc(), hook.getEvent().getValue()));
         waitForAlma(5);
-        Item item = this.almaItemService.findItemByMmsAndItemId(hook.getItem().getBibData().getMmsId(), hook.getItem().getItemData().getPid());
+        Item item = this.almaItemService.refreshItem(hook.getItem());
 
         log.debug("received item hook: " + item.toString());
         if ("ITEM_DELETED".equals(hook.getEvent().getValue())) {
@@ -313,14 +313,13 @@ public class HookService {
                         log.warn("holding call number is null for item " + item.getItemData().getPid());
                         return;
                     }
+                    boolean isChanged = false;
 
                     // check for barcode with blanks
                     String barcode = item.getItemData().getBarcode();
                     if (barcode.contains(" ")) {
-                        waitForAlma(3);
-                        item = this.almaItemService.refreshItem(item);
                         item.getItemData().setBarcode(item.getItemData().getBarcode().strip());
-                        item = this.almaItemService.updateItem(item);
+                        isChanged = true;
                     }
                     // check holding shelfmark
                     String itemCallNo = item.getItemData().getAlternativeCallNumber().strip();
@@ -328,21 +327,19 @@ public class HookService {
                         // check for call number type if it is not "other" (value 8) set it accordingly
                         ItemDataAlternativeCallNumberType itemDataAlternativeCallNumberType = item.getItemData().getAlternativeCallNumberType();
                         if (itemDataAlternativeCallNumberType == null || itemDataAlternativeCallNumberType.getValue().isEmpty()) {
-                            waitForAlma(3);
-                            item = this.almaItemService.refreshItem(item);
                             item.getItemData().setAlternativeCallNumberType(new ItemDataAlternativeCallNumberType().value("8"));
-                            item = this.almaItemService.updateItem(item);
+                            isChanged = true;
                         }
                         // check whether holding signature needs to be updated
                         String callNo = itemCallNo.replaceAll("\\+\\d+", "");
                         String holdingCallNo = item.getHoldingData().getCallNumber().strip();
                         if (!callNo.equals(holdingCallNo)) {
-                            waitForAlma(3);
-                            item = this.almaItemService.refreshItem(item);
                             this.almaCatalogService.updateCallNoInHolding(item.getBibData().getMmsId(), item.getHoldingData().getHoldingId(), callNo);
-                            this.almaItemService.updateItem(item);
+                            isChanged = true;
                         }
                     }
+                    if (isChanged)
+                        this.almaItemService.updateItem(item);
                 }
             }
         }
