@@ -34,6 +34,8 @@ public class BubiOrderFullDto {
 
     private Double totalAmount;
 
+    private String campus;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date created;
@@ -94,6 +96,10 @@ public class BubiOrderFullDto {
         this.additionalCostsComment = bubiOrder.getAdditionalCostsComment();
         this.additionalCostsFund = bubiOrder.getAdditionalCostsFund();
         this.mediaType = bubiOrder.getMediaType();
+        if (bubiOrder.getCampus() == null)
+            this.campus = "";
+        else
+            this.campus = bubiOrder.getCampus();
     }
 
     /**

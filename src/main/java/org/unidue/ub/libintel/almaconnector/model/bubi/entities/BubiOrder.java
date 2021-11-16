@@ -61,6 +61,9 @@ public class BubiOrder {
     @Column(name="additional_costs_fund")
     private String additionalCostsFund = "";
 
+    @Column(name="campus")
+    private String campus;
+
     @Column(name="created")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -302,6 +305,14 @@ public class BubiOrder {
 
     public void setAdditionalCostsFund(String additionalCostsFund) {
         this.additionalCostsFund = additionalCostsFund;
+    }
+
+    public String getCampus() {
+        return campus;
+    }
+
+    public void setCampus(String campus) {
+        this.campus = campus;
     }
 
     public BubiOrderLine retrieveStandardOrderline() {

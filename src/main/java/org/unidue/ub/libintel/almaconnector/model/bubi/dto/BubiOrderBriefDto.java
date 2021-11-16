@@ -29,6 +29,8 @@ public class BubiOrderBriefDto {
 
     private Double totalAmount;
 
+    private String campus;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date created;
@@ -65,6 +67,10 @@ public class BubiOrderBriefDto {
         this.invoiceDate = bubiOrder.getInvoiceDate();
         this.collectedOn = bubiOrder.getCollectedOn();
         this.returnedOn = bubiOrder.getReturnedOn();
+        if (bubiOrder.getCampus() == null)
+            this.campus = "";
+        else
+            this.campus = bubiOrder.getCampus();
         if (bubiOrder.getAlmaSetName() == null)
             this.name = "";
         else {

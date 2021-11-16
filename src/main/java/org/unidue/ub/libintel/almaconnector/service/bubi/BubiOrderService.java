@@ -388,6 +388,7 @@ public class BubiOrderService {
         BubiOrder bubiOrder = new BubiOrder(bubiOrderline.getVendorAccount(), counter);
         bubiOrder.setAlmaSetName(orderName);
         bubiOrder.setMediaType(bubiOrderline.getMediaType());
+        bubiOrder.setCampus(bubiOrderline.getCollection().charAt(0) + "0001");
         Set set = this.almaSetService.createSet(orderName, bubiOrder.getComment());
         bubiOrderline.getBubiOrderlinePositions().forEach(
                 bubiOrderlinePosition -> {
