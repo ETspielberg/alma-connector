@@ -124,5 +124,6 @@ public class BubiOrderFullDto {
         bubiOrder.setAdditionalCosts(this.additionalCosts);
         bubiOrder.setAdditionalCostsComment(this.additionalCostsComment);
         bubiOrder.setAdditionalCostsFund(this.additionalCostsFund);
+        bubiOrder.setCampus(this.campus);
     }
 }
