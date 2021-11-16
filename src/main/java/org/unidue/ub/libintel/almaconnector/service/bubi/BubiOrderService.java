@@ -234,6 +234,8 @@ public class BubiOrderService {
         bubiOrder.setBubiStatus(BubiStatus.AT_BUBI);
         bubiOrder.setLastChange(new Date());
         for (BubiOrderLine orderline: bubiOrder.getBubiOrderLines()) {
+            orderline.setStatus(BubiStatus.AT_BUBI);
+            this.bubiOrderLineRepository.save(orderline);
             for (BubiOrderlinePosition position: orderline.getBubiOrderlinePositions()) {
                 if (position.getAlmaItemId() != null && position.getAlmaMmsId() != null && !position.getAlmaMmsId().isEmpty() && !position.getAlmaItemId().isEmpty()) {
                     Item item = this.almaItemService.findItemByMmsAndItemId(position.getAlmaMmsId(), position.getAlmaItemId());
