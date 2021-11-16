@@ -23,6 +23,7 @@ import org.unidue.ub.libintel.almaconnector.service.alma.AlmaPoLineService;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaSetService;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -194,7 +195,7 @@ public class BubiOrderService {
                 (key, order) -> {
                     this.bubiOrderRepository.save(order);
                     order.setBubiStatus(BubiStatus.NEW);
-                    order.setLastChange(new Date());
+                    order.setLastChange(LocalDate.now());
                     order.sortBubiOrderLines();
                     order.calculateTotalPrice();
                     String date = new SimpleDateFormat(DATE_FORMAT_NOW).format(new Date());
@@ -232,7 +233,7 @@ public class BubiOrderService {
         BubiOrder bubiOrder = this.bubiOrderRepository.findById(bubiOrderId).orElse(null);
         if (bubiOrder == null) return null;
         bubiOrder.setBubiStatus(BubiStatus.AT_BUBI);
-        bubiOrder.setLastChange(new Date());
+        bubiOrder.setLastChange(LocalDate.now());
         for (BubiOrderLine orderline: bubiOrder.getBubiOrderLines()) {
             orderline.setStatus(BubiStatus.AT_BUBI);
             this.bubiOrderLineRepository.save(orderline);
@@ -279,7 +280,7 @@ public class BubiOrderService {
         if (bubiOrder == null) return null;
         this.scanItems(bubiOrderId);
         bubiOrder.setBubiStatus(BubiStatus.RETURNED);
-        bubiOrder.setLastChange(new Date());
+        bubiOrder.setLastChange(LocalDate.now());
         return new BubiOrderFullDto(bubiOrderRepository.save(bubiOrder));
     }
 
@@ -305,7 +306,7 @@ public class BubiOrderService {
         // ToDo: pack po lines into po
         Invoice invoice = this.almaInvoiceService.buildInvoiceForBubiOrder(bubiOrder, distribute);
         bubiOrder.setPaymentStatus(PaymentStatus.PAID);
-        bubiOrder.setLastChange(new Date());
+        bubiOrder.setLastChange(LocalDate.now());
         return new BubiOrderFullDto(this.bubiOrderRepository.save(bubiOrder));
     }
 
@@ -324,7 +325,7 @@ public class BubiOrderService {
             bubiOrderLine.setStatus(BubiStatus.NEW);
             bubiOrderLine.setBubiOrder(null);
             bubiOrderLine.setAlmaSetId(null);
-            bubiOrder.setLastChange(new Date());
+            bubiOrder.setLastChange(LocalDate.now());
             this.bubiOrderLineRepository.save(bubiOrderLine);
             this.bubiOrderRepository.save(bubiOrder);
             if (bubiOrder.getAlmaSetId() != null && !bubiOrder.getAlmaSetId().isEmpty())
@@ -352,7 +353,7 @@ public class BubiOrderService {
             bubiOrder.addBubiOrderLine(bubiOrderLine);
             bubiOrderLine.setBubiOrder(bubiOrder);
             bubiOrderLine.setPositionalNumber(positionalNumber);
-            bubiOrder.setLastChange(new Date());
+            bubiOrder.setLastChange(LocalDate.now());
             this.bubiOrderLineRepository.save(bubiOrderLine);
             this.bubiOrderRepository.save(bubiOrder);
             return new BubiOrderFullDto(bubiOrder);

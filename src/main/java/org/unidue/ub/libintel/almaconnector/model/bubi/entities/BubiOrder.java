@@ -6,6 +6,7 @@ import org.unidue.ub.libintel.almaconnector.model.bubi.BubiStatus;
 import org.unidue.ub.libintel.almaconnector.model.bubi.PaymentStatus;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -67,27 +68,27 @@ public class BubiOrder {
     @Column(name="created")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date created;
+    private LocalDate created;
 
     @Column(name="last_change")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date lastChange;
+    private LocalDate lastChange;
 
     @Column(name="invoice_date")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date invoiceDate;
+    private LocalDate invoiceDate;
 
     @Column(name="collected_on")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date collectedOn;
+    private LocalDate collectedOn;
 
     @Column(name="returned_on")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date returnedOn;
+    private LocalDate returnedOn;
 
     @Column(name = "media_type")
     private String mediaType;
@@ -106,8 +107,8 @@ public class BubiOrder {
         this.bubiOrderLines.add(bubiOrderLine);
         this.bubiStatus = BubiStatus.NEW;
         this.paymentStatus = PaymentStatus.OPEN;
-        this.created = new Date();
-        this.lastChange = new Date();
+        this.created = LocalDate.now();
+        this.lastChange = LocalDate.now();
         this.totalAmount = bubiOrderLine.getPrice();
     }
 
@@ -117,8 +118,8 @@ public class BubiOrder {
         this.vendorAccount = vendorAccount;
         this.bubiStatus = BubiStatus.NEW;
         this.paymentStatus = PaymentStatus.OPEN;
-        this.created = new Date();
-        this.lastChange = new Date();
+        this.created = LocalDate.now();
+        this.lastChange = LocalDate.now();
         this.totalAmount = 0.0;
         this.bubiOrderLines = new HashSet<>();
     }
@@ -179,19 +180,19 @@ public class BubiOrder {
         this.vendorAccount = vendorAccount;
     }
 
-    public Date getCollectedOn() {
+    public LocalDate getCollectedOn() {
         return collectedOn;
     }
 
-    public void setCollectedOn(Date collectedOn) {
+    public void setCollectedOn(LocalDate collectedOn) {
         this.collectedOn = collectedOn;
     }
 
-    public Date getReturnedOn() {
+    public LocalDate getReturnedOn() {
         return returnedOn;
     }
 
-    public void setReturnedOn(Date returnedOn) {
+    public void setReturnedOn(LocalDate returnedOn) {
         this.returnedOn = returnedOn;
     }
 
@@ -219,19 +220,19 @@ public class BubiOrder {
         this.almaPoNumber = almaPoLineNumber;
     }
 
-    public Date getCreated() {
+    public LocalDate getCreated() {
         return created;
     }
 
-    public void setCreated(Date created) {
+    public void setCreated(LocalDate created) {
         this.created = created;
     }
 
-    public Date getLastChange() {
+    public LocalDate getLastChange() {
         return lastChange;
     }
 
-    public void setLastChange(Date lastChange) {
+    public void setLastChange(LocalDate lastChange) {
         this.lastChange = lastChange;
     }
 
@@ -259,11 +260,11 @@ public class BubiOrder {
         this.invoiceNumber = invoiceNumber;
     }
 
-    public Date getInvoiceDate() {
+    public LocalDate getInvoiceDate() {
         return invoiceDate;
     }
 
-    public void setInvoiceDate(Date invoiceDate) {
+    public void setInvoiceDate(LocalDate invoiceDate) {
         this.invoiceDate = invoiceDate;
     }
 

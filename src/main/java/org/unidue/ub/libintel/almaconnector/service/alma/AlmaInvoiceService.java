@@ -9,6 +9,7 @@ import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderLine;
 import org.unidue.ub.libintel.almaconnector.model.sap.InvoiceUpdate;
 
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.*;
 
 /**
@@ -209,7 +210,12 @@ public class AlmaInvoiceService {
 
         // set the invoice number and date
         invoice.setNumber(bubiOrder.getInvoiceNumber());
-        invoice.setInvoiceDate(bubiOrder.getInvoiceDate());
+        Date invoiceDate = Date.from(bubiOrder
+                .getInvoiceDate()
+                .atStartOfDay()
+                .atZone(ZoneId.systemDefault())
+                .toInstant());
+        invoice.setInvoiceDate(invoiceDate);
 
         // set the owner of the order line
         Optional<BubiOrderLine> option = bubiOrder.getBubiOrderLines().stream().findFirst();

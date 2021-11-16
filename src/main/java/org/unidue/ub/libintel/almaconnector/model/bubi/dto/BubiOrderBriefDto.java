@@ -5,6 +5,8 @@ import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrder;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderLine;
+
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.Set;
 
@@ -33,23 +35,23 @@ public class BubiOrderBriefDto {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date created;
+    private LocalDate created;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date lastChange;
+    private LocalDate lastChange;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date invoiceDate;
+    private LocalDate invoiceDate;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date collectedOn;
+    private LocalDate collectedOn;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date returnedOn;
+    private LocalDate returnedOn;
 
     public BubiOrderBriefDto() {}
 

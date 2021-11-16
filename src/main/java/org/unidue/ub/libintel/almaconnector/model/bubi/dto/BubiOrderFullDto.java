@@ -5,6 +5,7 @@ import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrder;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @Data
@@ -38,23 +39,23 @@ public class BubiOrderFullDto {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date created;
+    private LocalDate created;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date lastChange;
+    private LocalDate lastChange;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date invoiceDate;
+    private LocalDate invoiceDate;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date collectedOn;
+    private LocalDate collectedOn;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date returnedOn;
+    private LocalDate returnedOn;
 
     private double additionalCosts;
 
@@ -114,7 +115,7 @@ public class BubiOrderFullDto {
      * @param bubiOrder the BubiOrder object to be updated
      */
     public void update(BubiOrder bubiOrder) {
-        bubiOrder.setLastChange(new Date());
+        bubiOrder.setLastChange(LocalDate.now());
         bubiOrder.setCollectedOn(this.collectedOn);
         bubiOrder.setReturnedOn(this.returnedOn);
         bubiOrder.setComment(this.comment);
