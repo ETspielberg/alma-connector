@@ -1,5 +1,6 @@
 package org.unidue.ub.libintel.almaconnector.model.hook;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
@@ -16,6 +17,7 @@ import java.util.Date;
 @XmlRootElement(name = "item_hook")
 @XmlAccessorType(XmlAccessType.FIELD)
 @JacksonXmlRootElement(localName = "item_hook")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ItemHook {
 
     public static final String JSON_PROPERTY_ID = "id";
