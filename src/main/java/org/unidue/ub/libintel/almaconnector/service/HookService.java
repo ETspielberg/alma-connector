@@ -1,5 +1,6 @@
 package org.unidue.ub.libintel.almaconnector.service;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -425,6 +426,7 @@ public class HookService {
     public void processHook(String hook, String type) {
         try {
             ObjectMapper mapper = new ObjectMapper();
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             switch (type) {
                 case "loan": {
                     LoanHook loanHook = mapper.readValue(hook, LoanHook.class);
