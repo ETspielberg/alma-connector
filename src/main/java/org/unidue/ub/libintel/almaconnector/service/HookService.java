@@ -266,6 +266,7 @@ public class HookService {
                 this.almaItemService.updateItem(mmsId, item);
                 break;
             default:
+
         }
     }
 
@@ -314,6 +315,15 @@ public class HookService {
                         return;
                     }
                     boolean isChanged = false;
+                    if (item.getHoldingData().getInTempLocation())
+                        if ("ETA".equals(item.getHoldingData().getTempLocation().getValue())) {
+                            if ("LOAN".equals(item.getItemData().getProcessType().getValue()))
+                                item.getItemData().setInternalNote3("");
+                            else
+                                item.getItemData().setInternalNote3("Ausleihe ab 20.12.21 möglich");
+                            isChanged = true;
+                        }
+
 
                     // check for barcode with blanks
                     String barcode = item.getItemData().getBarcode();
