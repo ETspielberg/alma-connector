@@ -84,7 +84,7 @@ public class HookService {
         log.debug("received user request: " + userRequest.toString());
         waitForAlma(3);
         Item item = this.almaItemService.findItemByMmsAndItemId(userRequest.getMmsId(), userRequest.getItemId());
-        elasticsearchService.indexRequest(hook, item);
+        //elasticsearchService.indexRequest(hook, item);
         if ("WORK_ORDER".equals(userRequest.getRequestType()) && "Int".equals(userRequest.getRequestSubType().getValue())) {
             switch (userRequest.getTargetDestination().getValue()) {
                 case "Buchbinder": {
@@ -177,8 +177,8 @@ public class HookService {
         AlmaUser almaUser = this.almaUserService.getUser(itemLoan.getUserId());
         waitForAlma(5);
         if (HookEventTypes.LOAN_CREATED.name().equals(hook.getEvent().getValue()) || HookEventTypes.LOAN_RETURNED.name().equals(hook.getEvent().getValue())) {
-            Item item = this.almaItemService.findItemByMmsAndItemId(itemLoan.getMmsId(), itemLoan.getItemId());
-            this.elasticsearchService.indexLoan(hook, item, almaUser);
+            //Item item = this.almaItemService.findItemByMmsAndItemId(itemLoan.getMmsId(), itemLoan.getItemId());
+            //this.elasticsearchService.indexLoan(hook, item, almaUser);
         }
         boolean needScan = false;
         String tempLibrary = "";
@@ -287,12 +287,12 @@ public class HookService {
 
         log.debug("received item hook: " + item.toString());
         if ("ITEM_DELETED".equals(hook.getEvent().getValue())) {
-            this.elasticsearchService.deleteItem(item, hook.getTime());
+            //this.elasticsearchService.deleteItem(item, hook.getTime());
         } else if (HookEventTypes.ITEM_CREATED.name().equals(hook.getEvent().getValue())) {
-            this.elasticsearchService.index(item, hook.getTime());
+            //this.elasticsearchService.index(item, hook.getTime());
         } else if (HookEventTypes.ITEM_UPDATED.name().equals(hook.getEvent().getValue())) {
             this.regalfinderService.checkRegalfinder(item);
-            this.elasticsearchService.updateItem(item, hook.getTime());
+            //this.elasticsearchService.updateItem(item, hook.getTime());
             switch (item.getItemData().getPhysicalMaterialType().getValue()) {
                 case "ISSUE": {
                     log.debug(String.format("deleting temporary location for received issue %s for shelfmark %s", item.getItemData().getBarcode(), item.getHoldingData().getCallNumber()));
