@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.conf.*;
 import org.unidue.ub.libintel.almaconnector.clients.alma.analytics.AlmaAnalyticsReportClient;
 import org.unidue.ub.libintel.almaconnector.clients.alma.conf.SetsApiClient;
-import org.unidue.ub.libintel.almaconnector.model.analytics.AusweisAblaufExterne;
 import org.unidue.ub.libintel.almaconnector.model.analytics.AusweisAblaufExterneReport;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderLine;
 
@@ -110,6 +109,21 @@ public class AlmaSetService {
         }
     }
 
+    public void addMemberListToSet(String almaSetId, List<String> almaIds, String itemDescription) {
+        if (almaIds == null || almaIds.isEmpty()) return;
+        Members members = new Members();
+        for (String almaId : almaIds) {
+            if (almaId == null || almaId.isEmpty()) continue;
+            members.addMemberItem(new Member().id(almaId).description(itemDescription));
+        }
+        Set set = new Set().members(members);
+        try {
+            this.setsApiClient.postConfSetsSetId(set, almaSetId, "add_members", "");
+        } catch (FeignException fe) {
+            log.warn(String.format("could not add items to set setId: %s, message: %s", almaSetId, fe.getMessage()));
+        }
+    }
+
     /**
      * adds all items from the positions of an orderline
      *
@@ -175,8 +189,9 @@ public class AlmaSetService {
         this.clearSet(AlmaSetIdBenutzerAusweisende);
         try {
             AusweisAblaufExterneReport ausweisAblaufExterneReport = this.almaAnalyticsReportClient.getReport(AusweisAblaufExterneReport.PATH, AusweisAblaufExterneReport.class);
-            for (AusweisAblaufExterne ausweisAblaufExterne: ausweisAblaufExterneReport.getRows())
-                this.addMemberToSet(AlmaSetIdBenutzerAusweisende, ausweisAblaufExterne.getPrimaryIdentifier(), "");
+            List<String> ids = new ArrayList<>();
+            ausweisAblaufExterneReport.getRows().forEach(entry -> ids.add(entry.getPrimaryIdentifier()));
+            this.addMemberListToSet(AlmaSetIdBenutzerAusweisende, ids, "");
         } catch (IOException e) {
             log.error("could not retrieve analytics report AusweisAblaufExtern", e);
         }
