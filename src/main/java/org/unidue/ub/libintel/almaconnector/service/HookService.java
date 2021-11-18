@@ -453,7 +453,7 @@ public class HookService {
                 }
             }
         } catch (Exception e) {
-            log.warn("");
+            log.warn("", e);
         }
     }
 

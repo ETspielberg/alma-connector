@@ -132,7 +132,7 @@ public class HookController {
 
     @PostMapping("/listener/{hookType}")
     public ResponseEntity<?> receiveLoan(@PathVariable String hookType, @RequestBody String hookContent, @RequestHeader("X-Exl-Signature") String signature) throws NoSuchAlgorithmException, InvalidKeyException {
-        log.info(hookContent);
+        log.info(hookType + "-Hook: " + hookContent);
         if (this.hookValidatorService.isValid(hookContent, signature)) {
             this.hookService.processHook(hookContent, hookType);
             return ResponseEntity.ok().build();
