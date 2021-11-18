@@ -277,6 +277,7 @@ public class HookService {
      */
     @Async("threadPoolTaskExecutor")
     public void processItemHook(ItemHook hook) {
+        log.info(hook.toString());
         if (hook.getEvent() == null || hook.getEvent().getValue() == null) {
             log.warn("no hook event type given");
             return;
