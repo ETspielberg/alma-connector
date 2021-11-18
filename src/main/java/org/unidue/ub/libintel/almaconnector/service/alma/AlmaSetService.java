@@ -2,11 +2,16 @@ package org.unidue.ub.libintel.almaconnector.service.alma;
 
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.conf.*;
+import org.unidue.ub.libintel.almaconnector.clients.alma.analytics.AlmaAnalyticsReportClient;
 import org.unidue.ub.libintel.almaconnector.clients.alma.conf.SetsApiClient;
+import org.unidue.ub.libintel.almaconnector.model.analytics.AusweisAblaufExterne;
+import org.unidue.ub.libintel.almaconnector.model.analytics.AusweisAblaufExterneReport;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderLine;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,13 +28,20 @@ public class AlmaSetService {
 
     private final SetsApiClient setsApiClient;
 
+    private final AlmaAnalyticsReportClient almaAnalyticsReportClient;
+
+    @Value("${alma.set.name.benutzer.ausweisende}")
+    private String AlmaSetIdBenutzerAusweisende;
+
     /**
      * constructor based autowiring to the sets api client and the item service
      *
      * @param setsApiClient the client for the sets api
      */
-    AlmaSetService(SetsApiClient setsApiClient) {
+    AlmaSetService(SetsApiClient setsApiClient,
+                   AlmaAnalyticsReportClient almaAnalyticsReportClient) {
         this.setsApiClient = setsApiClient;
+        this.almaAnalyticsReportClient = almaAnalyticsReportClient;
     }
 
     /**
@@ -135,5 +147,38 @@ public class AlmaSetService {
         Member member = new Member().id(almaItemId);
         Set set = new Set().members(new Members().addMemberItem(member));
         this.setsApiClient.postConfSetsSetId(set, almaSetId, "delete_members", "");
+    }
+
+    /**
+     * clears a set of all members
+     * @param setId the set id of the set to be cleared
+     */
+    public void clearSet(String setId) {
+        // initialize values for member collection
+        int limit = 500;
+        int offset = 0;
+
+        // retrieve total number of members
+        Members members = this.setsApiClient.getConfSetsSetIdMembers(setId, "application/json", 1, offset);
+
+        // if it is already empty, stop here
+        if (members.getTotalRecordCount() == 0) return;
+
+        // collect all members and remove them from set.
+        for (offset = 0; offset < members.getTotalRecordCount(); offset += limit) {
+            members = this.setsApiClient.getConfSetsSetIdMembers(setId, "application/json", limit, offset);
+            this.setsApiClient.postConfSetsSetId(new Set().members(members), setId, "delete", "");
+        }
+    }
+
+    public void transferAusweisAblaufExterneAnalyticsReportToSet() {
+        this.clearSet(AlmaSetIdBenutzerAusweisende);
+        try {
+            AusweisAblaufExterneReport ausweisAblaufExterneReport = this.almaAnalyticsReportClient.getReport(AusweisAblaufExterneReport.PATH, AusweisAblaufExterneReport.class);
+            for (AusweisAblaufExterne ausweisAblaufExterne: ausweisAblaufExterneReport.getRows())
+                this.addMemberToSet(AlmaSetIdBenutzerAusweisende, ausweisAblaufExterne.getPrimaryIdentifier(), "");
+        } catch (IOException e) {
+            log.error("could not retrieve analytics report AusweisAblaufExtern", e);
+        }
     }
 }
