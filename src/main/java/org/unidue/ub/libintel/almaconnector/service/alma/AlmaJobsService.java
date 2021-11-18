@@ -8,6 +8,7 @@ import org.unidue.ub.alma.shared.conf.Jobs;
 import org.unidue.ub.libintel.almaconnector.clients.alma.conf.AlmaJobsApiClient;
 import org.unidue.ub.libintel.almaconnector.model.jobs.JobIdWithDescription;
 import org.unidue.ub.libintel.almaconnector.repository.jpa.JobIdWithDescriptionRepository;
+import org.unidue.ub.libintel.almaconnector.service.XmlReaderService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +28,13 @@ public class AlmaJobsService {
 
     private final JobIdWithDescriptionRepository jobIdWithDescriptionRepository;
 
+    private final XmlReaderService xmlReaderService;
+
     @Value("${alma.elisa.import.job.id:00000000}")
     private String elisaJobId;
+
+    @Value("${alma.notify.ending.job.if:00000001")
+    private String notifyEndingJobId;
 
     /**
      * constructor based autowiring of the alma jobs api feign client and the jobs with description repository
@@ -36,9 +42,11 @@ public class AlmaJobsService {
      * @param jobIdWithDescriptionRepository the jobs with description repository
      */
     public AlmaJobsService(AlmaJobsApiClient almaJobsApiClient,
-                           JobIdWithDescriptionRepository jobIdWithDescriptionRepository) {
+                           JobIdWithDescriptionRepository jobIdWithDescriptionRepository,
+                           XmlReaderService xmlReaderService) {
         this.almaJobsApiClient = almaJobsApiClient;
         this.jobIdWithDescriptionRepository = jobIdWithDescriptionRepository;
+        this.xmlReaderService = xmlReaderService;
     }
 
     /**
@@ -81,5 +89,10 @@ public class AlmaJobsService {
      */
     public List<JobIdWithDescription> searchJob(String term) {
         return this.jobIdWithDescriptionRepository.findAllByCategoryContainingOrDescriptionContainingOrNameContaining(term, term, term);
+    }
+
+    public void runEndingUserNotificationJob() {
+        Job job = this.xmlReaderService.readJobParameters("BenutzerAusweisende");
+        this.almaJobsApiClient.postAlmawsV1ConfJobsJobId(job, notifyEndingJobId, "run");
     }
 }
