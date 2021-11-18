@@ -407,6 +407,8 @@ public class HookService {
      */
     @Async("threadPoolTaskExecutor")
     public void processJobHook(JobHook hook) {
+        if (hook == null || hook.getJobInstance() == null)
+            return;
         String jobName = hook.getJobInstance().getJobInfo().getName();
         if (jobName.contains("EDI - Load Files")) {
             waitForAlma(30);
