@@ -38,6 +38,8 @@ public class ScheduledService {
 
     private final AlmaCatalogService almaCatalogService;
 
+    private final AlmaSetService almaSetService;
+
     private final MappingTables mappingTables;
 
     @Value("${libintel.profile:dev}")
@@ -64,7 +66,8 @@ public class ScheduledService {
                      AlmaPoLineService almaPoLineService,
                      AlmaJobsService almaJobsService,
                      AlmaUserService almaUserService,
-                     AlmaCatalogService almaCatalogService) {
+                     AlmaCatalogService almaCatalogService,
+                     AlmaSetService almaSetService) {
         this.almaAnalyticsReportClient = almaAnalyticsReportClient;
         this.mappingTables = mappingTables;
         this.almaItemService = almaItemService;
@@ -72,6 +75,7 @@ public class ScheduledService {
         this.almaJobsService = almaJobsService;
         this.almaUserService = almaUserService;
         this.almaCatalogService = almaCatalogService;
+        this.almaSetService = almaSetService;
     }
 
     /**
@@ -129,9 +133,9 @@ public class ScheduledService {
                                     if (reducedPrice != 0.0) {
                                         String newPrice;
                                         if ("EUR".equals(currency))
-                                            newPrice = String.format(Locale.GERMAN,"%.2f", reducedPrice);
+                                            newPrice = String.format(Locale.GERMAN, "%.2f", reducedPrice);
                                         else
-                                            newPrice = String.format(Locale.GERMAN,"%.2f %s", price, currency);
+                                            newPrice = String.format(Locale.GERMAN, "%.2f %s", price, currency);
                                         item.getItemData().setInventoryPrice(newPrice);
                                         itemUpdated = true;
                                         log.debug(String.format("updated item inventory price to %s", newPrice));
@@ -213,7 +217,18 @@ public class ScheduledService {
     }
 
     /**
+     * runs the elisa import job on additional times during the week
+     */
+    @Scheduled(cron = "0 0 8 * * 1")
+    public void runEndingUserNotificationJob() {
+        if (profile.equals("dev")) return;
+        this.almaSetService.transferAusweisAblaufExterneAnalyticsReportToSet();
+        this.almaJobsService.runEndingUserNotificationJob();
+    }
+
+    /**
      * updates the po ids of the packed po lines in the bubi orders
+     *
      * @throws IOException thrown by the analytics client if the xsl transformation fails
      */
     @Scheduled(cron = "0 0 8 * * *")
@@ -227,6 +242,7 @@ public class ScheduledService {
 
     /**
      * retrieves the open requests and logs the corresponding information to be picked up by beats
+     *
      * @throws IOException thrown by the analytics client if the xsl transformation fails
      */
     @Scheduled(cron = "0 0 5 * * *")
