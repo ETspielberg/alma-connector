@@ -318,20 +318,13 @@ public class HookService {
                     }
                     boolean isChanged = false;
                     if (item.getHoldingData().getInTempLocation())
-                        if ("ETA".equals(item.getHoldingData().getTempLocation().getValue())) {
-                            String internalNote3 = item.getItemData().getInternalNote3();
+                        if ("ETA".equals(item.getHoldingData().getTempLocation().getValue()) || "DTR".equals(item.getHoldingData().getTempLocation().getValue())) {
                             if ("LOAN".equals(item.getItemData().getProcessType().getValue())) {
                                 item.getHoldingData().setInTempLocation(false);
                                 item.getHoldingData().setTempLocation(null);
                                 item.getHoldingData().setTempLibrary(null);
-                                if (internalNote3.contains("Ausleihe ab 20.12.21 möglich"))
-                                    item.getItemData().setInternalNote3(internalNote3.replace("Ausleihe ab 20.12.21 möglich", "").strip());
-                            } else
-                                if (internalNote3.isEmpty())
-                                    item.getItemData().setInternalNote3("Ausleihe ab 20.12.21 möglich");
-                                else if (!internalNote3.contains("Ausleihe ab 20.12.21 möglich"))
-                                    item.getItemData().setInternalNote3(internalNote3 + " Ausleihe ab 20.12.21 möglich");
-                            isChanged = true;
+                                isChanged = true;
+                            }
                         }
 
 
