@@ -5,7 +5,7 @@ logging:
         ub:
           libintel:
             almaconnector:
-              repository:
-                elasticsearch: debug
+              client: debug
+              repository: debug
               service: debug
               controller: debug
