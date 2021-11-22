@@ -45,7 +45,7 @@ public class ElasticsearchService {
         if (inventoryDate == null)
             inventoryDate = updateDate;
         EsItem esItem = new EsItem(almaItem, inventoryDate);
-        EsPrintManifestation esPrintManifestation = findManifestationByMmsId(mmsId);
+        EsPrintManifestation esPrintManifestation = findManifestationByItem(almaItem);
         if (esPrintManifestation == null) {
             BibWithRecord bib = this.almaCatalogService.getRecord(almaItem.getBibData().getMmsId());
             if (bib == null) {
@@ -58,10 +58,23 @@ public class ElasticsearchService {
         index(esPrintManifestation);
     }
 
+    public void update(EsPrintManifestation esPrintManifestation, String id) {
+        this.manifestationRepository.save(esPrintManifestation);
+    }
+
     private EsPrintManifestation findManifestationByMmsId(String mmsId) {
         List<EsPrintManifestation> hits = this.manifestationRepository.findManifestationByTitleIDOrAlmaId(mmsId, mmsId);
         log.debug(String.format("manifestations with %s found to be updated: %d", mmsId, hits.size()));
         return (hits.size() == 0) ? null : hits.get(0);
+    }
+
+    private EsPrintManifestation findManifestationByItem(Item item) {
+        EsPrintManifestation printManifestation = this.findManifestationByMmsId(item.getBibData().getMmsId());
+        if (printManifestation == null)
+            printManifestation = this.manifestationRepository.retrieveByBarcode(item.getItemData().getBarcode());
+        if (printManifestation == null)
+            printManifestation = this.manifestationRepository.retrieveByShelfmark(item.getItemData().getAlternativeCallNumber());
+        return printManifestation;
     }
 
     public void deleteItem(Item almaItem, Date date) {
@@ -75,8 +88,7 @@ public class ElasticsearchService {
     }
 
     public void updateItem(Item almaItem, Date updateDate) {
-        String mmsId = almaItem.getBibData().getMmsId();
-        EsPrintManifestation esPrintManifestation = retrieveOrBuildManifestation(mmsId, almaItem, updateDate);
+        EsPrintManifestation esPrintManifestation = findManifestationByItem(almaItem);
         if (esPrintManifestation == null)
             return;
         EsItem esItem = esPrintManifestation.findCorrespindingItem(almaItem);
