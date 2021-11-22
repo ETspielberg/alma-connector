@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  * @author Frank L\u00FCtzenkirchen, Eike Spielberg
  * @version 1
  */
-@Document(indexName = "manifestation_v2")
+@Document(indexName = "manifestation_v2", type="_doc")
 public class EsPrintManifestation implements Cloneable, Comparable<EsPrintManifestation> {
 
 	@Field(analyzer = "keyword")
