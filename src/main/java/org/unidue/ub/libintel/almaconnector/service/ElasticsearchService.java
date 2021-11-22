@@ -69,9 +69,7 @@ public class ElasticsearchService {
     }
 
     private EsPrintManifestation findManifestationByItem(Item item) {
-        EsPrintManifestation printManifestation = this.findManifestationByMmsId(item.getBibData().getMmsId());
-        if (printManifestation == null)
-            printManifestation = this.manifestationRepository.retrieveByBarcode(item.getItemData().getBarcode());
+        EsPrintManifestation printManifestation = this.manifestationRepository.retrieveByBarcode(item.getItemData().getBarcode());
         if (printManifestation == null)
             printManifestation = this.manifestationRepository.retrieveByShelfmark(item.getItemData().getAlternativeCallNumber());
         return printManifestation;
