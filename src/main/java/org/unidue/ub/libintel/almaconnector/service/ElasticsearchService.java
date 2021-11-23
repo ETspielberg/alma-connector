@@ -72,6 +72,10 @@ public class ElasticsearchService {
         EsPrintManifestation printManifestation = this.manifestationRepository.retrieveByBarcode(item.getItemData().getBarcode());
         if (printManifestation == null)
             printManifestation = this.manifestationRepository.retrieveByShelfmark(item.getItemData().getAlternativeCallNumber());
+
+        // retrieve full document
+        if (printManifestation != null)
+            printManifestation = this.manifestationRepository.findById(printManifestation.getTitleID()).orElse(null);
         return printManifestation;
     }
 
