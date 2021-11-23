@@ -24,17 +24,13 @@ public class RegalfinderService {
 
     @Cacheable("regalfinder")
     public boolean checkRegalfinder(String collection, String shelfmark) throws IOException {
-        // do not check resource sharing items
-        if ("RES_SHARE".equals(collection))
-            return true;
-
         String resourceUrl = String.format(Regalfinder_URL, URLEncoder.encode(collection, StandardCharsets.UTF_8), URLEncoder.encode(shelfmark, StandardCharsets.UTF_8));
         return Jsoup.connect(resourceUrl).get().select("regal").size() > 0;
     }
 
     public void checkRegalfinder(Item item) {
         try {
-            if ("RES_SHARE".equals(item.getItemData().getLocation().getValue()))
+            if ("RES_SHARE".equals(item.getItemData().getLibrary().getValue()))
                 return;
             boolean isInRegalfinder = this.checkRegalfinder(item.getItemData().getLocation().getValue(), item.getItemData().getAlternativeCallNumber());
             if (!isInRegalfinder) {

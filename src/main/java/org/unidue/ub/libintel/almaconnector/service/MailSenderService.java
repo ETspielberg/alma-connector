@@ -60,7 +60,7 @@ public class MailSenderService {
 
     private String buildRegalfinderMail(Item item) {
         Context context = new Context();
-        context.setVariable("collection", item.getItemData().getLibrary().getValue());
+        context.setVariable("collection", item.getItemData().getLocation().getValue());
         context.setVariable("shelfmark", item.getItemData().getAlternativeCallNumber());
         context.setVariable("mmsId", item.getBibData().getMmsId());
         context.setVariable("title", item.getBibData().getTitle());
