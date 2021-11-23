@@ -22,23 +22,44 @@ public class RegalfinderService {
         this.mailSenderService = mailSenderService;
     }
 
+    /**
+     * checks whether the item (collection and shelfmark) is displayed in the regalfinder
+     * @param collection the collection of the item to be checked
+     * @param shelfmark the shelfmark of the item to be checked
+     * @return true, if the response from the regalfinder contains the node 'regal'
+     * @throws IOException thrown, if an error occurred upon connecting to the regalfinder web application
+     */
     @Cacheable("regalfinder")
     public boolean checkRegalfinder(String collection, String shelfmark) throws IOException {
         String resourceUrl = String.format(Regalfinder_URL, URLEncoder.encode(collection, StandardCharsets.UTF_8), URLEncoder.encode(shelfmark, StandardCharsets.UTF_8));
         return Jsoup.connect(resourceUrl).get().select("regal").size() > 0;
     }
 
+    /**
+     * checks whether the item is displayed in the regalfinder
+     * @param item the item to be checked
+     */
     public void checkRegalfinder(Item item) {
+        // if it is an item from the resource sharing library, do nothing
+        if ("RES_SHARE".equals(item.getItemData().getLibrary().getValue()))
+            return;
+
+        // if it is a key to a locker, do nothing
+        if ("KEY".equals(item.getItemData().getPhysicalMaterialType().getValue()))
+            return;
+
+        // check shelfmark. if none is given, the shelfmark is too short (normally only notation from elisa),
+        // or it is a magazin shelfmark, do nothing.
+        String shelfmark = item.getItemData().getAlternativeCallNumber();
+        if ( shelfmark == null || shelfmark.length() < 5 || shelfmark.startsWith("ZZ"))
+            return;
+
+        // check the location. if it is none or a none-publishing location, do nothing
+        String location = item.getItemData().getLocation().getValue();
+        if (location == null ||"ENP".equals(location) || "DNP".equals(location))
+            return;
         try {
-            if ("RES_SHARE".equals(item.getItemData().getLibrary().getValue()))
-                return;
-            if ("KEY".equals(item.getItemData().getPhysicalMaterialType().getValue()))
-                return;
-            // check shelfmark. if none is given, the shelfmark is too short (only notation), or it is a magazin shelfmark, do nothing.
-            String shelfmark = item.getItemData().getAlternativeCallNumber();
-            if ( shelfmark == null || shelfmark.length() < 5 || shelfmark.startsWith("ZZ"))
-                return;
-            boolean isInRegalfinder = this.checkRegalfinder(item.getItemData().getLocation().getValue(), item.getItemData().getAlternativeCallNumber());
+            boolean isInRegalfinder = this.checkRegalfinder(location, shelfmark);
             if (!isInRegalfinder) {
                 this.mailSenderService.sendNotificationMail(item);
                 log.warn(String.format("item is not in regalfinder: %s, %s %s", item.getBibData().getMmsId(), item.getItemData().getPid(), item.getItemData().getAlternativeCallNumber()));
