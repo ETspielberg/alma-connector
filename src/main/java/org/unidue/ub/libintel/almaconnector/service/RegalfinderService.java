@@ -32,6 +32,12 @@ public class RegalfinderService {
         try {
             if ("RES_SHARE".equals(item.getItemData().getLibrary().getValue()))
                 return;
+            if ("KEY".equals(item.getItemData().getPhysicalMaterialType().getValue()))
+                return;
+            // check shelfmark. if none is given, the shelfmark is too short (only notation), or it is a magazin shelfmark, do nothing.
+            String shelfmark = item.getItemData().getAlternativeCallNumber();
+            if ( shelfmark == null || shelfmark.length() < 5 || shelfmark.startsWith("ZZ"))
+                return;
             boolean isInRegalfinder = this.checkRegalfinder(item.getItemData().getLocation().getValue(), item.getItemData().getAlternativeCallNumber());
             if (!isInRegalfinder) {
                 this.mailSenderService.sendNotificationMail(item);
