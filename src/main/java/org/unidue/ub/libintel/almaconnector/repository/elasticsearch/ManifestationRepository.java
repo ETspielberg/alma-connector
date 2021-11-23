@@ -13,7 +13,7 @@ public interface ManifestationRepository extends ElasticsearchRepository<EsPrint
     List<EsPrintManifestation> findManifestationByTitleIDOrAlmaId(String titleId, String almaId);
 
     @Query("{\"match\": {\"items.barcode\": \"?0\"}}")
-    EsPrintManifestation retrieveByBarcode(String AlmaItemId);
+    EsPrintManifestation retrieveByBarcode(String Barcode);
 
     @Query("{\"match\": {\"items.shelfmark\": \"?0\"}}")
     EsPrintManifestation retrieveByShelfmark(String shelfmark);
