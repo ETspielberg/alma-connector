@@ -34,6 +34,8 @@ public class RegalfinderService {
 
     public void checkRegalfinder(Item item) {
         try {
+            if ("RES_SHARE".equals(item.getItemData().getLocation().getValue()))
+                return;
             boolean isInRegalfinder = this.checkRegalfinder(item.getItemData().getLocation().getValue(), item.getItemData().getAlternativeCallNumber());
             if (!isInRegalfinder) {
                 this.mailSenderService.sendNotificationMail(item);
