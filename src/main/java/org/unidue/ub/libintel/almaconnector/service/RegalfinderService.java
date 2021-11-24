@@ -9,6 +9,8 @@ import org.unidue.ub.alma.shared.bibs.Item;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,6 +19,8 @@ import java.util.regex.Pattern;
 public class RegalfinderService {
 
     private final MailSenderService mailSenderService;
+
+    private final List<String> ignoredLocations = Arrays.asList("ENP", "DNP", "EPR", "DPR", "DBB", "EBB", "AFL", "DES", "EES", "DHS", "UNASSIGNED", "FL-AUSL", "FL-LS"," ELS", "ERK", "DRK","EHS", "MPR", "MNP", "MHS");
 
     private final static String Regalfinder_URL = "https://services.ub.uni-due.de/ub-map/regalfinder.html?standort=%s&signatur=%s&lang=de&XSL.Style=xml";
 
@@ -60,7 +64,7 @@ public class RegalfinderService {
 
         // check the location. if it is none or a none-publishing location, do nothing
         String location = item.getItemData().getLocation().getValue();
-        if (location == null ||"ENP".equals(location) || "DNP".equals(location))
+        if (location == null || ignoredLocations.contains(location))
             return;
         try {
             boolean isInRegalfinder = this.checkRegalfinder(location, shelfmark);
