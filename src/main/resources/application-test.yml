@@ -4,8 +4,4 @@ logging:
       unidue:
         ub:
           libintel:
-            almaconnector:
-              client: debug
-              repository: debug
-              service: debug
-              controller: debug
+            almaconnector: debug
