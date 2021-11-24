@@ -9,6 +9,8 @@ import org.unidue.ub.alma.shared.bibs.Item;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Service
@@ -53,6 +55,8 @@ public class RegalfinderService {
         String shelfmark = item.getItemData().getAlternativeCallNumber();
         if ( shelfmark == null || shelfmark.length() < 5 || shelfmark.startsWith("ZZ"))
             return;
+        if (!isShelfmark(shelfmark.strip()))
+            return;
 
         // check the location. if it is none or a none-publishing location, do nothing
         String location = item.getItemData().getLocation().getValue();
@@ -67,5 +71,11 @@ public class RegalfinderService {
         } catch (IOException ioe) {
             log.warn("could not check regalfinder", ioe);
         }
+    }
+
+    public static boolean isShelfmark (String s){
+        Pattern pattern = Pattern.compile("^[A-Za]{3,4}\\d+");
+        Matcher matcher = pattern.matcher(s);
+        return matcher.find();
     }
 }
