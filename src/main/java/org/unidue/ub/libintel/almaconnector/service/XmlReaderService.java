@@ -14,7 +14,7 @@ import java.io.InputStream;
 @Slf4j
 public class XmlReaderService {
 
-    @Value("${libintel.data.dir")
+    @Value("${libintel.data.dir}")
     private String libintelDataDir;
 
     public Job readJobParameters(String job) {

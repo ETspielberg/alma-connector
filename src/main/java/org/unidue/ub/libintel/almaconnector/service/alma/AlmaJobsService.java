@@ -33,7 +33,7 @@ public class AlmaJobsService {
     @Value("${alma.elisa.import.job.id:00000000}")
     private String elisaJobId;
 
-    @Value("${alma.notify.ending.job.if:00000001")
+    @Value("${alma.notify.ending.job.if:00000001}")
     private String notifyEndingJobId;
 
     /**
@@ -93,6 +93,7 @@ public class AlmaJobsService {
 
     public void runEndingUserNotificationJob() {
         Job job = this.xmlReaderService.readJobParameters("BenutzerAusweisende");
+        log.info(String.format("running jo %s with parameters %s", notifyEndingJobId, job.toString()));
         this.almaJobsApiClient.postAlmawsV1ConfJobsJobId(job, notifyEndingJobId, "run");
     }
 }
