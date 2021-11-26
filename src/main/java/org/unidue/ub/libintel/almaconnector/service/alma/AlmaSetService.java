@@ -168,6 +168,7 @@ public class AlmaSetService {
      * @param setId the set id of the set to be cleared
      */
     public void clearSet(String setId) {
+        log.info("clearing set " + setId);
         // initialize values for member collection
         int limit = 500;
         int offset = 0;
@@ -191,6 +192,7 @@ public class AlmaSetService {
             AusweisAblaufExterneReport ausweisAblaufExterneReport = this.almaAnalyticsReportClient.getReport(AusweisAblaufExterneReport.PATH, AusweisAblaufExterneReport.class);
             List<String> ids = new ArrayList<>();
             ausweisAblaufExterneReport.getRows().forEach(entry -> ids.add(entry.getPrimaryIdentifier()));
+            log.info(String.format("retreived %d users, whose accout is going to expire", ids.size()));
             this.addMemberListToSet(AlmaSetIdBenutzerAusweisende, ids, "");
         } catch (IOException e) {
             log.error("could not retrieve analytics report AusweisAblaufExtern", e);

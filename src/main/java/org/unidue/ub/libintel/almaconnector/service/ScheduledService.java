@@ -221,6 +221,7 @@ public class ScheduledService {
      */
     @Scheduled(cron = "0 0 8 * * 1")
     public void runEndingUserNotificationJob() {
+        log.info("updating ending user account set");
         if (profile.equals("dev")) return;
         this.almaSetService.transferAusweisAblaufExterneAnalyticsReportToSet();
         this.almaJobsService.runEndingUserNotificationJob();
@@ -231,6 +232,7 @@ public class ScheduledService {
      *
      * @throws IOException thrown by the analytics client if the xsl transformation fails
      */
+    /*
     @Scheduled(cron = "0 0 8 * * *")
     public void updateBubiOrders() throws IOException {
         if (profile.equals("dev")) return;
@@ -239,6 +241,8 @@ public class ScheduledService {
 
         }
     }
+
+     */
 
     /**
      * retrieves the open requests and logs the corresponding information to be picked up by beats

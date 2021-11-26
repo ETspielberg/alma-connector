@@ -45,7 +45,7 @@ public class AlmaAnalyticsReportClient {
      */
     public <T> T getReport(String reportPath, Class<T> clazz) throws IOException {
         String url = String.format(urlTemplate, reportPath, almaAcqApiKey, 500);
-        log.debug("querying url: " + url);
+        log.info("querying anayltics report with url: " + url);
         RestTemplate restTemplate = new RestTemplate();
         String response = restTemplate.getForObject(url, String.class);
         log.debug("queried alma api with response: " + response);

@@ -66,6 +66,12 @@ public class ServiceController {
         return "bereitstellungen";
     }
 
+    @GetMapping("/usersToEnd")
+    private String updateUsersToEnd(){
+        this.scheduledService.runEndingUserNotificationJob();
+        return "services/finished";
+    }
+
     private static class UserIdInvalidException extends RuntimeException {
         UserIdInvalidException(String message) { super(message); }
 
