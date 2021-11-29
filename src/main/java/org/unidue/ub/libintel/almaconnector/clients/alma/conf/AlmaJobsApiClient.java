@@ -10,6 +10,7 @@ import org.unidue.ub.alma.shared.conf.JobInstance;
 import org.unidue.ub.alma.shared.conf.JobInstances;
 import org.unidue.ub.alma.shared.conf.Jobs;
 import org.unidue.ub.libintel.almaconnector.clients.alma.AlmaFeignConfiguration;
+import org.unidue.ub.libintel.almaconnector.model.JobParametersFile;
 
 @FeignClient(name = "jobs", url = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/conf/jobs", configuration = AlmaFeignConfiguration.class)
 @Service
@@ -70,5 +71,5 @@ public interface AlmaJobsApiClient {
    * @return Job
    */
   @RequestMapping(method = RequestMethod.POST, value = "/{jobId}", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
-  Job postAlmawsV1ConfJobsJobId(@RequestBody Job body, @RequestParam("jobId") String jobId, @RequestParam("op") String op);
+  Job postAlmawsV1ConfJobsJobId(@RequestBody JobParametersFile body, @RequestParam("jobId") String jobId, @RequestParam("op") String op);
 }

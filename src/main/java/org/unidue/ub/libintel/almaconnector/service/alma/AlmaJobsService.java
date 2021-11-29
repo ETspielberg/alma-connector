@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.conf.Job;
 import org.unidue.ub.alma.shared.conf.Jobs;
 import org.unidue.ub.libintel.almaconnector.clients.alma.conf.AlmaJobsApiClient;
+import org.unidue.ub.libintel.almaconnector.model.JobParametersFile;
 import org.unidue.ub.libintel.almaconnector.model.jobs.JobIdWithDescription;
 import org.unidue.ub.libintel.almaconnector.repository.jpa.JobIdWithDescriptionRepository;
 import org.unidue.ub.libintel.almaconnector.service.XmlReaderService;
@@ -54,7 +55,7 @@ public class AlmaJobsService {
      * runs the elisa import job (elisa job id given as configuration parameter 'alma.elisa.import.job.id'
      */
     public void runElisaImportJob() {
-        this.almaJobsApiClient.postAlmawsV1ConfJobsJobId(new Job(),elisaJobId, "run");
+        this.almaJobsApiClient.postAlmawsV1ConfJobsJobId(new JobParametersFile(),elisaJobId, "run");
 
     }
 
@@ -93,7 +94,7 @@ public class AlmaJobsService {
     }
 
     public void runEndingUserNotificationJob() {
-        Job job = this.xmlReaderService.readJobParameters("BenutzerAusweisende");
+        JobParametersFile job = this.xmlReaderService.readJobParameters("BenutzerAusweisende");
         log.info(String.format("running jo %s with parameters %s", notifyEndingJobId, job.toString()));
         try {
             this.almaJobsApiClient.postAlmawsV1ConfJobsJobId(job, notifyEndingJobId, "run");
