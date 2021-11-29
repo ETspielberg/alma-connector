@@ -219,7 +219,7 @@ public class ScheduledService {
     /**
      * runs the elisa import job on additional times during the week
      */
-    @Scheduled(cron = "0 0 8 * * 1")
+    @Scheduled(cron = "0 0 8 * * *")
     public void runEndingUserNotificationJob() {
         log.info("updating ending user account set");
         if (profile.equals("dev")) return;
