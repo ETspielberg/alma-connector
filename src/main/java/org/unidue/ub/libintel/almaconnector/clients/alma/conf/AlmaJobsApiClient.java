@@ -1,6 +1,7 @@
 package org.unidue.ub.libintel.almaconnector.clients.alma.conf;
 
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 import org.unidue.ub.alma.shared.conf.Job;
@@ -68,6 +69,6 @@ public interface AlmaJobsApiClient {
    * @param body This method takes a Job object. See [here](/alma/apis/docs/xsd/rest_job.xsd?tags&#x3D;POST) (required)
    * @return Job
    */
-  @RequestMapping(method = RequestMethod.POST, value = "/{job_id}?op={op}")
+  @RequestMapping(method = RequestMethod.POST, value = "/{job_id}?op={op}", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
   Job postAlmawsV1ConfJobsJobId( @RequestBody Job body, @RequestParam("job_id") String jobId, @RequestParam("op") String op);
 }
