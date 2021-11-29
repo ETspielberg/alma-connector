@@ -201,7 +201,7 @@ public class AlmaSetService {
             AusweisAblaufExterneReport ausweisAblaufExterneReport = this.almaAnalyticsReportClient.getReport(AusweisAblaufExterneReport.PATH, AusweisAblaufExterneReport.class);
             List<String> ids = new ArrayList<>();
             ausweisAblaufExterneReport.getRows().forEach(entry -> ids.add(entry.getPrimaryIdentifier()));
-            log.info(String.format("retreived %d users, whose accout is going to expire", ids.size()));
+            log.info(String.format("retrieved %d users, whose account is going to expire", ids.size()));
             this.addMemberListToSet(AlmaSetIdBenutzerAusweisende, ids, "");
         } catch (IOException e) {
             log.error("could not retrieve analytics report AusweisAblaufExtern", e);
