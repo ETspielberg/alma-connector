@@ -7,6 +7,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.conf.Job;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -20,9 +22,10 @@ public class XmlReaderService {
     public Job readJobParameters(String job) {
         try {
             String pathToXml = String.format("%s/jobs/%s.xml", libintelDataDir, job);
-            InputStream xmlFile = new ClassPathResource(String.format(pathToXml,job)).getInputStream();
+            File xmlFile = new File(pathToXml);
+            InputStream xmlFileStream = new FileInputStream(xmlFile);
             XmlMapper xmlMapper = new XmlMapper();
-            return xmlMapper.readValue(xmlFile, Job.class);
+            return xmlMapper.readValue(xmlFileStream, Job.class);
         } catch (IOException e) {
             log.error("could not read in job parameters for Job " + job, e);
             return new Job();
