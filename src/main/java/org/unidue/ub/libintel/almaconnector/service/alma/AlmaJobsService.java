@@ -34,7 +34,7 @@ public class AlmaJobsService {
     @Value("${alma.elisa.import.job.id:00000000}")
     private String elisaJobId;
 
-    @Value("${alma.notify.ending.job.if:00000001}")
+    @Value("${alma.notify.ending.job.id:00000001}")
     private String notifyEndingJobId;
 
     /**
