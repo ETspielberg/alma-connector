@@ -69,6 +69,6 @@ public interface AlmaJobsApiClient {
    * @param body This method takes a Job object. See [here](/alma/apis/docs/xsd/rest_job.xsd?tags&#x3D;POST) (required)
    * @return Job
    */
-  @RequestMapping(method = RequestMethod.POST, value = "/{job_id}?op={op}", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
-  Job postAlmawsV1ConfJobsJobId( @RequestBody Job body, @RequestParam("job_id") String jobId, @RequestParam("op") String op);
+  @RequestMapping(method = RequestMethod.POST, value = "/{jobId}", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
+  Job postAlmawsV1ConfJobsJobId(@RequestBody Job body, @RequestParam("jobId") String jobId, @RequestParam("op") String op);
 }

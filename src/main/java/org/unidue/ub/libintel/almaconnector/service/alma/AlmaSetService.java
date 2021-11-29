@@ -120,7 +120,7 @@ public class AlmaSetService {
         try {
             this.setsApiClient.postConfSetsSetId(set, almaSetId, "add_members", "");
         } catch (FeignException fe) {
-            log.warn(String.format("could not add items to set setId: %s, message: %s", almaSetId, fe.getMessage()));
+            log.warn(String.format("could not add items to set setId: %s, message: %s", almaSetId, fe.getMessage()), fe);
         }
     }
 
@@ -182,7 +182,11 @@ public class AlmaSetService {
         // collect all members and remove them from set.
         for (offset = 0; offset < members.getTotalRecordCount(); offset += limit) {
             members = this.setsApiClient.getConfSetsSetIdMembers(setId, "application/json", limit, offset);
-            this.setsApiClient.postConfSetsSetId(new Set().members(members), setId, "delete", "");
+            try {
+                this.setsApiClient.postConfSetsSetId(new Set().members(members), setId, "delete", "");
+            } catch (FeignException feignException) {
+                log.warn(String.format("could not clear set %s, message: %s", setId, feignException.getMessage()), feignException);
+            }
         }
     }
 

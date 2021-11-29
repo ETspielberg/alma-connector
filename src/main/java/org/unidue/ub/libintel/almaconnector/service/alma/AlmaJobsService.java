@@ -1,5 +1,6 @@
 package org.unidue.ub.libintel.almaconnector.service.alma;
 
+import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -94,6 +95,10 @@ public class AlmaJobsService {
     public void runEndingUserNotificationJob() {
         Job job = this.xmlReaderService.readJobParameters("BenutzerAusweisende");
         log.info(String.format("running jo %s with parameters %s", notifyEndingJobId, job.toString()));
-        this.almaJobsApiClient.postAlmawsV1ConfJobsJobId(job, notifyEndingJobId, "run");
+        try {
+            this.almaJobsApiClient.postAlmawsV1ConfJobsJobId(job, notifyEndingJobId, "run");
+        } catch (FeignException feignException) {
+            log.warn(String.format("could not start job %s: %s", notifyEndingJobId, feignException.getMessage()), feignException);
+        }
     }
 }
