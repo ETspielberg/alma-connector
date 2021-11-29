@@ -174,8 +174,13 @@ public class AlmaSetService {
         int offset = 0;
 
         // retrieve total number of members
-        Members members = this.setsApiClient.getConfSetsSetIdMembers(setId, "application/json", 1, offset);
-
+        Members members;
+        try {
+            members = this.setsApiClient.getConfSetsSetIdMembers(setId, "application/json", 1, offset);
+        } catch (FeignException fe) {
+            log.warn(String.format("could not read set %s: message :%s", setId, fe.getMessage()), fe);
+            return;
+        }
         // if it is already empty, stop here
         if (members.getTotalRecordCount() == 0) return;
 
