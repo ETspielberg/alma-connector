@@ -183,7 +183,7 @@ public class AlmaSetService {
         for (offset = 0; offset < members.getTotalRecordCount(); offset += limit) {
             members = this.setsApiClient.getConfSetsSetIdMembers(setId, "application/json", limit, offset);
             try {
-                this.setsApiClient.postConfSetsSetId(new Set().members(members), setId, "delete", "");
+                this.setsApiClient.postConfSetsSetId(new Set().members(members), setId, "delete_members", "");
             } catch (FeignException feignException) {
                 log.warn(String.format("could not clear set %s, message: %s", setId, feignException.getMessage()), feignException);
             }
