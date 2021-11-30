@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.unidue.ub.alma.shared.acq.Invoice;
@@ -59,6 +60,13 @@ public class SapController {
         this.almaExportRunService = almaExportRunService;
         this.sapService = sapService;
     }
+
+
+    @InitBinder
+    protected void initBinder(WebDataBinder binder) {
+        binder.setAutoGrowCollectionLimit(Integer.MAX_VALUE);
+    }
+
 
     /**
      * the overview page of the
