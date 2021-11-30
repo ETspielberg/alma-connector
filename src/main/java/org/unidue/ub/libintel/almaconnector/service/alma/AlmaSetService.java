@@ -195,7 +195,7 @@ public class AlmaSetService {
         }
     }
 
-    public void transferAusweisAblaufExterneAnalyticsReportToSet() {
+    public List<String> transferAusweisAblaufExterneAnalyticsReportToSet() {
         this.clearSet(AlmaSetIdBenutzerAusweisende);
         try {
             AusweisAblaufExterneReport ausweisAblaufExterneReport = this.almaAnalyticsReportClient.getReport(AusweisAblaufExterneReport.PATH, AusweisAblaufExterneReport.class);
@@ -203,8 +203,10 @@ public class AlmaSetService {
             ausweisAblaufExterneReport.getRows().forEach(entry -> ids.add(entry.getPrimaryIdentifier()));
             log.info(String.format("retrieved %d users, whose account is going to expire", ids.size()));
             this.addMemberListToSet(AlmaSetIdBenutzerAusweisende, ids, "");
+            return ids;
         } catch (IOException e) {
             log.error("could not retrieve analytics report AusweisAblaufExtern", e);
+            return new ArrayList<>();
         }
     }
 }

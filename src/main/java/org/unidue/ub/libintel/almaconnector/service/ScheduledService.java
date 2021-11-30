@@ -223,7 +223,8 @@ public class ScheduledService {
     public void runEndingUserNotificationJob() {
         log.info("updating ending user account set");
         if (profile.equals("dev")) return;
-        this.almaSetService.transferAusweisAblaufExterneAnalyticsReportToSet();
+        List<String> ids = this.almaSetService.transferAusweisAblaufExterneAnalyticsReportToSet();
+        this.almaUserService.setExpireyNote(ids);
         this.almaJobsService.runEndingUserNotificationJob();
     }
 
