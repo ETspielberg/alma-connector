@@ -41,7 +41,7 @@ public class HookService {
 
     private final RegalfinderService regalfinderService;
 
-    private final ElasticsearchService elasticsearchService;
+    private final GetterService getterService;
 
     private final BlockedIdService blockedIdService;
 
@@ -61,7 +61,7 @@ public class HookService {
                 AlmaElectronicService almaElectronicService,
                 AlmaInvoiceService almaInvoiceService,
                 RegalfinderService regalfinderService,
-                ElasticsearchService elasticsearchService,
+                GetterService getterService,
                 BlockedIdService blockedIdService) {
         this.almaUserService = almaUserService;
         this.almaItemService = almaItemService;
@@ -70,7 +70,7 @@ public class HookService {
         this.bubiOrderLineService = bubiOrderLineService;
         this.almaInvoiceService = almaInvoiceService;
         this.regalfinderService = regalfinderService;
-        this.elasticsearchService = elasticsearchService;
+        this.getterService = getterService;
         this.blockedIdService = blockedIdService;
     }
 

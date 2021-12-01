@@ -1,7 +1,5 @@
 package org.unidue.ub.libintel.almaconnector.model.media.elasticsearch;
 
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.unidue.ub.libintel.almaconnector.model.EventType;
 
 import java.util.Date;
@@ -17,10 +15,8 @@ public class EsEvent implements Comparable<EsEvent> {
 
     private final static long dayInMillis = 86400000L;
 
-    @Field(type = FieldType.Date)
     private Date beginDate;
 
-    @Field(type = FieldType.Date)
     private Date endDate;
 
     private EventType type;

@@ -1,7 +1,5 @@
 package org.unidue.ub.libintel.almaconnector.model.media.elasticsearch;
 
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.unidue.ub.alma.shared.bibs.Item;
 import org.unidue.ub.libintel.almaconnector.model.EventType;
 
@@ -19,7 +17,6 @@ public class EsItem {
 
 	private String collection;
 
-	@Field(analyzer = "keyword")
 	private String shelfmark;
 
 	private String subLibrary;
@@ -30,20 +27,16 @@ public class EsItem {
 
 	private String processStatus;
 
-	@Field(type=FieldType.Date)
 	private Date inventoryDate;
 
-	@Field(type=FieldType.Date)
 	private Date deletionDate;
 
 	private String itemId;
 
 	private String noteOpac;
 
-	@Field(analyzer = "keyword")
 	private String barcode;
 
-	@Field(type = FieldType.Nested, includeInParent = true)
 	private List<EsEvent> esEvents = new ArrayList<>();
 
 	public EsItem(Item almaItem, Date inventoryDate) {

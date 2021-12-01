@@ -2,8 +2,6 @@ package org.unidue.ub.libintel.almaconnector.model.media.elasticsearch;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.unidue.ub.alma.shared.bibs.BibWithRecord;
 
 import java.util.ArrayList;
@@ -21,10 +19,8 @@ public class EsBibliographicInformation {
 
 	private String titleId = "";
 
-	@Field(analyzer = "keyword")
 	private String isbn = "";
 
-	@Field(analyzer = "keyword")
 	private String doi = "";
 
 	private List<String> authors = new ArrayList<>();
@@ -37,21 +33,18 @@ public class EsBibliographicInformation {
 
 	private String place = "";
 
-	@Field(type = FieldType.Integer)
 	private String year = "";
 	
 	private String edition = "";
 	
 	private String series = "";
 
-	@Field(type = FieldType.Integer)
 	private int volume = 1;
 	
 	private Set<String> keywords = new HashSet<>();
 
 	private String type = "";
 
-	@Field(analyzer = "keyword")
 	private String otherIdentifier = "";
 
 	private String fullDescription = "";

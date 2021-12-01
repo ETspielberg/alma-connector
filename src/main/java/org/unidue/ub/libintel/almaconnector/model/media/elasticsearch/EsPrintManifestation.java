@@ -2,9 +2,6 @@ package org.unidue.ub.libintel.almaconnector.model.media.elasticsearch;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.elasticsearch.annotations.Document;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.unidue.ub.alma.shared.bibs.BibWithRecord;
 
 import java.util.*;
@@ -21,29 +18,21 @@ import java.util.regex.Pattern;
  * @author Frank L\u00FCtzenkirchen, Eike Spielberg
  * @version 1
  */
-@Document(indexName = "manifestation_v2", type="_doc")
 public class EsPrintManifestation implements Cloneable, Comparable<EsPrintManifestation> {
 
-	@Field(analyzer = "keyword")
 	private String almaId = "";
 
 	@Id
-	@Field(analyzer = "keyword")
 	private String titleID = "";
 
-	@Field(analyzer = "keyword")
 	private String shelfmark = "";
 
-	@Field(analyzer = "keyword")
 	private String shelfmarkBase = "";
 
-	@Field(type = FieldType.Nested, includeInParent = true)
 	private List<EsItem> esItems = new ArrayList<>();
 
-	@Field(type = FieldType.Integer)
 	private int edition = 1;
 
-	@Field(type = FieldType.Nested, includeInParent = true)
 	private EsBibliographicInformation esBibliographicInformation;
 
 	public EsPrintManifestation() {

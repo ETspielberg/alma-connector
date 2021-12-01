@@ -1,10 +1,7 @@
 package org.unidue.ub.libintel.almaconnector.model.media.elasticsearch;
 
-import org.springframework.data.elasticsearch.annotations.Document;
-
 import java.util.List;
 
-@Document(indexName = "electronic_manifestation_v1")
 public class EsElectronicManifestation {
 
     private EsBibliographicInformation bibliographicInformation;

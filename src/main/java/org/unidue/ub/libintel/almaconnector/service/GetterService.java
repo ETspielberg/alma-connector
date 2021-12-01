@@ -6,6 +6,7 @@ import org.unidue.ub.alma.shared.bibs.BibWithRecord;
 import org.unidue.ub.alma.shared.bibs.HookUserRequest;
 import org.unidue.ub.alma.shared.bibs.Item;
 import org.unidue.ub.alma.shared.user.AlmaUser;
+import org.unidue.ub.libintel.almaconnector.clients.getter.GetterClient;
 import org.unidue.ub.libintel.almaconnector.model.hook.HookEventTypes;
 import org.unidue.ub.libintel.almaconnector.model.hook.LoanHook;
 import org.unidue.ub.libintel.almaconnector.model.hook.RequestHook;
@@ -13,7 +14,6 @@ import org.unidue.ub.libintel.almaconnector.model.EventType;
 import org.unidue.ub.libintel.almaconnector.model.media.elasticsearch.EsEvent;
 import org.unidue.ub.libintel.almaconnector.model.media.elasticsearch.EsItem;
 import org.unidue.ub.libintel.almaconnector.model.media.elasticsearch.EsPrintManifestation;
-import org.unidue.ub.libintel.almaconnector.repository.elasticsearch.ManifestationRepository;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaCatalogService;
 
 import java.util.Date;
@@ -21,20 +21,20 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class ElasticsearchService {
-
-    private final ManifestationRepository manifestationRepository;
+public class GetterService {
 
     private final AlmaCatalogService almaCatalogService;
 
-    ElasticsearchService(ManifestationRepository manifestationRepository,
-                         AlmaCatalogService almaCatalogService) {
+    private final GetterClient getterClient;
+
+    GetterService(AlmaCatalogService almaCatalogService,
+                  GetterClient getterClient) {
         this.almaCatalogService = almaCatalogService;
-        this.manifestationRepository = manifestationRepository;
+        this.getterClient = getterClient;
     }
 
     public EsPrintManifestation index(EsPrintManifestation esPrintManifestation) {
-        return this.manifestationRepository.save(esPrintManifestation);
+        return this.getterClient.saveManifestation(esPrintManifestation);
     }
 
     public void index(Item almaItem, Date updateDate) {
@@ -58,25 +58,22 @@ public class ElasticsearchService {
         index(esPrintManifestation);
     }
 
-    public void update(EsPrintManifestation esPrintManifestation, String id) {
-        this.manifestationRepository.save(esPrintManifestation);
-    }
-
     private EsPrintManifestation findManifestationByMmsId(String mmsId) {
-        List<EsPrintManifestation> hits = this.manifestationRepository.findManifestationByTitleIDOrAlmaId(mmsId, mmsId);
+        List<EsPrintManifestation> hits = this.getterClient.getManifestations("multipleIds", mmsId);
         log.debug(String.format("manifestations with %s found to be updated: %d", mmsId, hits.size()));
         return (hits.size() == 0) ? null : hits.get(0);
     }
 
     private EsPrintManifestation findManifestationByItem(Item item) {
-        EsPrintManifestation printManifestation = this.manifestationRepository.retrieveByBarcode(item.getItemData().getBarcode());
-        if (printManifestation == null)
-            printManifestation = this.manifestationRepository.retrieveByShelfmark(item.getItemData().getAlternativeCallNumber());
+        List<EsPrintManifestation> printManifestations = this.getterClient.getManifestations("barcode", (item.getItemData().getBarcode()));
+        if (printManifestations.size() == 0)
+            printManifestations = this.getterClient.getManifestations("shelfmark", item.getItemData().getAlternativeCallNumber());
 
         // retrieve full document
-        if (printManifestation != null)
-            printManifestation = this.manifestationRepository.findById(printManifestation.getTitleID()).orElse(null);
-        return printManifestation;
+        if (printManifestations.size() > 0)
+            return printManifestations.get(0);
+        else
+            return null;
     }
 
     public void deleteItem(Item almaItem, Date date) {
