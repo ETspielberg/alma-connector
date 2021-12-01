@@ -7,6 +7,7 @@ import org.unidue.ub.alma.shared.user.UserNote;
 import org.unidue.ub.alma.shared.user.UserNoteNoteType;
 import org.unidue.ub.libintel.almaconnector.clients.alma.users.AlmaUserApiClient;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -56,7 +57,11 @@ public class AlmaUserService {
                 userNote.setNoteText("Your limited account expires soon.");
             else
                 userNote.setNoteText("Ihr befristeter Ausweis endet in Kürze.");
-            almaUser.getUserNote().add(userNote);
+            List<UserNote> userNotes= almaUser.getUserNote();
+            if (userNotes == null)
+                userNotes = new ArrayList<>();
+            userNotes.add(userNote);
+            almaUser.setUserNote(userNotes);
             this.updateUser(almaUser);
         }
     }
