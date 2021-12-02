@@ -110,6 +110,31 @@ public class SapController {
         return "sap/finishedRun";
     }
 
+    @PostMapping("/sap/collectSelectedInvoices")
+    public String collectByInvoiceNumbers(@ModelAttribute("almaExportRun") AlmaExportRun almaExportRun, Model model) {
+        log.debug(String.format("collecting invoices for %s at %s", dateformat.format(almaExportRun.getDesiredDate()), almaExportRun.getInvoiceOwner()));
+        AlmaExportRun almaExportRunNew = this.almaExportRunService.getAlmaExportRun(almaExportRun.getDesiredDate(), almaExportRun.getInvoiceOwner());
+        almaExportRunNew.setDateSpecific(almaExportRun.isDateSpecific());
+        log.info(almaExportRunNew.log());
+        this.almaExportRunService.saveAlmaExportRun(almaExportRunNew);
+        almaExportRunNew = this.sapService.getInvoicesForInvoiceNumbers(almaExportRunNew);
+        model.addAttribute("almaExportRun", almaExportRunNew);
+        return "sap/finishedRun";
+    }
+
+    @PostMapping("/sap/availableInvoices")
+    public String getAvaliableInvoices(@ModelAttribute("almaExportRun") AlmaExportRun almaExportRun, Model model) {
+        log.debug(String.format("collecting invoices for %s at %s", dateformat.format(almaExportRun.getDesiredDate()), almaExportRun.getInvoiceOwner()));
+        AlmaExportRun almaExportRunNew = this.almaExportRunService.getAlmaExportRun(almaExportRun.getDesiredDate(), almaExportRun.getInvoiceOwner());
+        almaExportRunNew.setDateSpecific(almaExportRun.isDateSpecific());
+        log.info(almaExportRunNew.log());
+        this.almaExportRunService.saveAlmaExportRun(almaExportRunNew);
+        almaExportRunNew = this.sapService.getAvailableInvoices(almaExportRunNew);
+        model.addAttribute("almaExportRun", almaExportRunNew);
+        return "sap/availableInvoices";
+
+    }
+
     /**
      * receives the sap import result as xlsx file and updates the invoices in alma correspondingly
      * @param sapReturnFile the result xlsx file resulting from the SAP import

@@ -13,6 +13,7 @@ import org.unidue.ub.libintel.almaconnector.model.analytics.InvoiceForPayment;
 import org.unidue.ub.libintel.almaconnector.model.analytics.InvoiceForPaymentReport;
 import org.unidue.ub.libintel.almaconnector.model.run.AlmaExportRun;
 import org.unidue.ub.libintel.almaconnector.model.run.SapResponseRun;
+import org.unidue.ub.libintel.almaconnector.model.sap.AvailableInvoice;
 import org.unidue.ub.libintel.almaconnector.model.sap.SapAccountData;
 import org.unidue.ub.libintel.almaconnector.model.sap.SapData;
 import org.unidue.ub.libintel.almaconnector.model.sap.SapResponse;
@@ -309,10 +310,12 @@ public class SapService {
                             .withComment(invoiceLine.getPriceNote());
                     positionalNumber++;
 
+
                     if ("EXCLUSIVE".equals(invoice.getInvoiceVat().getType().getValue())) {
                         double amount = invoiceLine.getPrice() * fundDistribution.getPercent() / 100;
                         sapData.setInvoiceAmount(amount);
                     }
+
                     // read the VAT code from the data.
                     try {
                         // get the vat code
@@ -398,6 +401,7 @@ public class SapService {
                             .withInvoiceNumber(invoice.getNumber())
                             .withComment(invoiceLine.getNote());
                     positionalNumber++;
+
 
                     if ("EXCLUSIVE".equals(invoice.getInvoiceVat().getType().getValue())) {
                         double amount = invoiceLine.getPrice() * fundDistribution.getPercent() / 100;
@@ -804,4 +808,23 @@ public class SapService {
         return sapData;
     }
 
+    public AlmaExportRun getInvoicesForInvoiceNumbers(AlmaExportRun almaExportRun) {
+        List<Invoice> invoices;
+        log.info("collecting all invoices for given invoice numbers");
+        invoices = almaInvoiceService.getInvocesByInvoiceNumber(almaExportRun.getAvailableInvoices());
+        log.info("retrieved " + invoices.size() + " invoices by invoice numbers");
+        almaExportRun.setInvoices(invoices);
+        almaExportRun.setLastRun(new Date());
+        this.almaExportRunRepository.save(almaExportRun);
+        return almaExportRun;
+    }
+
+    public AlmaExportRun getAvailableInvoices(AlmaExportRun almaExportRun) {
+        List<AvailableInvoice> invoices = almaInvoiceService.getAvailableInvoices(almaExportRun.getInvoiceOwner());
+        log.info("retrieved " + invoices.size() + " (filtered) invoices");
+        almaExportRun.setAvailableInvoices(invoices);
+        almaExportRun.setLastRun(new Date());
+        this.almaExportRunRepository.save(almaExportRun);
+        return almaExportRun;
+    }
 }

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="general :: generalHead"/>
+<body>
+
+<nav th:replace="general :: navbar"></nav>
+
+<div class="container-fluid">
+    <form th:action="@{/alma/sap/collectSelectedInvoices}" method="post" th:object="${almaExportRun}">
+        <div class="ui-g">
+            <div class="ui-g-12 ui-md-12 ui-lg-10 ui-lg-offset-1">
+                <div class="tile centered">
+                    <h3 style="height:1.2em;" th:text="#{sap.run.result}"></h3>
+                    <p>Lauf vom <span th:text="${#dates.format(almaExportRun.lastRun, 'dd.MM.yyyy')}"></span>
+                        für den Campus <span th:text="${almaExportRun.invoiceOwner}"></span> vom
+                        <span th:text="${#dates.format(almaExportRun.desiredDate, 'dd.MM.yyyy')}"></span>, Nummer <span
+                                th:text="${almaExportRun.runIndex}"></span></p>
+                    <input hidden th:field="*{dateSpecific}">
+                    <input hidden th:field="*{desiredDate}">
+                    <input hidden th:field="*{numberForeignSapData}">
+                    <input hidden th:field="*{numberHomeSapData}">
+                    <input hidden th:field="*{invoiceOwner}">
+                </div>
+            </div>
+        </div>
+        <div class="ui-g">
+            <div class="ui-g-12 ui-md-12 ui-lg-12">
+                <div class="tile centered">
+                    <h2 th:text="#{sap.title.invoices.available}"></h2>
+                    <table class="table table-striped text-left">
+                        <tr>
+                            <th th:text="#{sap.result.invoicenumber}"></th>
+                            <th th:text="#{sap.result.vendorcode}"></th>
+                            <th th:text="#{sap.result.date.invoice}"></th>
+                            <th th:text="#{sap.result.amount}"></th>
+                            <th th:text="#{sap.result.currency}"></th>
+                        </tr>
+                        <tr th:each="availableInvoice, itemStat : *{availableInvoices}">
+                            <td th:text="${availableInvoice.invoiceNumber}"></td>
+                            <td th:text="${availableInvoice.vendorAccount}"></td>
+                            <td th:text="${#dates.format(availableInvoice.invoiceDate, 'dd.MM.yyyy')}"></td>
+                            <td th:text="${#numbers.formatDecimal(availableInvoice.amount,1,2)}"></td>
+                            <td th:text="${availableInvoice.currency}"></td>
+                            <td>
+                                <input hidden th:field="*{availableInvoices[__${itemStat.index}__].vendorAccount}">
+                                <input hidden th:field="*{availableInvoices[__${itemStat.index}__].invoiceNumber}">
+                                <input th:field="*{availableInvoices[__${itemStat.index}__].isChecked}"
+                                       th:checked="*{availableInvoices[__${itemStat.index}__].isChecked}" type="checkbox">
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="ui-g-12 ui-md-12 ui-lg-12">
+            <div style="margin: auto;" class="tile centered">
+                <input type="submit" class="btn btn-primary" th:value="#{invoices.collect.open}"/>
+            </div>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>

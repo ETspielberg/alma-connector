@@ -6,6 +6,7 @@ import org.unidue.ub.alma.shared.acq.*;
 import org.unidue.ub.libintel.almaconnector.clients.alma.acquisition.AlmaInvoicesApiClient;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrder;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderLine;
+import org.unidue.ub.libintel.almaconnector.model.sap.AvailableInvoice;
 import org.unidue.ub.libintel.almaconnector.model.sap.InvoiceUpdate;
 
 import java.text.SimpleDateFormat;
@@ -52,7 +53,7 @@ public class AlmaInvoiceService {
         log.debug("retrieving " + invoices.getTotalRecordCount() + " invoices");
 
         // as long as not all data are being collected, collect further
-        while (offset < invoices.getTotalRecordCount()) {
+        while (offset < invoices.getTotalRecordCount() && offset + batchSize < 256) {
             offset += batchSize;
             log.debug("collecting invoices from " + offset + " to " + (offset + batchSize));
             invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "Waiting to be Sent", owner, "", "", batchSize, offset, "");
@@ -60,6 +61,19 @@ public class AlmaInvoiceService {
         }
         log.debug(String.format("retrieved list of %d invoices", invoiceList.size()));
         return invoiceList;
+    }
+
+    public List<Invoice> getInvocesByInvoiceNumber(List<AvailableInvoice> availableInvoices) {
+        // initialize parameters
+        int batchSize = 25;
+        int offset = 0;
+
+        List<Invoice> invoices = new ArrayList<>();
+        // retrieve first list of invocies.
+        for (AvailableInvoice availableInvoice: availableInvoices)
+            if (availableInvoice.getIsChecked())
+                invoices.addAll(this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "Waiting to be Sent", "", "", "invoice_number~"+availableInvoice.getInvoiceNumber(), batchSize, offset, "").getInvoice());
+        return invoices;
     }
 
     /**
@@ -354,5 +368,28 @@ public class AlmaInvoiceService {
 
     private void updateInvoiceLine(String invoiceId, InvoiceLine invoiceLine) {
         this.almaInvoicesApiClient.putInvoicesInvoiceIdLinesInvoiceLineId(invoiceLine, "application/json", invoiceId, invoiceLine.getId());
+    }
+
+    public List<AvailableInvoice> getAvailableInvoices(String invoiceOwner) {
+        // initialize parameters
+        int batchSize = 25;
+        int offset = 0;
+
+        // retrieve first list of invocies.
+        Invoices invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "Waiting to be Sent", invoiceOwner, "", "", batchSize, offset, "brief");
+        List<Invoice> invoiceList = new ArrayList<>(invoices.getInvoice());
+
+        // as long as not all data are being collected, collect further
+        while (offset < invoices.getTotalRecordCount() && offset + batchSize < 256) {
+            offset += batchSize;
+            log.debug("collecting invoices from " + offset + " to " + (offset + batchSize));
+            invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "Waiting to be Sent", invoiceOwner, "", "", batchSize, offset, "");
+            invoiceList.addAll(invoices.getInvoice());
+        }
+        log.debug(String.format("retrieved list of %d invoices", invoiceList.size()));
+        List<AvailableInvoice> availableInvoices = new ArrayList<>();
+        for (Invoice invoice: invoiceList)
+            availableInvoices.add(new AvailableInvoice(invoice));
+        return availableInvoices;
     }
 }

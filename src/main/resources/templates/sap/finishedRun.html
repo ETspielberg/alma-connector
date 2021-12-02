@@ -72,7 +72,7 @@
                             <td th:text="${#dates.format(sapDatumHome.invoiceDate, 'dd.MM.yyyy')}"></td>
                             <td th:text="${#dates.format(sapDatumHome.commitmentDate, 'dd.MM.yyyy')}"></td>
                             <td th:style="${sapDatumHome.costType == null or sapDatumHome.costType.isEmpty() ? 'background-color: HotPink' : 'background-color: transparent'}" th:text="${sapDatumHome.costType}"></td>
-                            <td th:text="${sapDatumHome.invoiceAmount}"></td>
+                            <td th:text="${#numbers.formatDecimal(sapDatumHome.invoiceAmount,1,2)}"></td>
                             <td th:text="${sapDatumHome.currency}"></td>
                             <td th:style="${sapDatumHome.invoiceNumber == null or sapDatumHome.invoiceNumber.length() > 16 ? 'background-color: HotPink' : 'background-color: transparent'}" th:text="${sapDatumHome.invoiceNumber}"></td>
                             <td th:text="${sapDatumHome.positionalNumber}"></td>
@@ -132,7 +132,7 @@
                             <td th:text="${#dates.format(sapDatum.invoiceDate, 'dd.MM.yyyy')}"></td>
                             <td th:text="${#dates.format(sapDatum.commitmentDate, 'dd.MM.yyyy')}"></td>
                             <td th:style="${sapDatum.costType == null or sapDatum.costType.isEmpty() ? 'background-color: HotPink' : 'background-color: transparent'}" th:text="${sapDatum.costType}"></td>
-                            <td th:text="${sapDatum.invoiceAmount}"></td>
+                            <td th:text="${#numbers.formatDecimal(sapDatum.invoiceAmount,1,2)}"></td>
                             <td th:text="${sapDatum.currency}"></td>
                             <td th:style="${sapDatum.invoiceNumber == null or sapDatum.invoiceNumber.length() > 16 ? 'background-color: HotPink' : 'background-color: transparent'}" th:text="${sapDatum.invoiceNumber}"></td>
                             <td th:text="${sapDatum.positionalNumber}"></td>
