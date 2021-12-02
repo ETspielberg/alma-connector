@@ -1,7 +1,6 @@
 package org.unidue.ub.libintel.almaconnector.model.media.elasticsearch;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.springframework.data.annotation.Id;
 import org.unidue.ub.alma.shared.bibs.BibWithRecord;
 
 import java.util.*;
@@ -22,7 +21,6 @@ public class EsPrintManifestation implements Cloneable, Comparable<EsPrintManife
 
 	private String almaId = "";
 
-	@Id
 	private String titleID = "";
 
 	private String shelfmark = "";

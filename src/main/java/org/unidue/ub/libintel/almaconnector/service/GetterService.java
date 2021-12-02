@@ -1,5 +1,6 @@
 package org.unidue.ub.libintel.almaconnector.service;
 
+import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.bibs.BibWithRecord;
@@ -33,10 +34,27 @@ public class GetterService {
         this.getterClient = getterClient;
     }
 
+    /**
+     * saves a manifestation to the index. If it does not exist, then a new entry is created.
+     * @param esPrintManifestation the manifestation to be saved
+     * @return the saved manifestation
+     */
     public EsPrintManifestation index(EsPrintManifestation esPrintManifestation) {
-        return this.getterClient.saveManifestation(esPrintManifestation);
+        try {
+            return this.getterClient.saveManifestation(esPrintManifestation);
+        } catch (FeignException feignException) {
+            log.warn(String.format("could not save print manifestation %s, message: %s",
+                    esPrintManifestation.getTitleID(),
+                    feignException.getMessage()),feignException);
+            return null;
+        }
     }
 
+    /**
+     * saves a new item to elasticsearch
+     * @param almaItem the new item to be saved
+     * @param updateDate the update date of the item webhook
+     */
     public void index(Item almaItem, Date updateDate) {
         String mmsId = almaItem.getBibData().getMmsId();
 
@@ -58,34 +76,12 @@ public class GetterService {
         index(esPrintManifestation);
     }
 
-    private EsPrintManifestation findManifestationByMmsId(String mmsId) {
-        List<EsPrintManifestation> hits = this.getterClient.getManifestations("multipleIds", mmsId);
-        log.debug(String.format("manifestations with %s found to be updated: %d", mmsId, hits.size()));
-        return (hits.size() == 0) ? null : hits.get(0);
-    }
 
-    private EsPrintManifestation findManifestationByItem(Item item) {
-        List<EsPrintManifestation> printManifestations = this.getterClient.getManifestations("barcode", (item.getItemData().getBarcode()));
-        if (printManifestations.size() == 0)
-            printManifestations = this.getterClient.getManifestations("shelfmark", item.getItemData().getAlternativeCallNumber());
-
-        // retrieve full document
-        if (printManifestations.size() > 0)
-            return printManifestations.get(0);
-        else
-            return null;
-    }
-
-    public void deleteItem(Item almaItem, Date date) {
-        String mmsId = almaItem.getBibData().getMmsId();
-        EsPrintManifestation esPrintManifestation = retrieveOrBuildManifestation(mmsId, almaItem, date);
-        if (esPrintManifestation == null)
-            return;
-        EsItem esItem = esPrintManifestation.findCorrespindingItem(almaItem);
-        esItem.delete(date);
-        this.index(esPrintManifestation);
-    }
-
+    /**
+     * updates an item in the elasticsearch index
+     * @param almaItem the item to be updated
+     * @param updateDate the update from the webhook
+     */
     public void updateItem(Item almaItem, Date updateDate) {
         EsPrintManifestation esPrintManifestation = findManifestationByItem(almaItem);
         if (esPrintManifestation == null)
@@ -100,6 +96,26 @@ public class GetterService {
         }
     }
 
+    /**
+     * sets the deletion date for an item in the elasticsearch index
+     * @param almaItem  the item to be deleted
+     * @param date the update date from the webhook
+     */
+    public void deleteItem(Item almaItem, Date date) {
+        String mmsId = almaItem.getBibData().getMmsId();
+        EsPrintManifestation esPrintManifestation = retrieveOrBuildManifestation(mmsId, almaItem, date);
+        if (esPrintManifestation == null)
+            return;
+        EsItem esItem = esPrintManifestation.findCorrespindingItem(almaItem);
+        esItem.delete(date);
+        this.index(esPrintManifestation);
+    }
+
+    /**
+     * saves a request event to the index or closes one.
+     * @param hook the request webhook
+     * @param almaItem the item of the corresponding request
+     */
     public void indexRequest(RequestHook hook, Item almaItem) {
         String eventType = hook.getEvent().getValue();
         HookUserRequest userRequest = hook.getUserRequest();
@@ -116,6 +132,12 @@ public class GetterService {
         this.index(esPrintManifestation);
     }
 
+    /**
+     * saves a loan event to the index or closes one.
+     * @param hook the loan webhook
+     * @param almaItem the item of the corresponding loan
+     * @param user the user who performed the loan
+     */
     public void indexLoan(LoanHook hook, Item almaItem, AlmaUser user) {
         String eventType = hook.getEvent().getValue();
         String mmsId = hook.getItemLoan().getMmsId();
@@ -128,6 +150,25 @@ public class GetterService {
         else if (HookEventTypes.LOAN_RETURNED.name().equals(eventType))
             esItem.closeLoan(new Date(hook.getItemLoan().getLoanDate().toInstant().toEpochMilli()));
         this.index(esPrintManifestation);
+    }
+
+
+    private EsPrintManifestation findManifestationByMmsId(String mmsId) {
+        List<EsPrintManifestation> hits = this.getterClient.getManifestations("multipleIds", mmsId);
+        log.debug(String.format("manifestations with %s found to be updated: %d", mmsId, hits.size()));
+        return (hits.size() == 0) ? null : hits.get(0);
+    }
+
+    private EsPrintManifestation findManifestationByItem(Item item) {
+        List<EsPrintManifestation> printManifestations = this.getterClient.getManifestations("barcode", (item.getItemData().getBarcode()));
+        if (printManifestations.size() == 0)
+            printManifestations = this.getterClient.getManifestations("shelfmark", item.getItemData().getAlternativeCallNumber());
+
+        // retrieve full document
+        if (printManifestations.size() > 0)
+            return printManifestations.get(0);
+        else
+            return null;
     }
 
     private EsPrintManifestation retrieveOrBuildManifestation(String mmsId, Item almaItem, Date updateDate) {

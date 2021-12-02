@@ -3,6 +3,7 @@ package org.unidue.ub.libintel.almaconnector.model.run;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.unidue.ub.alma.shared.acq.Invoice;
+import org.unidue.ub.libintel.almaconnector.model.sap.AvailableInvoice;
 import org.unidue.ub.libintel.almaconnector.model.sap.SapData;
 
 import javax.persistence.*;
@@ -14,75 +15,78 @@ import static org.unidue.ub.libintel.almaconnector.service.SapService.dateformat
  * container object to hold all information about a download of the sap data from Alma
  */
 @Entity
-@Table(name="alma_export_run")
+@Table(name = "alma_export_run")
 public class AlmaExportRun {
 
     @Id
     private String identifier;
 
-    @Column(name="date_specific")
+    @Column(name = "date_specific")
     private boolean dateSpecific = false;
 
-    @Column(name="invoice_owner")
+    @Column(name = "invoice_owner")
     private String invoiceOwner;
 
-    @Column(name="desired_date")
+    @Column(name = "desired_date")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date desiredDate;
 
-    @Column(name="last_run")
+    @Column(name = "last_run")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date lastRun;
 
-    @Column(name="run_index")
+    @Column(name = "run_index")
     private long runIndex;
 
-    @Column(name="files_created")
+    @Column(name = "files_created")
     @ElementCollection
     private Set<String> filesCreated = new HashSet<>();
 
-    @Column(name="number_invoices")
+    @Column(name = "number_invoices")
     private long numberInvoices = 0;
 
-    @Column(name="number_invoice_lines")
+    @Column(name = "number_invoice_lines")
     private long numberInvoiceLines = 0;
 
-    @Column(name="successfull_sap_data")
+    @Column(name = "successfull_sap_data")
     private long successfullSapData = 0;
 
-    @Column(name="missed_sap_data")
+    @Column(name = "missed_sap_data")
     private long missedSapData = 0;
 
-    @Column(name="number_home_sap_data")
+    @Column(name = "number_home_sap_data")
     private long numberHomeSapData = 0;
 
-    @Column(name="number_foreign_sap_data")
+    @Column(name = "number_foreign_sap_data")
     private long numberForeignSapData = 0;
 
-    @Column(name="missed_invoice_lines")
+    @Column(name = "missed_invoice_lines")
     @ElementCollection
     private Set<String> missedInvoiceLines = new HashSet<>();
 
-    @Column(name="empty_invoices")
+    @Column(name = "empty_invoices")
     @ElementCollection
     private Set<String> emptyInvoices = new HashSet<>();
 
     @Transient
     private List<SapData> missedSapDataList = new ArrayList<>();
 
-    @Column(name="status")
+    @Column(name = "status")
     private String status;
 
     @Transient
-    private List<Invoice> invoices= new ArrayList<>();
+    private List<AvailableInvoice> availableInvoices;
+
+    @Transient
+    private List<Invoice> invoices = new ArrayList<>();
 
     @Transient
     private List<SapData> homeSapData = new ArrayList<>();
 
     @Transient
-    private List<SapData> foreignSapData= new ArrayList<>();
+    private List<SapData> foreignSapData = new ArrayList<>();
 
     public AlmaExportRun() {
         this.desiredDate = new Date();
@@ -189,7 +193,9 @@ public class AlmaExportRun {
         this.successfullSapData = successfullSapData;
     }
 
-    public void increaseSuccessfullSapData() { this.successfullSapData++; }
+    public void increaseSuccessfullSapData() {
+        this.successfullSapData++;
+    }
 
     public long getMissedSapData() {
         return this.missedSapData;
@@ -263,6 +269,21 @@ public class AlmaExportRun {
         return this.foreignSapData;
     }
 
+    public List<AvailableInvoice> getAvailableInvoices() {
+        return availableInvoices;
+    }
+
+    public void setAvailableInvoices(List<AvailableInvoice> invoiceNumbers) {
+        this.availableInvoices = invoiceNumbers;
+    }
+
+    public void addAvailableInvoice(AvailableInvoice invoiceNumber) {
+        if (availableInvoices == null) {
+            this.availableInvoices = new ArrayList<>();
+        }
+        this.availableInvoices.add(invoiceNumber);
+    }
+
     public void setForeignSapData(List<SapData> foreignSapData) {
         this.foreignSapData = foreignSapData;
         this.numberForeignSapData = foreignSapData.size();
@@ -272,7 +293,7 @@ public class AlmaExportRun {
         this.invoices = invoices;
         this.invoices.removeIf(invoice -> !invoice.getOwner().getValue().equals(this.invoiceOwner));
         this.numberInvoices = invoices.size();
-        for (Invoice invoice: this.invoices) {
+        for (Invoice invoice : this.invoices) {
             if (invoice.getInvoiceLines() != null && invoice.getInvoiceLines().getInvoiceLine() != null)
                 this.numberInvoiceLines += invoice.getInvoiceLines().getInvoiceLine().size();
             else
@@ -302,11 +323,11 @@ public class AlmaExportRun {
     }
 
     public void addSapDataList(List<SapData> sapDataList, List<String> homeTaxKeys) {
-        for (SapData sapData: sapDataList)
+        for (SapData sapData : sapDataList)
             addSapData(sapData, homeTaxKeys);
     }
 
-    public void sortSapData(){
+    public void sortSapData() {
         Collections.sort(this.homeSapData);
         Collections.sort(this.foreignSapData);
     }
@@ -361,7 +382,7 @@ public class AlmaExportRun {
 
     public long getNumberHomeDataSelected() {
         int number = 0;
-        for (SapData sapData: this.homeSapData) {
+        for (SapData sapData : this.homeSapData) {
             if (sapData.isChecked)
                 number++;
         }
@@ -370,7 +391,7 @@ public class AlmaExportRun {
 
     public long getNumberForeignDataSelected() {
         int number = 0;
-        for (SapData sapData: this.foreignSapData) {
+        for (SapData sapData : this.foreignSapData) {
             if (sapData.isChecked)
                 number++;
         }
