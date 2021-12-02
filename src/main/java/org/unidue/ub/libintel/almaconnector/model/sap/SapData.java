@@ -4,6 +4,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * holds all Data for a single invoice line to be uploaded to SAP
@@ -247,7 +248,7 @@ public class SapData implements Comparable<SapData> {
         else
             string += ";";
         string += this.currency + ";";
-        string += String.format("%1$,.2f", this.invoiceAmount) + ";";
+        string += String.format("%.2f", this.invoiceAmount) + ";";
         string += this.invoiceNumber + ";";
         string += getSizedString(this.positionalNumber, 5).replace(" ", "0") + ";";
         string += this.comment + ";";
@@ -284,7 +285,7 @@ public class SapData implements Comparable<SapData> {
         string += getSizedString(readableDateFormatter.format(this.commitmentDate), 12);
         string += getSizedString(readableDateFormatter.format(this.invoiceDate), 12);
         string += getSizedString(this.costType, 12);
-        string += getSizedString(String.format("%1$,.2f", this.invoiceAmount), 14);
+        string += getSizedString(String.format(Locale.ENGLISH,"%.2f", this.invoiceAmount), 14);
         string += getSizedString(this.currency, 8);
         string += getSizedString(this.invoiceNumber, 22);
         string += getSizedString(getSizedString(this.positionalNumber, 5).replace(" ", "0"), 7);
