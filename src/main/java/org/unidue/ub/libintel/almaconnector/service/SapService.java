@@ -312,7 +312,7 @@ public class SapService {
 
 
                     if ("EXCLUSIVE".equals(invoice.getInvoiceVat().getType().getValue())) {
-                        double amount = invoiceLine.getPrice() * fundDistribution.getPercent() / 100;
+                        double amount = fundDistribution.getAmount() * 100/ (100 + invoiceLine.getInvoiceLineVat().getPercentage());
                         sapData.setInvoiceAmount(amount);
                     }
 
@@ -404,7 +404,7 @@ public class SapService {
 
 
                     if ("EXCLUSIVE".equals(invoice.getInvoiceVat().getType().getValue())) {
-                        double amount = invoiceLine.getPrice() * fundDistribution.getPercent() / 100;
+                        double amount = fundDistribution.getAmount() * 100/ (100 + invoiceLine.getInvoiceLineVat().getPercentage());
                         sapData.setInvoiceAmount(amount);
                     }
                     // read the VAT code from the data.
