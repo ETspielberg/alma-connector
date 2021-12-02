@@ -85,7 +85,7 @@ public class HookService {
         log.debug("received user request: " + userRequest.toString());
         waitForAlma(3);
         Item item = this.almaItemService.findItemByMmsAndItemId(userRequest.getMmsId(), userRequest.getItemId());
-        // elasticsearchService.indexRequest(hook, item);
+        //getterService.indexRequest(hook, item);
         if ("WORK_ORDER".equals(userRequest.getRequestType()) && "Int".equals(userRequest.getRequestSubType().getValue())) {
             switch (userRequest.getTargetDestination().getValue()) {
                 case "Buchbinder": {
@@ -159,8 +159,6 @@ public class HookService {
                     break;
                 }
             }
-        } else {
-            // ToDo: save user request to Alma
         }
     }
 
@@ -171,18 +169,16 @@ public class HookService {
      */
     @Async("threadPoolTaskExecutor")
     public void processLoanHook(LoanHook hook) {
-        this.blockedIdService.blockId(hook.getItemLoan().getItemId());
+        //this.blockedIdService.blockId(hook.getItemLoan().getItemId());
         HookItemLoan itemLoan = hook.getItemLoan();
         log.debug("received item loan: " + itemLoan.toString());
         log.debug(String.format("retrieving user %s", itemLoan.getUserId()));
         AlmaUser almaUser = this.almaUserService.getUser(itemLoan.getUserId());
         waitForAlma(5);
-        /*
         if (HookEventTypes.LOAN_CREATED.name().equals(hook.getEvent().getValue()) || HookEventTypes.LOAN_RETURNED.name().equals(hook.getEvent().getValue())) {
             Item item = this.almaItemService.findItemByMmsAndItemId(itemLoan.getMmsId(), itemLoan.getItemId());
-            this.elasticsearchService.indexLoan(hook, item, almaUser);
+            //this.getterService.indexLoan(hook, item, almaUser);
         }
-        */
         boolean needScan = false;
         String tempLibrary = "";
         switch (almaUser.getUserGroup().getDesc()) {
@@ -290,12 +286,12 @@ public class HookService {
 
         log.debug("received item hook: " + item.toString());
         if ("ITEM_DELETED".equals(hook.getEvent().getValue())) {
-            //this.elasticsearchService.deleteItem(item, hook.getTime());
+            //this.getterService.deleteItem(item, hook.getTime());
         } else if (HookEventTypes.ITEM_CREATED.name().equals(hook.getEvent().getValue())) {
-            //this.elasticsearchService.index(item, hook.getTime());
+            //this.getterService.index(item, hook.getTime());
         } else if (HookEventTypes.ITEM_UPDATED.name().equals(hook.getEvent().getValue())) {
             this.regalfinderService.checkRegalfinder(item);
-            //this.elasticsearchService.updateItem(item, hook.getTime());
+            //this.getterService.updateItem(item, hook.getTime());
             switch (item.getItemData().getPhysicalMaterialType().getValue()) {
                 case "ISSUE": {
                     log.debug(String.format("deleting temporary location for received issue %s for shelfmark %s", item.getItemData().getBarcode(), item.getHoldingData().getCallNumber()));
@@ -310,8 +306,8 @@ public class HookService {
                 case "KEYS":
                     break;
                 default: {
-                    if (blockedIdService.check(item.getItemData().getPid()))
-                        return;
+                    //if (blockedIdService.check(item.getItemData().getPid()))
+                    //    return;
                     log.info(String.format("got item with  call number %s and item call number %s", item.getHoldingData().getCallNumber(), item.getItemData().getAlternativeCallNumber()));
                     if (item.getHoldingData().getCallNumber() == null) {
                         log.warn("holding call number is null for item " + item.getItemData().getPid());
@@ -327,7 +323,6 @@ public class HookService {
                                 isChanged = true;
                             }
                         }
-
 
                     // check for barcode with blanks
                     String barcode = item.getItemData().getBarcode();
@@ -401,7 +396,6 @@ public class HookService {
         }
     }
 
-
     /**
      * processes a webhook for a bib event sent by alma
      *
@@ -418,7 +412,6 @@ public class HookService {
             this.almaInvoiceService.updateEdiInvoices(vendorId);
         }
     }
-
 
     /**
      * generalized method for processing any kind of hook
