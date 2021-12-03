@@ -1,5 +1,6 @@
 package org.unidue.ub.libintel.almaconnector.service.alma;
 
+import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.user.AlmaUser;
@@ -62,7 +63,11 @@ public class AlmaUserService {
                 userNotes = new ArrayList<>();
             userNotes.add(userNote);
             almaUser.setUserNote(userNotes);
-            this.updateUser(almaUser);
+            try {
+                this.updateUser(almaUser);
+            } catch (FeignException feignException) {
+                log.warn(String.format("could not send expirey note for user %s, message: %s", userId, feignException.getMessage()));
+            }
         }
     }
 }
