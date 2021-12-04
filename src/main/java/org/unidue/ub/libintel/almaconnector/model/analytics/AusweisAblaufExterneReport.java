@@ -9,7 +9,7 @@ import java.util.List;
 @JacksonXmlRootElement(localName = "result")
 public class AusweisAblaufExterneReport {
 
-    public final static String PATH = "/shared/Universität Duisburg-Essen 49HBZ_UDE/libintel/AusweisAblaufExterne_Test";
+    public final static String PATH = "/shared/Universität Duisburg-Essen 49HBZ_UDE/libintel/AusweisAblaufExtPromo";
 
     @JacksonXmlElementWrapper(useWrapping = false)
     @JacksonXmlProperty(localName = "row")
