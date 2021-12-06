@@ -11,12 +11,13 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.io.Serializable;
 import java.util.Date;
 
 @XmlRootElement(name = "request_hook")
 @XmlAccessorType(XmlAccessType.FIELD)
 @JacksonXmlRootElement(localName = "request_hook")
-public class RequestHook {
+public class RequestHook implements Serializable {
 
     public static final String JSON_PROPERTY_ID = "id";
     @XmlElement(name = "id")
