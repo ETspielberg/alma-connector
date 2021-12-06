@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.conf.*;
 import org.unidue.ub.libintel.almaconnector.clients.alma.analytics.AlmaAnalyticsReportClient;
 import org.unidue.ub.libintel.almaconnector.clients.alma.conf.SetsApiClient;
+import org.unidue.ub.libintel.almaconnector.model.analytics.AusweisAblaufExterne;
 import org.unidue.ub.libintel.almaconnector.model.analytics.AusweisAblaufExterneReport;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderLine;
 
@@ -200,7 +201,11 @@ public class AlmaSetService {
         try {
             AusweisAblaufExterneReport ausweisAblaufExterneReport = this.almaAnalyticsReportClient.getReport(AusweisAblaufExterneReport.PATH, AusweisAblaufExterneReport.class);
             List<String> ids = new ArrayList<>();
-            ausweisAblaufExterneReport.getRows().forEach(entry -> ids.add(entry.getPrimaryIdentifier()));
+            List<AusweisAblaufExterne> allExterne =  ausweisAblaufExterneReport.getRows();
+            if (allExterne == null)
+                return new ArrayList<>();
+            else
+                allExterne.forEach(entry -> ids.add(entry.getPrimaryIdentifier()));
             log.info(String.format("retrieved %d users, whose account is going to expire", ids.size()));
             this.addMemberListToSet(AlmaSetIdBenutzerAusweisende, ids, "");
             return ids;
