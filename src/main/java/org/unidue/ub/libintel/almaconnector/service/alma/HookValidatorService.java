@@ -38,6 +38,7 @@ public class HookValidatorService {
         sha256_HMAC.init(secret_key);
 
         String hash = Base64.encodeBase64String(sha256_HMAC.doFinal(content.getBytes()));
+        log.debug(hash);
         return hash.equals(signature);
     }
 }
