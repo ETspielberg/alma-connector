@@ -4,9 +4,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.springframework.data.keyvalue.annotation.KeySpace;
+import org.springframework.data.redis.core.RedisHash;
 import org.unidue.ub.alma.shared.conf.GeneralInstitution;
 import org.unidue.ub.alma.shared.conf.JobInstance;
 
+import javax.persistence.Id;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -17,10 +20,13 @@ import java.util.Date;
 @XmlRootElement(name = "loan_hook")
 @XmlAccessorType(XmlAccessType.FIELD)
 @JacksonXmlRootElement(localName = "loan_hook")
+@KeySpace("job_hook")
+@RedisHash(value = "job_hook", timeToLive = 5)
 public class JobHook implements Serializable {
 
     public static final String JSON_PROPERTY_ID = "id";
     @XmlElement(name = "id")
+    @Id
     private String id;
 
     public static final String JSON_PROPERTY_ACTION = "action";

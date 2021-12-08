@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.springframework.data.keyvalue.annotation.KeySpace;
+import org.springframework.data.redis.core.RedisHash;
 import org.unidue.ub.alma.shared.bibs.Item;
 import org.unidue.ub.alma.shared.conf.GeneralInstitution;
 import org.unidue.ub.alma.shared.user.AlmaUser;
@@ -18,6 +20,8 @@ import java.util.Date;
 @XmlRootElement(name = "user_hook")
 @XmlAccessorType(XmlAccessType.FIELD)
 @JacksonXmlRootElement(localName = "user_hook")
+@KeySpace("user_hook")
+@RedisHash(value = "user_hook", timeToLive = 10)
 public class UserHook implements Serializable {
 
     public static final String JSON_PROPERTY_ID = "id";
