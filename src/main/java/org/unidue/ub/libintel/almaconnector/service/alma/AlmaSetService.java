@@ -204,8 +204,14 @@ public class AlmaSetService {
             List<AusweisAblaufExterne> allExterne =  ausweisAblaufExterneReport.getRows();
             if (allExterne == null)
                 return new ArrayList<>();
-            else
-                allExterne.forEach(entry -> ids.add(entry.getPrimaryIdentifier()));
+            else {
+                for (AusweisAblaufExterne ausweisAblaufExterne: allExterne) {
+                    if (ausweisAblaufExterne == null || ausweisAblaufExterne.getPrimaryIdentifier() == null)
+                        return new ArrayList<>();
+                    else
+                        ids.add(ausweisAblaufExterne.getPrimaryIdentifier());
+                }
+            }
             log.info(String.format("retrieved %d users, whose account is going to expire", ids.size()));
             this.addMemberListToSet(AlmaSetIdBenutzerAusweisende, ids, "");
             return ids;
