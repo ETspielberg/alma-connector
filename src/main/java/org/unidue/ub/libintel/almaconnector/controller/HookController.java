@@ -1,6 +1,5 @@
 package org.unidue.ub.libintel.almaconnector.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -9,11 +8,11 @@ import org.springframework.web.bind.annotation.*;
 import org.unidue.ub.libintel.almaconnector.logging.JobLoggerService;
 import org.unidue.ub.libintel.almaconnector.model.hook.*;
 import org.unidue.ub.libintel.almaconnector.service.HookService;
+import org.unidue.ub.libintel.almaconnector.service.RedisService;
 import org.unidue.ub.libintel.almaconnector.service.alma.HookValidatorService;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 
 /**
  * provides endpoints to handle webhooks sent from alma. Each endpoint consists of a GET endpoint with a challenge
@@ -39,10 +38,15 @@ public class HookController {
 
     private final HookValidatorService hookValidatorService;
 
+    private final RedisService redisService;
+
+
     public HookController(HookService hookService,
                           JobLoggerService jobLoggerService,
-                          HookValidatorService hookValidatorService) {
+                          HookValidatorService hookValidatorService,
+                          RedisService redisService) {
         this.hookService = hookService;
+        this.redisService = redisService;
         this.jobLoggerService = jobLoggerService;
         this.hookValidatorService = hookValidatorService;
     }
@@ -132,11 +136,14 @@ public class HookController {
 
     @PostMapping("/listener/{hookType}")
     public ResponseEntity<?> receiveLoan(@PathVariable String hookType, @RequestBody String hookContent, @RequestHeader("X-Exl-Signature") String signature) throws NoSuchAlgorithmException, InvalidKeyException {
-        log.info(hookType + "-Hook: " + hookContent);
         if (this.hookValidatorService.isValid(hookContent, signature)) {
-            this.hookService.processHook(hookContent, hookType);
+            log.debug("Hook passed validation");
+            this.redisService.cacheHook(hookContent, hookType);
             return ResponseEntity.ok().build();
-        } else
+        } else {
+
+            log.warn("hook did not pass validation");
             return ResponseEntity.badRequest().build();
+        }
     }
 }

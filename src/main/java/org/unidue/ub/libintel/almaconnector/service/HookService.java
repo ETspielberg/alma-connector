@@ -45,6 +45,8 @@ public class HookService {
 
     private final BlockedIdService blockedIdService;
 
+    private final RedisService redisService;
+
     /**
      * constructor based autowiring to the individual services
      *
@@ -62,7 +64,8 @@ public class HookService {
                 AlmaInvoiceService almaInvoiceService,
                 RegalfinderService regalfinderService,
                 GetterService getterService,
-                BlockedIdService blockedIdService) {
+                BlockedIdService blockedIdService,
+                RedisService redisService) {
         this.almaUserService = almaUserService;
         this.almaItemService = almaItemService;
         this.almaCatalogService = almaCatalogService;
@@ -72,6 +75,7 @@ public class HookService {
         this.regalfinderService = regalfinderService;
         this.getterService = getterService;
         this.blockedIdService = blockedIdService;
+        this.redisService = redisService;
     }
 
     /**
@@ -81,11 +85,12 @@ public class HookService {
      */
     @Async("threadPoolTaskExecutor")
     public void processRequestHook(RequestHook hook) {
+        log.debug("processing request hook");
         HookUserRequest userRequest = hook.getUserRequest();
         log.debug("received user request: " + userRequest.toString());
         waitForAlma(3);
         Item item = this.almaItemService.findItemByMmsAndItemId(userRequest.getMmsId(), userRequest.getItemId());
-        //getterService.indexRequest(hook, item);
+        getterService.indexRequest(hook, item);
         if ("WORK_ORDER".equals(userRequest.getRequestType()) && "Int".equals(userRequest.getRequestSubType().getValue())) {
             switch (userRequest.getTargetDestination().getValue()) {
                 case "Buchbinder": {
@@ -169,7 +174,8 @@ public class HookService {
      */
     @Async("threadPoolTaskExecutor")
     public void processLoanHook(LoanHook hook) {
-        //this.blockedIdService.blockId(hook.getItemLoan().getItemId());
+        log.debug("processing loan hook");
+        // this.blockedIdService.blockId(hook.getItemLoan().getItemId());
         HookItemLoan itemLoan = hook.getItemLoan();
         log.debug("received item loan: " + itemLoan.toString());
         log.debug(String.format("retrieving user %s", itemLoan.getUserId()));
@@ -177,7 +183,7 @@ public class HookService {
         waitForAlma(5);
         if (HookEventTypes.LOAN_CREATED.name().equals(hook.getEvent().getValue()) || HookEventTypes.LOAN_RETURNED.name().equals(hook.getEvent().getValue())) {
             Item item = this.almaItemService.findItemByMmsAndItemId(itemLoan.getMmsId(), itemLoan.getItemId());
-            //this.getterService.indexLoan(hook, item, almaUser);
+            this.getterService.indexLoan(hook, item, almaUser);
         }
         boolean needScan = false;
         String tempLibrary = "";
@@ -276,6 +282,7 @@ public class HookService {
      */
     @Async("threadPoolTaskExecutor")
     public void processItemHook(ItemHook hook) {
+        log.debug("processing item hook");
         if (hook.getEvent() == null || hook.getEvent().getValue() == null) {
             log.warn("no hook event type given");
             return;
@@ -286,12 +293,12 @@ public class HookService {
 
         log.debug("received item hook: " + item.toString());
         if ("ITEM_DELETED".equals(hook.getEvent().getValue())) {
-            //this.getterService.deleteItem(item, hook.getTime());
+            this.getterService.deleteItem(item, hook.getTime());
         } else if (HookEventTypes.ITEM_CREATED.name().equals(hook.getEvent().getValue())) {
-            //this.getterService.index(item, hook.getTime());
+            this.getterService.index(item, hook.getTime());
         } else if (HookEventTypes.ITEM_UPDATED.name().equals(hook.getEvent().getValue())) {
             this.regalfinderService.checkRegalfinder(item);
-            //this.getterService.updateItem(item, hook.getTime());
+            this.getterService.updateItem(item, hook.getTime());
             switch (item.getItemData().getPhysicalMaterialType().getValue()) {
                 case "ISSUE": {
                     log.debug(String.format("deleting temporary location for received issue %s for shelfmark %s", item.getItemData().getBarcode(), item.getHoldingData().getCallNumber()));
@@ -361,6 +368,7 @@ public class HookService {
      */
     @Async("threadPoolTaskExecutor")
     public void processBibHook(BibHook hook) {
+        log.debug("processing bib hook");
         BibWithRecord bib = hook.getBib();
         log.debug("received bib hook: " + bib.toString());
         if ("Universität Duisburg-Essen".equals(bib.getPublisherConst())) {
@@ -403,6 +411,7 @@ public class HookService {
      */
     @Async("threadPoolTaskExecutor")
     public void processJobHook(JobHook hook) {
+        log.debug("processing job hook");
         if (hook == null || hook.getJobInstance() == null)
             return;
         String jobName = hook.getJobInstance().getJobInfo().getName();
@@ -413,55 +422,16 @@ public class HookService {
         }
     }
 
-    /**
-     * generalized method for processing any kind of hook
-     *
-     * @param hook the string content of the webhook
-     * @param type the typoe of webhook event
-     */
-    @Async("threadPoolTaskExecutor")
-    public void processHook(String hook, String type) {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            switch (type) {
-                case "loan": {
-                    LoanHook loanHook = mapper.readValue(hook, LoanHook.class);
-                    log.info(String.format("revceived hook of type %s and event %s", loanHook.getAction(), loanHook.getEvent().getValue()));
-                    processLoanHook(loanHook);
-                }
-                case "request": {
-                    RequestHook requestHook = mapper.readValue(hook, RequestHook.class);
-                    log.info(String.format("revceived hook of type %s and event %s", requestHook.getAction(), requestHook.getEvent().getValue()));
-                    processRequestHook(requestHook);
-                }
-                case "bib": {
-                    BibHook bibHook = mapper.readValue(hook, BibHook.class);
-                    log.info(String.format("revceived hook of type %s and event %s", bibHook.getAction(), bibHook.getEvent().getValue()));
-                    processBibHook(bibHook);
-                }
-                case "item": {
-                    ItemHook itemHook = mapper.readValue(hook, ItemHook.class);
-                    log.info(String.format("revceived hook of type %s and event %s", itemHook.getAction(), itemHook.getEvent().getValue()));
-                    processItemHook(itemHook);
-                }
-                case "job": {
-                    JobHook jobHook = mapper.readValue(hook, JobHook.class);
-                    log.info(String.format("revceived job hook of type %s", jobHook.getAction()));
-                    processJobHook(jobHook);
-                }
-            }
-        } catch (Exception e) {
-            log.warn("", e);
-        }
-    }
-
     private void waitForAlma(int timeout) {
         try {
-            TimeUnit.SECONDS.sleep(timeout);
             log.debug("We wait for a few seconds to give Alma enough time to handle all the updates: collect the item from the basement, carry it to the desk, change the status and bring it back to the basement...");
+            TimeUnit.SECONDS.sleep(timeout);
         } catch (InterruptedException ie) {
             log.warn(String.format("I cannot sleep for %d seconds here...", timeout), ie);
         }
+    }
+
+    public void processUserHook(UserHook userHook) {
+        log.info("user hook: " + userHook.getId());
     }
 }
