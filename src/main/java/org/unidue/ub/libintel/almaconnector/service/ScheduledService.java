@@ -147,15 +147,17 @@ public class ScheduledService {
                                 // try to set the dbs subject statistics field to the value corresponding to the fund code (if there is only one fund used)
                                 if (poLine.getFundDistribution().size() == 1) {
                                     String fund = poLine.getFundDistribution().get(0).getFundCode().getValue();
-                                    String fundCode = "etat" + fund.substring(0, fund.indexOf("-"));
-                                    if (fund.contains("RW"))
-                                        fundCode += "RW";
-                                    log.info(String.format("updating item price and statistics field for po line %s and fund %s", polineNumber, fund));
-                                    if (codes.containsKey(fundCode) && (item.getItemData().getStatisticsNote1() == null || item.getItemData().getStatisticsNote1().isEmpty())) {
-                                        item.getItemData().setStatisticsNote1(codes.get(fundCode));
-                                        itemUpdated = true;
-                                        log.debug(String.format("updated statistics note 1 for item with mms id %s and pid %s to %s",
-                                                newItemWithOrder.getMmsId(), newItemWithOrder.getItemId(), codes.get(fund)));
+                                    if (fund != null && fund.contains("-")) {
+                                        String fundCode = "etat" + fund.substring(0, fund.indexOf("-"));
+                                        if (fund.contains("RW"))
+                                            fundCode += "RW";
+                                        log.info(String.format("updating item price and statistics field for po line %s and fund %s", polineNumber, fund));
+                                        if (codes.containsKey(fundCode) && (item.getItemData().getStatisticsNote1() == null || item.getItemData().getStatisticsNote1().isEmpty())) {
+                                            item.getItemData().setStatisticsNote1(codes.get(fundCode));
+                                            itemUpdated = true;
+                                            log.debug(String.format("updated statistics note 1 for item with mms id %s and pid %s to %s",
+                                                    newItemWithOrder.getMmsId(), newItemWithOrder.getItemId(), codes.get(fund)));
+                                        }
                                     }
                                 }
 
