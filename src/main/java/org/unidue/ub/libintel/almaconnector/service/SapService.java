@@ -26,6 +26,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -310,6 +313,8 @@ public class SapService {
                             .withComment(invoiceLine.getPriceNote());
                     positionalNumber++;
 
+                    resetCommitmentDateForFirstDaysOfYear(sapData);
+
 
                     if ("EXCLUSIVE".equals(invoice.getInvoiceVat().getType().getValue())) {
                         double amount = fundDistribution.getAmount() * 100/ (100 + invoiceLine.getInvoiceLineVat().getPercentage());
@@ -402,6 +407,9 @@ public class SapService {
                             .withComment(invoiceLine.getNote());
                     positionalNumber++;
 
+                    resetCommitmentDateForFirstDaysOfYear(sapData);
+
+
 
                     if ("EXCLUSIVE".equals(invoice.getInvoiceVat().getType().getValue())) {
                         double amount = fundDistribution.getAmount() * 100/ (100 + invoiceLine.getInvoiceLineVat().getPercentage());
@@ -440,6 +448,20 @@ public class SapService {
             }
         }
         return sapDataList;
+    }
+
+    private static void resetCommitmentDateForFirstDaysOfYear(SapData sapData) {
+        LocalDate today = LocalDate.now();
+        LocalDate invoiceData = sapData.invoiceDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        if (today.getYear() == invoiceData.getYear())
+            return;
+        LocalDate commitmentDate = sapData.getCommitmentDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        if (commitmentDate.getMonth() == Month.JANUARY && commitmentDate.getDayOfMonth() > 15)
+            return;
+        commitmentDate = commitmentDate.minusDays(commitmentDate.getDayOfMonth() + 1);
+        sapData.setCommitmentDate(Date.from(commitmentDate.atStartOfDay()
+                .atZone(ZoneId.systemDefault())
+                .toInstant()));
     }
 
     /**
