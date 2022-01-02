@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.libintel.almaconnector.model.hook.*;
+import org.unidue.ub.libintel.almaconnector.model.run.SapDataRun;
 import org.unidue.ub.libintel.almaconnector.repository.*;
 
 @Service
@@ -23,18 +24,22 @@ public class RedisService {
 
     private final BibHookRepository bibHookRepository;
 
+    private final SapDataRunRepository sapDataRunRepository;
+
     public RedisService(JobHookRepository jobHookRepository,
                         ItemHookRepository itemHookRepository,
                         UserHookRepository userHookRepository,
                         LoanHookRepository loanHookRepository,
                         RequestHookRepository requestHookRepository,
-                        BibHookRepository bibHookRepository) {
+                        BibHookRepository bibHookRepository,
+                        SapDataRunRepository sapDataRunRepository) {
         this.jobHookRepository = jobHookRepository;
         this.itemHookRepository = itemHookRepository;
         this.bibHookRepository = bibHookRepository;
         this.loanHookRepository = loanHookRepository;
         this.requestHookRepository = requestHookRepository;
         this.userHookRepository = userHookRepository;
+        this.sapDataRunRepository = sapDataRunRepository;
     }
 
     public JobHook getJobHook(String id) {
@@ -140,5 +145,14 @@ public class RedisService {
 
     private String getPhantomId(String id) {
         return id + ":phantom";
+    }
+
+    public SapDataRun cache(SapDataRun almaExportRun) {
+        return this.sapDataRunRepository.save(almaExportRun);
+    }
+
+    public SapDataRun retrieveAlmaExportRun(String invoiceOwner, long counter) {
+        String id = String.format("%s-%s", invoiceOwner, counter);
+        return this.sapDataRunRepository.findById(id).orElse(new SapDataRun(invoiceOwner).withRunIndex(counter));
     }
 }

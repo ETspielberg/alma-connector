@@ -12,6 +12,7 @@ import org.unidue.ub.libintel.almaconnector.clients.alma.analytics.AlmaAnalytics
 import org.unidue.ub.libintel.almaconnector.model.analytics.InvoiceForPayment;
 import org.unidue.ub.libintel.almaconnector.model.analytics.InvoiceForPaymentReport;
 import org.unidue.ub.libintel.almaconnector.model.run.AlmaExportRun;
+import org.unidue.ub.libintel.almaconnector.model.run.SapDataRun;
 import org.unidue.ub.libintel.almaconnector.model.run.SapResponseRun;
 import org.unidue.ub.libintel.almaconnector.model.sap.AvailableInvoice;
 import org.unidue.ub.libintel.almaconnector.model.sap.SapAccountData;
@@ -19,6 +20,7 @@ import org.unidue.ub.libintel.almaconnector.model.sap.SapData;
 import org.unidue.ub.libintel.almaconnector.model.sap.SapResponse;
 import org.unidue.ub.libintel.almaconnector.repository.jpa.AlmaExportRunRepository;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaInvoiceService;
+import org.unidue.ub.libintel.almaconnector.service.alma.AlmaVendorService;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -29,6 +31,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -51,6 +54,10 @@ public class SapService {
 
     private final AlmaAnalyticsReportClient almaAnalyticsReportClient;
 
+    private final RedisService redisService;
+
+    private final AlmaVendorService vendorService;
+
     public static SimpleDateFormat dateformat = new SimpleDateFormat("yyyy-MM-dd");
 
     @Value("${sap.home.tax.keys}")
@@ -61,20 +68,23 @@ public class SapService {
     /**
      * constructor based autowiring of the Feign client
      *
-     * @param dataDir the data directory where the export files are stored in
-     * @param almaInvoiceService the Feign client for the Alma Invoice API
-     * @param almaExportRunRepository the repository holding the data for an individual export run
+     * @param dataDir                   the data directory where the export files are stored in
+     * @param almaInvoiceService        the Feign client for the Alma Invoice API
+     * @param almaExportRunRepository   the repository holding the data for an individual export run
      * @param almaAnalyticsReportClient the client to retrieve alma analytics reports
-     *
      */
     SapService(@Value("${ub.statistics.data.dir}") String dataDir,
                AlmaInvoiceService almaInvoiceService,
                AlmaExportRunRepository almaExportRunRepository,
-               AlmaAnalyticsReportClient almaAnalyticsReportClient) {
+               AlmaAnalyticsReportClient almaAnalyticsReportClient,
+               RedisService redisService,
+               AlmaVendorService almaVendorService) {
         this.file = dataDir + "/sapData/";
         this.almaInvoiceService = almaInvoiceService;
         this.almaExportRunRepository = almaExportRunRepository;
         this.almaAnalyticsReportClient = almaAnalyticsReportClient;
+        this.redisService = redisService;
+        this.vendorService = almaVendorService;
         File folder = new File(this.file);
         if (!folder.exists()) {
             if (!folder.mkdirs())
@@ -155,6 +165,7 @@ public class SapService {
 
     /**
      * uses a provided alma analytics report to retrieve the open invoices to be exported
+     *
      * @param almaExportRun the <class>AlmaExportRun</class> object holding the data about this export session
      * @return a list of invoices
      */
@@ -317,7 +328,7 @@ public class SapService {
 
 
                     if ("EXCLUSIVE".equals(invoice.getInvoiceVat().getType().getValue())) {
-                        double amount = fundDistribution.getAmount() * 100/ (100 + invoiceLine.getInvoiceLineVat().getPercentage());
+                        double amount = fundDistribution.getAmount() * 100 / (100 + invoiceLine.getInvoiceLineVat().getPercentage());
                         sapData.setInvoiceAmount(amount);
                     }
 
@@ -410,9 +421,8 @@ public class SapService {
                     resetCommitmentDateForFirstDaysOfYear(sapData);
 
 
-
                     if ("EXCLUSIVE".equals(invoice.getInvoiceVat().getType().getValue())) {
-                        double amount = fundDistribution.getAmount() * 100/ (100 + invoiceLine.getInvoiceLineVat().getPercentage());
+                        double amount = fundDistribution.getAmount() * 100 / (100 + invoiceLine.getInvoiceLineVat().getPercentage());
                         sapData.setInvoiceAmount(amount);
                     }
                     // read the VAT code from the data.
@@ -458,7 +468,11 @@ public class SapService {
         LocalDate commitmentDate = sapData.getCommitmentDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         if (commitmentDate.getMonth() == Month.JANUARY && commitmentDate.getDayOfMonth() > 15)
             return;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MM yyyy");
+        log.info("resetting commitment date.");
+        log.info("previous date: " + commitmentDate.format(formatter));
         commitmentDate = commitmentDate.minusDays(commitmentDate.getDayOfMonth() + 1);
+        log.info("new date: " + commitmentDate.format(formatter));
         sapData.setCommitmentDate(Date.from(commitmentDate.atStartOfDay()
                 .atZone(ZoneId.systemDefault())
                 .toInstant()));
@@ -689,6 +703,7 @@ public class SapService {
 
     /**
      * retrieves a list of invoices for a given export session
+     *
      * @param almaExportRun the <class>AlmaExportRun</class> object holding the data about this export session
      * @return the <class>AlmaExportRun</class> object holding the data about this export session and the retrieved invoices
      */
@@ -706,6 +721,43 @@ public class SapService {
         almaExportRun.setLastRun(new Date());
         this.almaExportRunRepository.save(almaExportRun);
         return almaExportRun;
+    }
+
+    /**
+     * retrieves a list of invoices for a given export session
+     *
+     * @param almaExportRun the <class>AlmaExportRun</class> object holding the data about this export session
+     * @return the <class>AlmaExportRun</class> object holding the data about this export session and the retrieved invoices
+     */
+    public SapDataRun getInvoices(SapDataRun almaExportRun) {
+        List<Invoice> invoices = almaInvoiceService.getOpenInvoices(almaExportRun.getInvoiceOwner());
+        log.info("retrieved " + invoices.size() + " invoices");
+        almaExportRun.setInvoices(invoices);
+        almaExportRun.setLastRun(new Date());
+        //this.almaExportRunRepository.save(almaExportRun);
+        return almaExportRun;
+    }
+
+    public void addInvoices(SapDataRun sapDataRun) {
+        sapDataRun = this.redisService.retrieveAlmaExportRun(sapDataRun.getInvoiceOwner(), sapDataRun.getRunIndex());
+        if (sapDataRun.getInvoices().size() == 0) {
+            sapDataRun = this.getInvoices(sapDataRun);
+            this.redisService.cache(sapDataRun);
+        }
+    }
+
+    public void addSapData(SapDataRun sapDataRun) {
+        for (Invoice invoice : sapDataRun.getInvoices()) {
+            Vendor vendor = this.vendorService.getVendorAccount(invoice.getVendor().getValue());
+            List<SapData> sapDataList = convertInvoiceToSapData(invoice, vendor);
+            log.debug(String.format("adding %d SAP data to the list", sapDataList.size()));
+            sapDataRun.addSapDataList(sapDataList, homeTaxKeys);
+            log.debug(String.format("run contains now %d entries: %d home and %d foreign",
+                    sapDataRun.getTotalSapData(),
+                    sapDataRun.getHomeSapData().size(),
+                    sapDataRun.getForeignSapData().size()));
+        }
+        sapDataRun.sortSapData();
     }
 
     private void addLineToFile(String filename, String line) throws IOException {
@@ -848,5 +900,49 @@ public class SapService {
         almaExportRun.setLastRun(new Date());
         this.almaExportRunRepository.save(almaExportRun);
         return almaExportRun;
+    }
+
+    public void addSingleInvoice(SapDataRun sapDataRun) {
+        sapDataRun.addInvoice(this.almaInvoiceService.retrieveInvoice(sapDataRun.getInvoiceOwner()));
+    }
+
+    public void writeExportFiles(SapDataRun sapDataRun) {
+        String dateString = dateformat.format(new Date());
+
+        String homeFilename = String.format("sap_%s_%s_%s.txt", "home", dateString, sapDataRun.getInvoiceOwner());
+        initializeSapFiles(homeFilename);
+        String foreignFilename = String.format("sap_%s_%s_%s.txt", "foreign", dateString, sapDataRun.getInvoiceOwner());
+        initializeSapFiles(foreignFilename);
+
+        for (SapData sapData : sapDataRun.getHomeSapData()) {
+            if (!sapData.isChecked)
+                continue;
+            try {
+                addLineToFile(homeFilename, generateComment(sapData).toCsv());
+            } catch (IOException ex) {
+                sapDataRun.increaseMissedSapData();
+                sapDataRun.addMissedSapData(sapData);
+                log.warn("could not write line: " + sapData.toFixedLengthLine());
+            }
+        }
+        for (SapData sapData : sapDataRun.getForeignSapData()) {
+            if (!sapData.isChecked)
+                continue;
+            try {
+                addLineToFile(foreignFilename, generateComment(sapData).toCsv());
+            } catch (IOException ex) {
+                sapDataRun.increaseMissedSapData();
+                sapDataRun.addMissedSapData(sapData);
+                log.warn("could not write line: " + sapData.toFixedLengthLine());
+            }
+        }
+    }
+
+    public SapDataRun addManualInvoices(List<AvailableInvoice> invoices) {
+        SapDataRun sapDataRun = new SapDataRun("manualInvoices");
+        for (AvailableInvoice availableInvoice: invoices) {
+            sapDataRun.addInvoice(this.almaInvoiceService.retrieveInvoice(availableInvoice.getInvoiceNumber()));
+        }
+        return sapDataRun;
     }
 }
