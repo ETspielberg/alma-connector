@@ -1,6 +1,7 @@
 package org.unidue.ub.libintel.almaconnector.model.run;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.keyvalue.annotation.KeySpace;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -8,10 +9,8 @@ import org.unidue.ub.alma.shared.acq.Invoice;
 import org.unidue.ub.libintel.almaconnector.model.sap.AvailableInvoice;
 import org.unidue.ub.libintel.almaconnector.model.sap.SapData;
 
-import javax.persistence.*;
 import java.util.*;
 
-import static org.unidue.ub.libintel.almaconnector.service.SapService.dateformat;
 
 /**
  * container object to hold all information about a download of the sap data from Alma
@@ -20,7 +19,7 @@ import static org.unidue.ub.libintel.almaconnector.service.SapService.dateformat
 @RedisHash(value = "sapdata", timeToLive = 36000)
 public class SapDataRun {
 
-    @Id
+    @org.springframework.data.annotation.Id
     private String identifier;
 
     private String invoiceOwner;
