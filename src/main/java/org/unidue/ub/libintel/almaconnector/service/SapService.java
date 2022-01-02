@@ -466,16 +466,17 @@ public class SapService {
         if (today.getYear() == invoiceData.getYear())
             return;
         LocalDate commitmentDate = sapData.getCommitmentDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        if (commitmentDate.getMonth() == Month.JANUARY && commitmentDate.getDayOfMonth() > 15)
-            return;
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MM yyyy");
-        log.info("resetting commitment date.");
-        log.info("previous date: " + commitmentDate.format(formatter));
-        commitmentDate = commitmentDate.minusDays(commitmentDate.getDayOfMonth() + 1);
-        log.info("new date: " + commitmentDate.format(formatter));
-        sapData.setCommitmentDate(Date.from(commitmentDate.atStartOfDay()
-                .atZone(ZoneId.systemDefault())
-                .toInstant()));
+        if (commitmentDate.getMonth() == Month.JANUARY && commitmentDate.getDayOfMonth() < 15) {
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MM yyyy");
+            log.info("resetting commitment date.");
+            log.info("previous date: " + commitmentDate.format(formatter));
+            commitmentDate = commitmentDate.minusDays(commitmentDate.getDayOfMonth() + 1);
+            log.info("new date: " + commitmentDate.format(formatter));
+            sapData.setCommitmentDate(Date.from(commitmentDate.atStartOfDay()
+                    .atZone(ZoneId.systemDefault())
+                    .toInstant()));
+        }
     }
 
     /**
