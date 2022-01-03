@@ -42,6 +42,8 @@ public class ScheduledService {
 
     private final MappingTables mappingTables;
 
+    private final SaveDataService saveDataService;
+
     @Value("${libintel.profile:dev}")
     private String profile;
 
@@ -67,7 +69,8 @@ public class ScheduledService {
                      AlmaJobsService almaJobsService,
                      AlmaUserService almaUserService,
                      AlmaCatalogService almaCatalogService,
-                     AlmaSetService almaSetService) {
+                     AlmaSetService almaSetService,
+                     SaveDataService saveDataService) {
         this.almaAnalyticsReportClient = almaAnalyticsReportClient;
         this.mappingTables = mappingTables;
         this.almaItemService = almaItemService;
@@ -76,6 +79,7 @@ public class ScheduledService {
         this.almaUserService = almaUserService;
         this.almaCatalogService = almaCatalogService;
         this.almaSetService = almaSetService;
+        this.saveDataService = saveDataService;
     }
 
     /**
@@ -300,5 +304,13 @@ public class ScheduledService {
             }
         }
         allRequestData.forEach((key, entry) -> log.info(entry.toString()));
+    }
+
+    /**
+     * retrieves the fine fees from the corresponding analytics report and saves them to the database
+     */
+    @Scheduled(cron = "0 0 9 * * *")
+    public void saveFineFees() {
+        this.saveDataService.saveDailyUserFineFees();
     }
 }

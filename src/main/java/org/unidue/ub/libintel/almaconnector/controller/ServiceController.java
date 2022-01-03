@@ -4,13 +4,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.unidue.ub.alma.shared.user.AlmaUser;
 import org.unidue.ub.libintel.almaconnector.service.RegalfinderService;
+import org.unidue.ub.libintel.almaconnector.service.SaveDataService;
 import org.unidue.ub.libintel.almaconnector.service.ScheduledService;
-import org.unidue.ub.libintel.almaconnector.service.alma.AlmaSetService;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaUserService;
 
 import java.io.IOException;
@@ -19,22 +17,23 @@ import java.io.IOException;
 @RequestMapping("/services")
 public class ServiceController {
 
-    private final AlmaSetService almaSetService;
-
     private final AlmaUserService almaUserService;
 
     private final ScheduledService scheduledService;
 
     private final RegalfinderService regalfinderService;
 
-    ServiceController(AlmaSetService almaSetService,
-                      AlmaUserService almaUserService,
+    private final SaveDataService saveDataService;
+
+    ServiceController(AlmaUserService almaUserService,
                       ScheduledService scheduledService,
-                      RegalfinderService regalfinderService) {
-        this.almaSetService = almaSetService;
+                      RegalfinderService regalfinderService,
+                      SaveDataService saveDataService) {
         this.almaUserService = almaUserService;
         this.scheduledService = scheduledService;
         this.regalfinderService = regalfinderService;
+        this.saveDataService = saveDataService;
+
     }
 
     @GetMapping("/scan")
@@ -69,6 +68,18 @@ public class ServiceController {
     @GetMapping("/usersToEnd")
     private String updateUsersToEnd(){
         this.scheduledService.runEndingUserNotificationJob();
+        return "services/finished";
+    }
+
+    @GetMapping("/saveDailyUserFineFees")
+    public String saveDailyUserFineFees() {
+        this.saveDataService.saveDailyUserFineFees();
+        return "services/finished";
+    }
+
+    @GetMapping("/saveInitialUserFineFees")
+    public String saveInitialUserFineFees() {
+        this.saveDataService.saveInitialUserFineFees();
         return "services/finished";
     }
 
