@@ -467,7 +467,6 @@ public class SapService {
             return;
         LocalDate commitmentDate = sapData.getCommitmentDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         if (commitmentDate.getMonth() == Month.JANUARY && commitmentDate.getDayOfMonth() < 15) {
-
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MM yyyy");
             log.info("resetting commitment date.");
             log.info("previous date: " + commitmentDate.format(formatter));

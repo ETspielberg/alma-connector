@@ -1,14 +1,23 @@
 package org.unidue.ub.libintel.almaconnector.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import org.unidue.ub.libintel.almaconnector.model.run.SapDataRun;
+import org.unidue.ub.libintel.almaconnector.model.run.SapResponseRun;
 import org.unidue.ub.libintel.almaconnector.model.sap.AvailableInvoice;
 import org.unidue.ub.libintel.almaconnector.service.SapService;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaInvoiceService;
 
+import java.io.IOException;
 import java.util.List;
+
+import static org.unidue.ub.libintel.almaconnector.service.SapService.getFromExcel;
 
 @RestController
 @RequestMapping("/sap/api/v1/")
@@ -73,4 +82,25 @@ public class SapRestController {
         this.sapService.addSapData(sapDataRun);
         return ResponseEntity.ok(sapDataRun);
     }
+
+    /**
+     * receives the sap import result as xlsx file and updates the invoices in alma correspondingly
+     * @param sapReturnFile the result xlsx file resulting from the SAP import
+     * @return returns a status of 200 if the import was successful
+     */
+    @PostMapping("/invoicesUpdate")
+    public ResponseEntity<SapResponseRun> updateInvoicesWithSapData(@RequestParam("file") MultipartFile sapReturnFile) {
+        try {// read the excel spreadsheet from the request
+            XSSFWorkbook workbook = new XSSFWorkbook(sapReturnFile.getInputStream());
+            // retrieve first sheet
+            XSSFSheet worksheet = workbook.getSheetAt(0);
+            //convert the excel sheet to a SapResponseRun holding the individual responses
+            SapResponseRun container = getFromExcel(worksheet, sapReturnFile.getOriginalFilename());
+            return ResponseEntity.ok(this.sapService.updateInvoiceWithErpData(container));
+        } catch (IOException ioe) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Excel file could not be read from request", ioe);
+        }
+    }
+
+
 }
