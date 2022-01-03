@@ -7,7 +7,7 @@ import org.unidue.ub.libintel.almaconnector.model.bubi.entities.CoreData;
 import java.util.List;
 
 @Repository
-public interface CoreDataRepository  extends CrudRepository<CoreData, String> {
+public interface CoreDataRepository extends CrudRepository<CoreData, String> {
 
     CoreData findAllByCollectionAndShelfmark(String collection, String shelfmark);
 
