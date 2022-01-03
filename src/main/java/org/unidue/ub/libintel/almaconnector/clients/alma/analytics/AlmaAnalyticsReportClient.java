@@ -1,8 +1,8 @@
 package org.unidue.ub.libintel.almaconnector.clients.alma.analytics;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -23,9 +23,8 @@ import java.io.*;
  * @version 1.0
  */
 @Service
+@Slf4j
 public class AlmaAnalyticsReportClient {
-
-    private final static Logger log = LoggerFactory.getLogger(AlmaAnalyticsReportClient.class);
 
     @Value("${alma.prod.api.key:1234}")
     private String almaAcqApiKey;
@@ -54,6 +53,23 @@ public class AlmaAnalyticsReportClient {
         String transformed = transformXmlDocument(response, xslFile);
         log.debug("converted response into string: " + transformed);
         XmlMapper xmlMapper = new XmlMapper();
+        xmlMapper.registerModule(new JavaTimeModule());
+        return xmlMapper.readValue(transformed, clazz);
+    }
+
+    public <T> T getLongReport(String reportPath, Class<T> clazz, String resumptionToken) throws IOException {
+        String url = String.format(urlTemplate, reportPath, almaAcqApiKey, 500);
+        if (!resumptionToken.isEmpty())
+            url += "&token=" + resumptionToken;
+        RestTemplate restTemplate = new RestTemplate();
+        String response = restTemplate.getForObject(url, String.class);
+        log.debug("queried alma api with response: " + response);
+        // XSL file written by Frank Lützenkirchen
+        InputStream xslFile = new ClassPathResource("/xslt/analyticsLong2xml.xsl").getInputStream();
+        String transformed = transformXmlDocument(response, xslFile);
+        log.debug("converted response into string: " + transformed);
+        XmlMapper xmlMapper = new XmlMapper();
+        xmlMapper.registerModule(new JavaTimeModule());
         return xmlMapper.readValue(transformed, clazz);
     }
 
