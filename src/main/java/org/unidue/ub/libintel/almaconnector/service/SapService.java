@@ -466,7 +466,7 @@ public class SapService {
         if (today.getYear() == invoiceData.getYear())
             return;
         LocalDate commitmentDate = sapData.getCommitmentDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        if (commitmentDate.getMonth() == Month.JANUARY && commitmentDate.getDayOfMonth() < 15) {
+        if (commitmentDate.getMonth() == Month.JANUARY) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MM yyyy");
             log.info("resetting commitment date.");
             log.info("previous date: " + commitmentDate.format(formatter));
@@ -738,15 +738,18 @@ public class SapService {
         return almaExportRun;
     }
 
-    public void addInvoices(SapDataRun sapDataRun) {
+    public SapDataRun addInvoices(SapDataRun sapDataRun) {
         sapDataRun = this.redisService.retrieveAlmaExportRun(sapDataRun.getInvoiceOwner(), sapDataRun.getRunIndex());
+        log.debug(String.format("retrieved sap data run from redis cache with %d invoices", sapDataRun.getInvoices().size()));
         if (sapDataRun.getInvoices().size() == 0) {
+            log.debug("found no invoices in cached sap data run. reloading invoices from alma");
             sapDataRun = this.getInvoices(sapDataRun);
             this.redisService.cache(sapDataRun);
         }
+        return sapDataRun;
     }
 
-    public void addSapData(SapDataRun sapDataRun) {
+    public SapDataRun addSapData(SapDataRun sapDataRun) {
         for (Invoice invoice : sapDataRun.getInvoices()) {
             Vendor vendor = this.vendorService.getVendorAccount(invoice.getVendor().getValue());
             List<SapData> sapDataList = convertInvoiceToSapData(invoice, vendor);
@@ -758,6 +761,7 @@ public class SapService {
                     sapDataRun.getForeignSapData().size()));
         }
         sapDataRun.sortSapData();
+        return sapDataRun;
     }
 
     private void addLineToFile(String filename, String line) throws IOException {
@@ -874,6 +878,10 @@ public class SapService {
                         sapData.comment = "Aufwendungen f. Veroeffentlichungen";
                         break;
                     }
+                    case "68900100 ": {
+                        sapData.comment = "Aufwendungen f. Veroeffentlichungen";
+                        break;
+                    }
                     default:
                         sapData.comment = "";
                 }
@@ -940,7 +948,7 @@ public class SapService {
 
     public SapDataRun addManualInvoices(List<AvailableInvoice> invoices) {
         SapDataRun sapDataRun = new SapDataRun("manualInvoices");
-        for (AvailableInvoice availableInvoice: invoices) {
+        for (AvailableInvoice availableInvoice : invoices) {
             sapDataRun.addInvoice(this.almaInvoiceService.retrieveInvoice(availableInvoice.getInvoiceNumber()));
         }
         return sapDataRun;
