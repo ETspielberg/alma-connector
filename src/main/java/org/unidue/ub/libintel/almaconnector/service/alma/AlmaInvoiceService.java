@@ -47,7 +47,7 @@ public class AlmaInvoiceService {
         int offset = 0;
 
         // retrieve first list of invocies.
-        Invoices invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "Waiting to be Sent", owner, "", "", batchSize, offset, "");
+        Invoices invoices = this.almaInvoicesApiClient.getInvoices("ACTIVE", "Waiting to be Sent", owner, "", "", batchSize, offset, "");
         List<Invoice> invoiceList = new ArrayList<>(invoices.getInvoice());
 
         log.debug("retrieving " + invoices.getTotalRecordCount() + " invoices");
@@ -56,7 +56,7 @@ public class AlmaInvoiceService {
         while (offset < invoices.getTotalRecordCount() && offset + batchSize < 256) {
             offset += batchSize;
             log.debug("collecting invoices from " + offset + " to " + (offset + batchSize));
-            invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "Waiting to be Sent", owner, "", "", batchSize, offset, "");
+            invoices = this.almaInvoicesApiClient.getInvoices("ACTIVE", "Waiting to be Sent", owner, "", "", batchSize, offset, "");
             invoiceList.addAll(invoices.getInvoice());
         }
         log.debug(String.format("retrieved list of %d invoices", invoiceList.size()));
@@ -72,7 +72,7 @@ public class AlmaInvoiceService {
         // retrieve first list of invocies.
         for (AvailableInvoice availableInvoice: availableInvoices)
             if (availableInvoice.getIsChecked())
-                invoices.addAll(this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "Waiting to be Sent", "", "", "invoice_number~"+availableInvoice.getInvoiceNumber(), batchSize, offset, "").getInvoice());
+                invoices.addAll(this.almaInvoicesApiClient.getInvoices("ACTIVE", "Waiting to be Sent", "", "", "invoice_number~"+availableInvoice.getInvoiceNumber(), batchSize, offset, "").getInvoice());
         return invoices;
     }
 
@@ -104,7 +104,7 @@ public class AlmaInvoiceService {
      * @return the saved invoice
      */
     public Invoice updateInvoice(Invoice invoice) {
-        return this.almaInvoicesApiClient.putInvoicesInvoiceId(invoice, "application/json", invoice.getId());
+        return this.almaInvoicesApiClient.putInvoicesInvoiceId(invoice, invoice.getId());
     }
 
     /**
@@ -114,7 +114,7 @@ public class AlmaInvoiceService {
      * @return the invoice
      */
     public Invoice retrieveInvoice(String invoiceNumber) {
-        return this.almaInvoicesApiClient.getInvoicesInvoiceId("application/json", invoiceNumber, "full");
+        return this.almaInvoicesApiClient.getInvoicesInvoiceId(invoiceNumber, "full");
     }
 
     /**
@@ -125,7 +125,7 @@ public class AlmaInvoiceService {
      */
     public Invoices getInvoicesForInvocieId(String invoiceNumber) {
         String searchQuery = "invoice_number~" + invoiceNumber;
-        Invoices invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE",
+        Invoices invoices = this.almaInvoicesApiClient.getInvoices("ACTIVE",
                 "Waiting to be Sent", "", "", searchQuery, 20, 0, "");
 
         log.debug(String.format("found %d invoices for invoice number %s", invoices.getTotalRecordCount(), invoiceNumber));
@@ -140,7 +140,7 @@ public class AlmaInvoiceService {
      */
     public void addPartialPayment(Invoice invoice, Payment payment) {
         InvoiceUpdate invoiceUpdate = new InvoiceUpdate(payment);
-        this.almaInvoicesApiClient.postInvoicesInvoiceIdToUpdate(invoiceUpdate, "application/json", invoice.getId(), "paid");
+        this.almaInvoicesApiClient.postInvoicesInvoiceIdToUpdate(invoiceUpdate, invoice.getId(), "paid");
     }
 
     /**
@@ -152,7 +152,7 @@ public class AlmaInvoiceService {
     public void addFullPayment(Invoice invoice, Payment payment) {
         payment.setPaymentStatus(new PaymentPaymentStatus().value("PAID").desc("bezahlt"));
         InvoiceUpdate invoiceUpdate = new InvoiceUpdate(payment);
-        this.almaInvoicesApiClient.postInvoicesInvoiceIdToUpdate(invoiceUpdate, "application/json", invoice.getId(), "paid");
+        this.almaInvoicesApiClient.postInvoicesInvoiceIdToUpdate(invoiceUpdate,  invoice.getId(), "paid");
     }
 
     /**
@@ -162,7 +162,7 @@ public class AlmaInvoiceService {
      * @param invoiceLine the invoice line to be added
      */
     public void addInvoiceLine(String id, InvoiceLine invoiceLine) {
-        this.almaInvoicesApiClient.postInvoicesInvoiceIdLines(invoiceLine, "application/json", id);
+        this.almaInvoicesApiClient.postInvoicesInvoiceIdLines(invoiceLine, id);
     }
 
     /**
@@ -171,7 +171,7 @@ public class AlmaInvoiceService {
      * @param id the id of the invoice to be processed
      */
     public void processInvoice(String id) {
-        this.almaInvoicesApiClient.postInvoicesInvoiceId(new Invoice(), "application/json", id, "process_invoice");
+        this.almaInvoicesApiClient.postInvoicesInvoiceId(new Invoice(),  id, "process_invoice");
     }
 
     /**
@@ -309,8 +309,7 @@ public class AlmaInvoiceService {
     public List<Invoice> getEdiInvoices(String vendorId) {
         int limit = 100;
         int offset = 0;
-        Invoices inovices = this.almaInvoicesApiClient.getInvoices("application/json",
-                "ACTIVE",
+        Invoices inovices = this.almaInvoicesApiClient.getInvoices("ACTIVE",
                 "InReview",
                 "", "EDI",
                 "vendor_code~" + vendorId,
@@ -320,8 +319,7 @@ public class AlmaInvoiceService {
         List<Invoice> allInvoices = new ArrayList<>(inovices.getInvoice());
         while (allInvoices.size() < inovices.getTotalRecordCount()) {
             offset += limit;
-            Invoices additionalInovices = this.almaInvoicesApiClient.getInvoices("application/json",
-                    "ACTIVE",
+            Invoices additionalInovices = this.almaInvoicesApiClient.getInvoices("ACTIVE",
                     "InReview",
                     "", "EDI",
                     "vendor_code~" + vendorId,
@@ -336,7 +334,7 @@ public class AlmaInvoiceService {
     public void updateEdiInvoices(String vendorId) {
         List<Invoice> invoices = this.getEdiInvoices(vendorId);
         for (Invoice invoice : invoices) {
-            invoice = this.almaInvoicesApiClient.getInvoicesInvoiceId("application/json", invoice.getId(), "");
+            invoice = this.almaInvoicesApiClient.getInvoicesInvoiceId(invoice.getId(), "");
             String vatCode = calculateVatCode(invoice);
             double vatAmount = invoice.getInvoiceVat().getVatAmount();
 
@@ -367,7 +365,7 @@ public class AlmaInvoiceService {
     }
 
     private void updateInvoiceLine(String invoiceId, InvoiceLine invoiceLine) {
-        this.almaInvoicesApiClient.putInvoicesInvoiceIdLinesInvoiceLineId(invoiceLine, "application/json", invoiceId, invoiceLine.getId());
+        this.almaInvoicesApiClient.putInvoicesInvoiceIdLinesInvoiceLineId(invoiceLine, invoiceId, invoiceLine.getId());
     }
 
     public List<AvailableInvoice> getAvailableInvoices(String invoiceOwner) {
@@ -376,14 +374,14 @@ public class AlmaInvoiceService {
         int offset = 0;
 
         // retrieve first list of invocies.
-        Invoices invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "Waiting to be Sent", invoiceOwner, "", "", batchSize, offset, "brief");
+        Invoices invoices = this.almaInvoicesApiClient.getInvoices("ACTIVE", "Waiting to be Sent", invoiceOwner, "", "", batchSize, offset, "brief");
         List<Invoice> invoiceList = new ArrayList<>(invoices.getInvoice());
 
         // as long as not all data are being collected, collect further
         while (offset < invoices.getTotalRecordCount() && offset + batchSize < 256) {
             offset += batchSize;
             log.debug("collecting invoices from " + offset + " to " + (offset + batchSize));
-            invoices = this.almaInvoicesApiClient.getInvoices("application/json", "ACTIVE", "Waiting to be Sent", invoiceOwner, "", "", batchSize, offset, "");
+            invoices = this.almaInvoicesApiClient.getInvoices("ACTIVE", "Waiting to be Sent", invoiceOwner, "", "", batchSize, offset, "");
             invoiceList.addAll(invoices.getInvoice());
         }
         log.debug(String.format("retrieved list of %d invoices", invoiceList.size()));
@@ -391,5 +389,14 @@ public class AlmaInvoiceService {
         for (Invoice invoice: invoiceList)
             availableInvoices.add(new AvailableInvoice(invoice));
         return availableInvoices;
+    }
+
+    public Invoice retrieveInvoiceByInvoiceNumber(String invoiceNumber) {
+        Invoices invoices = this.almaInvoicesApiClient.getInvoices("", "", "", "", "invoice_number~" + invoiceNumber, 25, 0, "full");
+        for (Invoice invoice: invoices.getInvoice()) {
+            if (invoice.getNumber().equals(invoiceNumber))
+                return invoice;
+        }
+        return null;
     }
 }

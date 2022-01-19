@@ -35,10 +35,10 @@ public class AlmaVendorService {
      * @return a vendor object
      */
     @Cacheable("vendors")
-    @Secured({ "ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Invoice Operator Extended" })
+    @Secured({ "ROLE_SYSTEM", "ROLE_SAP", "ROLE_ALMA_Invoice Operator Extended"})
     public Vendor getVendorAccount(String vendorAccountCode) {
         try {
-            Vendor vendor = this.almaVendorApiClient.getVendorsVendorCode("application/json", vendorAccountCode);
+            Vendor vendor = this.almaVendorApiClient.getVendorsVendorCode(vendorAccountCode);
             log.debug("retrieved vendor " + vendor.getCode());
             return vendor;
         } catch (FeignException fe) {

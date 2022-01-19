@@ -43,13 +43,13 @@ public class AlmaPoLineService {
         int offset = 0;
 
         // retrieve first list of po-lines.
-        PoLines poLines = this.almaPoLinesApiClient.getPoLines("application/json", "", "ACTIVE", batchSize, offset, "", "", "", "", "", "", "");
+        PoLines poLines = this.almaPoLinesApiClient.getPoLines("", "ACTIVE", batchSize, offset, "", "", "", "", "", "", "");
         List<PoLine> poLineList = new ArrayList<>(poLines.getPoLine());
 
         // as long as not all data are being collected, collect further
         while (poLineList.size() < poLines.getTotalRecordCount()) {
             offset += batchSize;
-            poLines = this.almaPoLinesApiClient.getPoLines("application/json", "", "ACTIVE", batchSize, offset, "", "", "", "", "", "", "");
+            poLines = this.almaPoLinesApiClient.getPoLines("", "ACTIVE", batchSize, offset, "", "", "", "", "", "", "");
             poLineList.addAll(poLines.getPoLine());
         }
         return poLineList;
@@ -60,7 +60,7 @@ public class AlmaPoLineService {
      * @return a list of po-lines
      */
     public PoLine savePoLine(PoLine poLine) {
-        return this.almaPoLinesApiClient.postAcqPoLines(poLine, "application/json", "");
+        return this.almaPoLinesApiClient.postAcqPoLines(poLine, "");
     }
 
     /**
@@ -69,7 +69,7 @@ public class AlmaPoLineService {
      * @return the updated po line
      */
     public PoLine updatePoLine(PoLine poLine) {
-        return this.almaPoLinesApiClient.putPoLinesPoLineId(poLine, "application/json", poLine.getNumber(),"false");
+        return this.almaPoLinesApiClient.putPoLinesPoLineId(poLine, poLine.getNumber(),"false");
     }
 
     /**
@@ -78,7 +78,7 @@ public class AlmaPoLineService {
      * @return the po line
      */
     public PoLine getPoLine(String poLineId) {
-        return this.almaPoLinesApiClient.getPoLinesPoLineId("application/json", poLineId);
+        return this.almaPoLinesApiClient.getPoLinesPoLineId(poLineId);
     }
 
     /**
@@ -131,7 +131,7 @@ public class AlmaPoLineService {
                 .vendor(new PoLineVendor().value(bubiOrderLine.getVendorAccount()))
                 .vendorAccount(bubiOrderLine.getVendorAccount())
                 .fundDistribution(fundList);
-        return this.almaPoLinesApiClient.postAcqPoLines(poLine, "application/json", "");
+        return this.almaPoLinesApiClient.postAcqPoLines(poLine, "");
    }
 
     /**
@@ -139,10 +139,13 @@ public class AlmaPoLineService {
      * @param bubiOrderLine the bubi order line corresponding to a given po line
      */
     public void updatePoLineByBubiOrderLine(BubiOrderLine bubiOrderLine) {
-        PoLine poLine = this.almaPoLinesApiClient.getPoLinesPoLineId("application/json", bubiOrderLine.getAlmaPoLineId());
+        PoLine poLine = this.almaPoLinesApiClient.getPoLinesPoLineId(bubiOrderLine.getAlmaPoLineId());
         Amount amount = new Amount().sum(String.valueOf(bubiOrderLine.getPrice()))
                 .currency(new AmountCurrency().value("EUR"));
         poLine.getFundDistribution().get(0).setAmount(amount);
-        this.almaPoLinesApiClient.putPoLinesPoLineId(poLine, "application/json", bubiOrderLine.getAlmaPoLineId(), "false");
+        this.almaPoLinesApiClient.putPoLinesPoLineId(poLine, bubiOrderLine.getAlmaPoLineId(), "false");
+    }
+
+    public void addNote(String orderNumber, String note) {
     }
 }

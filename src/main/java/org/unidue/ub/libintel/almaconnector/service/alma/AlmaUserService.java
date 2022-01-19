@@ -40,11 +40,11 @@ public class AlmaUserService {
      * @return the <class>AlmaUser</class>> object
      */
     public AlmaUser getUser(String userId) {
-        return this.almaUserApiClient.getAlmaUser("application/json", userId, "full");
+        return this.almaUserApiClient.getAlmaUser(userId, "full");
     }
 
     public AlmaUser updateUser(AlmaUser almaUser) {
-        return this.almaUserApiClient.putAlmaUsersUserId(almaUser, "application/json", almaUser.getPrimaryId(),"", "", "" );
+        return this.almaUserApiClient.putAlmaUsersUserId(almaUser, almaUser.getPrimaryId(),"", "", "" );
     }
 
     public void setExpireyNote(List<String> ids) {

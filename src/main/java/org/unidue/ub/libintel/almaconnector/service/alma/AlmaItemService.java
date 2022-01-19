@@ -4,9 +4,7 @@ import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.bibs.Item;
-import org.unidue.ub.libintel.almaconnector.clients.alma.acquisition.AlmaItemsApiClient;
 import org.unidue.ub.libintel.almaconnector.clients.alma.bib.AlmaCatalogApiClient;
-import org.unidue.ub.libintel.almaconnector.service.BlockedIdService;
 
 /**
  * offers functions around items in Alma
@@ -19,24 +17,16 @@ import org.unidue.ub.libintel.almaconnector.service.BlockedIdService;
 @Slf4j
 public class AlmaItemService {
 
-    private final AlmaItemsApiClient almaItemsApiClient;
-
     private final AlmaCatalogApiClient almaCatalogApiClient;
 
-    private final BlockedIdService blockedIdService;
 
     /**
      * constructor based autowiring to the alma items api feign client and the alma bib api feign client
      *
-     * @param almaItemsApiClient   the alma item api feign client
      * @param almaCatalogApiClient the alma bib api feign client
      */
-    public AlmaItemService(AlmaItemsApiClient almaItemsApiClient,
-                           AlmaCatalogApiClient almaCatalogApiClient,
-                           BlockedIdService blockedIdService) {
-        this.almaItemsApiClient = almaItemsApiClient;
+    public AlmaItemService(AlmaCatalogApiClient almaCatalogApiClient) {
         this.almaCatalogApiClient = almaCatalogApiClient;
-        this.blockedIdService = blockedIdService;
     }
 
     /**
@@ -46,7 +36,7 @@ public class AlmaItemService {
      * @return the item
      */
     public Item findItemByBarcode(String barcode) {
-        return this.almaItemsApiClient.getItemByBarcode("application/json", barcode, "");
+        return this.almaCatalogApiClient.getItemByBarcode("application/json", barcode, "");
     }
 
     /**
@@ -146,7 +136,6 @@ public class AlmaItemService {
         String mmsId = item.getBibData().getMmsId();
         String holdingId = item.getHoldingData().getHoldingId();
         String itemPid = item.getItemData().getPid();
-        this.blockedIdService.blockId(item.getItemData().getPid());
         log.debug(String.format("updating item MMS-ID, Holding-ID, Item-ID | %s | %s | %s", mmsId, holdingId, itemPid));
         return this.almaCatalogApiClient.putBibsMmsIdHoldingsHoldingIdItemsItemPid(mmsId, holdingId, itemPid, item);
     }

@@ -65,12 +65,12 @@ public class AlmaJobsService {
     public void updateJobsList() {
         int limit = 100;
         int offset = 0;
-        Jobs jobs = this.almaJobsApiClient.getAlmawsV1ConfJobs("application/json", limit, offset, "", "", "");
+        Jobs jobs = this.almaJobsApiClient.getAlmawsV1ConfJobs(limit, offset, "", "", "");
         List<Job> allJobs = new ArrayList<>(jobs.getJob());
         int totalNumberOfJobs = jobs.getTotalRecordCount();
         while (allJobs.size() < totalNumberOfJobs) {
             offset += limit;
-            Jobs jobsInd = this.almaJobsApiClient.getAlmawsV1ConfJobs("application/json", limit, offset, "", "", "");
+            Jobs jobsInd = this.almaJobsApiClient.getAlmawsV1ConfJobs(limit, offset, "", "", "");
             allJobs.addAll(jobsInd.getJob());
         }
         if (allJobs.size() > 0) {
