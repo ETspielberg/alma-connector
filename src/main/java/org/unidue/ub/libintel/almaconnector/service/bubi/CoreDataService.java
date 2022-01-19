@@ -137,17 +137,17 @@ public class CoreDataService {
             coreData.setPositionYear(getValue(8, row));
             coreData.setPositionVolume(getValue(9, row));
             coreData.setPositionPart(getValue(10, row));
-            coreData.setPositionDescription(getValue(11, row));
+            coreData.setMintingTemplate(getValue(11, row));
             coreData.setComment(getValue(12, row));
             coreData.setBindingsFollow(getValue(13, row));
             coreData.setVendorAccount(getValue(14, row));
-            coreData.setInternalNote(getValue(15, row));
+            coreData.setLabelTemplate(getValue(15, row));
             coreData.setBubiNote(getValue(16, row));
             coreData.setActive(getBoolValue(17, row));
             coreData.setFund(getValue(18, row));
             coreData.setCoverBack(getBoolValue(19, row));
             coreData.setWithoutRemoval(getBoolValue(20, row));
-            coreData.setPositionDescription(getValue(21, row));
+            coreData.setMintingTemplate(getValue(21, row));
             coreDataImportRun.addCoreData(coreData);
             if (coreData.isActive()) {
                 AlmaItemData almaItemData = new AlmaItemData(coreData.getCollection(), coreData.getShelfmark());

@@ -56,6 +56,10 @@ public class BubiOrderLineFullDto {
 
     private String bindingsFollow;
 
+    private String labelTemplate;
+
+    private String mintingTemplate;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date created;
@@ -146,6 +150,8 @@ public class BubiOrderLineFullDto {
         this.priceCorrection = bubiOrderLine.getPriceCorrection();
         this.priceCorrectionComment = bubiOrderLine.getPriceCorrectionComment();
         this.preserveFrontPages = bubiOrderLine.getPreserveFrontPages();
+        this.labelTemplate = bubiOrderLine.getLabelTemplate();
+        this.mintingTemplate = bubiOrderLine.getMintingTemplate();
     }
 
     public void updateBubiOrderLine(BubiOrderLine bubiOrderLine) {
@@ -179,5 +185,7 @@ public class BubiOrderLineFullDto {
         bubiOrderLine.setPriceCorrection(this.priceCorrection);
         bubiOrderLine.setPriceCorrectionComment(this.priceCorrectionComment);
         bubiOrderLine.setPreserveFrontPages(this.preserveFrontPages);
+        bubiOrderLine.setLabelTemplate(this.labelTemplate);
+        bubiOrderLine.setMintingTemplate(this.mintingTemplate);
     }
 }

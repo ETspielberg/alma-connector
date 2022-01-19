@@ -28,7 +28,7 @@ public class CoreDataFullDto {
 
     private String positionPart;
 
-    private String positionDescription;
+    private String mintingTemplate;
 
     private String cover;
 
@@ -68,7 +68,7 @@ public class CoreDataFullDto {
 
     private double hours = 0;
 
-    private String internalNote = "";
+    private String labelTemplate = "";
 
     private String bubiNote = "";
 
@@ -100,13 +100,13 @@ public class CoreDataFullDto {
         this.coverBack = coreData.getCoverBack();
         this.withouRemoval = coreData.getWithoutRemoval();
         this.hours = coreData.getHours();
-        this.internalNote = coreData.getInternalNote();
+        this.labelTemplate = coreData.getLabelTemplate();
         this.bubiNote = coreData.getBubiNote();
         this.fund = coreData.getFund();
         this.positionVolume = coreData.getPositionVolume();
         this.positionYear = coreData.getPositionYear();
         this.positionPart = coreData.getPositionPart();
-        this.positionDescription = coreData.getPositionDescription();
+        this.mintingTemplate = coreData.getMintingTemplate();
     }
 
     public CoreData updateCoreData(CoreData coreData) {
@@ -134,9 +134,9 @@ public class CoreDataFullDto {
         coreData.setCoverBack(this.coverBack);
         coreData.setHours(this.hours);
         coreData.setBubiNote(this.bubiNote);
-        coreData.setInternalNote(this.internalNote);
+        coreData.setLabelTemplate(this.labelTemplate);
         coreData.setFund(this.fund);
-        coreData.setPositionDescription(this.positionDescription);
+        coreData.setMintingTemplate(this.mintingTemplate);
         coreData.setPositionVolume(this.positionVolume);
         coreData.setPositionPart(this.positionPart);
         coreData.setPositionYear(this.positionYear);

@@ -142,6 +142,12 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
     @Column(name = "new_sample_board_needed")
     private boolean newSampleBoardNeeded = false;
 
+    @Column(name = "minting_template")
+    private String mintingTemplate;
+
+    @Column(name = "label_template")
+    private String labelTemplate;
+
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "bubiOrderLine")
     private Set<BubiOrderlinePosition> bubiOrderlinePositions;
 
@@ -197,7 +203,7 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
     public void addPositionFromCoredata(CoreData coredata) {
         BubiOrderlinePosition bubiOrderlinePosition = new BubiOrderlinePosition()
                 .withVolume(coredata.getPositionVolume())
-                .withDescription(coredata.getPositionDescription())
+                .withDescription(coredata.getMintingTemplate())
                 .withPart(coredata.getPositionPart())
                 .withYear(coredata.getPositionYear())
                 .withMmsId(coredata.getAlmaMmsId())
@@ -537,6 +543,22 @@ public class BubiOrderLine implements Cloneable, Comparable<BubiOrderLine> {
 
     public void setPreserveFrontPages(boolean preserveFrontPages) {
         this.preserveFrontPages = preserveFrontPages;
+    }
+
+    public String getMintingTemplate() {
+        return mintingTemplate;
+    }
+
+    public void setMintingTemplate(String mintingTemplate) {
+        this.mintingTemplate = mintingTemplate;
+    }
+
+    public String getLabelTemplate() {
+        return labelTemplate;
+    }
+
+    public void setLabelTemplate(String labelTemplate) {
+        this.labelTemplate = labelTemplate;
     }
 
     @Override
