@@ -1,7 +1,5 @@
 package org.unidue.ub.libintel.almaconnector.service;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -43,10 +41,6 @@ public class HookService {
 
     private final GetterService getterService;
 
-    private final BlockedIdService blockedIdService;
-
-    private final RedisService redisService;
-
     /**
      * constructor based autowiring to the individual services
      *
@@ -63,9 +57,7 @@ public class HookService {
                 AlmaElectronicService almaElectronicService,
                 AlmaInvoiceService almaInvoiceService,
                 RegalfinderService regalfinderService,
-                GetterService getterService,
-                BlockedIdService blockedIdService,
-                RedisService redisService) {
+                GetterService getterService) {
         this.almaUserService = almaUserService;
         this.almaItemService = almaItemService;
         this.almaCatalogService = almaCatalogService;
@@ -74,8 +66,6 @@ public class HookService {
         this.almaInvoiceService = almaInvoiceService;
         this.regalfinderService = regalfinderService;
         this.getterService = getterService;
-        this.blockedIdService = blockedIdService;
-        this.redisService = redisService;
     }
 
     /**

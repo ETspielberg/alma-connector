@@ -1,12 +1,14 @@
 package org.unidue.ub.libintel.almaconnector.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.libintel.almaconnector.model.hook.*;
 import org.unidue.ub.libintel.almaconnector.model.run.SapDataRun;
-import org.unidue.ub.libintel.almaconnector.repository.*;
+import org.unidue.ub.libintel.almaconnector.repository.redis.*;
 
 @Service
 @Slf4j
@@ -24,7 +26,7 @@ public class RedisService {
 
     private final BibHookRepository bibHookRepository;
 
-    private final SapDataRunRepository sapDataRunRepository;
+    private final RedisTemplate<String, SapDataRun> sapDataRunRedisTemplate;
 
     public RedisService(JobHookRepository jobHookRepository,
                         ItemHookRepository itemHookRepository,
@@ -32,14 +34,14 @@ public class RedisService {
                         LoanHookRepository loanHookRepository,
                         RequestHookRepository requestHookRepository,
                         BibHookRepository bibHookRepository,
-                        SapDataRunRepository sapDataRunRepository) {
+                        RedisTemplate<String, SapDataRun> redisSapDataRunTemplate) {
         this.jobHookRepository = jobHookRepository;
         this.itemHookRepository = itemHookRepository;
         this.bibHookRepository = bibHookRepository;
         this.loanHookRepository = loanHookRepository;
         this.requestHookRepository = requestHookRepository;
         this.userHookRepository = userHookRepository;
-        this.sapDataRunRepository = sapDataRunRepository;
+        this.sapDataRunRedisTemplate = redisSapDataRunTemplate;
     }
 
     public JobHook getJobHook(String id) {
@@ -147,12 +149,25 @@ public class RedisService {
         return id + ":phantom";
     }
 
-    public SapDataRun cache(SapDataRun almaExportRun) {
-        return this.sapDataRunRepository.save(almaExportRun);
+    public SapDataRun cache(SapDataRun sapDataRun) {
+        this.sapDataRunRedisTemplate.opsForValue().set(sapDataRun.getIdentifier(), sapDataRun);
+        return sapDataRun;
     }
 
     public SapDataRun retrieveAlmaExportRun(String invoiceOwner, long counter) {
         String id = String.format("%s-%s", invoiceOwner, counter);
-        return this.sapDataRunRepository.findById(id).orElse(new SapDataRun(invoiceOwner).withRunIndex(counter));
+        SapDataRun sapDataRun = sapDataRunRedisTemplate.opsForValue().get(id);
+        if (sapDataRun != null) {
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                log.debug("retrieved sap data run from redis cache: \n" + objectMapper.writeValueAsString(sapDataRun));
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+            return sapDataRun;
+        } else {
+            log.debug("did not find sap data run in redis cache");
+            return new SapDataRun(invoiceOwner).withRunIndex(counter);
+        }
     }
 }
