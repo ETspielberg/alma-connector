@@ -27,8 +27,12 @@ public interface AlmaJobsApiClient {
    * @param profileId For filtering jobs by their profile ID. Optional. Relevant only for scheduled jobs. (optional, default to &quot;&quot;)
    * @return List<Job>
    */
-  @RequestMapping(method = RequestMethod.GET, value = "/?limit={limit}&offset={offset}&category={category}&type={type}&profile_id={profile_id}")
-  Jobs getAlmawsV1ConfJobs(@RequestHeader("Accept") String accept, @RequestParam("limit") Integer limit, @RequestParam("offset") Integer offset, @RequestParam("category") String category, @RequestParam("type") String type, @RequestParam("profile_id") String profileId);
+  @RequestMapping(method = RequestMethod.GET, value = "/")
+  Jobs getAlmawsV1ConfJobs(@RequestParam("limit") Integer limit,
+                           @RequestParam("offset") Integer offset,
+                           @RequestParam("category") String category,
+                           @RequestParam("type") String type,
+                           @RequestParam("profile_id") String profileId);
 
   /**
    * Retrieve Job Details
@@ -37,7 +41,7 @@ public interface AlmaJobsApiClient {
    * @return Job
    */
   @RequestMapping(method = RequestMethod.GET, value = "/almaws/v1/conf/jobs/{job_id}")
-  Job getAlmawsV1ConfJobsJobId(@RequestParam("job_id") String jobId);
+  Job getAlmawsV1ConfJobsJobId(@PathVariable("job_id") String jobId);
 
   /**
    * Retrieve Job Instances
@@ -50,8 +54,13 @@ public interface AlmaJobsApiClient {
    * @param offset Offset of the results returned. Optional. Default value: 0, which means that the first results will be returned. (optional)
    * @return JobInstances
    */
-  @RequestMapping(method = RequestMethod.GET, value = "/{job_id}/instances?limit={limit}&offset={offset}&submit_date_from={submit_date_from}&submit_date_to={submit_date_to}&status={status}")
-  JobInstances getAlmawsV1ConfJobsJobIdInstances(@RequestParam("job_id") String jobId, @RequestParam("submit_date_from") String submitDateFrom, @RequestParam("submit_date_to") String submitDateTo, @RequestParam("status") String status, @RequestParam("limit") Integer limit, @RequestParam("offset") Integer offset);
+  @RequestMapping(method = RequestMethod.GET, value = "/{job_id}/instances", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+  JobInstances getAlmawsV1ConfJobsJobIdInstances(@PathVariable("job_id") String jobId,
+                                                 @RequestParam("submit_date_from") String submitDateFrom,
+                                                 @RequestParam("submit_date_to") String submitDateTo,
+                                                 @RequestParam("status") String status,
+                                                 @RequestParam("limit") Integer limit,
+                                                 @RequestParam("offset") Integer offset);
   /**
    * Retrieve Job Instance Details
    * This Web service returns a job instance for given job id and instance id.
@@ -59,8 +68,9 @@ public interface AlmaJobsApiClient {
    * @param instanceId Unique id of the specific job instance. Mandatory. (required)
    * @return JobInstance
    */
-  @RequestMapping(method = RequestMethod.GET, value = "/{jobId}/instances/{instance_id}")
-  JobInstance getAlmawsV1ConfJobsJobIdInstancesInstanceId(@RequestParam("job_id") String jobId, @RequestParam("instance_id") String instanceId);
+  @RequestMapping(method = RequestMethod.GET, value = "/{jobId}/instances/{instanceId}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+  JobInstance getAlmawsV1ConfJobsJobIdInstancesInstanceId(@PathVariable("jobId") String jobId,
+                                                          @PathVariable("instanceId") String instanceId);
 
   /**
    * Submit a manual or scheduled job
@@ -71,5 +81,7 @@ public interface AlmaJobsApiClient {
    * @return Job
    */
   @RequestMapping(method = RequestMethod.POST, value = "/{jobId}", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
-  Job postAlmawsV1ConfJobsJobId(@RequestBody JobParametersFile body, @RequestParam("jobId") String jobId, @RequestParam("op") String op);
+  Job postAlmawsV1ConfJobsJobId(@RequestBody JobParametersFile body,
+                                @PathVariable("jobId") String jobId,
+                                @RequestParam("op") String op);
 }

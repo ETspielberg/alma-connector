@@ -1,6 +1,7 @@
 package org.unidue.ub.libintel.almaconnector.clients.alma.acquisition;
 
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 import org.unidue.ub.alma.shared.acq.*;
@@ -21,8 +22,14 @@ public interface AlmaPoLinesApiClient {
      * @param override     Override errors flag. Defaults to false. (optional, default to false)
      * @param bib          Method for handling standalone Bib record: retain, delete or suppress. Optional. By default: retain. (optional, default to &quot;retain&quot;)
      */
-    @RequestMapping(method = RequestMethod.DELETE, value = "po-lines/{poLineId}?reason={reason}&comment={comment}&inform_vendor={informVendor}&override={override}&bib={bib}")
-    void deletePoLinesPoLineId(@PathVariable("poLineId") String poLineId, @RequestHeader("Accept") String accept, @RequestParam("reason") String reason, @RequestParam("comment") String comment, @RequestParam("inform_vendor") Boolean informVendor, @RequestParam("override") Boolean override, @RequestParam("bib") String bib);
+    @RequestMapping(method = RequestMethod.DELETE, value = "po-lines/{poLineId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    void deletePoLinesPoLineId(@PathVariable("poLineId") String poLineId,
+                               @RequestHeader("Accept") String accept,
+                               @RequestParam("reason") String reason,
+                               @RequestParam("comment") String comment,
+                               @RequestParam("inform_vendor") Boolean informVendor,
+                               @RequestParam("override") Boolean override,
+                               @RequestParam("bib") String bib);
 
     /**
      * Retrieve PO-Lines
@@ -41,8 +48,18 @@ public interface AlmaPoLinesApiClient {
      * @param maxExpectedArrivalDate Retrieve PO lines with expected arrival date until this Date (YYYY-MM-DD), included. Optional. (optional, default to &quot;&quot;)
      * @return PoLines
      */
-    @RequestMapping(method=RequestMethod.GET)
-    PoLines getPoLines(@RequestHeader("Accept") String accept, @RequestParam("q") String q, @RequestParam("status") String status, @RequestParam("limit") Integer limit, @RequestParam("offset") Integer offset, @RequestParam("order_by") String orderBy, @RequestParam("direction") String direction, @RequestParam("acquisition_method") String acquisitionMethod, @RequestParam("expand") String expand, @RequestParam("library") String library, @RequestParam("min_expected_arrival_date") String minExpectedArrivalDate, @RequestParam("max_expected_arrival_date") String maxExpectedArrivalDate);
+    @RequestMapping(method=RequestMethod.GET, value="/", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    PoLines getPoLines(@RequestParam("q") String q,
+                       @RequestParam("status") String status,
+                       @RequestParam("limit") Integer limit,
+                       @RequestParam("offset") Integer offset,
+                       @RequestParam("order_by") String orderBy,
+                       @RequestParam("direction") String direction,
+                       @RequestParam("acquisition_method") String acquisitionMethod,
+                       @RequestParam("expand") String expand,
+                       @RequestParam("library") String library,
+                       @RequestParam("min_expected_arrival_date") String minExpectedArrivalDate,
+                       @RequestParam("max_expected_arrival_date") String maxExpectedArrivalDate);
 
     /**
      * Get PO-Line
@@ -51,8 +68,8 @@ public interface AlmaPoLinesApiClient {
      * @param poLineId The PO-Line number. (required)
      * @return PoLine
      */
-    @RequestMapping(method = RequestMethod.GET, value="/{poLineId}")
-    PoLine getPoLinesPoLineId(@RequestHeader("Accept") String accept, @PathVariable("poLineId") String poLineId);
+    @RequestMapping(method = RequestMethod.GET, value="/{poLineId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    PoLine getPoLinesPoLineId(@PathVariable("poLineId") String poLineId);
 
     /**
      * Get PO-Line Items
@@ -61,8 +78,8 @@ public interface AlmaPoLinesApiClient {
      * @param poLineId The PO-Line number. (required)
      * @return Items
      */
-    @RequestMapping(method=RequestMethod.GET, value="/{poLineId}/items")
-    Items getPoLinesPoLineIdItems(@RequestHeader("Accept") String accept, @PathVariable("poLineId") String poLineId);
+    @RequestMapping(method=RequestMethod.GET, value="/{poLineId}/items", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    Items getPoLinesPoLineIdItems(@PathVariable("poLineId") String poLineId);
 
     /**
      * Create PO-Line
@@ -72,8 +89,9 @@ public interface AlmaPoLinesApiClient {
      * @param profileCode New Order API profile code. Optional. (optional, default to &quot;&quot;)
      * @return PoLine
      */
-    @RequestMapping(method=RequestMethod.POST)
-    PoLine postAcqPoLines(@RequestBody PoLine body, @RequestHeader("Accept") String accept, @RequestParam("profile_code") String profileCode);
+    @RequestMapping(method=RequestMethod.POST, value = "/",  consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    PoLine postAcqPoLines(@RequestBody PoLine body,
+                          @RequestParam("profile_code") String profileCode);
 
     /**
      * Receive New Item
@@ -86,8 +104,12 @@ public interface AlmaPoLinesApiClient {
      * @param departmentLibrary The library code of the department where the item is being received. (optional, default to &quot;&quot;)
      * @return Item
      */
-    @RequestMapping(method=RequestMethod.POST, value="/{poLineId}/items")
-    Item postPoLinesPoLineIdItems(@RequestBody Item body, @RequestHeader("Accept") String accept, @PathVariable("poLineId") String poLineId, @RequestParam("receive_date") String receiveDate, @RequestParam("department") String department, @RequestParam("department_library") String departmentLibrary);
+    @RequestMapping(method=RequestMethod.POST, value="/{poLineId}/items", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    Item postPoLinesPoLineIdItems(@RequestBody Item body,
+                                  @PathVariable("poLineId") String poLineId,
+                                  @RequestParam("receive_date") String receiveDate,
+                                  @RequestParam("department") String department,
+                                  @RequestParam("department_library") String departmentLibrary);
 
     /**
      * Receive an Existing Item
@@ -102,8 +124,14 @@ public interface AlmaPoLinesApiClient {
      * @param departmentLibrary The library code of the department where the item is being received. (optional, default to &quot;&quot;)
      * @return PoLines
      */
-    @RequestMapping(method=RequestMethod.POST, value="/{poLineId}/items/{itemId}")
-    PoLines postPoLinesPoLineIdItemsItemId(@RequestBody PoLines body, @RequestHeader("Accept") String accept, @PathVariable("poLineId") String poLineId, @PathVariable("itemId") String itemId, @RequestParam("op") String op, @RequestParam("receive_date") String receiveDate, @RequestParam("department") String department, @RequestParam("department_library") String departmentLibrary);
+    @RequestMapping(method=RequestMethod.POST, value="/{poLineId}/items/{itemId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    PoLines postPoLinesPoLineIdItemsItemId(@RequestBody PoLines body,
+                                           @PathVariable("poLineId") String poLineId,
+                                           @PathVariable("itemId") String itemId,
+                                           @RequestParam("op") String op,
+                                           @RequestParam("receive_date") String receiveDate,
+                                           @RequestParam("department") String department,
+                                           @RequestParam("department_library") String departmentLibrary);
 
     /**
      * Update PO-Line
@@ -114,7 +142,9 @@ public interface AlmaPoLinesApiClient {
      * @param updateInventory Flag for updating the PO Line&#39;s inventory. Options: true, false. Default: true. (optional, default to &quot;true&quot;)
      * @return PoLine
      */
-    @RequestMapping(method=RequestMethod.PUT, value="/{poLineId}")
-    PoLine putPoLinesPoLineId(@RequestBody PoLine body, @RequestHeader("Accept") String accept, @PathVariable("poLineId") String poLineId, @RequestParam("update_inventory") String updateInventory);
+    @RequestMapping(method=RequestMethod.PUT, value="/{poLineId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    PoLine putPoLinesPoLineId(@RequestBody PoLine body,
+                              @PathVariable("poLineId") String poLineId,
+                              @RequestParam("update_inventory") String updateInventory);
 
 }

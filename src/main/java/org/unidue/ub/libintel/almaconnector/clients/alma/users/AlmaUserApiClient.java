@@ -21,7 +21,8 @@ public interface AlmaUserApiClient {
      * @param userIdType The type of identifier that is being searched. Optional. If this is not provided, all unique identifier types are used. The values that can be used are any of the values in UserIdentifierTypes code table. (optional, default to &quot;all_unique&quot;)
      */
     @RequestMapping(method=RequestMethod.DELETE, value="/{userId}")
-    void deleteAlmaUsersUserId(@RequestParam("Accept") String accept, @PathVariable("userId") String userId, @RequestParam("user_id_type") String userIdType);
+    void deleteAlmaUsersUserId(@PathVariable("userId") String userId,
+                               @RequestParam("user_id_type") String userIdType);
 
     /**
      * Retrieve users
@@ -35,7 +36,12 @@ public interface AlmaUserApiClient {
      * @return List<AlmaUser>
      */
     @RequestMapping(method=RequestMethod.GET, value="")
-    List<AlmaUser> getAlmaUsers(@RequestParam("Accept") String accept, @RequestParam("limit") Integer limit, @RequestParam("offset") Integer offset, @RequestParam("q") String q, @RequestParam("order_by") String orderBy, @RequestParam("source_institution_code") String sourceInstitutionCode, @RequestParam("source_user_id") String sourceUserId);
+    List<AlmaUser> getAlmaUsers(@RequestParam("limit") Integer limit,
+                                @RequestParam("offset") Integer offset,
+                                @RequestParam("q") String q,
+                                @RequestParam("order_by") String orderBy,
+                                @RequestParam("source_institution_code") String sourceInstitutionCode,
+                                @RequestParam("source_user_id") String sourceUserId);
 
     /**
      * Get user details
@@ -48,10 +54,15 @@ public interface AlmaUserApiClient {
      * @return AlmaUser
      */
     @RequestMapping(method=RequestMethod.GET, value="/{userId}")
-    AlmaUser getAlmaUsersUserId(@RequestParam("Accept") String accept, @PathVariable("userId") String userId, @RequestParam("user_id_type") String userIdType, @RequestParam("view") String view, @RequestParam("expand") String expand, @RequestParam("source_institution_code") String sourceInstitutionCode);
+    AlmaUser getAlmaUsersUserId(@PathVariable("userId") String userId,
+                                @RequestParam("user_id_type") String userIdType,
+                                @RequestParam("view") String view,
+                                @RequestParam("expand") String expand,
+                                @RequestParam("source_institution_code") String sourceInstitutionCode);
 
     @RequestMapping(method=RequestMethod.GET, value="/{userId}")
-    AlmaUser getAlmaUser(@RequestParam("Accept") String accept, @PathVariable("userId") String userId, @RequestParam("view") String view);
+    AlmaUser getAlmaUser(@PathVariable("userId") String userId,
+                         @RequestParam("view") String view);
 
     /**
      * Create user
@@ -64,7 +75,11 @@ public interface AlmaUserApiClient {
      * @return AlmaUser
      */
     @RequestMapping(method=RequestMethod.POST, value="")
-    AlmaUser postAlmaUsers(@RequestBody AlmaUser body, @RequestParam("Accept") String accept, @RequestParam("social_authentication") String socialAuthentication, @RequestParam("send_pin_number_letter") String sendPinNumberLetter, @RequestParam("source_institution_code") String sourceInstitutionCode, @RequestParam("source_user_id") String sourceUserId);
+    AlmaUser postAlmaUsers(@RequestBody AlmaUser body,
+                           @RequestParam("social_authentication") String socialAuthentication,
+                           @RequestParam("send_pin_number_letter") String sendPinNumberLetter,
+                           @RequestParam("source_institution_code") String sourceInstitutionCode,
+                           @RequestParam("source_user_id") String sourceUserId);
 
     /**
      * Authenticate or refresh user
@@ -76,7 +91,10 @@ public interface AlmaUserApiClient {
      * @return AlmaUser
      */
     @RequestMapping(method=RequestMethod.POST, value="/{userId}")
-    AlmaUser postAlmaUsersUserId(@RequestParam("Accept") String accept, @PathVariable("userId") String userId, @RequestParam("password") String password, @RequestParam("user_id_type") String userIdType, @RequestParam("op") String op);
+    AlmaUser postAlmaUsersUserId(@PathVariable("userId") String userId,
+                                 @RequestParam("password") String password,
+                                 @RequestParam("user_id_type") String userIdType,
+                                 @RequestParam("op") String op);
 
     /**
      * Update User Details
@@ -89,11 +107,49 @@ public interface AlmaUserApiClient {
      * @return AlmaUser
      */
     @RequestMapping(method=RequestMethod.PUT, value="/{userId}")
-    AlmaUser putAlmaUsersUserId(@RequestBody AlmaUser body, @RequestParam("Accept") String accept, @PathVariable("userId") String userId, @RequestParam("user_id_type") String userIdType, @RequestParam("override") String override, @RequestParam("send_pin_number_letter") String sendPinNumberLetter);
+    AlmaUser putAlmaUsersUserId(@RequestBody AlmaUser body,
+                                @PathVariable("userId") String userId,
+                                @RequestParam("user_id_type") String userIdType,
+                                @RequestParam("override") String override,
+                                @RequestParam("send_pin_number_letter") String sendPinNumberLetter);
 
+    /**
+     * Get user loans
+     * @param userId A unique identifier for the user (required)
+     * @param limit Limits the number of results. Optional. Valid values are 0-100. Default value: 10. (optional)
+     * @param offset Offset of the results returned. Optional. Default value: 0, which means that the first results will be returned. (optional)
+     * @param user_id_type The type of identifier that is being searched. Optional. If this is not provided, all unique identifier types are used. The values that can be used are any of the values in UserIdentifierTypes code table. The value may also be linking_id.  To search for users which have linked accounts in other institutions according to the linking_id use user_id_type&#x3D;linking_id. (optional, default to &quot;all_unique&quot;)
+     * @param order_by A few sort options are available: last_name, first_name and primary_id. One sort option may be used at a time. A secondary sort key, primary_id, is added if last_name or first_name is the primary sort. Default sorting is by all three in the following order: last_name, first_name, primary_id. If the query option is used, the result will not sort by primary_id. (optional, default to &quot;last_name, first_name, primary_id&quot;)
+     * @param direction Sorting direction: ASC/DESC. Default: ASC
+     * @param expand Comma separated list of values for expansion of results. Possible values: 'renewable'
+     * @param loan_status Active or Completeloan status. Default: Active. The Complete loan status is only relevant if historic loans haven't been anonymized
+     * @return UserLoans
+     */
     @RequestMapping(method=RequestMethod.GET, value="/{userId}/loans")
-    UserLoans getUserLoansByUserId(@PathVariable String userId, @RequestParam int limit, @RequestParam int offset, @RequestParam String user_id_type, @RequestParam String order_by, @RequestParam String direction, @RequestParam String expand);
+    UserLoans getUserLoansByUserId(@PathVariable String userId,
+                                   @RequestParam int limit,
+                                   @RequestParam int offset,
+                                   @RequestParam String user_id_type,
+                                   @RequestParam String order_by,
+                                   @RequestParam String direction,
+                                   @RequestParam String expand,
+                                   @RequestParam String loan_status);
 
+    /**
+     *
+     * @param userId A unique identifier for the user (required)
+     * @param limit Limits the number of results. Optional. Valid values are 0-100. Default value: 10. (optional)
+     * @param offset Offset of the results returned. Optional. Default value: 0, which means that the first results will be returned. (optional)
+     * @param user_id_type The type of identifier that is being searched. Optional. If this is not provided, all unique identifier types are used. The values that can be used are any of the values in UserIdentifierTypes code table. The value may also be linking_id.  To search for users which have linked accounts in other institutions according to the linking_id use user_id_type&#x3D;linking_id. (optional, default to &quot;all_unique&quot;)
+     * @param request_type Filter results by request type. Optional. Possible values: HOLD, DIGITIZATION, BOOKING. If not supplied, all request types will be returned.
+     * @param status Active or History request status. Default is active. The 'history' option is only available if the 'should_anonymize_requests' customer parameter is set to 'false' at the time the request was completed
+     * @return UserRequests
+     */
     @RequestMapping(method=RequestMethod.GET, value="/{userId}/requests")
-    UserRequests getUserRequestsByUserId(@PathVariable String userId, @RequestParam int limit, @RequestParam int offset, @RequestParam String request_type, @RequestParam String user_id_type, @RequestParam String status);
+    UserRequests getUserRequestsByUserId(@PathVariable String userId,
+                                         @RequestParam int limit,
+                                         @RequestParam int offset,
+                                         @RequestParam String request_type,
+                                         @RequestParam String user_id_type,
+                                         @RequestParam String status);
 }

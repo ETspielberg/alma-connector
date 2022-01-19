@@ -1,6 +1,7 @@
 package org.unidue.ub.libintel.almaconnector.clients.alma.acquisition;
 
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 import org.unidue.ub.alma.shared.acq.Invoice;
@@ -29,8 +30,15 @@ public interface AlmaInvoicesApiClient {
      * @param view Invoice view. If view&#x3D;brief, invoices will be returned without lines. (optional, default to &quot;&quot;)
      * @return Invoices
      */
-    @RequestMapping(method=RequestMethod.GET, value="/")
-    Invoices getInvoices(@RequestHeader("Accept") String accept, @RequestParam("base_status") String baseStatus, @RequestParam("invoice_workflow_status") String invoiceWorkflowStatus, @RequestParam("owner") String owner, @RequestParam("creation_form") String creationForm, @RequestParam("q") String q, @RequestParam("limit") Integer limit, @RequestParam("offset") Integer offset, @RequestParam("view") String view);
+    @RequestMapping(method=RequestMethod.GET, value="/", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    Invoices getInvoices(@RequestParam("base_status") String baseStatus,
+                         @RequestParam("invoice_workflow_status") String invoiceWorkflowStatus,
+                         @RequestParam("owner") String owner,
+                         @RequestParam("creation_form") String creationForm,
+                         @RequestParam("q") String q,
+                         @RequestParam("limit") Integer limit,
+                         @RequestParam("offset") Integer offset,
+                         @RequestParam("view") String view);
 
 
     /**
@@ -40,8 +48,9 @@ public interface AlmaInvoicesApiClient {
      * @param view Invoice view. If view&#x3D;brief, invoices will be returned without lines. (optional, default to &quot;&quot;)
      * @return Invoice
      */
-    @RequestMapping(method=RequestMethod.GET, value="/{invoiceId}")
-     Invoice getInvoicesInvoiceId(@RequestHeader("Accept") String accept, @PathVariable("invoiceId") String invoiceId, @RequestParam("view") String view);
+    @RequestMapping(method=RequestMethod.GET, value="/{invoiceId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+     Invoice getInvoicesInvoiceId(@PathVariable("invoiceId") String invoiceId,
+                                  @RequestParam("view") String view);
 
     /**
      * Get Invoice Lines
@@ -52,8 +61,11 @@ public interface AlmaInvoicesApiClient {
      * @param offset Offset of the results returned. Optional. Default value: 0, which means that the first results will be returned. (optional)
      * @return List<InvoiceLine>
      */
-    @RequestMapping(method=RequestMethod.GET, value="/{invoiceId}/lines")
-    List<InvoiceLine> getInvoicesInvoiceIdLines(@RequestHeader("Accept") String accept, @PathVariable("invoiceId") String invoiceId, @RequestParam("q") String q, @RequestParam("limit") Integer limit, @RequestParam("offset") Integer offset);
+    @RequestMapping(method=RequestMethod.GET, value="/{invoiceId}/lines", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    List<InvoiceLine> getInvoicesInvoiceIdLines(@PathVariable("invoiceId") String invoiceId,
+                                                @RequestParam("q") String q,
+                                                @RequestParam("limit") Integer limit,
+                                                @RequestParam("offset") Integer offset);
 
     /**
      * Get Invoice Line
@@ -62,8 +74,9 @@ public interface AlmaInvoicesApiClient {
      * @param invoiceLineId The Invoice line id. (required)
      * @return InvoiceLine
      */
-    @RequestMapping(method=RequestMethod.GET, value="{invoiceId}/lines/{invoiceLineId}")
-    InvoiceLine getInvoicesInvoiceIdLinesInvoiceLineId(@RequestHeader("Accept") String accept, @PathVariable("invoiceId") String invoiceId, @PathVariable("invoiceLineId") String invoiceLineId);
+    @RequestMapping(method=RequestMethod.GET, value="{invoiceId}/lines/{invoiceLineId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    InvoiceLine getInvoicesInvoiceIdLinesInvoiceLineId(@PathVariable("invoiceId") String invoiceId,
+                                                       @PathVariable("invoiceLineId") String invoiceLineId);
 
     /**
      * Create Invoice
@@ -71,8 +84,9 @@ public interface AlmaInvoicesApiClient {
      * @param body This method takes an invoice object. See [here](/alma/apis/docs/xsd/rest_invoice.xsd?tags&#x3D;POST) (required)
      * @return Invoice
      */
-    @RequestMapping(method=RequestMethod.POST)
-    Invoice postAcqInvoices(@RequestBody Invoice body, @RequestHeader("Accept") String accept);
+    @RequestMapping(method=RequestMethod.POST, value="/", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    Invoice postAcqInvoices(@RequestBody Invoice body,
+                            @RequestHeader("Accept") String accept);
 
     /**
      * Invoice Service
@@ -82,8 +96,10 @@ public interface AlmaInvoicesApiClient {
      * @param body This method takes an invoice object. See [here](/alma/apis/docs/xsd/rest_invoice.xsd?tags&#x3D;POST) (required)
      * @return Invoice
      */
-    @RequestMapping(method=RequestMethod.POST, value="/{invoiceId}")
-    Invoice postInvoicesInvoiceId(@RequestBody Invoice body, @RequestHeader("Accept") String accept, @PathVariable("invoiceId") String invoiceId, @RequestParam("op") String op);
+    @RequestMapping(method=RequestMethod.POST, value="/{invoiceId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    Invoice postInvoicesInvoiceId(@RequestBody Invoice body,
+                                  @PathVariable("invoiceId") String invoiceId,
+                                  @RequestParam("op") String op);
 
     /**
      * Invoice Update Service
@@ -94,8 +110,10 @@ public interface AlmaInvoicesApiClient {
      * @param body This method takes an invoice object. See [here](/alma/apis/docs/xsd/rest_invoice.xsd?tags&#x3D;POST) (required)
      * @return Invoice
      */
-    @RequestMapping(method=RequestMethod.POST, value="/{invoiceId}")
-    Invoice postInvoicesInvoiceIdToUpdate(@RequestBody InvoiceUpdate body, @RequestHeader("Accept") String accept, @PathVariable("invoiceId") String invoiceId, @RequestParam("op") String op);
+    @RequestMapping(method=RequestMethod.POST, value="/{invoiceId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    Invoice postInvoicesInvoiceIdToUpdate(@RequestBody InvoiceUpdate body,
+                                          @PathVariable("invoiceId") String invoiceId,
+                                          @RequestParam("op") String op);
 
 
     /**
@@ -105,8 +123,9 @@ public interface AlmaInvoicesApiClient {
      * @param body This method takes an invoice line object. See [here](/alma/apis/docs/xsd/rest_invoice_line.xsd?tags&#x3D;POST) (required)
      * @return InvoiceLine
      */
-    @RequestMapping(method=RequestMethod.POST, value="/{invoiceId}/lines")
-    InvoiceLine postInvoicesInvoiceIdLines(@RequestBody InvoiceLine body, @RequestHeader("Accept") String accept, @PathVariable("invoiceId") String invoiceId);
+    @RequestMapping(method=RequestMethod.POST, value="/{invoiceId}/lines", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    InvoiceLine postInvoicesInvoiceIdLines(@RequestBody InvoiceLine body,
+                                           @PathVariable("invoiceId") String invoiceId);
 
     /**
      * Update Invoice
@@ -115,8 +134,9 @@ public interface AlmaInvoicesApiClient {
      * @param body This method takes an invoice object. See [here](/alma/apis/docs/xsd/rest_invoice.xsd?tags&#x3D;PUT) (required)
      * @return Invoice
      */
-    @RequestMapping(method= RequestMethod.PUT, value="/{invoiceId}")
-    Invoice putInvoicesInvoiceId(@RequestBody Invoice body, @RequestHeader("Accept") String accept, @PathVariable("invoiceId") String invoiceId);
+    @RequestMapping(method= RequestMethod.PUT, value="/{invoiceId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    Invoice putInvoicesInvoiceId(@RequestBody Invoice body,
+                                 @PathVariable("invoiceId") String invoiceId);
 
     /**
      * Update Invoice Line
@@ -126,6 +146,8 @@ public interface AlmaInvoicesApiClient {
      * @param body This method takes an invoice line object. See [here](/alma/apis/docs/xsd/rest_invoice_line.xsd?tags&#x3D;PUT) (required)
      * @return InvoiceLine
      */
-    @RequestMapping(method= RequestMethod.PUT, value="/{invoiceId}/lines/{invoiceLineId}")
-    InvoiceLine putInvoicesInvoiceIdLinesInvoiceLineId(@RequestBody InvoiceLine body, @RequestHeader("Accept") String accept, @PathVariable("invoiceId") String invoiceId, @PathVariable("invoiceLineId") String invoiceLineId);
+    @RequestMapping(method= RequestMethod.PUT, value="/{invoiceId}/lines/{invoiceLineId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    InvoiceLine putInvoicesInvoiceIdLinesInvoiceLineId(@RequestBody InvoiceLine body,
+                                                       @PathVariable("invoiceId") String invoiceId,
+                                                       @PathVariable("invoiceLineId") String invoiceLineId);
 }
