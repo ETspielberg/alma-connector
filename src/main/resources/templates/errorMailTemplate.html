@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Ein Problem ist aufgetreten</title>
+    <style>
+        .title{
+            color: #004c93
+        }
+    </style>
+</head>
+<body>
+
+<h1 class="title">
+    Ein Problem ist aufgetreten
+</h1>
+
+<h3>Uuuups...</h3>
+<p>... da ist etwas schief gegangen.</p>
+<p> Wer mehr wissen möchte: hier ein paar Details:</p>
+<table>
+    <tr>
+        <td>Wann ist der Fehler aufgetreten?</td>
+        <td th:text="${timestamp}"/>
+    </tr>
+    <tr>
+        <td>Gab es eine Meldung dazu?</td>
+        <td th:text="${message}"/>
+    </tr>
+    <tr>
+        <td>Gab es eine lokalisierte Meldung dazu?</td>
+        <td th:text="${localized}"/>
+    </tr>
+    <tr>
+        <td>Gab es vielleicht sogar einen Stacktrace?</td>
+        <td th:text="${stacktrace}"/>
+    </tr>
+    <tr>
+        <td>Welche Klasse war betroffen?</td>
+        <td th:text="${class}"/>
+    </tr>
+    <tr>
+        <td>Welcher Fehler?</td>
+        <td th:text="${cause}"/>
+    </tr>
+</table>
+
+<p>Viele Grüße,</p>
+<p><b>Lib</b> <i>intel</i></p>
+</body>
+</html>
