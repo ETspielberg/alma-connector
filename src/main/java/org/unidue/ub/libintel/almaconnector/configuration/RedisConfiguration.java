@@ -1,28 +1,60 @@
 package org.unidue.ub.libintel.almaconnector.configuration;
 
-import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
-import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
-import org.unidue.ub.libintel.almaconnector.model.BlockedId;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.PatternTopic;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.data.redis.listener.Topic;
+import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.unidue.ub.libintel.almaconnector.listener.RedisListener;
+import org.unidue.ub.libintel.almaconnector.model.run.SapDataRun;
 
 @Configuration
-@Log4j2
-@EnableRedisRepositories(basePackageClasses = BlockedId.class)
 public class RedisConfiguration {
 
-    @Value("${spring.redis.host:localhost}")
-    private String host;
-
-    @Value("${spring.redis.port:6379}")
-    private Integer port;
-
+    /**
+     * using Jackson JSON serializer to avoid stack overflow due to invoice object with back references
+     * @param redisConnectionFactory the redis connection factory bean
+     * @return the redis template to save SapDataRun objects
+     */
     @Bean
-    JedisConnectionFactory jedisConnectionFactory() {
-        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(host, port);
-        return new JedisConnectionFactory(config);
+    RedisTemplate<String, SapDataRun> redisSapDataRunTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, SapDataRun> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory);
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new Jackson2JsonRedisSerializer<>(SapDataRun.class));
+        return template;
+    }
+
+    /**
+     * registers a redis message listener which listens to the expiration of cached hooks
+     * @param connectionFactory the redis connection factory bean
+     * @param redisListener the redis listener bean
+     * @return a redis listener container
+     */
+    @Bean
+    public RedisMessageListenerContainer getListenerContainer(RedisConnectionFactory connectionFactory, RedisListener redisListener) {
+        //Create connection container
+        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+        //Put in redis connection
+        container.setConnectionFactory(connectionFactory);
+        //Write the type to be monitored, i.e. timeout monitoring
+        Topic topic = new PatternTopic("__keyevent@0__:expired");
+        container.addMessageListener(messageListener(redisListener), topic);
+        return container;
+    }
+
+    /**
+     * the listener adapter foor the redis listener container
+     * @param redisListener the redis listener bean
+     * @return the message listener adapter
+     */
+    @Bean
+    MessageListenerAdapter messageListener(RedisListener redisListener) {
+        return new MessageListenerAdapter(redisListener);
     }
 }
