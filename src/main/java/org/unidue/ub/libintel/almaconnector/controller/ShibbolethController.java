@@ -1,54 +1,44 @@
 package org.unidue.ub.libintel.almaconnector.controller;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.context.request.WebRequest;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import org.unidue.ub.libintel.almaconnector.model.jobs.ShibbolethData;
 import org.unidue.ub.libintel.almaconnector.service.ShibbolethDataService;
 
-@Controller
-@RequestMapping("/shibboleth")
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/v1/shibboleth")
 public class ShibbolethController {
 
     private final ShibbolethDataService shibbolethDataService;
 
+    /**
+     * constructor based autowiring of the shibboleth data service
+     * @param shibbolethDataService the shibboleth data service
+     */
     public ShibbolethController(ShibbolethDataService shibbolethDataService) {
         this.shibbolethDataService = shibbolethDataService;
     }
 
-    @GetMapping("edit")
-    public String editPlatform(String platform, Model model) {
-        model.addAttribute("platform", shibbolethDataService.getDataForPlatform(platform));
-        return "shibboleth/edit";
+    @GetMapping("/{platform}")
+    public ResponseEntity<ShibbolethData> getShibbolethData(@PathVariable String platform) {
+        return ResponseEntity.ok(shibbolethDataService.getDataForPlatform(platform));
     }
 
-
-    @GetMapping("/start")
-    public String getStartPage(Model model) {
-        model.addAttribute("shibbolethData", this.shibbolethDataService.getAllShibbolethData());
-        return "shibboleth/start";
+    @GetMapping("")
+    public ResponseEntity<List<ShibbolethData>> getAllShibbolethData() {
+        return ResponseEntity.ok(this.shibbolethDataService.getAllShibbolethData());
     }
 
-    @GetMapping("/confirmDelete")
-    public String confirmDeletion(String platform, Model model) {
-        model.addAttribute("platformToDelete", platform);
-        return "shibboleth/delete";
-    }
-
-    @PostMapping("/delete")
-    public String deletePlatform(WebRequest request, Model model) {
-        String platform = request.getParameter("platformToDelete");
+    @DeleteMapping("/{platform}")
+    public ResponseEntity<?> deletePlatform(String platform) {
         this.shibbolethDataService.delete(platform);
-        return getStartPage(model);
+        return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/save")
-    public String saveShibbolethData(@ModelAttribute ShibbolethData platform, Model model) {
-        this.shibbolethDataService.save(platform);
-        return getStartPage(model);
+    @PostMapping("")
+    public ResponseEntity<ShibbolethData> saveShibbolethData(@RequestBody ShibbolethData shibbolethData) {
+        return ResponseEntity.ok(this.shibbolethDataService.save(shibbolethData));
     }
 }
