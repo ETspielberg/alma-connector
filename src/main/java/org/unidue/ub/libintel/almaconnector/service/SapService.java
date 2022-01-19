@@ -32,10 +32,7 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * offers functions around sap import and export data managed in alma
@@ -73,7 +70,7 @@ public class SapService {
      * @param almaExportRunRepository   the repository holding the data for an individual export run
      * @param almaAnalyticsReportClient the client to retrieve alma analytics reports
      */
-    SapService(@Value("${ub.statistics.data.dir}") String dataDir,
+    SapService(@Value("${libintel.data.dir}") String dataDir,
                AlmaInvoiceService almaInvoiceService,
                AlmaExportRunRepository almaExportRunRepository,
                AlmaAnalyticsReportClient almaAnalyticsReportClient,
@@ -742,11 +739,15 @@ public class SapService {
         sapDataRun = this.redisService.retrieveAlmaExportRun(sapDataRun.getInvoiceOwner(), sapDataRun.getRunIndex());
         log.debug(String.format("retrieved sap data run from redis cache with %d invoices", sapDataRun.getInvoices().size()));
         if (sapDataRun.getInvoices().size() == 0) {
-            log.debug("found no invoices in cached sap data run. reloading invoices from alma");
-            sapDataRun = this.getInvoices(sapDataRun);
-            this.redisService.cache(sapDataRun);
+            sapDataRun = this.reloadInvoices(sapDataRun);
         }
         return sapDataRun;
+    }
+
+    public SapDataRun reloadInvoices(SapDataRun sapDataRun) {
+        log.debug("reloading invoices from alma");
+        sapDataRun = this.getInvoices(sapDataRun);
+        return this.redisService.cache(sapDataRun);
     }
 
     public SapDataRun addSapData(SapDataRun sapDataRun) {
@@ -791,6 +792,7 @@ public class SapService {
 
     private void initializeSapFiles(String filename) {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(this.file + filename, false))) {
+            log.debug("prepared file " + this.file + filename);
             bw.write("");
             bw.flush();
         } catch (IOException ioe) {
@@ -911,37 +913,27 @@ public class SapService {
     }
 
     public void addSingleInvoice(SapDataRun sapDataRun) {
-        sapDataRun.addInvoice(this.almaInvoiceService.retrieveInvoice(sapDataRun.getInvoiceOwner()));
+        sapDataRun.addInvoice(this.almaInvoiceService.retrieveInvoiceByInvoiceNumber(sapDataRun.getInvoiceOwner()));
     }
 
     public void writeExportFiles(SapDataRun sapDataRun) {
         String dateString = dateformat.format(new Date());
-
-        String homeFilename = String.format("sap_%s_%s_%s.txt", "home", dateString, sapDataRun.getInvoiceOwner());
-        initializeSapFiles(homeFilename);
-        String foreignFilename = String.format("sap_%s_%s_%s.txt", "foreign", dateString, sapDataRun.getInvoiceOwner());
-        initializeSapFiles(foreignFilename);
-
-        for (SapData sapData : sapDataRun.getHomeSapData()) {
-            if (!sapData.isChecked)
+        List<String> fileTypes = Arrays.asList("home", "foreign");
+        for (String fileType: fileTypes) {
+            List<SapData> sapDataList = sapDataRun.retrieveSapData(fileType);
+            if (sapDataList.size() == 0)
                 continue;
-            try {
-                addLineToFile(homeFilename, generateComment(sapData).toCsv());
-            } catch (IOException ex) {
-                sapDataRun.increaseMissedSapData();
-                sapDataRun.addMissedSapData(sapData);
-                log.warn("could not write line: " + sapData.toFixedLengthLine());
-            }
-        }
-        for (SapData sapData : sapDataRun.getForeignSapData()) {
-            if (!sapData.isChecked)
-                continue;
-            try {
-                addLineToFile(foreignFilename, generateComment(sapData).toCsv());
-            } catch (IOException ex) {
-                sapDataRun.increaseMissedSapData();
-                sapDataRun.addMissedSapData(sapData);
-                log.warn("could not write line: " + sapData.toFixedLengthLine());
+            String filename = String.format("sap_%s_%s_%s.txt", fileType, dateString, sapDataRun.getInvoiceOwner());
+            initializeSapFiles(filename);
+            log.debug(String.format("found %d %s sap data, preparing sap export file %s", sapDataList.size(), fileType, filename));
+            for (SapData sapData : sapDataList) {
+                try {
+                    addLineToFile(filename, generateComment(sapData).toCsv());
+                } catch (IOException ex) {
+                    sapDataRun.increaseMissedSapData();
+                    sapDataRun.addMissedSapData(sapData);
+                    log.warn("could not write line: " + sapData.toFixedLengthLine());
+                }
             }
         }
     }
@@ -952,5 +944,10 @@ public class SapService {
             sapDataRun.addInvoice(this.almaInvoiceService.retrieveInvoice(availableInvoice.getInvoiceNumber()));
         }
         return sapDataRun;
+    }
+
+    public Resource loadFilesForToday(String type, String owner) throws FileNotFoundException {
+        String dateString = dateformat.format(new Date());
+        return this.loadFiles(dateString, type, owner);
     }
 }

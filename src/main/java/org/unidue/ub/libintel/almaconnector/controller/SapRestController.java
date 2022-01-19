@@ -5,6 +5,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -39,12 +40,6 @@ public class SapRestController {
         this.almaInvoiceService = almaInvoiceService;
     }
 
-    @GetMapping("availableInvoices/{invoiceOwner}")
-    public ResponseEntity<List<AvailableInvoice>> getAvailableInvoices(@PathVariable String invoiceOwner) {
-        return ResponseEntity.ok(this.almaInvoiceService.getAvailableInvoices(invoiceOwner));
-
-    }
-
     @GetMapping("updateInvoice/{invoiceNumber}")
     public ResponseEntity<AvailableInvoice> updateAvailableInvoice(@PathVariable String invoiceNumber) {
         return ResponseEntity.ok(new AvailableInvoice(this.almaInvoiceService.retrieveInvoice(invoiceNumber)));
@@ -53,8 +48,16 @@ public class SapRestController {
     @GetMapping("sapDataRun/{invoiceOwner}")
     public ResponseEntity<SapDataRun> getAlmaExportRun(@PathVariable String invoiceOwner) {
         SapDataRun sapDataRun = new SapDataRun(invoiceOwner);
-        this.sapService.addInvoices(sapDataRun);
-        this.sapService.addSapData(sapDataRun);
+        sapDataRun = this.sapService.addInvoices(sapDataRun);
+        sapDataRun = this.sapService.addSapData(sapDataRun);
+        return ResponseEntity.ok(sapDataRun);
+    }
+
+    @GetMapping("reloadInvoices/{invoiceOwner}")
+    public ResponseEntity<SapDataRun> reloadAlmaExportRun(@PathVariable String invoiceOwner) {
+        SapDataRun sapDataRun = new SapDataRun(invoiceOwner);
+        sapDataRun = this.sapService.reloadInvoices(sapDataRun);
+        sapDataRun = this.sapService.addSapData(sapDataRun);
         return ResponseEntity.ok(sapDataRun);
     }
 
@@ -70,7 +73,7 @@ public class SapRestController {
     public ResponseEntity<String> prepareInputFiles(@RequestBody SapDataRun sapDataRun) {
         try {
             this.sapService.writeExportFiles(sapDataRun);
-            return ResponseEntity.ok("success");
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.status(500).body(e.getMessage());
         }
@@ -101,6 +104,5 @@ public class SapRestController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Excel file could not be read from request", ioe);
         }
     }
-
 
 }

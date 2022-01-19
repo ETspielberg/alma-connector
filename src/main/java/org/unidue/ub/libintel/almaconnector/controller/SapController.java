@@ -184,4 +184,18 @@ public class SapController {
         return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=\"" + file.getFilename() + "\"").contentType(MediaType.TEXT_PLAIN).body(file);
     }
+
+    /**
+     * retrieves a file containing the sap import data
+     * @param type the type of data to be retrieved (home or foreign)
+     * @param owner the owner of the invoices
+     * @return the file loaded from disc
+     * @throws FileNotFoundException thrown if the desired file does not exist.
+     */
+    @GetMapping("/downloadFile/{type}/{owner}")
+    public ResponseEntity<Resource> serveFileForToday(@PathVariable String type, @PathVariable String owner) throws FileNotFoundException {
+        Resource file = sapService.loadFilesForToday(type, owner);
+        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=\"" + file.getFilename() + "\"").contentType(MediaType.TEXT_PLAIN).body(file);
+    }
 }

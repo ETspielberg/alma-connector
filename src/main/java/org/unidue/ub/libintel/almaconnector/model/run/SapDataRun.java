@@ -1,6 +1,7 @@
 package org.unidue.ub.libintel.almaconnector.model.run;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.keyvalue.annotation.KeySpace;
 import org.springframework.data.redis.core.RedisHash;
@@ -19,7 +20,7 @@ import java.util.*;
 @RedisHash(value = "sapdata", timeToLive = 36000)
 public class SapDataRun {
 
-    @org.springframework.data.annotation.Id
+    @Id
     private String identifier;
 
     private String invoiceOwner;
@@ -38,6 +39,8 @@ public class SapDataRun {
 
     private long successfullSapData = 0;
 
+    private long totalSapData = 0;
+
     private long missedSapData = 0;
 
     private long numberHomeSapData = 0;
@@ -48,6 +51,7 @@ public class SapDataRun {
 
     private Set<String> emptyInvoices = new HashSet<>();
 
+    @Transient
     private List<SapData> missedSapDataList = new ArrayList<>();
 
     private String status;
@@ -256,6 +260,10 @@ public class SapDataRun {
         }
     }
 
+    public void setTotalSapData(long totalSapData) {
+        this.totalSapData = totalSapData;
+    }
+
     public void setHomeSapData(List<SapData> homeSapData) {
         this.homeSapData = homeSapData;
         this.numberHomeSapData = homeSapData.size();
@@ -321,6 +329,15 @@ public class SapDataRun {
 
     public void increaseRunIndex() {
         this.runIndex++;
+    }
+
+    public List<SapData> retrieveSapData(String type) {
+        if ("home".equals(type))
+            return this.homeSapData;
+        else if ("foreign".equals(type))
+            return this.foreignSapData;
+        else
+            return new ArrayList<>();
     }
 
     public String log() {
