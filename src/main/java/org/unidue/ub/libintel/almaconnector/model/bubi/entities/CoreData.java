@@ -67,8 +67,8 @@ public class CoreData implements Cloneable {
     @Column(name= "position_part")
     private String positionPart;
 
-    @Column(name= "position_description")
-    private String positionDescription;
+    @Column(name= "minting_template")
+    private String mintingTemplate;
 
     @Column(name="security_strip")
     private boolean securityStrip = true;
@@ -85,8 +85,8 @@ public class CoreData implements Cloneable {
     @Column(name="cover_back")
     private boolean coverBack = false;
 
-    @Column(name = "internal_note")
-    private String internalNote = "";
+    @Column(name = "label_template")
+    private String labelTemplate = "";
 
     @Column(name = "bubi_note")
     private String bubiNote = "";
@@ -273,12 +273,12 @@ public class CoreData implements Cloneable {
         this.colorMinting = colorMinting;
     }
 
-    public String getInternalNote() {
-        return internalNote;
+    public String getLabelTemplate() {
+        return labelTemplate;
     }
 
-    public void setInternalNote(String internalNote) {
-        this.internalNote = internalNote;
+    public void setLabelTemplate(String internalNote) {
+        this.labelTemplate = internalNote;
     }
 
     public String getBubiNote() {
@@ -321,12 +321,12 @@ public class CoreData implements Cloneable {
         this.positionPart = positionPart;
     }
 
-    public String getPositionDescription() {
-        return positionDescription;
+    public String getMintingTemplate() {
+        return mintingTemplate;
     }
 
-    public void setPositionDescription(String positionDescription) {
-        this.positionDescription = positionDescription;
+    public void setMintingTemplate(String positionDescription) {
+        this.mintingTemplate = positionDescription;
     }
 
     public boolean getWithoutRemoval() {
@@ -361,12 +361,12 @@ public class CoreData implements Cloneable {
         clone.setWithoutRemoval(this.withoutRemoval);
         clone.setCoverBack(this.coverBack);
         clone.setHours(this.hours);
-        clone.setInternalNote(this.internalNote);
+        clone.setLabelTemplate(this.labelTemplate);
         clone.setBubiNote(this.bubiNote);
-        clone.setPositionDescription(this.positionDescription);
+        clone.setMintingTemplate(this.mintingTemplate);
         clone.setPositionPart(this.positionPart);
         clone.setPositionVolume(this.positionVolume);
-        clone.setPositionDescription(this.positionDescription);
+        clone.setMintingTemplate(this.mintingTemplate);
         return clone;
     }
 
