@@ -29,9 +29,6 @@ import java.security.NoSuchAlgorithmException;
 @Slf4j
 public class HookController {
 
-    @Value("${libintel.alma.jobs.id.packaging:123456789}")
-    private String packagingJobId;
-
     private final HookService hookService;
 
     private final JobLoggerService jobLoggerService;
