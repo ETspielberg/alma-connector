@@ -18,7 +18,7 @@ public class StartController {
 
 
     /**
-     * displys the start page of the alma microservice
+     * displays the start page of the alma microservice
      * @return the start html page
      */
     @GetMapping("/start")
