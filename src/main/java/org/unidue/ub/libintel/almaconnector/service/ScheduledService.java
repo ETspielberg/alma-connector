@@ -44,6 +44,8 @@ public class ScheduledService {
 
     private final SaveDataService saveDataService;
 
+    private final MailSenderService mailSenderService;
+
     @Value("${libintel.profile:dev}")
     private String profile;
 
@@ -70,7 +72,8 @@ public class ScheduledService {
                      AlmaUserService almaUserService,
                      AlmaCatalogService almaCatalogService,
                      AlmaSetService almaSetService,
-                     SaveDataService saveDataService) {
+                     SaveDataService saveDataService,
+                     MailSenderService mailSenderService) {
         this.almaAnalyticsReportClient = almaAnalyticsReportClient;
         this.mappingTables = mappingTables;
         this.almaItemService = almaItemService;
@@ -80,6 +83,7 @@ public class ScheduledService {
         this.almaCatalogService = almaCatalogService;
         this.almaSetService = almaSetService;
         this.saveDataService = saveDataService;
+        this.mailSenderService = mailSenderService;
     }
 
     /**
@@ -96,6 +100,7 @@ public class ScheduledService {
         try {
             results = this.almaAnalyticsReportClient.getReport(NewItemWithFundReport.PATH, NewItemWithFundReport.class).getRows();
         } catch (IOException ioe) {
+            mailSenderService.sendAlertMail(ioe);
             log.warn("could not retrieve analytics report.", ioe);
             return;
         }
@@ -235,23 +240,6 @@ public class ScheduledService {
     }
 
     /**
-     * updates the po ids of the packed po lines in the bubi orders
-     *
-     * @throws IOException thrown by the analytics client if the xsl transformation fails
-     */
-    /*
-    @Scheduled(cron = "0 0 8 * * *")
-    public void updateBubiOrders() throws IOException {
-        if (profile.equals("dev")) return;
-        List<OpenBubiOrder> result = this.almaAnalyticsReportClient.getReport(OpenBubiOrdersReport.PATH, OpenBubiOrdersReport.class).getRows();
-        for (OpenBubiOrder openBubiOrder : result) {
-
-        }
-    }
-
-     */
-
-    /**
      * retrieves the open requests and logs the corresponding information to be picked up by beats
      *
      * @throws IOException thrown by the analytics client if the xsl transformation fails
@@ -311,6 +299,12 @@ public class ScheduledService {
      */
     @Scheduled(cron = "0 0 9 * * *")
     public void saveFineFees() {
-        this.saveDataService.saveDailyUserFineFees();
+        if (profile.equals("dev")) return;
+        try {
+            this.saveDataService.saveDailyUserFineFees();
+        } catch (Exception exception) {
+            mailSenderService.sendAlertMail(exception);
+            log.error("could not save user fine fees. messaage: " + exception.getMessage(), exception);
+        }
     }
 }
