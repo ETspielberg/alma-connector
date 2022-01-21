@@ -101,6 +101,6 @@ public class MailSenderService {
         context.setVariable("cause", exception.getCause());
         context.setVariable("class", exception.getClass());
         context.setVariable("localized", exception.getLocalizedMessage());
-        return templateEngine.process("errorMail", context);
+        return templateEngine.process("errorMailTemplate", context);
     }
 }
