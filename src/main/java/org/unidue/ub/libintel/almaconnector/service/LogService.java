@@ -1,4 +1,4 @@
-package org.unidue.ub.libintel.almaconnector.logging;
+package org.unidue.ub.libintel.almaconnector.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,11 +8,11 @@ import org.unidue.ub.alma.shared.conf.JobInstance;
 
 @Service
 @Slf4j
-public class JobLoggerService {
+public class LogService {
 
     private final ObjectMapper objectMapper;
 
-    JobLoggerService(ObjectMapper objectMapper) {
+    LogService(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
 

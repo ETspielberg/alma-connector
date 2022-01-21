@@ -10,7 +10,7 @@ import org.springframework.data.redis.listener.Topic;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.unidue.ub.libintel.almaconnector.listener.RedisListener;
+import org.unidue.ub.libintel.almaconnector.service.RedisListener;
 import org.unidue.ub.libintel.almaconnector.model.run.SapDataRun;
 
 @Configuration

@@ -1,4 +1,4 @@
-package org.unidue.ub.libintel.almaconnector.listener;
+package org.unidue.ub.libintel.almaconnector.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.Message;

@@ -1,11 +1,10 @@
 package org.unidue.ub.libintel.almaconnector.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.unidue.ub.libintel.almaconnector.logging.JobLoggerService;
+import org.unidue.ub.libintel.almaconnector.service.LogService;
 import org.unidue.ub.libintel.almaconnector.model.hook.*;
 import org.unidue.ub.libintel.almaconnector.service.HookService;
 import org.unidue.ub.libintel.almaconnector.service.RedisService;
@@ -31,7 +30,7 @@ public class HookController {
 
     private final HookService hookService;
 
-    private final JobLoggerService jobLoggerService;
+    private final LogService logService;
 
     private final HookValidatorService hookValidatorService;
 
@@ -39,12 +38,12 @@ public class HookController {
 
 
     public HookController(HookService hookService,
-                          JobLoggerService jobLoggerService,
+                          LogService logService,
                           HookValidatorService hookValidatorService,
                           RedisService redisService) {
         this.hookService = hookService;
         this.redisService = redisService;
-        this.jobLoggerService = jobLoggerService;
+        this.logService = logService;
         this.hookValidatorService = hookValidatorService;
     }
 
@@ -68,7 +67,7 @@ public class HookController {
     @PostMapping("/jobListener")
     public ResponseEntity<?> receiveJobHook(@RequestBody JobHook hookContent, @RequestHeader("X-Exl-Signature") String signature) {
         log.info(String.format("revceived hook of type %s", hookContent.getAction()));
-        this.jobLoggerService.logJob(hookContent.getJobInstance());
+        this.logService.logJob(hookContent.getJobInstance());
         this.hookService.processJobHook(hookContent);
         return ResponseEntity.ok().build();
     }
