@@ -44,12 +44,6 @@ public class JobsController {
         return ResponseEntity.ok(this.almaJobsService.searchJob(term));
     }
 
-    @GetMapping("/updateStatisticsNotes")
-    public ResponseEntity<?> runUpdateStatisticsNote() {
-        this.scheduledService.updateStatisticField();
-        return ResponseEntity.ok().build();
-    }
-
     @GetMapping("/updateStatistics")
     public ResponseEntity<?> updateStatistics() {
         this.scheduledService.updateStatisticField();
