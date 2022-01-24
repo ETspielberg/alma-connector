@@ -176,4 +176,13 @@ public class AlmaItemService {
     public Item refreshItem(Item item) {
         return this.findItemByMmsAndItemId(item.getBibData().getMmsId(), item.getItemData().getPid());
     }
+
+    public Item findItemByItemId(String itemId) {
+        try {
+            return this.findItemByMmsAndItemId("ALL", itemId);
+        } catch (FeignException fe) {
+            log.warn(String.format("could not retrieve item %s from alma: %s", itemId, fe.getMessage()), fe);
+            return null;
+        }
+    }
 }

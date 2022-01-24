@@ -21,7 +21,7 @@ import java.util.Date;
 @XmlAccessorType(XmlAccessType.FIELD)
 @JacksonXmlRootElement(localName = "user_hook")
 @KeySpace("user_hook")
-@RedisHash(value = "user_hook", timeToLive = 10)
+@RedisHash(value = "user_hook", timeToLive = 30)
 public class UserHook implements Serializable {
 
     public static final String JSON_PROPERTY_ID = "id";

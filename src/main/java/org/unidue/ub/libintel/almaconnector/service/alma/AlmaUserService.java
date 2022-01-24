@@ -40,7 +40,12 @@ public class AlmaUserService {
      * @return the <class>AlmaUser</class>> object
      */
     public AlmaUser getUser(String userId) {
-        return this.almaUserApiClient.getAlmaUser(userId, "full");
+        try {
+            return this.almaUserApiClient.getAlmaUser(userId, "full");
+        } catch (FeignException fe) {
+            log.warn(String.format("could not retrieve alma user %s: %s", userId, fe.getMessage()), fe);
+            return null;
+        }
     }
 
     public AlmaUser updateUser(AlmaUser almaUser) {

@@ -39,6 +39,8 @@ public class HookService {
 
     private final RegalfinderService regalfinderService;
 
+    private final RedisService redisService;
+
     private final GetterService getterService;
 
     /**
@@ -57,6 +59,7 @@ public class HookService {
                 AlmaElectronicService almaElectronicService,
                 AlmaInvoiceService almaInvoiceService,
                 RegalfinderService regalfinderService,
+                RedisService redisService,
                 GetterService getterService) {
         this.almaUserService = almaUserService;
         this.almaItemService = almaItemService;
@@ -65,6 +68,7 @@ public class HookService {
         this.bubiOrderLineService = bubiOrderLineService;
         this.almaInvoiceService = almaInvoiceService;
         this.regalfinderService = regalfinderService;
+        this.redisService = redisService;
         this.getterService = getterService;
     }
 
@@ -75,12 +79,13 @@ public class HookService {
      */
     @Async("threadPoolTaskExecutor")
     public void processRequestHook(RequestHook hook) {
-        log.debug("processing request hook");
+        if (hook.getEvent() == null || hook.getEvent().getValue() == null) {
+            log.warn("no hook event type given");
+            return;
+        }
         HookUserRequest userRequest = hook.getUserRequest();
-        log.debug("received user request: " + userRequest.toString());
-        waitForAlma(3);
-        Item item = this.almaItemService.findItemByMmsAndItemId(userRequest.getMmsId(), userRequest.getItemId());
-        // getterService.indexRequest(hook, item);
+        log.debug("processing user request from web hook: " + userRequest.toString());
+        Item item = this.retrieveItem(userRequest.getItemId());
         if ("WORK_ORDER".equals(userRequest.getRequestType()) && "Int".equals(userRequest.getRequestSubType().getValue())) {
             switch (userRequest.getTargetDestination().getValue()) {
                 case "Buchbinder": {
@@ -97,11 +102,7 @@ public class HookService {
                     if (HookEventTypes.REQUEST_CREATED.name().equals(hook.getEvent().getValue())) {
 
                         // attach "wird gebunden" to note
-                        String note = item.getItemData().getPublicNote();
-                        if (note == null || note.isEmpty())
-                            item.getItemData().setPublicNote("in der Einbandstelle");
-                        else
-                            item.getItemData().setPublicNote(note + " in der Einbandstelle");
+                        this.addPublicNote(item, "in der Einbandstelle");
 
                         // set temporary location to Buchbinder
                         item.getHoldingData().setInTempLocation(false);
@@ -116,10 +117,8 @@ public class HookService {
                         // handle closing of request (return from bubi
                     } else if (HookEventTypes.REQUEST_CLOSED.name().equals(hook.getEvent().getValue())) {
                         // remove "wird gebunden" from note
-                        item.getItemData().setPublicNote(item.getItemData().getPublicNote()
-                                .replace("wird gebunden", "")
-                                .replace("in der Einbandstelle", "")
-                                .strip());
+                        this.removePublicNote(item, "wird gebunden");
+                        this.removePublicNote(item, "in der Einbandstelle");
                         // if it is bound issue, set it to the non-publishing temporary location
                         if ("ISSBD".equals(userRequest.getMaterialType().getValue())) {
                             item.getHoldingData().setInTempLocation(true);
@@ -154,6 +153,8 @@ public class HookService {
                     break;
                 }
             }
+        } else {
+            getterService.indexRequest(hook, item);
         }
     }
 
@@ -164,16 +165,19 @@ public class HookService {
      */
     @Async("threadPoolTaskExecutor")
     public void processLoanHook(LoanHook hook) {
-        log.debug("processing loan hook");
-        // this.blockedIdService.blockId(hook.getItemLoan().getItemId());
+        if (hook.getEvent() == null || hook.getEvent().getValue() == null) {
+            log.warn("no hook event type given");
+            return;
+        }
+
         HookItemLoan itemLoan = hook.getItemLoan();
-        log.debug("received item loan: " + itemLoan.toString());
-        log.debug(String.format("retrieving user %s", itemLoan.getUserId()));
-        AlmaUser almaUser = this.almaUserService.getUser(itemLoan.getUserId());
-        waitForAlma(5);
+        log.debug("processing loan from web hook: " + itemLoan.toString());
+
+        AlmaUser almaUser = this.retrieveUser(itemLoan.getUserId());
+        Item item = this.retrieveItem(itemLoan.getItemId());
+        String mmsId = itemLoan.getMmsId();
         if (HookEventTypes.LOAN_CREATED.name().equals(hook.getEvent().getValue()) || HookEventTypes.LOAN_RETURNED.name().equals(hook.getEvent().getValue())) {
-            Item item = this.almaItemService.findItemByMmsAndItemId(itemLoan.getMmsId(), itemLoan.getItemId());
-            //this.getterService.indexLoan(hook, item, almaUser);
+            this.getterService.indexLoan(hook, item, almaUser);
         }
         boolean needScan = false;
         String tempLibrary = "";
@@ -184,17 +188,16 @@ public class HookService {
                 for (Address address : almaUser.getContactInfo().getAddress())
                     if (address.getPreferred()) {
                         log.debug(String.format("retrieve item with barcode %s", itemLoan.getItemBarcode()));
-                        String mmsId = itemLoan.getMmsId();
-                        String itemPid = itemLoan.getItemId();
-                        Item item = this.almaItemService.findItemByMmsAndItemId(mmsId, itemPid);
+
                         log.debug(String.format("retrieved item:\n %s", item.toString()));
+
                         // setting bib data to null in order to avoid problems with network-number / network_numbers....
                         item.setBibData(null);
 
                         if ("LOAN_CREATED".equals(hook.getEvent().getValue())) {
                             log.debug(String.format("setting public note to %s", address.getLine1()));
                             item.getHoldingData().setInTempLocation(true);
-                            item.getItemData().setPublicNote(address.getLine1());
+                            this.addPublicNote(item, address.getLine1());
                             String library = itemLoan.getLibrary().getValue();
                             if (address.getLine1().contains("LK") || address.getLine1().contains("BA") || address.getLine1().contains("MC"))
                                 library = "D0001";
@@ -229,7 +232,7 @@ public class HookService {
                                 tempLibrary = item.getHoldingData().getTempLibrary().getValue();
                                 needScan = !tempLibrary.equals(item.getItemData().getLibrary().getValue());
                             }
-                            item.getItemData().setPublicNote("");
+                            this.removePublicNote(item, address.getLine1());
                             item.getHoldingData().setInTempLocation(false);
                             item.getHoldingData().tempLocation(null);
                             item.getHoldingData().tempLibrary(null);
@@ -245,18 +248,15 @@ public class HookService {
             case "Neuerw. / 14 Tage":
                 log.info("got neuerwerbungs loan");
                 log.debug(String.format("retrieve item with barcode %s", itemLoan.getItemBarcode()));
-                String mmsId = itemLoan.getMmsId();
-                String itemPid = itemLoan.getItemId();
-                Item item = this.almaItemService.findItemByMmsAndItemId(mmsId, itemPid);
                 log.debug(String.format("retrieved item:\n %s", item.toString()));
                 // setting bib data to null in order to avoid problems with network-number / network_numbers....
                 item.setBibData(null);
                 if ("LOAN_CREATED".equals(hook.getEvent().getValue())) {
                     log.debug(String.format("setting public note to %s", almaUser.getLastName()));
-                    item.getItemData().setPublicNote(almaUser.getLastName());
+                    this.addPublicNote(item,almaUser.getLastName() );
                 } else if ("LOAN_RETURNED".equals(hook.getEvent().getValue())) {
                     log.debug("resetting public note");
-                    item.getItemData().setPublicNote("");
+                    this.removePublicNote(item, almaUser.getLastName());;
                 }
                 this.almaItemService.updateItem(mmsId, item);
                 break;
@@ -278,17 +278,16 @@ public class HookService {
             return;
         }
         log.info(String.format("received item hook with event %s (%s)", hook.getEvent().getDesc(), hook.getEvent().getValue()));
-        waitForAlma(5);
-        Item item = this.almaItemService.refreshItem(hook.getItem());
+        Item item = hook.getItem();
 
         log.debug("received item hook: " + item.toString());
         if ("ITEM_DELETED".equals(hook.getEvent().getValue())) {
-            //this.getterService.deleteItem(item, hook.getTime());
+            this.getterService.deleteItem(item, hook.getTime());
         } else if (HookEventTypes.ITEM_CREATED.name().equals(hook.getEvent().getValue())) {
-            //this.getterService.index(item, hook.getTime());
+            this.getterService.index(item, hook.getTime());
         } else if (HookEventTypes.ITEM_UPDATED.name().equals(hook.getEvent().getValue())) {
             this.regalfinderService.checkRegalfinder(item);
-            //this.getterService.updateItem(item, hook.getTime());
+            this.getterService.updateItem(item, hook.getTime());
             switch (item.getItemData().getPhysicalMaterialType().getValue()) {
                 case "ISSUE": {
                     log.debug(String.format("deleting temporary location for received issue %s for shelfmark %s", item.getItemData().getBarcode(), item.getHoldingData().getCallNumber()));
@@ -358,6 +357,10 @@ public class HookService {
      */
     @Async("threadPoolTaskExecutor")
     public void processBibHook(BibHook hook) {
+        if (hook.getEvent() == null || hook.getEvent().getValue() == null) {
+            log.warn("no hook event type given");
+            return;
+        }
         log.debug("processing bib hook");
         BibWithRecord bib = hook.getBib();
         log.debug("received bib hook: " + bib.toString());
@@ -423,5 +426,45 @@ public class HookService {
 
     public void processUserHook(UserHook userHook) {
         log.info("user hook: " + userHook.getId());
+    }
+
+    private Item retrieveItem(String itemId) {
+        Item item = this.redisService.getItemHook(itemId).getItem();
+        if (item == null) {
+            log.debug(String.format("did not find item %s in redis cache, collecting user data from alma", itemId));
+            return this.almaItemService.findItemByItemId(itemId);
+        }
+        return item;
+    }
+
+    private AlmaUser retrieveUser(String userId) {
+        AlmaUser almaUser = this.redisService.getUserHook(userId).getUser();
+        if (almaUser == null) {
+            log.debug(String.format("did not find user %s in redis cache, collecting user data from alma", userId));
+            almaUser = this.almaUserService.getUser(userId);
+        }
+        return almaUser;
+    }
+
+    private void addPublicNote(Item item, String noteText) {
+        String note = item.getItemData().getPublicNote();
+        if (note == null || note.isEmpty()) {
+            item.getItemData().setPublicNote(noteText);
+            return;
+        }
+        if (note.contains(noteText))
+            return;
+        item.getItemData().setPublicNote(note + "; " + noteText);
+    }
+
+    private void removePublicNote(Item item, String noteText) {
+        String note = item.getItemData().getPublicNote();
+        if (note == null || note.isEmpty()) {
+            return;
+        }
+        if (note.contains(noteText))
+            return;
+        item.getItemData().setPublicNote(note.replace(noteText, "").trim());
+
     }
 }

@@ -127,6 +127,7 @@ public class HookController {
 
     @GetMapping("/listener/{hookType}")
     public ResponseEntity<Challenge> answerChallenge(String challenge, @PathVariable String hookType) {
+        log.debug(String.format("challenging %s hook endpoint.", hookType));
         return ResponseEntity.ok(new Challenge(challenge));
     }
 
@@ -137,7 +138,6 @@ public class HookController {
             this.redisService.cacheHook(hookContent, hookType);
             return ResponseEntity.ok().build();
         } else {
-
             log.warn("hook did not pass validation");
             return ResponseEntity.badRequest().build();
         }
