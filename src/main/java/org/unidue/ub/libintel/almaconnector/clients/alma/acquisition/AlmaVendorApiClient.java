@@ -20,7 +20,10 @@ public interface AlmaVendorApiClient {
      * This API deletes the vendor the code refers to.
      * @param vendorCode Specific vendor code (required)
      */
-    @RequestMapping(method= RequestMethod.DELETE, value="/{vendorCode}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method= RequestMethod.DELETE,
+            value="/{vendorCode}",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     void deleteVendorsVendorCode(@PathVariable("vendorCode") String vendorCode);
 
     /**
@@ -33,7 +36,10 @@ public interface AlmaVendorApiClient {
      * @param offset Offset of the results returned. Optional. Default value: 0, which means that the first results will be returned. (optional)
      * @return List<Vendor>
      */
-    @RequestMapping(method= RequestMethod.GET, value="", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method= RequestMethod.GET,
+            value="",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     List<Vendor> getVendors(@RequestParam("status") String status,
                             @RequestParam("type") String type,
                             @RequestParam("q") String q,
@@ -46,7 +52,10 @@ public interface AlmaVendorApiClient {
      * @param vendorCode Specific vendor code (required)
      * @return Vendor
      */
-    @RequestMapping(method= RequestMethod.GET, value="/{vendorCode}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method= RequestMethod.GET,
+            value="/{vendorCode}",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     Vendor getVendorsVendorCode(@PathVariable("vendorCode") String vendorCode);
 
     /**
@@ -57,7 +66,10 @@ public interface AlmaVendorApiClient {
      * @param offset Offset of the results returned. Optional. Default value: 0, which means that the first results will be returned. (optional)
      * @return Object
      */
-    @RequestMapping(method= RequestMethod.GET, value="/{vendorCode}/invoices", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method= RequestMethod.GET,
+            value="/{vendorCode}/invoices",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     List<Invoice> getVendorsVendorCodeInvoices(@PathVariable("vendorCode") String vendorCode,
                                                @RequestParam("limit") Integer limit,
                                                @RequestParam("offset") Integer offset);
@@ -70,7 +82,10 @@ public interface AlmaVendorApiClient {
      * @param offset Offset of the results returned. Optional. Default value: 0, which means that the first results will be returned. (optional)
      * @return List<PoLine>
      */
-    @RequestMapping(method= RequestMethod.GET, value="/{vendorCode}/po-lines", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method= RequestMethod.GET,
+            value="/{vendorCode}/po-lines",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     List<PoLine> getVendorsVendorCodePoLines(@PathVariable("vendorCode") String vendorCode,
                                              @RequestParam("limit") Integer limit,
                                              @RequestParam("offset") Integer offset);
@@ -81,7 +96,10 @@ public interface AlmaVendorApiClient {
      * @param body This method takes a Vendor object. See [here](/alma/apis/docs/xsd/rest_vendor.xsd?tags&#x3D;POST) (required)
      * @return Vendor
      */
-    @RequestMapping(method= RequestMethod.POST, value="", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method= RequestMethod.POST,
+            value="",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     Vendor postVendors(@RequestBody Vendor body);
 
     /**
@@ -91,7 +109,10 @@ public interface AlmaVendorApiClient {
      * @param body This method takes a Vendor object. See [here](/alma/apis/docs/xsd/rest_vendor.xsd?tags&#x3D;PUT) (required)
      * @return Vendor
      */
-    @RequestMapping(method= RequestMethod.PUT, value="/{vendorCode}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method= RequestMethod.PUT,
+            value="/{vendorCode}",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     Vendor putVendorsVendorCode(@RequestBody Vendor body,
                                 @PathVariable("vendorCode") String vendorCode);
 }

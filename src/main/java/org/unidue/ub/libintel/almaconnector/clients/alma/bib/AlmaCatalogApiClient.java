@@ -23,7 +23,8 @@ public interface AlmaCatalogApiClient {
      * @param override       Override the warnings and delete the Bib Record. Optional. The default is to not override (false). (optional, default to &quot;false&quot;)
      * @param catalogerLevel Cataloger level of the user deleting the record. (optional, default to &quot;&quot;)
      */
-    @RequestMapping(method = RequestMethod.DELETE, value = "/{mmsId}")
+    @RequestMapping(method = RequestMethod.DELETE,
+            value = "/{mmsId}")
     void deleteBibsMmsId(@PathVariable("mmsId") String mmsId,
                          @RequestParam("override") String override,
                          @RequestParam("cataloger_level") String catalogerLevel);
@@ -36,7 +37,8 @@ public interface AlmaCatalogApiClient {
      * @param holdingId The Holding Record ID. (required)
      * @param bib       Method for handling a Bib record left without any holdings: retain, delete or suppress. Optional. By default: retain. (optional, default to &quot;retain&quot;)
      */
-    @RequestMapping(method = RequestMethod.DELETE, value = "/{mmsId}/holdings/{holdingId}")
+    @RequestMapping(method = RequestMethod.DELETE,
+            value = "/{mmsId}/holdings/{holdingId}")
     void deleteBibsMmsIdHoldingsHoldingId(@PathVariable("mmsId") String mmsId,
                                           @PathVariable("holdingId") String holdingId,
                                           @RequestParam("bib") String bib);
@@ -51,7 +53,8 @@ public interface AlmaCatalogApiClient {
      * @param override  Indication whether the item should be deleted even if warnings exist. Optional. By default: false. (optional, default to &quot;false&quot;)
      * @param holdings  Method for handling a Holdings record left without any items: retain, delete or suppress. Optional. By default: retain. (optional, default to &quot;retain&quot;)
      */
-    @RequestMapping(method = RequestMethod.DELETE, value = "/{mmsId}/holdings/{holdingId}/items/{itemPid}")
+    @RequestMapping(method = RequestMethod.DELETE,
+            value = "/{mmsId}/holdings/{holdingId}/items/{itemPid}")
     void deleteBibsMmsIdHoldingsHoldingIdItemsItemPid(@PathVariable("mmsId") String mmsId,
                                                       @PathVariable("holdingId") String holdingId,
                                                       @PathVariable("itemPid") String itemPid,
@@ -67,7 +70,8 @@ public interface AlmaCatalogApiClient {
      * @param portfolioId Unique ID of the electronic portfolio. (required)
      * @param bib         Method for handling a bib left without any inventory: retain, suppress or delete. Optional. By default: delete. (optional, default to &quot;retain&quot;)
      */
-    @RequestMapping(method = RequestMethod.DELETE, value = "/{mmsId}/portfolios/{portfolioId}")
+    @RequestMapping(method = RequestMethod.DELETE,
+            value = "/{mmsId}/portfolios/{portfolioId}")
     void deleteBibsMmsIdPortfoliosPortfolioId(@PathVariable("mmsId") String mmsId,
                                               @PathVariable("portfolioId") String portfolioId,
                                               @RequestParam("bib") String bib);
@@ -88,7 +92,10 @@ public interface AlmaCatalogApiClient {
      * @param otherSystemId    An Other System Id. An additional ID stored as part of the record&#39;s network numbers. Optional. (optional, default to &quot;&quot;)
      * @return Object
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/")
+    @RequestMapping(method = RequestMethod.GET,
+            value = "/",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     List<Bib> getBibs(@RequestParam("mms_id") String mmsId,
                       @RequestParam("ie_id") String ieId,
                       @RequestParam("holdings_id") String holdingsId,
@@ -109,7 +116,9 @@ public interface AlmaCatalogApiClient {
      * @param expand This parameter allows for expanding the bibliographic record with additional information:   p_avail - Expand physical inventory information.   e_avail - Expand electronic inventory information.   d_avail - Expand digital inventory information.   requests - Expand total number of title requests.   To use more than one, use a comma separator. (optional, default to &quot;None&quot;)
      * @return Object
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{mmsId}", produces = MediaType.APPLICATION_XML_VALUE)
+    @RequestMapping(method = RequestMethod.GET,
+            value = "/{mmsId}",
+            produces = MediaType.APPLICATION_XML_VALUE)
     BibWithRecord getBibsMmsId(@PathVariable("mmsId") String mmsId,
                                @RequestParam("view") String view,
                                @RequestParam("expand") String expand);
@@ -122,7 +131,10 @@ public interface AlmaCatalogApiClient {
      * @param mmsId The Bib Record ID. (required)
      * @return Object
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{mmsId}/holdings")
+    @RequestMapping(method = RequestMethod.GET,
+            value = "/{mmsId}/holdings",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     List<HoldingData> getBibsMmsIdHoldings(@PathVariable("mmsId") String mmsId);
 
     /**
@@ -133,7 +145,9 @@ public interface AlmaCatalogApiClient {
      * @param holdingId The Holding Record ID. (required)
      * @return Object
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{mmsId}/holdings/{holdingId}", produces = MediaType.APPLICATION_XML_VALUE)
+    @RequestMapping(method = RequestMethod.GET,
+            value = "/{mmsId}/holdings/{holdingId}",
+            produces = MediaType.APPLICATION_XML_VALUE)
     HoldingWithRecord getBibsMmsIdHoldingsHoldingId(@PathVariable String mmsId,
                                                     @PathVariable String holdingId);
 
@@ -163,7 +177,10 @@ public interface AlmaCatalogApiClient {
      * @param view                    Special view of an item object. Optional. Currently supported: label - adds fields relevant for label printing. (optional, default to &quot;brief&quot;)
      * @return Items
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{mmsId}/holdings/{holdingId}/items", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.GET,
+            value = "/{mmsId}/holdings/{holdingId}/items",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     Items getBibsMmsIdHoldingsHoldingIdItems(@PathVariable("mmsId") String mmsId,
                                              @PathVariable("holdingId") String holdingId,
                                              @RequestParam("limit") Integer limit,
@@ -198,7 +215,10 @@ public interface AlmaCatalogApiClient {
      * @param userId    The id of the user which the due_date_policy expand will be calculated for. Default: GUEST. (optional, default to &quot;&quot;)
      * @return Object
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{mmsId}/holdings/{holdingId}/items/{itemPid}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.GET,
+            value = "/{mmsId}/holdings/{holdingId}/items/{itemPid}",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     Item getBibsMmsIdHoldingsHoldingIdItemsItemPid(@RequestHeader("Accept") String accept,
                                                    @PathVariable("mmsId") String mmsId,
                                                    @PathVariable("holdingId") String holdingId,
@@ -217,7 +237,10 @@ public interface AlmaCatalogApiClient {
      * @param offset Offset of the results returned. Optional. Default value: 0, which means that the first results will be returned. (optional)
      * @return Object
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{mmsId}/portfolios", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.GET,
+            value = "/{mmsId}/portfolios",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     Portfolios getBibsMmsIdPortfolios(@PathVariable("mmsId") String mmsId,
                                       @RequestParam("limit") Integer limit,
                                       @RequestParam("offset") Integer offset);
@@ -231,7 +254,10 @@ public interface AlmaCatalogApiClient {
      * @param portfolioId Unique ID of the electronic portfolio. (required)
      * @return Object
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/{mmsId}/portfolios/{portfolioId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.GET,
+            value = "/{mmsId}/portfolios/{portfolioId}",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     Portfolio getBibsMmsIdPortfoliosPortfolioId(@PathVariable("mmsId") String mmsId,
                                                 @PathVariable("portfolioId") String portfolioId);
 
@@ -248,7 +274,10 @@ public interface AlmaCatalogApiClient {
      * @param checkMatch      Indicating whether to check for a match. Default: false (record will be saved despite possible match). (optional, default to &quot;false&quot;)
      * @return Object
      */
-    @RequestMapping(method = RequestMethod.POST, value = "/", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
+    @RequestMapping(method = RequestMethod.POST,
+            value = "/",
+            consumes = MediaType.APPLICATION_XML_VALUE,
+            produces = MediaType.APPLICATION_XML_VALUE)
     BibWithRecord postBibs(@RequestBody BibWithRecord body,
                            @RequestParam("from_nz_mms_id") String fromNzMmsId,
                            @RequestParam("from_cz_mms_id") String fromCzMmsId,
@@ -267,7 +296,10 @@ public interface AlmaCatalogApiClient {
      * @param body  This method takes a Bib object. See [here](/alma/apis/docs/xsd/rest_bib.xsd?tags&#x3D;POST) (required)
      * @return Object
      */
-    @RequestMapping(method = RequestMethod.POST, value = "/{mmsId}", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
+    @RequestMapping(method = RequestMethod.POST,
+            value = "/{mmsId}",
+            consumes = MediaType.APPLICATION_XML_VALUE,
+            produces = MediaType.APPLICATION_XML_VALUE)
     BibWithRecord postBibsMmsId(@RequestBody Object body,
                                 @PathVariable("mmsId") String mmsId,
                                 @RequestParam("op") String op);
@@ -281,7 +313,10 @@ public interface AlmaCatalogApiClient {
      * @param body  This method takes a Holding object. See [here](/alma/apis/docs/xsd/rest_holding.xsd?tags&#x3D;POST) (required)
      * @return Object
      */
-    @RequestMapping(method = RequestMethod.POST, value = "/{mmsId}/holdings", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
+    @RequestMapping(method = RequestMethod.POST,
+            value = "/{mmsId}/holdings",
+            consumes = MediaType.APPLICATION_XML_VALUE,
+            produces = MediaType.APPLICATION_XML_VALUE)
     HoldingWithRecord postBibsMmsIdHoldings(@RequestBody Object body,
                                             @PathVariable("mmsId") String mmsId);
 
@@ -294,7 +329,10 @@ public interface AlmaCatalogApiClient {
      * @param body      This method takes an Item object. See [here](/alma/apis/docs/xsd/rest_item.xsd?tags&#x3D;POST) (required)
      * @return Object
      */
-    @RequestMapping(method = RequestMethod.POST, value = "/{mmsId}/holdings/{holdingId}/items", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.POST,
+            value = "/{mmsId}/holdings/{holdingId}/items",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     Item postBibsMmsIdHoldingsHoldingIdItems(@RequestBody  Object body,
                                              @PathVariable("mmsId") String mmsId,
                                              @PathVariable("holdingId") String holdingId);
@@ -321,7 +359,10 @@ public interface AlmaCatalogApiClient {
      * @param registerInHouseUse Register in house uses. Options: true or false. (optional, default to &quot;true&quot;)
      * @return Object
      */
-    @RequestMapping(method = RequestMethod.POST, value = "/{mmsId}/holdings/{holdingId}/items/{itemPid}")
+    @RequestMapping(method = RequestMethod.POST,
+            value = "/{mmsId}/holdings/{holdingId}/items/{itemPid}",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     Item postBibsMmsIdHoldingsHoldingIdItemsItemPid(@PathVariable("mmsId") String mmsId,
                                                     @PathVariable("holdingId") String holdingId,
                                                     @PathVariable("itemPid") String itemPid,
@@ -348,7 +389,10 @@ public interface AlmaCatalogApiClient {
      * @param portfolio This method takes a portfolio object. See [here](/alma/apis/docs/xsd/rest_portfolio.xsd?tags&#x3D;POST) (required)
      * @return Object
      */
-    @RequestMapping(method = RequestMethod.POST, value = "/{mmsId}/portfolios/", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.POST,
+            value = "/{mmsId}/portfolios/",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     Portfolio postBibsMmsIdPortfolios(@RequestBody Portfolio portfolio,
                                       @PathVariable("mmsId") String mmsId);
 
@@ -367,7 +411,10 @@ public interface AlmaCatalogApiClient {
      * @param checkMatch        Indicating whether to check for a match. Default: false (record will be saved despite possible match). (optional, default to &quot;false&quot;)
      * @return Object
      */
-    @RequestMapping(method = RequestMethod.PUT, value = "/{mmsId}", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
+    @RequestMapping(method = RequestMethod.PUT,
+            value = "/{mmsId}",
+            consumes = MediaType.APPLICATION_XML_VALUE,
+            produces = MediaType.APPLICATION_XML_VALUE)
     Bib putBibsMmsId(@RequestBody Object body,
                      @PathVariable("mmsId") String mmsId,
                      @RequestParam("normalization") String normalization,
@@ -388,7 +435,10 @@ public interface AlmaCatalogApiClient {
      * @param body      This method takes a Holding object. See [here](/alma/apis/docs/xsd/rest_holding.xsd?tags&#x3D;PUT) (required)
      * @return Object
      */
-    @RequestMapping(method = RequestMethod.PUT, value = "/{mmsId}/holdings/{holdingId}", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
+    @RequestMapping(method = RequestMethod.PUT,
+            value = "/{mmsId}/holdings/{holdingId}",
+            consumes = MediaType.APPLICATION_XML_VALUE,
+            produces = MediaType.APPLICATION_XML_VALUE)
     Holding putBibsMmsIdHoldingsHoldingId(@RequestBody Object body,
                                           @PathVariable String mmsId,
                                           @PathVariable String holdingId);
@@ -403,7 +453,9 @@ public interface AlmaCatalogApiClient {
      * @param item      This method takes an Item object. See [here](/alma/apis/docs/xsd/rest_item.xsd?tags&#x3D;PUT) (required)
      * @return Object
      */
-    @RequestMapping(method = RequestMethod.PUT, value = "/{mmsId}/holdings/{holdingId}/items/{itemPid}", consumes = MediaType.APPLICATION_XML_VALUE)
+    @RequestMapping(method = RequestMethod.PUT,
+            value = "/{mmsId}/holdings/{holdingId}/items/{itemPid}",
+            consumes = MediaType.APPLICATION_XML_VALUE)
     Item putBibsMmsIdHoldingsHoldingIdItemsItemPid(@PathVariable("mmsId") String mmsId,
                                                    @PathVariable("holdingId") String holdingId,
                                                    @PathVariable("itemPid") String itemPid,
@@ -418,7 +470,10 @@ public interface AlmaCatalogApiClient {
      * @param body        This method takes a portfolio object. See [here](/alma/apis/docs/xsd/rest_portfolio.xsd?tags&#x3D;PUT) (required)
      * @return Object
      */
-    @RequestMapping(method = RequestMethod.PUT, value = "/{mmsId}/portfolios/{portfolioId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.PUT,
+            value = "/{mmsId}/portfolios/{portfolioId}",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     Portfolio putBibsMmsIdPortfoliosPortfolioId(@PathVariable("mmsId") String mmsId,
                                                 @PathVariable("portfolioId") String portfolioId,
                                                 @RequestBody Portfolio body);
@@ -430,6 +485,9 @@ public interface AlmaCatalogApiClient {
      * @param view Invoice view. If view&#x3D;brief, invoices will be returned without lines. (optional, default to &quot;&quot;)
      * @return Invoices
      */
-    @RequestMapping(method= RequestMethod.GET, value="/items")
-    Item getItemByBarcode(@RequestHeader("Accept") String accept, @RequestParam("item_barcode") String itemBarcode, @RequestParam("view") String view);
+    @RequestMapping(method= RequestMethod.GET,
+            value="/items",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    Item getItemByBarcode(@RequestParam("item_barcode") String itemBarcode, @RequestParam("view") String view);
 }

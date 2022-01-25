@@ -36,7 +36,7 @@ public class AlmaItemService {
      * @return the item
      */
     public Item findItemByBarcode(String barcode) {
-        return this.almaCatalogApiClient.getItemByBarcode("application/json", barcode, "");
+        return this.almaCatalogApiClient.getItemByBarcode(barcode, "");
     }
 
     /**
