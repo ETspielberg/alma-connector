@@ -22,6 +22,7 @@ import java.util.Date;
 @JacksonXmlRootElement(localName = "user_hook")
 @KeySpace("user_hook")
 @RedisHash(value = "user_hook", timeToLive = 30)
+// the time to live needs to be longer to account for user collection from the redis cash after loan webhooks
 public class UserHook implements Serializable {
 
     public static final String JSON_PROPERTY_ID = "id";
