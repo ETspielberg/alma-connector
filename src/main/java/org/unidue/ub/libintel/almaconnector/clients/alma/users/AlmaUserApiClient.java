@@ -1,6 +1,7 @@
 package org.unidue.ub.libintel.almaconnector.clients.alma.users;
 
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 import org.unidue.ub.alma.shared.user.AlmaUser;
@@ -20,7 +21,10 @@ public interface AlmaUserApiClient {
      * @param userId A unique identifier for the user (required)
      * @param userIdType The type of identifier that is being searched. Optional. If this is not provided, all unique identifier types are used. The values that can be used are any of the values in UserIdentifierTypes code table. (optional, default to &quot;all_unique&quot;)
      */
-    @RequestMapping(method=RequestMethod.DELETE, value="/{userId}")
+    @RequestMapping(method=RequestMethod.DELETE,
+            value="/{userId}",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_JSON_VALUE)
     void deleteAlmaUsersUserId(@PathVariable("userId") String userId,
                                @RequestParam("user_id_type") String userIdType);
 
@@ -35,7 +39,10 @@ public interface AlmaUserApiClient {
      * @param sourceUserId The ID of the user in the source institution. Optional. (optional, default to &quot;&quot;)
      * @return List<AlmaUser>
      */
-    @RequestMapping(method=RequestMethod.GET, value="")
+    @RequestMapping(method=RequestMethod.GET,
+            value="",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_JSON_VALUE)
     List<AlmaUser> getAlmaUsers(@RequestParam("limit") Integer limit,
                                 @RequestParam("offset") Integer offset,
                                 @RequestParam("q") String q,
@@ -53,14 +60,20 @@ public interface AlmaUserApiClient {
      * @param sourceInstitutionCode The source institution Code. Optional. When used the user_id is used to locate a copied user (linked account) based on source_link_id. (optional, default to &quot;&quot;)
      * @return AlmaUser
      */
-    @RequestMapping(method=RequestMethod.GET, value="/{userId}")
+    @RequestMapping(method=RequestMethod.GET,
+            value="/{userId}",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_JSON_VALUE)
     AlmaUser getAlmaUsersUserId(@PathVariable("userId") String userId,
                                 @RequestParam("user_id_type") String userIdType,
                                 @RequestParam("view") String view,
                                 @RequestParam("expand") String expand,
                                 @RequestParam("source_institution_code") String sourceInstitutionCode);
 
-    @RequestMapping(method=RequestMethod.GET, value="/{userId}")
+    @RequestMapping(method=RequestMethod.GET,
+            value="/{userId}",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_JSON_VALUE)
     AlmaUser getAlmaUser(@PathVariable("userId") String userId,
                          @RequestParam("view") String view);
 
@@ -74,7 +87,10 @@ public interface AlmaUserApiClient {
      * @param sourceUserId The ID of the user in the source institution. Optional. (optional, default to &quot;&quot;)
      * @return AlmaUser
      */
-    @RequestMapping(method=RequestMethod.POST, value="")
+    @RequestMapping(method=RequestMethod.POST,
+            value="",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_JSON_VALUE)
     AlmaUser postAlmaUsers(@RequestBody AlmaUser body,
                            @RequestParam("social_authentication") String socialAuthentication,
                            @RequestParam("send_pin_number_letter") String sendPinNumberLetter,
@@ -90,7 +106,10 @@ public interface AlmaUserApiClient {
      * @param op The operation to be performed on the user. Mandatory. Currently op&#x3D;auth or op&#x3D;refresh are supported.  The default is auth. (optional, default to &quot;auth&quot;)
      * @return AlmaUser
      */
-    @RequestMapping(method=RequestMethod.POST, value="/{userId}")
+    @RequestMapping(method=RequestMethod.POST,
+            value="/{userId}",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_JSON_VALUE)
     AlmaUser postAlmaUsersUserId(@PathVariable("userId") String userId,
                                  @RequestParam("password") String password,
                                  @RequestParam("user_id_type") String userIdType,
@@ -106,7 +125,10 @@ public interface AlmaUserApiClient {
      * @param sendPinNumberLetter The email notification for PIN setting change will be sent (optional, default to &quot;false&quot;)
      * @return AlmaUser
      */
-    @RequestMapping(method=RequestMethod.PUT, value="/{userId}")
+    @RequestMapping(method=RequestMethod.PUT,
+            value="/{userId}",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_JSON_VALUE)
     AlmaUser putAlmaUsersUserId(@RequestBody AlmaUser body,
                                 @PathVariable("userId") String userId,
                                 @RequestParam("user_id_type") String userIdType,
@@ -125,7 +147,10 @@ public interface AlmaUserApiClient {
      * @param loan_status Active or Completeloan status. Default: Active. The Complete loan status is only relevant if historic loans haven't been anonymized
      * @return UserLoans
      */
-    @RequestMapping(method=RequestMethod.GET, value="/{userId}/loans")
+    @RequestMapping(method=RequestMethod.GET,
+            value="/{userId}/loans",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_JSON_VALUE)
     UserLoans getUserLoansByUserId(@PathVariable String userId,
                                    @RequestParam int limit,
                                    @RequestParam int offset,
@@ -145,7 +170,10 @@ public interface AlmaUserApiClient {
      * @param status Active or History request status. Default is active. The 'history' option is only available if the 'should_anonymize_requests' customer parameter is set to 'false' at the time the request was completed
      * @return UserRequests
      */
-    @RequestMapping(method=RequestMethod.GET, value="/{userId}/requests")
+    @RequestMapping(method=RequestMethod.GET,
+            value="/{userId}/requests",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_JSON_VALUE)
     UserRequests getUserRequestsByUserId(@PathVariable String userId,
                                          @RequestParam int limit,
                                          @RequestParam int offset,

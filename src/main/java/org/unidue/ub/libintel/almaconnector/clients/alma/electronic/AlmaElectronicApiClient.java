@@ -19,7 +19,10 @@ public interface AlmaElectronicApiClient {
    * @param serviceId The ID of the electronic service. (required)
    * @param portfolio The portfolio to be added to the collection.
    */
-  @RequestMapping(method= RequestMethod.POST, value="/e-collections/{collectionId}/e-services/{serviceId}/portfolios", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+  @RequestMapping(method= RequestMethod.POST,
+          value="/e-collections/{collectionId}/e-services/{serviceId}/portfolios",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
   Portfolio createElectronicPortfolio(@PathVariable("collectionId") String collectionId,
                                       @PathVariable("serviceId") String serviceId,
                                       @RequestBody Portfolio portfolio);
