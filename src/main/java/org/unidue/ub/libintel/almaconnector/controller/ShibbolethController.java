@@ -32,7 +32,7 @@ public class ShibbolethController {
     }
 
     @DeleteMapping("/{platform}")
-    public ResponseEntity<?> deletePlatform(String platform) {
+    public ResponseEntity<?> deletePlatform(@PathVariable String platform) {
         this.shibbolethDataService.delete(platform);
         return ResponseEntity.ok().build();
     }

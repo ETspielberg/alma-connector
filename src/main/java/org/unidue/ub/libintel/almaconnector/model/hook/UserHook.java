@@ -6,7 +6,6 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.springframework.data.keyvalue.annotation.KeySpace;
 import org.springframework.data.redis.core.RedisHash;
-import org.unidue.ub.alma.shared.bibs.Item;
 import org.unidue.ub.alma.shared.conf.GeneralInstitution;
 import org.unidue.ub.alma.shared.user.AlmaUser;
 

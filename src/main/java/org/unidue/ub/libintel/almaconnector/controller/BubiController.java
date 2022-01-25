@@ -5,7 +5,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.unidue.ub.libintel.almaconnector.model.bubi.dto.*;
-import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderLine;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiPrice;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrder;
 import org.unidue.ub.libintel.almaconnector.service.PrimoService;

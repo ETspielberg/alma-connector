@@ -4,9 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.unidue.ub.libintel.almaconnector.service.LogService;
 import org.unidue.ub.libintel.almaconnector.model.hook.*;
-import org.unidue.ub.libintel.almaconnector.service.HookService;
 import org.unidue.ub.libintel.almaconnector.service.RedisService;
 import org.unidue.ub.libintel.almaconnector.service.alma.HookValidatorService;
 
@@ -28,101 +26,15 @@ import java.security.NoSuchAlgorithmException;
 @Slf4j
 public class HookController {
 
-    private final HookService hookService;
-
-    private final LogService logService;
-
     private final HookValidatorService hookValidatorService;
 
     private final RedisService redisService;
 
 
-    public HookController(HookService hookService,
-                          LogService logService,
-                          HookValidatorService hookValidatorService,
+    public HookController(HookValidatorService hookValidatorService,
                           RedisService redisService) {
-        this.hookService = hookService;
         this.redisService = redisService;
-        this.logService = logService;
         this.hookValidatorService = hookValidatorService;
-    }
-
-    @GetMapping("/userListener")
-    public ResponseEntity<Challenge> answerUserChallenge(String challenge) {
-        return ResponseEntity.ok(new Challenge(challenge));
-    }
-
-    @PostMapping("/userListener")
-    public ResponseEntity<?> receiveUserHook(@RequestBody UserHook hookContent, @RequestHeader("X-Exl-Signature") String signature) {
-        log.info(String.format("revceived hook of type %s and event %s", hookContent.getAction(), hookContent.getEvent().getValue()));
-        return ResponseEntity.ok().build();
-    }
-
-
-    @GetMapping("/jobListener")
-    public ResponseEntity<Challenge> answerJobChallenge(String challenge) {
-        return ResponseEntity.ok(new Challenge(challenge));
-    }
-
-    @PostMapping("/jobListener")
-    public ResponseEntity<?> receiveJobHook(@RequestBody JobHook hookContent, @RequestHeader("X-Exl-Signature") String signature) {
-        log.info(String.format("revceived hook of type %s", hookContent.getAction()));
-        this.logService.logJob(hookContent.getJobInstance());
-        this.hookService.processJobHook(hookContent);
-        return ResponseEntity.ok().build();
-    }
-
-
-    @GetMapping("/itemListener")
-    public ResponseEntity<Challenge> answerItemChallenge(String challenge) {
-        return ResponseEntity.ok(new Challenge(challenge));
-    }
-
-    @PostMapping("/itemListener")
-    public ResponseEntity<?> receiveItemHook(@RequestBody ItemHook hookContent, @RequestHeader("X-Exl-Signature") String signature) {
-        log.info(String.format("revceived hook of type %s and event %s", hookContent.getAction(), hookContent.getEvent().getValue()));
-        log.debug(hookContent.toString());
-        this.hookService.processItemHook(hookContent);
-        return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/bibListener")
-    public ResponseEntity<Challenge> answerBibChallenge(String challenge) {
-        return ResponseEntity.ok(new Challenge(challenge));
-    }
-
-    @PostMapping("/bibListener")
-    public ResponseEntity<?> receiveBibHook(@RequestBody BibHook hookContent, @RequestHeader("X-Exl-Signature") String signature) {
-        log.info(String.format("revceived hook of type %s and event %s", hookContent.getAction(), hookContent.getEvent().getValue()));
-        log.debug(hookContent.toString());
-        this.hookService.processBibHook(hookContent);
-        return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/requestsListener")
-    public ResponseEntity<Challenge> answerRequestChallenge(String challenge) {
-        return ResponseEntity.ok(new Challenge(challenge));
-    }
-
-    @PostMapping("/requestsListener")
-    public ResponseEntity<?> receiveRequestHook(@RequestBody RequestHook hookContent, @RequestHeader("X-Exl-Signature") String signature) {
-        log.info(String.format("revceived hook of type %s and event %s", hookContent.getAction(), hookContent.getEvent().getValue()));
-        log.debug(hookContent.toString());
-        this.hookService.processRequestHook(hookContent);
-        return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/loanListener")
-    public ResponseEntity<Challenge> answerLoanChallenge(String challenge) {
-        return ResponseEntity.ok(new Challenge(challenge));
-    }
-
-    @PostMapping("/loanListener")
-    public ResponseEntity<?> receiveLoanHook(@RequestBody LoanHook hookContent, @RequestHeader("X-Exl-Signature") String signature) {
-        log.info(String.format("revceived hook of type %s and event %s", hookContent.getAction(), hookContent.getEvent().getValue()));
-        log.debug(hookContent.toString());
-        this.hookService.processLoanHook(hookContent);
-        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/listener/{hookType}")
