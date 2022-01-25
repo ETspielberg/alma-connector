@@ -153,6 +153,11 @@ public class AlmaItemService {
         return this.almaCatalogApiClient.putBibsMmsIdHoldingsHoldingIdItemsItemPid(mmsId, holdingId, itemPid, item);
     }
 
+    /**
+     * performs a scan operation at a given location
+     * @param library the library the scan shall be performed in
+     * @param item the item to be scanned
+     */
     public void scanInItemAtLocation(String library, Item item) {
         this.almaCatalogApiClient.postBibsMmsIdHoldingsHoldingIdItemsItemPid(
                 item.getBibData().getMmsId(),
@@ -177,6 +182,11 @@ public class AlmaItemService {
         return this.findItemByMmsAndItemId(item.getBibData().getMmsId(), item.getItemData().getPid());
     }
 
+    /**
+     * retreives an item from alma by its item id (setting mms-id to 'ALL')
+     * @param itemId the ID of the item to be retrieved
+     * @return the alma Item object
+     */
     public Item findItemByItemId(String itemId) {
         try {
             return this.findItemByMmsAndItemId("ALL", itemId);
@@ -184,5 +194,37 @@ public class AlmaItemService {
             log.warn(String.format("could not retrieve item %s from alma: %s", itemId, fe.getMessage()), fe);
             return null;
         }
+    }
+
+    /**
+     * add the given note text to the public note, if it is not already present.
+     * @param item the item holding the public note the note text should be added to
+     * @param noteText the note text to be added
+     */
+    public void addPublicNote(Item item, String noteText) {
+        String note = item.getItemData().getPublicNote();
+        if (note == null || note.isEmpty()) {
+            item.getItemData().setPublicNote(noteText);
+            return;
+        }
+        if (note.contains(noteText))
+            return;
+        item.getItemData().setPublicNote(note + "; " + noteText);
+    }
+
+    /**
+     * removes the given note text from the public note, if it is present.
+     * @param item the item holding the public note the note text should be removed from
+     * @param noteText the note text to be removed
+     */
+    public void removePublicNote(Item item, String noteText) {
+        String note = item.getItemData().getPublicNote();
+        if (note == null || note.isEmpty()) {
+            return;
+        }
+        if (note.contains(noteText))
+            return;
+        item.getItemData().setPublicNote(note.replace(noteText, "").trim());
+
     }
 }
