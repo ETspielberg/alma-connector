@@ -54,9 +54,9 @@ public class AlmaItemData {
         return this;
     }
 
+    @Override
     public AlmaItemData clone() {
-        AlmaItemData clone = new AlmaItemData(this.collection, this.shelfmark)
+        return new AlmaItemData(this.collection, this.shelfmark)
                 .withHoldingId(this.holdingId).withMmsId(this.mmsId).withTitle(title);
-        return clone;
     }
 }

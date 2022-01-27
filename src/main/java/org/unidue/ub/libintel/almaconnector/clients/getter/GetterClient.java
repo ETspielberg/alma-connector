@@ -14,7 +14,7 @@ import java.util.List;
 @Service
 public interface GetterClient {
 
-    @RequestMapping(method= RequestMethod.GET, value="/es/manifestations/{mode}/{identifier}")
+    @RequestMapping(method= RequestMethod.GET, value="/es/manifestation/{mode}/{identifier}")
     List<EsPrintManifestation> getManifestations(@PathVariable("mode") String mode, @PathVariable("identifier") String identifier);
 
     @RequestMapping(method= RequestMethod.POST, value="/es/manifestation")
