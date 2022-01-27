@@ -381,10 +381,17 @@ public class HookService {
                         isChanged = true;
                     }
 
+                    // check for shelfmark with blanks
+                    String itemCallNo = item.getItemData().getAlternativeCallNumber();
+                    if (itemCallNo.startsWith(" ") || itemCallNo.endsWith(" ")) {
+                        itemCallNo = itemCallNo.strip();
+                        item.getItemData().setAlternativeCallNumber(itemCallNo);
+                        isChanged = true;
+                    }
+
                     log.info(String.format("got item with  call number %s and item call number %s", item.getHoldingData().getCallNumber(), item.getItemData().getAlternativeCallNumber()));
                     if (item.getHoldingData().getCallNumber() != null) {
                         // check holding shelfmark
-                        String itemCallNo = item.getItemData().getAlternativeCallNumber().strip();
                         if (!itemCallNo.isEmpty()) {
                             // check for call number type if it is not "other" (value 8) set it accordingly
                             ItemDataAlternativeCallNumberType itemDataAlternativeCallNumberType = item.getItemData().getAlternativeCallNumberType();
