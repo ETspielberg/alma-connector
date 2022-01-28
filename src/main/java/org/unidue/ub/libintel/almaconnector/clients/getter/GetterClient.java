@@ -20,3 +20,4 @@ public interface GetterClient {
     @RequestMapping(method= RequestMethod.POST, value="/es/manifestation")
     EsPrintManifestation saveManifestation(@RequestBody EsPrintManifestation manifestation);
 }
+

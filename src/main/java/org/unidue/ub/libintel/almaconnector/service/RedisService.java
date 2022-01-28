@@ -3,6 +3,7 @@ package org.unidue.ub.libintel.almaconnector.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -101,7 +102,9 @@ public class RedisService {
     public void cacheHook(String hook, String type) {
         try {
             ObjectMapper mapper = new ObjectMapper();
+            mapper.registerModule(new JavaTimeModule());
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            log.debug(hook);
             switch (type) {
                 case "loan": {
                     LoanHook loanHook = mapper.readValue(hook, LoanHook.class);

@@ -572,14 +572,14 @@ public class HookService {
      */
     private Item retrieveItem(String itemId) {
         // retrieve item from the redis cache
-        Item item = this.redisService.getItemHook(itemId).getItem();
+        ItemHook itemHook = this.redisService.getItemHook(itemId);
 
         // if the item is not found in the redis cache, collect the item from alma directly
-        if (item == null) {
+        if (itemHook == null) {
             log.debug(String.format("did not find item %s in redis cache, collecting user data from alma", itemId));
             return this.almaItemService.findItemByItemId(itemId);
-        }
-        return item;
+        } else
+            return itemHook.getItem();
     }
 
     /**
@@ -590,13 +590,13 @@ public class HookService {
      */
     private AlmaUser retrieveUser(String userId) {
         // retrieves the user from the redis cache
-        AlmaUser almaUser = this.redisService.getUserHook(userId).getUser();
+        UserHook userhook = this.redisService.getUserHook(userId);
 
         // if the user is not found in the redis cache, collect the user from alma directly
-        if (almaUser == null) {
+        if (userhook == null) {
             log.debug(String.format("did not find user %s in redis cache, collecting user data from alma", userId));
-            almaUser = this.almaUserService.getUser(userId);
-        }
-        return almaUser;
+            return this.almaUserService.getUser(userId);
+        } else
+            return userhook.getUser();
     }
 }

@@ -20,7 +20,7 @@ import java.util.Date;
 @XmlAccessorType(XmlAccessType.FIELD)
 @JacksonXmlRootElement(localName = "item_hook")
 @KeySpace("item_hook")
-@RedisHash(value = "item_hook", timeToLive = 30)
+@RedisHash(value = "item_hook", timeToLive = 10)
 // the time to live needs to be longer to account for intermediate savings in the metadata editor and for item
 // collection from the redis cash after request or loan webhooks
 public class ItemHook implements Serializable {
