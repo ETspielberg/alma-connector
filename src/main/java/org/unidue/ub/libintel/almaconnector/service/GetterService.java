@@ -102,6 +102,8 @@ public class GetterService {
      * @param date the update date from the webhook
      */
     public void deleteItem(Item almaItem, Date date) {
+        if (almaItem.getBibData() == null || almaItem.getBibData().getMmsId() == null)
+            return;
         String mmsId = almaItem.getBibData().getMmsId();
         EsPrintManifestation esPrintManifestation = retrieveOrBuildManifestation(mmsId, almaItem, date);
         if (esPrintManifestation == null)

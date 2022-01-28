@@ -346,9 +346,6 @@ public class HookService {
             // check, whether the new shelfmark is found by the regalfinder. an alert is sent via email if it is not.
             this.regalfinderService.checkRegalfinder(item);
 
-            // index the item change to elasticsearch
-            this.getterService.updateItem(item, hook.getTime());
-
             // perform special operations for material types
             switch (item.getItemData().getPhysicalMaterialType().getValue()) {
 
@@ -376,7 +373,7 @@ public class HookService {
 
                     // check for barcode with blanks
                     String barcode = item.getItemData().getBarcode();
-                    if (barcode.contains(" ")) {
+                    if (barcode.startsWith(" ") || barcode.endsWith(" ")) {
                         item.getItemData().setBarcode(item.getItemData().getBarcode().strip());
                         isChanged = true;
                     }
@@ -389,7 +386,7 @@ public class HookService {
                         isChanged = true;
                     }
 
-                    log.info(String.format("got item with  call number %s and item call number %s", item.getHoldingData().getCallNumber(), item.getItemData().getAlternativeCallNumber()));
+                    log.info(String.format("got item with call number '%s' and item call number '%s'", item.getHoldingData().getCallNumber(), item.getItemData().getAlternativeCallNumber()));
                     if (item.getHoldingData().getCallNumber() != null) {
                         // check holding shelfmark
                         if (!itemCallNo.isEmpty()) {
@@ -431,6 +428,9 @@ public class HookService {
                         this.almaItemService.updateItem(item);
                 }
             }
+
+            // index the item changes to elasticsearch
+            this.getterService.updateItem(item, hook.getTime());
         }
     }
 
