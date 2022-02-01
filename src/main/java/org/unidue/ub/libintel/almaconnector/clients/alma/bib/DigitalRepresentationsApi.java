@@ -1,8 +1,9 @@
 package org.unidue.ub.libintel.almaconnector.clients.alma.bib;
 
-import feign.*;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.*;
 import org.unidue.ub.libintel.almaconnector.clients.alma.AlmaFeignConfiguration;
 
 @FeignClient(name = "digitalRepresentations", url = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/bibs", configuration = AlmaFeignConfiguration.class)
@@ -18,11 +19,14 @@ public interface DigitalRepresentationsApi {
    * @param override Indication whether the representation should be deleted even if warnings exist. Optional. By default: false. (optional, default to &quot;false&quot;)
    * @param bibs Method for handling a bib left without any representations: retain, suppress or delete. Optional. By default: retain. (optional, default to &quot;retain&quot;)
    */
-  @RequestLine("DELETE /almaws/v1/bibs/{mmsId}/representations/{repId}?override={override}&bibs={bibs}")
-  @Headers({
-    "Accept: application/json",
-  })
-  void deleteAlmawsV1BibsMmsIdRepresentationsRepId(@Param("mms_id") String mmsId, @Param("rep_id") String repId, @Param("override") String override, @Param("bibs") String bibs);
+  @RequestMapping(method = RequestMethod.DELETE,
+          value = "/{mmsId}/representations/{repId}",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  void deleteBibsMmsIdRepresentationsRepId(@PathVariable("mmsId") String mmsId,
+                                                   @PathVariable("repId") String repId,
+                                                   @RequestParam("override") String override,
+                                                   @RequestParam("bibs") String bibs);
 
   /**
    * Delete Representation File
@@ -33,11 +37,15 @@ public interface DigitalRepresentationsApi {
    * @param representations Method for handling a representation left without any files: retain or delete. Optional. By default: retain. (optional, default to &quot;retain&quot;)
    * @param bibs Method for handling a bib left without any representations: retain , suppress or delete. Optional. By default: retain. (optional, default to &quot;retain&quot;)
    */
-  @RequestLine("DELETE /almaws/v1/bibs/{mmsId}/representations/{repId}/files/{fileId}?representations={representations}&bibs={bibs}")
-  @Headers({
-    "Accept: application/json",
-  })
-  void deleteAlmawsV1BibsMmsIdRepresentationsRepIdFilesFileId(@Param("mms_id") String mmsId, @Param("rep_id") String repId, @Param("file_id") String fileId, @Param("representations") String representations, @Param("bibs") String bibs);
+  @RequestMapping(method = RequestMethod.DELETE,
+          value = "/{mmsId}/representations/{repId}/files/{fileId}",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  void deleteBibsMmsIdRepresentationsRepIdFilesFileId(@PathVariable("mmsId") String mmsId,
+                                                              @PathVariable("repId") String repId, 
+                                                              @PathVariable("fileId") String fileId,
+                                                              @RequestParam("representations") String representations,
+                                                              @RequestParam("bibs") String bibs);
 
 
   /**
@@ -49,11 +57,14 @@ public interface DigitalRepresentationsApi {
    * @param offset Offset of the results returned. Optional. Default value: 0, which means that the first results will be returned. (optional)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/bibs/{mmsId}/representations?originating_record_id={originatingRecordId}&limit={limit}&offset={offset}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1BibsMmsIdRepresentations(@Param("mms_id") String mmsId, @Param("originating_record_id") String originatingRecordId, @Param("limit") Integer limit, @Param("offset") Integer offset);
+  @RequestMapping(method = RequestMethod.GET,
+          value = "/{mmsId}/representations",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getBibsMmsIdRepresentations(@PathVariable("mmsId") String mmsId, 
+                                             @RequestParam("originating_record_id") String originatingRecordId, 
+                                             @RequestParam("limit") Integer limit, 
+                                             @RequestParam("offset") Integer offset);
 
 
   /**
@@ -63,11 +74,12 @@ public interface DigitalRepresentationsApi {
    * @param repId The Representation ID. (required)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/bibs/{mmsId}/representations/{repId}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1BibsMmsIdRepresentationsRepId(@Param("mms_id") String mmsId, @Param("rep_id") String repId);
+  @RequestMapping(method = RequestMethod.GET,
+          value = "/{mmsId}/representations/{repId}",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getBibsMmsIdRepresentationsRepId(@PathVariable("mmsId") String mmsId,
+                                                  @PathVariable("repId") String repId);
 
   /**
    * Retrieve Representation Files&#39; Details
@@ -77,11 +89,13 @@ public interface DigitalRepresentationsApi {
    * @param expand If expand&#x3D;url the &lt;url&gt; field will hold the signed URL for downloading. (optional, default to &quot;&quot;)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/bibs/{mmsId}/representations/{repId}/files?expand={expand}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1BibsMmsIdRepresentationsRepIdFiles(@Param("mms_id") String mmsId, @Param("rep_id") String repId, @Param("expand") String expand);
+  @RequestMapping(method = RequestMethod.GET,
+          value = "/{mmsId}/representations/{repId}/files",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getBibsMmsIdRepresentationsRepIdFiles(@PathVariable("mmsId") String mmsId, 
+                                                       @PathVariable("repId") String repId, 
+                                                       @RequestParam("expand") String expand);
 
 
   /**
@@ -93,11 +107,14 @@ public interface DigitalRepresentationsApi {
    * @param expand If expand&#x3D;url the &lt;url&gt; field will hold the signed URL for downloading. (optional, default to &quot;&quot;)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/bibs/{mmsId}/representations/{repId}/files/{fileId}?expand={expand}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1BibsMmsIdRepresentationsRepIdFilesFileId(@Param("mms_id") String mmsId, @Param("rep_id") String repId, @Param("file_id") String fileId, @Param("expand") String expand);
+  @RequestMapping(method = RequestMethod.GET,
+          value = "/{mmsId}/representations/{repId}/files/{fileId}",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getBibsMmsIdRepresentationsRepIdFilesFileId(@PathVariable("mmsId") String mmsId, 
+                                                             @PathVariable("repId") String repId, 
+                                                             @PathVariable("fileId") String fileId, 
+                                                             @RequestParam("expand") String expand);
 
 
   /**
@@ -108,12 +125,12 @@ public interface DigitalRepresentationsApi {
    * @param generateLabel Auto-generate label: true/false (optional, default to &quot;false&quot;)
    * @return Object
    */
-  @RequestLine("POST /almaws/v1/bibs/{mmsId}/representations?generate_label={generateLabel}")
-  @Headers({
-    "Content-Type: application/json",
-    "Accept: application/json",
-  })
-  Object postAlmawsV1BibsMmsIdRepresentations(@Param("mms_id") String mmsId, Object body, @Param("generate_label") String generateLabel);
+  @RequestMapping(method = RequestMethod.POST,
+          value = "/{mmsId}/representations",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object postBibsMmsIdRepresentations(@PathVariable("mmsId") String mmsId, Object body, 
+                                              @RequestParam("generate_label") String generateLabel);
 
 
   /**
@@ -124,12 +141,13 @@ public interface DigitalRepresentationsApi {
    * @param body This method takes a Representation File object. See [here](/alma/apis/docs/xsd/rest_representation_file.xsd?tags&#x3D;POST) (required)
    * @return Object
    */
-  @RequestLine("POST /almaws/v1/bibs/{mmsId}/representations/{repId}/files")
-  @Headers({
-    "Content-Type: application/json",
-    "Accept: application/json",
-  })
-  Object postAlmawsV1BibsMmsIdRepresentationsRepIdFiles(@Param("mms_id") String mmsId, @Param("rep_id") String repId, Object body);
+  @RequestMapping(method = RequestMethod.POST,
+          value = "/{mmsId}/representations/{repId}/files",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object postBibsMmsIdRepresentationsRepIdFiles(@PathVariable("mmsId") String mmsId, 
+                                                        @PathVariable("repId") String repId, 
+                                                        @RequestBody Object body);
 
   /**
    * Update Representation
@@ -140,12 +158,14 @@ public interface DigitalRepresentationsApi {
    * @param generateLabel Auto-generate label: true/false (optional, default to &quot;false&quot;)
    * @return Object
    */
-  @RequestLine("PUT /almaws/v1/bibs/{mmsId}/representations/{repId}?generate_label={generateLabel}")
-  @Headers({
-    "Content-Type: application/json",
-    "Accept: application/json",
-  })
-  Object putAlmawsV1BibsMmsIdRepresentationsRepId(@Param("mms_id") String mmsId, @Param("rep_id") String repId, Object body, @Param("generate_label") String generateLabel);
+  @RequestMapping(method = RequestMethod.PUT,
+          value = "/{mmsId}/representations/{repId}",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object putBibsMmsIdRepresentationsRepId(@PathVariable("mmsId") String mmsId, 
+                                                  @PathVariable("repId") String repId,
+                                                  @RequestBody Object body, 
+                                                  @RequestParam("generate_label") String generateLabel);
 
   /**
    * Update Representation File
@@ -156,10 +176,12 @@ public interface DigitalRepresentationsApi {
    * @param body This method takes a Representation File object. See [here](/alma/apis/docs/xsd/rest_representation_file.xsd?tags&#x3D;PUT) (required)
    * @return Object
    */
-  @RequestLine("PUT /almaws/v1/bibs/{mmsId}/representations/{repId}/files/{fileId}")
-  @Headers({
-    "Content-Type: application/json",
-    "Accept: application/json",
-  })
-  Object putAlmawsV1BibsMmsIdRepresentationsRepIdFilesFileId(@Param("mms_id") String mmsId, @Param("rep_id") String repId, @Param("file_id") String fileId, Object body);
+  @RequestMapping(method = RequestMethod.PUT,
+          value = "/{mmsId}/representations/{repId}/files/{fileId}",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object putBibsMmsIdRepresentationsRepIdFilesFileId(@PathVariable("mmsId") String mmsId,
+                                                             @PathVariable("repId") String repId,
+                                                             @PathVariable("fileId") String fileId,
+                                                             @RequestBody Object body);
 }

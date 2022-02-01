@@ -1,8 +1,11 @@
 package org.unidue.ub.libintel.almaconnector.clients.alma.conf;
 
-import feign.*;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.unidue.ub.libintel.almaconnector.clients.alma.AlmaFeignConfiguration;
 
 @FeignClient(name = "utilities", url = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/conf/utlilities", configuration = AlmaFeignConfiguration.class)
@@ -21,10 +24,17 @@ public interface UtilitiesApi {
    * @param receivedByCircDesk Add circulation desk filter. Must be used in conjunction with received_by_circ_library to filter results. (optional, default to &quot;&quot;)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/conf/utilities/fee-transactions?limit={limit}&offset={offset}&transaction_from_date={transactionFromDate}&transaction_to_date={transactionToDate}&transaction_type={transactionType}&owner={owner}&received_by_circ_library={receivedByCircLibrary}&received_by_circ_desk={receivedByCircDesk}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1ConfUtilitiesFeeTransactions(@Param("limit") Integer limit, @Param("offset") Integer offset, @Param("transaction_from_date") String transactionFromDate, @Param("transaction_to_date") String transactionToDate, @Param("transaction_type") String transactionType, @Param("owner") String owner, @Param("received_by_circ_library") String receivedByCircLibrary, @Param("received_by_circ_desk") String receivedByCircDesk);
+  @RequestMapping(method= RequestMethod.GET,
+          value="",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getConfUtilitiesFeeTransactions(@RequestParam("limit") Integer limit,
+                                                 @RequestParam("offset") Integer offset,
+                                                 @RequestParam("transaction_from_date") String transactionFromDate,
+                                                 @RequestParam("transaction_to_date") String transactionToDate,
+                                                 @RequestParam("transaction_type") String transactionType,
+                                                 @RequestParam("owner") String owner,
+                                                 @RequestParam("received_by_circ_library") String receivedByCircLibrary,
+                                                 @RequestParam("received_by_circ_desk") String receivedByCircDesk);
 
 }

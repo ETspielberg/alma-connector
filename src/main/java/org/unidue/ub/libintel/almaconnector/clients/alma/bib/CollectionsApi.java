@@ -1,8 +1,9 @@
 package org.unidue.ub.libintel.almaconnector.clients.alma.bib;
 
-import feign.*;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.*;
 import org.unidue.ub.libintel.almaconnector.clients.alma.AlmaFeignConfiguration;
 
 @FeignClient(name = "collections", url = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/bibs/collections", configuration = AlmaFeignConfiguration.class)
@@ -15,11 +16,11 @@ public interface CollectionsApi {
    * This Web service removes a collection that has no Sub Collections and no Bibliographic titles attached.
    * @param pid The collection ID. (required)
    */
-  @RequestLine("DELETE /almaws/v1/bibs/collections/{pid}")
-  @Headers({
-    "Accept: application/json",
-  })
-  void deleteAlmawsV1BibsCollectionsPid(@Param("pid") String pid);
+  @RequestMapping(method = RequestMethod.DELETE,
+          value = "/collections/{pid}",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  void deleteBibsCollectionsPid(@PathVariable("pid") String pid);
 
   /**
    * Remove Bib from a collection
@@ -27,11 +28,12 @@ public interface CollectionsApi {
    * @param pid The collection ID. (required)
    * @param mmsId The Bib Record ID (for example, 99939650000541). (required)
    */
-  @RequestLine("DELETE /almaws/v1/bibs/collections/{pid}/bibs/{mmsId}")
-  @Headers({
-    "Accept: application/json",
-  })
-  void deleteAlmawsV1BibsCollectionsPidBibsMmsId(@Param("pid") String pid, @Param("mms_id") String mmsId);
+  @RequestMapping(method = RequestMethod.DELETE,
+          value = "/collections/{pid}/bibs/{mmsId}",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  void deleteBibsCollectionsPidBibsMmsId(@PathVariable("pid") String pid,
+                                         @PathVariable("mmsId") String mmsId);
 
   /**
    * Retrieve Collections
@@ -40,11 +42,12 @@ public interface CollectionsApi {
    * @param q Search query. Optional.  Does not work with levels parameter. Searching for text in library, collection name, external system or external ID. Multiple search terms may be combined with AND only.  For example q&#x3D;external_system~x%20AND%20external_id~y. (optional, default to &quot;&quot;)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/bibs/collections?level={level}&q={q}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1BibsCollections(@Param("level") String level, @Param("q") String q);
+  @RequestMapping(method = RequestMethod.GET,
+          value = "/collections",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getBibsCollections(@RequestParam("level") String level,
+                            @RequestParam("q") String q);
 
 
   /**
@@ -54,11 +57,12 @@ public interface CollectionsApi {
    * @param level This parameter determines the number of levels of sub-collections should be retrieved. For example, 1 &#x3D; only current; 2 &#x3D; immediate decendants. Default is 1. (required)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/bibs/collections/{pid}?level={level}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1BibsCollectionsPid(@Param("pid") String pid, @Param("level") String level);
+  @RequestMapping(method = RequestMethod.GET,
+          value = "/collections/{pid}",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getBibsCollectionsPid(@PathVariable("pid") String pid,
+                               @RequestParam("level") String level);
 
 
   /**
@@ -69,11 +73,13 @@ public interface CollectionsApi {
    * @param limit Limits the number of results. Optional. Valid values are 0-100. Default value: 10. (optional)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/bibs/collections/{pid}/bibs?offset={offset}&limit={limit}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1BibsCollectionsPidBibs(@Param("pid") String pid, @Param("offset") String offset, @Param("limit") Integer limit);
+  @RequestMapping(method = RequestMethod.GET,
+          value = "/collections/{pid}/bibs",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getBibsCollectionsPidBibs(@PathVariable("pid") String pid,
+                                   @RequestParam("offset") String offset,
+                                   @RequestParam("limit") Integer limit);
 
 
   /**
@@ -83,12 +89,12 @@ public interface CollectionsApi {
    * @param recordFormat The record format which may be marc21, unimarc, kormarc, cnmarc, dc, dcap01, dcap02, or etd. (optional, default to &quot;marc21&quot;)
    * @return Object
    */
-  @RequestLine("POST /almaws/v1/bibs/collections?record_format={recordFormat}")
-  @Headers({
-    "Content-Type: application/json",
-    "Accept: application/json",
-  })
-  Object postAlmawsV1BibsCollections(Object body, @Param("record_format") String recordFormat);
+  @RequestMapping(method = RequestMethod.POST,
+          value = "/collections",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object postBibsCollections(@RequestBody Object body,
+                             @RequestParam("record_format") String recordFormat);
 
 
   /**
@@ -98,12 +104,12 @@ public interface CollectionsApi {
    * @param body This method takes an Bib object with only mms_id. See [here](/alma/apis/docs/xsd/rest_bib.xsd?tags&#x3D;POST) (required)
    * @return Object
    */
-  @RequestLine("POST /almaws/v1/bibs/collections/{pid}/bibs")
-  @Headers({
-    "Content-Type: application/json",
-    "Accept: application/json",
-  })
-  Object postAlmawsV1BibsCollectionsPidBibs(@Param("pid") String pid, Object body);
+  @RequestMapping(method = RequestMethod.POST,
+          value = "/collections/{pid}/bibs",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object postBibsCollectionsPidBibs(@PathVariable("pid") String pid,
+                                    @RequestBody Object body);
 
   /**
    * Update Collection
@@ -112,10 +118,10 @@ public interface CollectionsApi {
    * @param body This method takes a Collection object. See [here](/alma/apis/docs/xsd/rest_collection.xsd?tags&#x3D;PUT) (required)
    * @return Object
    */
-  @RequestLine("PUT /almaws/v1/bibs/collections/{pid}")
-  @Headers({
-    "Content-Type: application/json",
-    "Accept: application/json",
-  })
-  Object putAlmawsV1BibsCollectionsPid(@Param("pid") String pid, Object body);
+  @RequestMapping(method = RequestMethod.PUT,
+          value = "/collections/{pid}",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object putBibsCollectionsPid(@PathVariable("pid") String pid,
+                               @RequestBody Object body);
 }

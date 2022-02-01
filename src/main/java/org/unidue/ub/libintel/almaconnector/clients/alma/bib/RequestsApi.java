@@ -1,8 +1,9 @@
 package org.unidue.ub.libintel.almaconnector.clients.alma.bib;
 
-import feign.*;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.*;
 import org.unidue.ub.libintel.almaconnector.clients.alma.AlmaFeignConfiguration;
 
 @FeignClient(name = "requests", url = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/bibs", configuration = AlmaFeignConfiguration.class)
@@ -21,11 +22,17 @@ public interface RequestsApi {
    * @param note Note with additional information regarding the cancellation. (optional, default to &quot;&quot;)
    * @param notifyUser Boolean flag for notifying the requester of the cancellation (when relevant). Defaults to &#39;true&#39;. (optional, default to true)
    */
-  @RequestLine("DELETE /almaws/v1/bibs/{mmsId}/holdings/{holdingId}/items/{itemPid}/requests/{requestId}?reason={reason}&note={note}&notify_user={notifyUser}")
-  @Headers({
-    "Accept: application/json",
-  })
-  void deleteAlmawsV1BibsMmsIdHoldingsHoldingIdItemsItemPidRequestsRequestId(@Param("mmsId") String mmsId, @Param("holdingId") String holdingId, @Param("itemPid") String itemPid, @Param("requestId") String requestId, @Param("reason") String reason, @Param("note") String note, @Param("notify_user") Boolean notifyUser);
+  @RequestMapping(method = RequestMethod.DELETE,
+          value = "/{mmsId}/holdings/{holdingId}/items/{itemPid}/requests/{requestId}",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  void deleteBibsMmsIdHoldingsHoldingIdItemsItemPidRequestsRequestId(@PathVariable("mmsId") String mmsId,
+                                                                             @PathVariable("holdingId") String holdingId,
+                                                                             @PathVariable("itemPid") String itemPid,
+                                                                             @PathVariable("requestId") String requestId,
+                                                                             @RequestParam("reason") String reason, 
+                                                                             @RequestParam("note") String note, 
+                                                                             @RequestParam("notify_user") Boolean notifyUser);
 
 
   /**
@@ -37,11 +44,15 @@ public interface RequestsApi {
    * @param note Note with additional information regarding the cancellation. (optional, default to &quot;&quot;)
    * @param notifyUser Boolean flag for notifying the requester of the cancellation (when relevant). Defaults to &#39;true&#39;. (optional, default to true)
    */
-  @RequestLine("DELETE /almaws/v1/bibs/{mmsId}/requests/{requestId}?reason={reason}&note={note}&notify_user={notifyUser}")
-  @Headers({
-    "Accept: application/json",
-  })
-  void deleteAlmawsV1BibsMmsIdRequestsRequestId(@Param("mmsId") String mmsId, @Param("requestId") String requestId, @Param("reason") String reason, @Param("note") String note, @Param("notify_user") Boolean notifyUser);
+  @RequestMapping(method = RequestMethod.DELETE,
+          value = "/{mmsId}/requests/{requestId}",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  void deleteBibsMmsIdRequestsRequestId(@PathVariable("mmsId") String mmsId,
+                                                @PathVariable("requestId") String requestId, 
+                                                @RequestParam("reason") String reason, 
+                                                @RequestParam("note") String note, 
+                                                @RequestParam("notify_user") Boolean notifyUser);
 
 
   /**
@@ -54,16 +65,20 @@ public interface RequestsApi {
    * @param userIdType The type of identifier that is being searched. Optional. If this is not provided, all unique identifier types are used. The values that can be used are any of the values in the User Identifier Type code table. (optional, default to &quot;all_unique&quot;)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/bibs/{mmsId}/booking-availability?period={period}&period_type={periodType}&user_id={userId}&user_id_type={userIdType}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1BibsMmsIdBookingAvailability(@Param("mms_id") String mmsId, @Param("period") Integer period, @Param("period_type") String periodType, @Param("user_id") String userId, @Param("user_id_type") String userIdType);
+  @RequestMapping(method = RequestMethod.GET,
+          value = "/{mmsId}/booking-availability",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getBibsMmsIdBookingAvailability(@PathVariable("mmsId") String mmsId, 
+                                         @RequestParam("period") Integer period, 
+                                         @RequestParam("period_type") String periodType, 
+                                         @RequestParam("user_id") String userId, 
+                                         @RequestParam("user_id_type") String userIdType);
 
 
   /**
    * Retrieve User Requests per Item
-   * This web service returns a list of requests per the given item (using item_id).
+   * This web service returns a list of requests per the given item (using itemPid).
    * @param mmsId The Bib Record ID. (required)
    * @param holdingId The Holding Bib Record ID. (required)
    * @param itemId The item ID. (required)
@@ -71,11 +86,15 @@ public interface RequestsApi {
    * @param status Active or history request status . The default is active. (optional, default to &quot;active&quot;)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/bibs/{mmsId}/holdings/{holdingId}/items/{itemId}/requests?request_type={requestType}&status={status}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1BibsMmsIdHoldingsHoldingIdItemsItemIdRequests(@Param("mms_id") String mmsId, @Param("holding_id") String holdingId, @Param("item_id") String itemId, @Param("request_type") String requestType, @Param("status") String status);
+  @RequestMapping(method = RequestMethod.GET,
+          value = "/{mmsId}/holdings/{holdingId}/items/{itemPid}/requests",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getBibsMmsIdHoldingsHoldingIdItemsItemIdRequests(@PathVariable("mmsId") String mmsId, 
+                                                          @PathVariable("holdingId") String holdingId, 
+                                                          @PathVariable("itemPid") String itemId,
+                                                          @RequestParam("request_type") String requestType, 
+                                                          @RequestParam("status") String status);
 
 
   /**
@@ -87,11 +106,14 @@ public interface RequestsApi {
    * @param requestId The Request ID. (required)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/bibs/{mmsId}/holdings/{holdingId}/items/{itemId}/requests/{requestId}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1BibsMmsIdHoldingsHoldingIdItemsItemIdRequestsRequestId(@Param("mms_id") String mmsId, @Param("holding_id") String holdingId, @Param("item_id") String itemId, @Param("request_id") String requestId);
+  @RequestMapping(method = RequestMethod.GET,
+          value = "/{mmsId}/holdings/{holdingId}/items/{itemId}/requests/{requestId}",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getBibsMmsIdHoldingsHoldingIdItemsItemIdRequestsRequestId(@PathVariable("mmsId") String mmsId, 
+                                                                   @PathVariable("holdingId") String holdingId,
+                                                                   @PathVariable("itemId") String itemId, 
+                                                                   @PathVariable("requestId") String requestId);
 
   /**
    * Retrieve booking availability for an Item
@@ -105,26 +127,34 @@ public interface RequestsApi {
    * @param userIdType The type of identifier that is being searched. Optional. If this is not provided, all unique identifier types are used. The values that can be used are any of the values in the User Identifier Type code table. (optional, default to &quot;all_unique&quot;)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/bibs/{mmsId}/holdings/{holdingId}/items/{itemPid}/booking-availability?period={period}&period_type={periodType}&user_id={userId}&user_id_type={userIdType}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1BibsMmsIdHoldingsHoldingIdItemsItemPidBookingAvailability(@Param("mms_id") String mmsId, @Param("holding_id") String holdingId, @Param("item_pid") String itemPid, @Param("period") Integer period, @Param("period_type") String periodType, @Param("user_id") String userId, @Param("user_id_type") String userIdType);
+  @RequestMapping(method = RequestMethod.GET,
+          value = "/{mmsId}/holdings/{holdingId}/items/{itemPid}/booking-availability",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getBibsMmsIdHoldingsHoldingIdItemsItemPidBookingAvailability(@PathVariable("mmsId") String mmsId, 
+                                                                      @PathVariable("holdingId") String holdingId, 
+                                                                      @PathVariable("itemPid") String itemPid, 
+                                                                      @RequestParam("period") Integer period, 
+                                                                      @RequestParam("period_type") String periodType, 
+                                                                      @RequestParam("user_id") String userId, 
+                                                                      @RequestParam("user_id_type") String userIdType);
 
 
   /**
    * Retrieve User Requests per Bib
-   * This web service returns a list of requests per the given bib (using mms_id).
+   * This web service returns a list of requests per the given bib (using mmsId).
    * @param mmsId The Bib Record ID. (required)
    * @param requestType Filter results by request type. Optional. Possible values: HOLD, DIGITIZATION, BOOKING, MOVE, WORK_ORDER. If not supplied, all request types will be returned. (optional, default to &quot;all_types&quot;)
    * @param status Active or history requests status. Default is active. (optional, default to &quot;active&quot;)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/bibs/{mmsId}/requests?request_type={requestType}&status={status}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1BibsMmsIdRequests(@Param("mms_id") String mmsId, @Param("request_type") String requestType, @Param("status") String status);
+  @RequestMapping(method = RequestMethod.GET,
+          value = "/{mmsId}/requests",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getBibsMmsIdRequests(@PathVariable("mmsId") String mmsId, 
+                              @RequestParam("request_type") String requestType, 
+                              @RequestParam("status") String status);
 
   /**
    * Retrieve User Title Request
@@ -133,11 +163,12 @@ public interface RequestsApi {
    * @param requestId The Request ID. (required)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/bibs/{mmsId}/requests/{requestId}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1BibsMmsIdRequestsRequestId(@Param("mms_id") String mmsId, @Param("request_id") String requestId);
+  @RequestMapping(method = RequestMethod.GET,
+          value = "/{mmsId}/requests/{requestId}",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getBibsMmsIdRequestsRequestId(@PathVariable("mmsId") String mmsId,
+                                       @PathVariable("requestId") String requestId);
 
   /**
    * Create request for an Item
@@ -150,12 +181,15 @@ public interface RequestsApi {
    * @param userIdType The type of identifier that is being searched. Optional. If this is not provided, all unique identifier types are used. The values that can be used are any of the values in the User Identifier Type code table. (optional, default to &quot;all_unique&quot;)
    * @return Object
    */
-  @RequestLine("POST /almaws/v1/bibs/{mmsId}/holdings/{holdingId}/items/{itemPid}/requests?user_id={userId}&user_id_type={userIdType}")
-  @Headers({
-    "Content-Type: application/json",
-    "Accept: application/json",
-  })
-  Object postAlmawsV1BibsMmsIdHoldingsHoldingIdItemsItemPidRequests(@Param("mms_id") String mmsId, @Param("holding_id") String holdingId, @Param("item_pid") String itemPid, Object body, @Param("user_id") String userId, @Param("user_id_type") String userIdType);
+  @RequestMapping(method = RequestMethod.POST,
+          value = "/{mmsId}/holdings/{holdingId}/items/{itemPid}/requests",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object postBibsMmsIdHoldingsHoldingIdItemsItemPidRequests(@PathVariable("mmsId") String mmsId,
+                                                            @PathVariable("holdingId") String holdingId,
+                                                            @PathVariable("itemPid") String itemPid, Object body,
+                                                            @RequestParam("user_id") String userId,
+                                                            @RequestParam("user_id_type") String userIdType);
 
 
   /**
@@ -169,11 +203,16 @@ public interface RequestsApi {
    * @param releaseItem Boolean flag for indicating whether to release the item from the request (optional, default to &quot;false&quot;)
    * @return Object
    */
-  @RequestLine("POST /almaws/v1/bibs/{mmsId}/holdings/{holdingId}/items/{itemPid}/requests/{requestId}?op={op}&release_item={releaseItem}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object postAlmawsV1BibsMmsIdHoldingsHoldingIdItemsItemPidRequestsRequestId(@Param("mms_id") String mmsId, @Param("holding_id") String holdingId, @Param("item_pid") String itemPid, @Param("request_id") String requestId, @Param("op") String op, @Param("release_item") String releaseItem);
+  @RequestMapping(method = RequestMethod.POST,
+          value = "/{mmsId}/holdings/{holdingId}/items/{itemPid}/requests/{requestId}",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object postBibsMmsIdHoldingsHoldingIdItemsItemPidRequestsRequestId(@PathVariable("mmsId") String mmsId,
+                                                                     @PathVariable("holdingId") String holdingId,
+                                                                     @PathVariable("itemPid") String itemPid,
+                                                                     @PathVariable("requestId") String requestId,
+                                                                     @RequestParam("op") String op,
+                                                                     @RequestParam("release_item") String releaseItem);
 
 
   /**
@@ -185,12 +224,14 @@ public interface RequestsApi {
    * @param userIdType The type of identifier that is being searched. Optional. If this is not provided, all unique identifier types are used. The values that can be used are any of the values in the User Identifier Type code table. (optional, default to &quot;all_unique&quot;)
    * @return Object
    */
-  @RequestLine("POST /almaws/v1/bibs/{mmsId}/requests?user_id={userId}&user_id_type={userIdType}")
-  @Headers({
-    "Content-Type: application/json",
-    "Accept: application/json",
-  })
-  Object postAlmawsV1BibsMmsIdRequests(@Param("mms_id") String mmsId, Object body, @Param("user_id") String userId, @Param("user_id_type") String userIdType);
+  @RequestMapping(method = RequestMethod.POST,
+          value = "/{mmsId}/requests",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object postBibsMmsIdRequests(@PathVariable("mmsId") String mmsId,
+                               @RequestBody Object body, 
+                               @RequestParam("user_id") String userId,
+                               @RequestParam("user_id_type") String userIdType);
 
 
   /**
@@ -202,11 +243,14 @@ public interface RequestsApi {
    * @param releaseItem Boolean flag for indicating whether to release the item from the request (optional, default to &quot;false&quot;)
    * @return Object
    */
-  @RequestLine("POST /almaws/v1/bibs/{mmsId}/requests/{requestId}?op={op}&release_item={releaseItem}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object postAlmawsV1BibsMmsIdRequestsRequestId(@Param("mms_id") String mmsId, @Param("request_id") String requestId, @Param("op") String op, @Param("release_item") String releaseItem);
+  @RequestMapping(method = RequestMethod.POST,
+          value = "/{mmsId}/requests/{requestId}",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object postBibsMmsIdRequestsRequestId(@PathVariable("mmsId") String mmsId,
+                                        @PathVariable("requestId") String requestId,
+                                        @RequestParam("op") String op,
+                                        @RequestParam("release_item") String releaseItem);
 
 
   /**
@@ -219,12 +263,15 @@ public interface RequestsApi {
    * @param body This method takes a User-Request object. See [here](/alma/apis/docs/xsd/rest_user_request.xsd?tags&#x3D;PUT) (required)
    * @return Object
    */
-  @RequestLine("PUT /almaws/v1/bibs/{mmsId}/holdings/{holdingId}/items/{itemPid}/requests/{requestId}")
-  @Headers({
-    "Content-Type: application/json",
-    "Accept: application/json",
-  })
-  Object putAlmawsV1BibsMmsIdHoldingsHoldingIdItemsItemPidRequestsRequestId(@Param("mms_id") String mmsId, @Param("holding_id") String holdingId, @Param("item_pid") String itemPid, @Param("request_id") String requestId, Object body);
+  @RequestMapping(method = RequestMethod.PUT,
+          value = "/{mmsId}/holdings/{holdingId}/items/{itemPid}/requests/{requestId}",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object putBibsMmsIdHoldingsHoldingIdItemsItemPidRequestsRequestId(@PathVariable("mmsId") String mmsId,
+                                                                    @PathVariable("holdingId") String holdingId,
+                                                                    @PathVariable("itemPid") String itemPid,
+                                                                    @PathVariable("requestId") String requestId,
+                                                                    @RequestBody Object body);
 
   /**
    * Update Title Request
@@ -234,10 +281,11 @@ public interface RequestsApi {
    * @param body This method takes a UserRequest object. See [here](/alma/apis/docs/xsd/rest_user_request.xsd?tags&#x3D;PUT) (required)
    * @return Object
    */
-  @RequestLine("PUT /almaws/v1/bibs/{mmsId}/requests/{requestId}")
-  @Headers({
-    "Content-Type: application/json",
-    "Accept: application/json",
-  })
-  Object putAlmawsV1BibsMmsIdRequestsRequestId(@Param("mms_id") String mmsId, @Param("request_id") String requestId, Object body);
+  @RequestMapping(method = RequestMethod.PUT,
+          value = "/{mmsId}/requests/{requestId}",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object putBibsMmsIdRequestsRequestId(@PathVariable("mmsId") String mmsId,
+                                       @PathVariable("requestId") String requestId,
+                                       @RequestBody Object body);
 }

@@ -1,8 +1,9 @@
 package org.unidue.ub.libintel.almaconnector.clients.alma.bib;
 
-import feign.*;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.*;
 import org.unidue.ub.libintel.almaconnector.clients.alma.AlmaFeignConfiguration;
 
 @FeignClient(name = "reminders", url = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/bibs", configuration = AlmaFeignConfiguration.class)
@@ -16,11 +17,12 @@ public interface RemindersApi {
    * @param mmsId MMS ID. Required. (required)
    * @param reminderId Reminder ID. Required. (required)
    */
-  @RequestLine("DELETE /almaws/v1/bibs/{mmsId}/reminders/{reminderId}")
-  @Headers({
-    "Accept: application/json",
-  })
-  void deleteAlmawsV1BibsMmsIdRemindersReminderId(@Param("mms_id") String mmsId, @Param("reminder_id") String reminderId);
+  @RequestMapping(method = RequestMethod.DELETE,
+          value = "/{mmsId}/reminders/{reminderId}",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  void deleteBibsMmsIdRemindersReminderId(@PathVariable("mmsId") String mmsId,
+                                                  @PathVariable("reminderId") String reminderId);
 
   /**
    * Retrieve a list of Reminders for BIB
@@ -36,11 +38,19 @@ public interface RemindersApi {
    * @param offset Offset of the results returned. Optional. Default value: 0, which means that the first results will be returned. (optional)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/bibs/{mmsId}/reminders?type={type}&status={status}&from={from}&to={to}&order_by={orderBy}&direction={direction}&limit={limit}&offset={offset}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1BibsMmsIdReminders(@Param("mms_id") String mmsId, @Param("type") String type, @Param("status") String status, @Param("from") String from, @Param("to") String to, @Param("order_by") String orderBy, @Param("direction") String direction, @Param("limit") Integer limit, @Param("offset") Integer offset);
+  @RequestMapping(method = RequestMethod.GET,
+          value = "/{mmsId}/reminders",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getBibsMmsIdReminders(@PathVariable("mmsId") String mmsId,
+                                       @RequestParam("type") String type,
+                                       @RequestParam("status") String status,
+                                       @RequestParam("from") String from,
+                                       @RequestParam("to") String to,
+                                       @RequestParam("order_by") String orderBy,
+                                       @RequestParam("direction") String direction,
+                                       @RequestParam("limit") Integer limit,
+                                       @RequestParam("offset") Integer offset);
 
 
   /**
@@ -50,11 +60,12 @@ public interface RemindersApi {
    * @param reminderId Reminder ID. Required. (required)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/bibs/{mmsId}/reminders/{reminderId}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1BibsMmsIdRemindersReminderId(@Param("mms_id") String mmsId, @Param("reminder_id") String reminderId);
+  @RequestMapping(method = RequestMethod.GET,
+          value = "/{mmsId}/reminders/{reminderId}",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getBibsMmsIdRemindersReminderId(@PathVariable("mmsId") String mmsId,
+                                                 @PathVariable("reminderId") String reminderId);
 
   /**
    * Creates a Reminder for BIB
@@ -63,12 +74,12 @@ public interface RemindersApi {
    * @param body This method takes a reminder object. See [here](/alma/apis/docs/xsd/rest_reminder.xsd?tags&#x3D;POST) (required)
    * @return Object
    */
-  @RequestLine("POST /almaws/v1/bibs/{mmsId}/reminders")
-  @Headers({
-    "Content-Type: application/json",
-    "Accept: application/json",
-  })
-  Object postAlmawsV1BibsMmsIdReminders(@Param("mms_id") String mmsId, Object body);
+  @RequestMapping(method = RequestMethod.POST,
+          value = "/{mmsId}/reminders",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object postBibsMmsIdReminders(@PathVariable("mmsId") String mmsId,
+                                        @RequestBody Object body);
 
   /**
    * Update a Reminder for BIB
@@ -78,10 +89,11 @@ public interface RemindersApi {
    * @param body This method takes a reminder object. See [here](/alma/apis/docs/xsd/rest_reminder.xsd?tags&#x3D;PUT) (required)
    * @return Object
    */
-  @RequestLine("PUT /almaws/v1/bibs/{mmsId}/reminders/{reminderId}")
-  @Headers({
-    "Content-Type: application/json",
-    "Accept: application/json",
-  })
-  Object putAlmawsV1BibsMmsIdRemindersReminderId(@Param("mms_id") String mmsId, @Param("reminder_id") String reminderId, Object body);
+  @RequestMapping(method = RequestMethod.PUT,
+          value = "/{mmsId}/reminders/{reminderId}",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object putBibsMmsIdRemindersReminderId(@PathVariable("mmsId") String mmsId,
+                                                 @PathVariable("reminderId") String reminderId,
+                                                 @RequestBody Object body);
 }

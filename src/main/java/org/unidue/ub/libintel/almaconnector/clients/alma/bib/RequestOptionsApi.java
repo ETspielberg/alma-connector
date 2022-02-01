@@ -1,8 +1,12 @@
 package org.unidue.ub.libintel.almaconnector.clients.alma.bib;
 
-import feign.*;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.unidue.ub.libintel.almaconnector.clients.alma.AlmaFeignConfiguration;
 
 @FeignClient(name = "requestOptions", url = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/bibs", configuration = AlmaFeignConfiguration.class)
@@ -19,11 +23,14 @@ public interface RequestOptionsApi {
    * @param userId The id of the user for which the request options will be calculated. Default value: GUEST (optional, default to &quot;GUEST&quot;)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/bibs/{mmsId}/holdings/{holdingId}/items/{itemPid}/request-options?user_id={userId}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1BibsMmsIdHoldingsHoldingIdItemsItemPidRequestOptions(@Param("mms_id") String mmsId, @Param("holding_id") String holdingId, @Param("item_pid") String itemPid, @Param("user_id") String userId);
+  @RequestMapping(method = RequestMethod.GET,
+          value = "/{mmsId}/holdings/{holdingId}/items/{itemPid}/request-options",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getBibsMmsIdHoldingsHoldingIdItemsItemPidRequestOptions(@PathVariable("mmsId") String mmsId,
+                                                                         @PathVariable("holdingId") String holdingId,
+                                                                         @PathVariable("itemPid") String itemPid,
+                                                                         @RequestParam("user_id") String userId);
 
 
   /**
@@ -34,9 +41,11 @@ public interface RequestOptionsApi {
    * @param considerDlr Include Display logic rules.  Default value: false (optional, default to &quot;false&quot;)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/bibs/{mmsId}/request-options?user_id={userId}&consider_dlr={considerDlr}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1BibsMmsIdRequestOptions(@Param("mms_id") String mmsId, @Param("user_id") String userId, @Param("consider_dlr") String considerDlr);
+  @RequestMapping(method = RequestMethod.GET,
+          value = "/{mmsId}/request-options",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getBibsMmsIdRequestOptions(@PathVariable("mmsId") String mmsId,
+                                            @RequestParam("user_id") String userId,
+                                            @RequestParam("consider_dlr") String considerDlr);
 }

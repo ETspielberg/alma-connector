@@ -27,8 +27,11 @@ public interface AlmaJobsApiClient {
    * @param profileId For filtering jobs by their profile ID. Optional. Relevant only for scheduled jobs. (optional, default to &quot;&quot;)
    * @return List<Job>
    */
-  @RequestMapping(method = RequestMethod.GET, value = "/")
-  Jobs getAlmawsV1ConfJobs(@RequestParam("limit") Integer limit,
+  @RequestMapping(method = RequestMethod.GET,
+          value = "/", 
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Jobs getConfJobs(@RequestParam("limit") Integer limit,
                            @RequestParam("offset") Integer offset,
                            @RequestParam("category") String category,
                            @RequestParam("type") String type,
@@ -40,8 +43,11 @@ public interface AlmaJobsApiClient {
    * @param jobId Unique id of the job. Mandatory. (required)
    * @return Job
    */
-  @RequestMapping(method = RequestMethod.GET, value = "/almaws/v1/conf/jobs/{job_id}")
-  Job getAlmawsV1ConfJobsJobId(@PathVariable("job_id") String jobId);
+  @RequestMapping(method = RequestMethod.GET,
+          value = "/almaws/v1/conf/jobs/{job_id}", 
+          produces = MediaType.APPLICATION_JSON_VALUE, 
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Job getConfJobsJobId(@PathVariable("job_id") String jobId);
 
   /**
    * Retrieve Job Instances
@@ -54,8 +60,11 @@ public interface AlmaJobsApiClient {
    * @param offset Offset of the results returned. Optional. Default value: 0, which means that the first results will be returned. (optional)
    * @return JobInstances
    */
-  @RequestMapping(method = RequestMethod.GET, value = "/{job_id}/instances", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-  JobInstances getAlmawsV1ConfJobsJobIdInstances(@PathVariable("job_id") String jobId,
+  @RequestMapping(method = RequestMethod.GET,
+          value = "/{job_id}/instances",
+          produces = MediaType.APPLICATION_JSON_VALUE, 
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  JobInstances getConfJobsJobIdInstances(@PathVariable("job_id") String jobId,
                                                  @RequestParam("submit_date_from") String submitDateFrom,
                                                  @RequestParam("submit_date_to") String submitDateTo,
                                                  @RequestParam("status") String status,
@@ -68,8 +77,11 @@ public interface AlmaJobsApiClient {
    * @param instanceId Unique id of the specific job instance. Mandatory. (required)
    * @return JobInstance
    */
-  @RequestMapping(method = RequestMethod.GET, value = "/{jobId}/instances/{instanceId}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-  JobInstance getAlmawsV1ConfJobsJobIdInstancesInstanceId(@PathVariable("jobId") String jobId,
+  @RequestMapping(method = RequestMethod.GET,
+          value = "/{jobId}/instances/{instanceId}", 
+          produces = MediaType.APPLICATION_JSON_VALUE, 
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  JobInstance getConfJobsJobIdInstancesInstanceId(@PathVariable("jobId") String jobId,
                                                           @PathVariable("instanceId") String instanceId);
 
   /**
@@ -80,8 +92,11 @@ public interface AlmaJobsApiClient {
    * @param body This method takes a Job object. See [here](/alma/apis/docs/xsd/rest_job.xsd?tags&#x3D;POST) (required)
    * @return Job
    */
-  @RequestMapping(method = RequestMethod.POST, value = "/{jobId}", produces = MediaType.APPLICATION_XML_VALUE, consumes = MediaType.APPLICATION_XML_VALUE)
-  Job postAlmawsV1ConfJobsJobId(@RequestBody JobParametersFile body,
+  @RequestMapping(method = RequestMethod.POST,
+          value = "/{jobId}", 
+          produces = MediaType.APPLICATION_XML_VALUE,
+          consumes = MediaType.APPLICATION_XML_VALUE)
+  Job postConfJobsJobId(@RequestBody JobParametersFile body,
                                 @PathVariable("jobId") String jobId,
                                 @RequestParam("op") String op);
 }

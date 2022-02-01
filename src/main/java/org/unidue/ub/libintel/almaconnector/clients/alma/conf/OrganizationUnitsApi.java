@@ -1,8 +1,12 @@
 package org.unidue.ub.libintel.almaconnector.clients.alma.conf;
 
-import feign.*;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.unidue.ub.libintel.almaconnector.clients.alma.AlmaFeignConfiguration;
 
 @FeignClient(name = "organizationUnits", url = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/conf", configuration = AlmaFeignConfiguration.class)
@@ -17,22 +21,23 @@ public interface OrganizationUnitsApi {
    * @param view Add optional parameter view&#x3D;brief to get a list of departments without operators. (optional, default to &quot;FULL&quot;)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/conf/departments?type={type}&view={view}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1ConfDepartments(@Param("type") String type, @Param("view") String view);
+  @RequestMapping(method= RequestMethod.GET,
+          value="/departments",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getConfDepartments(@RequestParam("type") String type,
+                                    @RequestParam("view") String view);
 
   /**
    * Retrieve Libraries
    * This API returns a list of all Libraries configured for the Institution.
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/conf/libraries")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1ConfLibraries();
+  @RequestMapping(method=RequestMethod.GET,
+          value="/libraries",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getConfLibraries();
 
   /**
    * Retrieve Library
@@ -40,11 +45,11 @@ public interface OrganizationUnitsApi {
    * @param libraryCode The code of the library. (required)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/conf/libraries/{libraryCode}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1ConfLibrariesLibraryCode(@Param("libraryCode") String libraryCode);
+  @RequestMapping(method=RequestMethod.GET,
+          value="/libraries/{libraryCode}",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getConfLibrariesLibraryCode(@PathVariable("libraryCode") String libraryCode);
 
   /**
    * Retrieve Locations
@@ -52,11 +57,11 @@ public interface OrganizationUnitsApi {
    * @param libraryCode The code of the library for which the locations should be retrieved. (required)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/conf/libraries/{libraryCode}/locations")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1ConfLibrariesLibraryCodeLocations(@Param("libraryCode") String libraryCode);
+  @RequestMapping(method=RequestMethod.GET,
+          value="/libraries/{libraryCode}/locations",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getConfLibrariesLibraryCodeLocations(@PathVariable("libraryCode") String libraryCode);
 
   /**
    * Retrieve Location
@@ -65,9 +70,10 @@ public interface OrganizationUnitsApi {
    * @param locationCode The code of the location to be retrieved. (required)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/conf/libraries/{libraryCode}/locations/{locationCode}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1ConfLibrariesLibraryCodeLocationsLocationCode(@Param("libraryCode") String libraryCode, @Param("locationCode") String locationCode);
+  @RequestMapping(method=RequestMethod.GET,
+          value="/libraries/{libraryCode}/locations/{locationCode}",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getConfLibrariesLibraryCodeLocationsLocationCode(@PathVariable("libraryCode") String libraryCode, 
+                                                                  @PathVariable("locationCode") String locationCode);
 }

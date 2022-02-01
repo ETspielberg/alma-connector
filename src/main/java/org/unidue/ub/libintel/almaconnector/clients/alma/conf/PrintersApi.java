@@ -1,8 +1,12 @@
 package org.unidue.ub.libintel.almaconnector.clients.alma.conf;
 
-import feign.*;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.unidue.ub.libintel.almaconnector.clients.alma.AlmaFeignConfiguration;
 
 @FeignClient(name = "printers", url = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/conf/printers", configuration = AlmaFeignConfiguration.class)
@@ -21,11 +25,16 @@ public interface PrintersApi {
    * @param offset Offset of the results returned. Optional. Default value: 0, which means that the first results will be returned. (optional)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/conf/printers?library={library}&printout_queue={printoutQueue}&name={name}&code={code}&limit={limit}&offset={offset}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1ConfPrinters(@Param("library") String library, @Param("printout_queue") String printoutQueue, @Param("name") String name, @Param("code") String code, @Param("limit") Integer limit, @Param("offset") Integer offset);
+  @RequestMapping(method= RequestMethod.GET,
+          value="",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getConfPrinters(@RequestParam("library") String library,
+                         @RequestParam("printout_queue") String printoutQueue,
+                         @RequestParam("name") String name,
+                         @RequestParam("code") String code,
+                         @RequestParam("limit") Integer limit,
+                         @RequestParam("offset") Integer offset);
 
   /**
    * Retrieve a Printer
@@ -33,9 +42,9 @@ public interface PrintersApi {
    * @param printerId  (required)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/conf/printers/{printerId}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1ConfPrintersPrinterId(@Param("printer_id") String printerId);
+  @RequestMapping(method=RequestMethod.GET,
+          value="/{printerId}",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getConfPrintersPrinterId(@PathVariable("printerId") String printerId);
 }

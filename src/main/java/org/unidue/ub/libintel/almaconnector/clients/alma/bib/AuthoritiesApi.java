@@ -1,8 +1,9 @@
 package org.unidue.ub.libintel.almaconnector.clients.alma.bib;
 
-import feign.*;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.*;
 import org.unidue.ub.libintel.almaconnector.clients.alma.AlmaFeignConfiguration;
 
 @FeignClient(name = "authorities", url = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/authorities", configuration = AlmaFeignConfiguration.class)
@@ -17,11 +18,13 @@ public interface AuthoritiesApi {
    * @param override Override the warnings and delete the Authority Record. Optional.  The default is to not override (false). (optional, default to &quot;false&quot;)
    * @param catalogerLevel Cataloger level of the user deleting the record. (optional, default to &quot;&quot;)
    */
-  @RequestLine("DELETE /almaws/v1/bibs/authorities/{authorityRecordId}?override={override}&cataloger_level={catalogerLevel}")
-  @Headers({
-    "Accept: application/json",
-  })
-  void deleteAlmawsV1BibsAuthoritiesAuthorityRecordId(@Param("authority_record_id") String authorityRecordId, @Param("override") String override, @Param("cataloger_level") String catalogerLevel);
+  @RequestMapping(method = RequestMethod.DELETE,
+          value = "/authorities/{authorityRecordId}",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  void deleteBibsAuthoritiesAuthorityRecordId(@PathVariable("authorityRecordId") String authorityRecordId,
+                                              @RequestParam("override") String override,
+                                              @RequestParam("cataloger_level") String catalogerLevel);
 
 
   /**
@@ -35,11 +38,16 @@ public interface AuthoritiesApi {
    * @param view Use view&#x3D;brief to retrieve without the MARCXML. (optional, default to &quot;full&quot;)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/bibs/authorities?originating_system={originatingSystem}&originating_system_id={originatingSystemId}&other_system_id={otherSystemId}&limit={limit}&offset={offset}&view={view}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1BibsAuthorities(@Param("originating_system") String originatingSystem, @Param("originating_system_id") String originatingSystemId, @Param("other_system_id") String otherSystemId, @Param("limit") Integer limit, @Param("offset") Integer offset, @Param("view") String view);
+  @RequestMapping(method = RequestMethod.GET,
+          value = "/authorities",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getBibsAuthorities(@RequestParam("originating_system") String originatingSystem,
+                            @RequestParam("originating_system_id") String originatingSystemId,
+                            @RequestParam("other_system_id") String otherSystemId,
+                            @RequestParam("limit") Integer limit,
+                            @RequestParam("offset") Integer offset,
+                            @RequestParam("view") String view);
 
 
   /**
@@ -49,11 +57,12 @@ public interface AuthoritiesApi {
    * @param view Use view&#x3D;brief to retrieve without the MARCXML. (optional, default to &quot;full&quot;)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/bibs/authorities/{authorityRecordId}?view={view}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1BibsAuthoritiesAuthorityRecordId(@Param("authority_record_id") String authorityRecordId, @Param("view") String view);
+  @RequestMapping(method = RequestMethod.GET,
+          value = "/authorities/{authorityRecordId}",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getBibsAuthoritiesAuthorityRecordId(@PathVariable("authorityRecordId") String authorityRecordId,
+                                             @RequestParam("view") String view);
 
 
   /**
@@ -66,12 +75,15 @@ public interface AuthoritiesApi {
    * @param checkMatch Indicating whether to check for a match. Default: false (record will be saved despite possible match). (optional, default to &quot;false&quot;)
    * @return Object
    */
-  @RequestLine("POST /almaws/v1/bibs/authorities?normalization={normalization}&validate={validate}&override_warning={overrideWarning}&check_match={checkMatch}")
-  @Headers({
-    "Content-Type: application/json",
-    "Accept: application/json",
-  })
-  Object postAlmawsV1BibsAuthorities(Object body, @Param("normalization") String normalization, @Param("validate") String validate, @Param("override_warning") String overrideWarning, @Param("check_match") String checkMatch);
+  @RequestMapping(method = RequestMethod.POST,
+          value = "/authorities",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object postBibsAuthorities(@RequestBody Object body,
+                             @RequestParam("normalization") String normalization,
+                             @RequestParam("validate") String validate,
+                             @RequestParam("override_warning") String overrideWarning,
+                             @RequestParam("check_match") String checkMatch);
 
 
   /**
@@ -88,10 +100,17 @@ public interface AuthoritiesApi {
    * @param checkMatch Indicating whether to check for a match. Default: false (record will be saved despite possible match). (optional, default to &quot;false&quot;)
    * @return Object
    */
-  @RequestLine("PUT /almaws/v1/bibs/authorities/{authorityRecordId}?normalization={normalization}&validate={validate}&override_warning={overrideWarning}&override_lock={overrideLock}&stale_version_check={staleVersionCheck}&cataloger_level={catalogerLevel}&check_match={checkMatch}")
-  @Headers({
-    "Content-Type: application/json",
-    "Accept: application/json",
-  })
-  Object putAlmawsV1BibsAuthoritiesAuthorityRecordId(@Param("authority_record_id") String authorityRecordId, Object body, @Param("normalization") String normalization, @Param("validate") String validate, @Param("override_warning") String overrideWarning, @Param("override_lock") String overrideLock, @Param("stale_version_check") String staleVersionCheck, @Param("cataloger_level") String catalogerLevel, @Param("check_match") String checkMatch);
+  @RequestMapping(method = RequestMethod.PUT,
+          value = "/authorities/{authorityRecordId}",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object putBibsAuthoritiesAuthorityRecordId(@PathVariable("authorityRecordId") String authorityRecordId,
+                                             @RequestBody Object body,
+                                             @RequestParam("normalization") String normalization,
+                                             @RequestParam("validate") String validate,
+                                             @RequestParam("override_warning") String overrideWarning,
+                                             @RequestParam("override_lock") String overrideLock,
+                                             @RequestParam("stale_version_check") String staleVersionCheck,
+                                             @RequestParam("cataloger_level") String catalogerLevel,
+                                             @RequestParam("check_match") String checkMatch);
 }

@@ -1,8 +1,12 @@
 package org.unidue.ub.libintel.almaconnector.clients.alma.conf;
 
-import feign.*;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.unidue.ub.libintel.almaconnector.clients.alma.AlmaFeignConfiguration;
 
 @FeignClient(name = "general", url = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/conf", configuration = AlmaFeignConfiguration.class)
@@ -17,22 +21,22 @@ public interface GeneralApi {
    * @param lang Requested language. (optional, default to &quot;&quot;)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/conf/code-tables/{codeTableName}?lang={lang}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1ConfCodeTablesCodeTableName(@Param("codeTableName") String codeTableName, @Param("lang") String lang);
+  @RequestMapping(method= RequestMethod.GET,
+          value="/code-tables/{codeTableName}",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getConfCodeTablesCodeTableName(@PathVariable("codeTableName") String codeTableName, @RequestParam("lang") String lang);
 
   /**
    * Retrieve General Configuration
    * This Web service returns the general configuration of the institution.
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/conf/general")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1ConfGeneral();
+  @RequestMapping(method=RequestMethod.GET,
+          value="/general",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getConfGeneral();
 
   /**
    * Retrieve Library Open Hours
@@ -42,11 +46,13 @@ public interface GeneralApi {
    * @param to To this Date (YYYY-MM-DD). Defaults to the From Date plus one week. (optional, default to &quot;&quot;)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/conf/libraries/{libraryCode}/open-hours?from={from}&to={to}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1ConfLibrariesLibraryCodeOpenHours(@Param("libraryCode") String libraryCode, @Param("from") String from, @Param("to") String to);
+  @RequestMapping(method=RequestMethod.GET,
+          value="/libraries/{libraryCode}/open-hours",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getConfLibrariesLibraryCodeOpenHours(@PathVariable("libraryCode") String libraryCode,
+                                              @RequestParam("from") String from,
+                                              @RequestParam("to") String to);
 
   /**
    * Retrieve Open Hours
@@ -54,9 +60,9 @@ public interface GeneralApi {
    * @param scope This optional parameter specifies a library scope. Default will be institution, e.g. 01AAA_INST. (required)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/conf/open-hours?scope={scope}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1ConfOpenHours(@Param("scope") String scope);
+  @RequestMapping(method=RequestMethod.GET,
+          value="/open-hours",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getConfOpenHours(@RequestParam("scope") String scope);
 }

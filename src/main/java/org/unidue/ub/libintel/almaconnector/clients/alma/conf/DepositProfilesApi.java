@@ -1,8 +1,12 @@
 package org.unidue.ub.libintel.almaconnector.clients.alma.conf;
 
-import feign.*;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.unidue.ub.libintel.almaconnector.clients.alma.AlmaFeignConfiguration;
 
 @FeignClient(name = "depositProfiles", url = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/conf/deposit-profiles", configuration = AlmaFeignConfiguration.class)
@@ -18,11 +22,13 @@ public interface DepositProfilesApi {
    * @param userGroup An option to filter by user group. Optional. Default value: Empty String which means that all the results will be returned. (optional, default to &quot;&quot;)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/conf/deposit-profiles?limit={limit}&offset={offset}&user_group={userGroup}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1ConfDepositProfiles(@Param("limit") Integer limit, @Param("offset") Integer offset, @Param("user_group") String userGroup);
+  @RequestMapping(method= RequestMethod.GET,
+          value="",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getConfDepositProfiles(@RequestParam("limit") Integer limit,
+                                @RequestParam("offset") Integer offset,
+                                @RequestParam("user_group") String userGroup);
 
 
   /**
@@ -31,9 +37,9 @@ public interface DepositProfilesApi {
    * @param depositProfileId The Deposit Profile ID. (required)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/conf/deposit-profiles/{depositProfileId}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1ConfDepositProfilesDepositProfileId(@Param("deposit_profile_id") String depositProfileId);
+  @RequestMapping(method=RequestMethod.GET,
+          value="/{depositProfileId}",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getConfDepositProfilesDepositProfileId(@PathVariable("depositProfileId") String depositProfileId);
 }

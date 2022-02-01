@@ -1,11 +1,15 @@
 package org.unidue.ub.libintel.almaconnector.clients.alma.conf;
 
-import feign.*;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.unidue.ub.libintel.almaconnector.clients.alma.AlmaFeignConfiguration;
 
-@FeignClient(name = "integrationProfiles", url = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/integration-profiles", configuration = AlmaFeignConfiguration.class)
+@FeignClient(name = "integrationProfiles", url = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/conf/integration-profiles", configuration = AlmaFeignConfiguration.class)
 @Service
 public interface IntegrationProfilesApi {
 
@@ -19,11 +23,14 @@ public interface IntegrationProfilesApi {
    * @param offset Offset of the results returned. Optional. Default value: 0, which means that the first results will be returned. (optional)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/conf/integration-profiles?type={type}&q={q}&limit={limit}&offset={offset}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1ConfIntegrationProfiles(@Param("type") String type, @Param("q") String q, @Param("limit") Integer limit, @Param("offset") Integer offset);
+  @RequestMapping(method= RequestMethod.GET,
+          value="",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getonfIntegrationProfiles(@RequestParam("type") String type,
+                                   @RequestParam("q") String q,
+                                   @RequestParam("limit") Integer limit,
+                                   @RequestParam("offset") Integer offset);
 
 
   /**
@@ -32,9 +39,9 @@ public interface IntegrationProfilesApi {
    * @param id The Integration Profile ID (required)
    * @return Object
    */
-  @RequestLine("GET /almaws/v1/conf/integration-profiles/{id}")
-  @Headers({
-    "Accept: application/json",
-  })
-  Object getAlmawsV1ConfIntegrationProfilesId(@Param("id") String id);
+  @RequestMapping(method=RequestMethod.GET,
+          value="/{id}",
+          produces = MediaType.APPLICATION_JSON_VALUE,
+          consumes = MediaType.APPLICATION_JSON_VALUE)
+  Object getConfIntegrationProfilesId(@PathVariable("id") String id);
 }
