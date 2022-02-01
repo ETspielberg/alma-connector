@@ -55,7 +55,7 @@ public class AlmaJobsService {
      * runs the elisa import job (elisa job id given as configuration parameter 'alma.elisa.import.job.id'
      */
     public void runElisaImportJob() {
-        this.almaJobsApiClient.postAlmawsV1ConfJobsJobId(new JobParametersFile(),elisaJobId, "run");
+        this.almaJobsApiClient.postConfJobsJobId(new JobParametersFile(),elisaJobId, "run");
 
     }
 
@@ -65,12 +65,12 @@ public class AlmaJobsService {
     public void updateJobsList() {
         int limit = 100;
         int offset = 0;
-        Jobs jobs = this.almaJobsApiClient.getAlmawsV1ConfJobs(limit, offset, "", "", "");
+        Jobs jobs = this.almaJobsApiClient.getConfJobs(limit, offset, "", "", "");
         List<Job> allJobs = new ArrayList<>(jobs.getJob());
         int totalNumberOfJobs = jobs.getTotalRecordCount();
         while (allJobs.size() < totalNumberOfJobs) {
             offset += limit;
-            Jobs jobsInd = this.almaJobsApiClient.getAlmawsV1ConfJobs(limit, offset, "", "", "");
+            Jobs jobsInd = this.almaJobsApiClient.getConfJobs(limit, offset, "", "", "");
             allJobs.addAll(jobsInd.getJob());
         }
         if (allJobs.size() > 0) {
@@ -97,7 +97,7 @@ public class AlmaJobsService {
         JobParametersFile job = this.xmlReaderService.readJobParameters("BenutzerAusweisende");
         log.info(String.format("running jo %s with parameters %s", notifyEndingJobId, job.toString()));
         try {
-            this.almaJobsApiClient.postAlmawsV1ConfJobsJobId(job, notifyEndingJobId, "run");
+            this.almaJobsApiClient.postConfJobsJobId(job, notifyEndingJobId, "run");
         } catch (FeignException feignException) {
             log.warn(String.format("could not start job %s: %s", notifyEndingJobId, feignException.getMessage()), feignException);
         }
