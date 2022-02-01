@@ -148,9 +148,9 @@ public class GetterService {
             return;
         EsItem esItem = esPrintManifestation.findCorrespindingItem(almaItem);
         if (HookEventTypes.LOAN_CREATED.name().equals(eventType))
-            esItem.addEvent(new EsEvent(hook.getItemLoan().getLoanId(), new Date(hook.getItemLoan().getLoanDate().toInstant().toEpochMilli()), null, EventType.LOAN, user.getUserGroup().getValue()));
+            esItem.addEvent(new EsEvent(hook.getItemLoan().getLoanId(), hook.getTime(), null, EventType.LOAN, user.getUserGroup().getValue()));
         else if (HookEventTypes.LOAN_RETURNED.name().equals(eventType))
-            esItem.closeLoan(new Date(hook.getItemLoan().getLoanDate().toInstant().toEpochMilli()));
+            esItem.closeLoan(hook.getTime());
         this.index(esPrintManifestation);
     }
 
