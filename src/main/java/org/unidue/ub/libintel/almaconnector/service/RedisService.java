@@ -104,7 +104,6 @@ public class RedisService {
             ObjectMapper mapper = new ObjectMapper();
             mapper.registerModule(new JavaTimeModule());
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            log.debug(hook);
             switch (type) {
                 case "loan": {
                     LoanHook loanHook = mapper.readValue(hook, LoanHook.class);

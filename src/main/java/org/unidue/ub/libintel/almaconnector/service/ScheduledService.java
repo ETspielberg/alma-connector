@@ -288,7 +288,7 @@ public class ScheduledService {
 
         // empty the set of user ids to be notified and transfer the ids from the analytics report to the
         // corresponding set
-        List<String> ids = this.almaSetService.transferAusweisAblaufExterneAnalyticsReportToSet();
+        this.almaSetService.transferAusweisAblaufExterneAnalyticsReportToSet();
 
         // trigger the sending of the emails for the set of users
         this.almaJobsService.runEndingUserNotificationJob();

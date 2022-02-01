@@ -1,4 +1,6 @@
 spring:
+  profiles:
+    active: ${libintel.profile:dev}
   application:
     name: alma-connector
   cloud:
