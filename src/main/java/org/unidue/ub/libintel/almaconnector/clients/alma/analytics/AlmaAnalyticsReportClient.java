@@ -40,37 +40,46 @@ public class AlmaAnalyticsReportClient {
      * @param clazz the class, the List of reports shall be cast into
      * @param <T> the class type
      * @return returns a report of class <T>
-     * @throws IOException thrown if the transformation results in errors.
+     * @throws AnalyticsNotRetrievedException thrown if the transformation results in errors.
      */
-    public <T> T getReport(String reportPath, Class<T> clazz) throws IOException {
+    public <T> T getReport(String reportPath, Class<T> clazz) throws AnalyticsNotRetrievedException {
         String url = String.format(urlTemplate, reportPath, almaAcqApiKey, 500);
         log.info("querying analytics report with url: " + url);
         RestTemplate restTemplate = new RestTemplate();
         String response = restTemplate.getForObject(url, String.class);
         log.debug("queried alma api with response: " + response);
         // XSL file written by Frank Lützenkirchen
-        InputStream xslFile = new ClassPathResource("/xslt/analytics2xml.xsl").getInputStream();
+        try {
+            InputStream xslFile = new ClassPathResource("/xslt/analytics2xml.xsl").getInputStream();
+
         String transformed = transformXmlDocument(response, xslFile);
         log.debug("converted response into string: " + transformed);
         XmlMapper xmlMapper = new XmlMapper();
         xmlMapper.registerModule(new JavaTimeModule());
         return xmlMapper.readValue(transformed, clazz);
+        } catch (IOException ioException) {
+            throw new AnalyticsNotRetrievedException("could not retrieve analytics report." + ioException.getMessage());
+        }
     }
 
-    public <T> T getLongReport(String reportPath, Class<T> clazz, String resumptionToken) throws IOException {
+    public <T> T getLongReport(String reportPath, Class<T> clazz, String resumptionToken) throws AnalyticsNotRetrievedException {
         String url = String.format(urlTemplate, reportPath, almaAcqApiKey, 500);
         if (!resumptionToken.isEmpty())
             url += "&token=" + resumptionToken;
         RestTemplate restTemplate = new RestTemplate();
         String response = restTemplate.getForObject(url, String.class);
         log.debug("queried alma api with response: " + response);
-        // XSL file written by Frank Lützenkirchen
-        InputStream xslFile = new ClassPathResource("/xslt/analyticsLong2xml.xsl").getInputStream();
-        String transformed = transformXmlDocument(response, xslFile);
-        log.debug("converted response into string: " + transformed);
-        XmlMapper xmlMapper = new XmlMapper();
-        xmlMapper.registerModule(new JavaTimeModule());
-        return xmlMapper.readValue(transformed, clazz);
+        try {
+            // XSL file written by Frank Lützenkirchen
+            InputStream xslFile = new ClassPathResource("/xslt/analyticsLong2xml.xsl").getInputStream();
+            String transformed = transformXmlDocument(response, xslFile);
+            log.debug("converted response into string: " + transformed);
+            XmlMapper xmlMapper = new XmlMapper();
+            xmlMapper.registerModule(new JavaTimeModule());
+            return xmlMapper.readValue(transformed, clazz);
+        } catch (IOException ioException) {
+            throw new AnalyticsNotRetrievedException("could not retrieve analytics report." + ioException.getMessage());
+        }
     }
 
 

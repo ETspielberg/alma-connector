@@ -8,9 +8,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.*;
-import org.unidue.ub.libintel.almaconnector.clients.alma.analytics.AlmaAnalyticsReportClient;
-import org.unidue.ub.libintel.almaconnector.model.analytics.InvoiceForPayment;
-import org.unidue.ub.libintel.almaconnector.model.analytics.InvoiceForPaymentReport;
 import org.unidue.ub.libintel.almaconnector.model.run.AlmaExportRun;
 import org.unidue.ub.libintel.almaconnector.model.run.SapDataRun;
 import org.unidue.ub.libintel.almaconnector.model.run.SapResponseRun;
@@ -49,8 +46,6 @@ public class SapService {
 
     private final AlmaExportRunRepository almaExportRunRepository;
 
-    private final AlmaAnalyticsReportClient almaAnalyticsReportClient;
-
     private final RedisService redisService;
 
     private final AlmaVendorService vendorService;
@@ -68,18 +63,15 @@ public class SapService {
      * @param dataDir                   the data directory where the export files are stored in
      * @param almaInvoiceService        the Feign client for the Alma Invoice API
      * @param almaExportRunRepository   the repository holding the data for an individual export run
-     * @param almaAnalyticsReportClient the client to retrieve alma analytics reports
      */
     SapService(@Value("${libintel.data.dir}") String dataDir,
                AlmaInvoiceService almaInvoiceService,
                AlmaExportRunRepository almaExportRunRepository,
-               AlmaAnalyticsReportClient almaAnalyticsReportClient,
                RedisService redisService,
                AlmaVendorService almaVendorService) {
         this.file = dataDir + "/sapData/";
         this.almaInvoiceService = almaInvoiceService;
         this.almaExportRunRepository = almaExportRunRepository;
-        this.almaAnalyticsReportClient = almaAnalyticsReportClient;
         this.redisService = redisService;
         this.vendorService = almaVendorService;
         File folder = new File(this.file);
@@ -158,38 +150,6 @@ public class SapService {
             }
         }
         return container;
-    }
-
-    /**
-     * uses a provided alma analytics report to retrieve the open invoices to be exported
-     *
-     * @param almaExportRun the <class>AlmaExportRun</class> object holding the data about this export session
-     * @return a list of invoices
-     */
-    public List<Invoice> getOpenInvoicesFromAnalytics(AlmaExportRun almaExportRun) {
-        try {
-            List<InvoiceForPayment> result = this.almaAnalyticsReportClient.getReport(InvoiceForPaymentReport.PATH, InvoiceForPaymentReport.class).getRows();
-            List<Invoice> invoices = new ArrayList<>();
-            if (result != null) {
-                for (InvoiceForPayment invoiceEntry : result) {
-                    if (invoiceEntry.getInvoiceOwnerCode().equals(almaExportRun.getInvoiceOwner())) {
-                        Invoice invoiceInd = this.almaInvoiceService.retrieveInvoice(invoiceEntry.getInvoiceNumber());
-                        almaExportRun.addInvoice(invoiceInd);
-                        List<SapData> sapDataList = convertToSapData(invoiceInd, invoiceEntry.getErpCode(), invoiceEntry.getOrderLineType());
-                        log.debug(String.format("adding %d SAP data to the list", sapDataList.size()));
-                        almaExportRun.addSapDataList(sapDataList, homeTaxKeys);
-                        log.debug(String.format("run contains now %d entries: %d home and %d foreign",
-                                almaExportRun.getTotalSapData(),
-                                almaExportRun.getHomeSapData().size(),
-                                almaExportRun.getForeignSapData().size()));
-                    }
-                }
-            }
-            return invoices;
-        } catch (IOException ioe) {
-            log.error("could not connect to analytics");
-            return null;
-        }
     }
 
     /**

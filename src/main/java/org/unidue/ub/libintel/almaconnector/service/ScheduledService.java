@@ -11,20 +11,16 @@ import org.unidue.ub.alma.shared.bibs.BibWithRecord;
 import org.unidue.ub.alma.shared.bibs.Item;
 import org.unidue.ub.alma.shared.user.AlmaUser;
 import org.unidue.ub.libintel.almaconnector.clients.alma.analytics.AlmaAnalyticsReportClient;
+import org.unidue.ub.libintel.almaconnector.clients.alma.analytics.AnalyticsNotRetrievedException;
 import org.unidue.ub.libintel.almaconnector.configuration.MappingTables;
 import org.unidue.ub.libintel.almaconnector.model.analytics.*;
 import org.unidue.ub.libintel.almaconnector.model.usage.SingleRequestData;
 import org.unidue.ub.libintel.almaconnector.service.alma.*;
 
-import java.io.IOException;
 import java.util.*;
 
 /**
  * service controlling scheduled tasks.
- *
- * @author Eike Spielberg
- * @author eike.spielberg@uni-due.de
- * @version 1.0
  */
 @Service
 @Slf4j
@@ -48,7 +44,7 @@ public class ScheduledService {
 
     private final SaveDataService saveDataService;
 
-    private final MailSenderService mailSenderService;
+    private final LogService logService;
 
     @Value("${libintel.profile:dev}")
     private String profile;
@@ -71,7 +67,7 @@ public class ScheduledService {
      * @param almaCatalogService        the alma catalog service
      * @param almaSetService            the alma set service
      * @param saveDataService           the service for saving data
-     * @param mailSenderService         the mail sender service
+     * @param logService                the log service
      */
     ScheduledService(AlmaAnalyticsReportClient almaAnalyticsReportClient,
                      MappingTables mappingTables,
@@ -82,7 +78,7 @@ public class ScheduledService {
                      AlmaCatalogService almaCatalogService,
                      AlmaSetService almaSetService,
                      SaveDataService saveDataService,
-                     MailSenderService mailSenderService) {
+                     LogService logService) {
         this.almaAnalyticsReportClient = almaAnalyticsReportClient;
         this.mappingTables = mappingTables;
         this.almaItemService = almaItemService;
@@ -92,7 +88,7 @@ public class ScheduledService {
         this.almaCatalogService = almaCatalogService;
         this.almaSetService = almaSetService;
         this.saveDataService = saveDataService;
-        this.mailSenderService = mailSenderService;
+        this.logService = logService;
     }
 
     /**
@@ -111,9 +107,8 @@ public class ScheduledService {
         List<NewItemWithOrder> results;
         try {
             results = this.almaAnalyticsReportClient.getReport(NewItemWithFundReport.PATH, NewItemWithFundReport.class).getRows();
-        } catch (IOException ioe) {
-            mailSenderService.sendAlertMail(ioe);
-            log.warn("could not retrieve analytics report.", ioe);
+        } catch (AnalyticsNotRetrievedException analyticsNotRetrievedException) {
+            logService.handleAnalyticsException(analyticsNotRetrievedException);
             return;
         }
 
@@ -286,21 +281,23 @@ public class ScheduledService {
         if ("dev".equals(profile) || "test".equals(profile)) return;
         log.info("updating ending user account set");
 
-        // empty the set of user ids to be notified and transfer the ids from the analytics report to the
-        // corresponding set
-        this.almaSetService.transferAusweisAblaufExterneAnalyticsReportToSet();
+        try {
+            // empty the set of user ids to be notified and transfer the ids from the analytics report to the
+            // corresponding set
+            this.almaSetService.transferAusweisAblaufExterneAnalyticsReportToSet();
 
-        // trigger the sending of the emails for the set of users
-        this.almaJobsService.runEndingUserNotificationJob();
+            // trigger the sending of the emails for the set of users
+            this.almaJobsService.runEndingUserNotificationJob();
+        } catch (AnalyticsNotRetrievedException analyticsNotRetrievedException) {
+            logService.handleAnalyticsException(analyticsNotRetrievedException);
+        }
     }
 
     /**
      * retrieves the open requests and logs the corresponding information to be picked up by beats
-     *
-     * @throws IOException thrown by the analytics client if the xsl transformation fails
      */
     @Scheduled(cron = "0 0 5 * * *")
-    public void collectRequests() throws IOException {
+    public void collectRequests() {
         // do not run this job in the test and dev environment as the analytics report work only in the prod-system
         if ("dev".equals(profile) || "test".equals(profile)) return;
 
@@ -308,67 +305,71 @@ public class ScheduledService {
         HashMap<String, SingleRequestData> allRequestData = new HashMap<>();
 
         // retrieve all requested items from the analytics report
-        List<RequestsItem> result = this.almaAnalyticsReportClient.getReport(RequestsReport.PATH, RequestsReport.class).getRows();
+        try {
+            List<RequestsItem> result = this.almaAnalyticsReportClient.getReport(RequestsReport.PATH, RequestsReport.class).getRows();
 
-        // go through all items
-        for (RequestsItem requestsItem : result) {
-            // replace the pickup location names by the library codes
-            switch (requestsItem.getPickupLocation()) {
-                case "Campus Duisburg": {
-                    requestsItem.setPickupLocation("D0001");
-                    break;
+            // go through all items
+            for (RequestsItem requestsItem : result) {
+                // replace the pickup location names by the library codes
+                switch (requestsItem.getPickupLocation()) {
+                    case "Campus Duisburg": {
+                        requestsItem.setPickupLocation("D0001");
+                        break;
+                    }
+                    case "FB Medizin": {
+                        requestsItem.setPickupLocation("E0023");
+                        break;
+                    }
+                    default: {
+                        requestsItem.setPickupLocation("E0001");
+                        break;
+                    }
                 }
-                case "FB Medizin": {
-                    requestsItem.setPickupLocation("E0023");
-                    break;
+
+                // initialize pointer to a SingelRequestData object
+                SingleRequestData singleRequestData;
+
+                // generate key from mms-ID, holding-ID and user group
+                String key = requestsItem.getMMSId() + "-" + requestsItem.getHoldingId() + "-" + requestsItem.getUserGroup();
+
+                // if there already exists an object in the hash map retrieve this one, otherwise create a new one and store
+                // it in the hash map
+                if (allRequestData.containsKey(key)) {
+                    singleRequestData = allRequestData.get(key);
+                } else {
+                    singleRequestData = new SingleRequestData(requestsItem);
+                    allRequestData.put(key, singleRequestData);
                 }
-                default: {
-                    requestsItem.setPickupLocation("E0001");
-                    break;
+
+                // add the request depending on the type (magazin, cald or other
+                if (magazinLocations.contains(requestsItem.getOwningLocationName()))
+                    singleRequestData.addMagazin();
+                else if (!requestsItem.getPickupLocation().equals(requestsItem.getOwningLibraryCode()))
+                    singleRequestData.addCald();
+                else
+                    singleRequestData.addRequest();
+
+                // retirive the bib record to get isbn of the requested item and add it ot the SingeRequestData object
+                try {
+                    BibWithRecord bib = this.almaCatalogService.getRecord(requestsItem.getMMSId());
+                    singleRequestData.setTitle(bib.getTitle());
+                    singleRequestData.setIsbn(bib.getIsbn());
+                } catch (FeignException fe) {
+                    log.warn("could not retrieve bib data: ", fe);
+                }
+
+                // retrieve the number of items in this location from alma and add it to the SingeRequestData object
+                try {
+                    singleRequestData.setNItems(this.almaCatalogService.getNumberOfItems(requestsItem.getMMSId(), requestsItem.getHoldingId()));
+                } catch (FeignException fe) {
+                    log.warn("could not retrieve holding data: ", fe);
                 }
             }
-
-            // initialize pointer to a SingelRequestData object
-            SingleRequestData singleRequestData;
-
-            // generate key from mms-ID, holding-ID and user group
-            String key = requestsItem.getMMSId() + "-" + requestsItem.getHoldingId() + "-" + requestsItem.getUserGroup();
-
-            // if there already exists an object in the hash map retrieve this one, otherwise create a new one and store
-            // it in the hash map
-            if (allRequestData.containsKey(key)) {
-                singleRequestData = allRequestData.get(key);
-            } else {
-                singleRequestData = new SingleRequestData(requestsItem);
-                allRequestData.put(key, singleRequestData);
-            }
-
-            // add the request depending on the type (magazin, cald or other
-            if (magazinLocations.contains(requestsItem.getOwningLocationName()))
-                singleRequestData.addMagazin();
-            else if (!requestsItem.getPickupLocation().equals(requestsItem.getOwningLibraryCode()))
-                singleRequestData.addCald();
-            else
-                singleRequestData.addRequest();
-
-            // retirive the bib record to get isbn of the requested item and add it ot the SingeRequestData object
-            try {
-                BibWithRecord bib = this.almaCatalogService.getRecord(requestsItem.getMMSId());
-                singleRequestData.setTitle(bib.getTitle());
-                singleRequestData.setIsbn(bib.getIsbn());
-            } catch (FeignException fe) {
-                log.warn("could not retrieve bib data: ", fe);
-            }
-
-            // retrieve the number of items in this location from alma and add it to the SingeRequestData object
-            try {
-                singleRequestData.setNItems(this.almaCatalogService.getNumberOfItems(requestsItem.getMMSId(), requestsItem.getHoldingId()));
-            } catch (FeignException fe) {
-                log.warn("could not retrieve holding data: ", fe);
-            }
+            // log all the SingleRequestData in order for beeans to pick them up and store them to elasticsearch
+            allRequestData.forEach((key, entry) -> log.info(entry.toString()));
+        } catch (AnalyticsNotRetrievedException analyticsNotRetrievedException) {
+            logService.handleAnalyticsException(analyticsNotRetrievedException);
         }
-        // log all the SingleRequestData in order for beeans to pick them up and store them to elasticsearch
-        allRequestData.forEach((key, entry) -> log.info(entry.toString()));
     }
 
     /**
@@ -378,15 +379,12 @@ public class ScheduledService {
     public void saveFineFees() {
         // do not run this job in the test and dev environment as the analytics report work only in the prod-system
         if ("dev".equals(profile) || "test".equals(profile)) return;
-
         try {
             // save the user fines from the daily report to the database
             this.saveDataService.saveDailyUserFineFees();
-        } catch (Exception exception) {
-
-            // send error mail
-            mailSenderService.sendAlertMail(exception);
-            log.error("could not save user fine fees. messaage: " + exception.getMessage(), exception);
+        } catch (AnalyticsNotRetrievedException analyticsNotRetrievedException) {
+            this.logService.handleAnalyticsException(analyticsNotRetrievedException);
         }
     }
+
 }

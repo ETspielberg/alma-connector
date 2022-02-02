@@ -1,26 +1,21 @@
 package org.unidue.ub.libintel.almaconnector.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.unidue.ub.alma.shared.conf.JobInstance;
+import org.unidue.ub.libintel.almaconnector.clients.alma.analytics.AnalyticsNotRetrievedException;
 
 @Service
 @Slf4j
 public class LogService {
 
-    private final ObjectMapper objectMapper;
+    private final MailSenderService mailSenderService;
 
-    LogService(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
+    LogService(MailSenderService mailSenderService) {
+        this.mailSenderService = mailSenderService;
     }
 
-    public void logJob(JobInstance jobInstance) {
-        try {
-            log.info(objectMapper.writeValueAsString(jobInstance));
-        } catch (JsonProcessingException e) {
-            log.error("could not write job");
-        }
+    public void handleAnalyticsException(AnalyticsNotRetrievedException analyticsNotRetrievedException) {
+        mailSenderService.sendAlertMail(analyticsNotRetrievedException);
+        log.warn("could not retrieve analytics report.", analyticsNotRetrievedException);
     }
 }

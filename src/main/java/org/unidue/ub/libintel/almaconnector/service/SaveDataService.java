@@ -3,14 +3,17 @@ package org.unidue.ub.libintel.almaconnector.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.libintel.almaconnector.clients.alma.analytics.AlmaAnalyticsReportClient;
+import org.unidue.ub.libintel.almaconnector.clients.alma.analytics.AnalyticsNotRetrievedException;
 import org.unidue.ub.libintel.almaconnector.model.analytics.*;
 import org.unidue.ub.libintel.almaconnector.model.jobs.UserFineFee;
 import org.unidue.ub.libintel.almaconnector.repository.jpa.UserFineFeeRepository;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * saves data for preservation purposes
+ */
 @Service
 @Slf4j
 public class SaveDataService {
@@ -25,7 +28,11 @@ public class SaveDataService {
         this.almaAnalyticsReportClient = almaAnalyticsReportClient;
     }
 
-    public void saveDailyUserFineFees() throws IOException {
+    /**
+     *
+     * @throws AnalyticsNotRetrievedException thrown, if the analytics report could not be retrieved
+     */
+    public void saveDailyUserFineFees() throws AnalyticsNotRetrievedException {
             GebuehrenSichernTaeglichReport gebuehrenSichernTaeglichReport = this.almaAnalyticsReportClient.getLongReport(GebuehrenSichernTaeglichReport.PATH, GebuehrenSichernTaeglichReport.class, "");
             log.debug("number of rows: " + gebuehrenSichernTaeglichReport.getRows().size());
             this.saveUserFineFees(gebuehrenSichernTaeglichReport.getRows());
@@ -38,8 +45,7 @@ public class SaveDataService {
             }
     }
 
-    public void saveInitialUserFineFees() {
-        try {
+    public void saveInitialUserFineFees() throws AnalyticsNotRetrievedException {
             GebuehrenSichernReport gebuehrenSichernTaeglichReport = this.almaAnalyticsReportClient.getLongReport(GebuehrenSichernReport.PATH, GebuehrenSichernReport.class, "");
             log.debug("number of rows: " + gebuehrenSichernTaeglichReport.getRows().size());
             this.saveUserFineFees(gebuehrenSichernTaeglichReport.getRows());
@@ -50,9 +56,6 @@ public class SaveDataService {
                 this.saveUserFineFees(gebuehrenSichernTaeglichReport.getRows());
                 log.debug("isfinished: " + gebuehrenSichernTaeglichReport.isFinished() + ", resumptionToken: " + gebuehrenSichernTaeglichReport.getResumptionToken());
             }
-        } catch (Exception e) {
-            log.error("could not save user fine fees. messaage: " + e.getMessage(), e);
-        }
     }
 
     private void saveUserFineFees(List<GebuehrenSichernTaeglich> gebuehrenSichernTaegliches) {

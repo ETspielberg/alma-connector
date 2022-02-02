@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.conf.*;
 import org.unidue.ub.libintel.almaconnector.clients.alma.analytics.AlmaAnalyticsReportClient;
+import org.unidue.ub.libintel.almaconnector.clients.alma.analytics.AnalyticsNotRetrievedException;
 import org.unidue.ub.libintel.almaconnector.clients.alma.conf.SetsApiClient;
 import org.unidue.ub.libintel.almaconnector.model.analytics.AusweisAblaufExterne;
 import org.unidue.ub.libintel.almaconnector.model.analytics.AusweisAblaufExterneReport;
@@ -166,6 +167,7 @@ public class AlmaSetService {
 
     /**
      * clears a set of all members
+     *
      * @param setId the set id of the set to be cleared
      */
     public void clearSet(String setId) {
@@ -196,28 +198,23 @@ public class AlmaSetService {
         }
     }
 
-    public List<String> transferAusweisAblaufExterneAnalyticsReportToSet() {
+    public List<String> transferAusweisAblaufExterneAnalyticsReportToSet() throws AnalyticsNotRetrievedException {
         this.clearSet(AlmaSetIdBenutzerAusweisende);
-        try {
-            AusweisAblaufExterneReport ausweisAblaufExterneReport = this.almaAnalyticsReportClient.getReport(AusweisAblaufExterneReport.PATH, AusweisAblaufExterneReport.class);
-            List<String> ids = new ArrayList<>();
-            List<AusweisAblaufExterne> allExterne =  ausweisAblaufExterneReport.getRows();
-            if (allExterne == null)
-                return new ArrayList<>();
-            else {
-                for (AusweisAblaufExterne ausweisAblaufExterne: allExterne) {
-                    if (ausweisAblaufExterne == null || ausweisAblaufExterne.getPrimaryIdentifier() == null)
-                        return new ArrayList<>();
-                    else
-                        ids.add(ausweisAblaufExterne.getPrimaryIdentifier());
-                }
-            }
-            log.info(String.format("retrieved %d users, whose account is going to expire", ids.size()));
-            this.addMemberListToSet(AlmaSetIdBenutzerAusweisende, ids, "");
-            return ids;
-        } catch (IOException e) {
-            log.error("could not retrieve analytics report AusweisAblaufExtern", e);
+        AusweisAblaufExterneReport ausweisAblaufExterneReport = this.almaAnalyticsReportClient.getReport(AusweisAblaufExterneReport.PATH, AusweisAblaufExterneReport.class);
+        List<String> ids = new ArrayList<>();
+        List<AusweisAblaufExterne> allExterne = ausweisAblaufExterneReport.getRows();
+        if (allExterne == null)
             return new ArrayList<>();
+        else {
+            for (AusweisAblaufExterne ausweisAblaufExterne : allExterne) {
+                if (ausweisAblaufExterne == null || ausweisAblaufExterne.getPrimaryIdentifier() == null)
+                    return new ArrayList<>();
+                else
+                    ids.add(ausweisAblaufExterne.getPrimaryIdentifier());
+            }
         }
+        log.info(String.format("retrieved %d users, whose account is going to expire", ids.size()));
+        this.addMemberListToSet(AlmaSetIdBenutzerAusweisende, ids, "");
+        return ids;
     }
 }
