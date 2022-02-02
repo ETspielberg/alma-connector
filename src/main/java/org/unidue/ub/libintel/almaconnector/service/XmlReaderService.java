@@ -10,9 +10,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
+/**
+ * reading xml files, e.g. the job parameters for starting jobs
+ */
 @Service
 @Slf4j
 public class XmlReaderService {
@@ -20,6 +21,11 @@ public class XmlReaderService {
     @Value("${libintel.data.dir}")
     private String libintelDataDir;
 
+    /**
+     * reads the file from the jobs directory
+     * @param jobId the ID of the job the parameters shall be loaded
+     * @return a <code>JobParametersFile</code> object
+     */
     public JobParametersFile readJobParameters(String jobId) {
         try {
             String pathToXml = String.format("%s/jobs/%s.xml", libintelDataDir, jobId);
@@ -30,16 +36,6 @@ public class XmlReaderService {
         } catch (IOException e) {
             log.error("could not read in job parameters for Job " + jobId, e);
             return new JobParametersFile();
-        }
-    }
-
-    public String readJobParamtersAsString(String job) {
-        try {
-            String pathToXml = String.format("%s/jobs/%s.xml", libintelDataDir, job);
-            return Files.readString(Paths.get(pathToXml));
-        } catch (IOException e) {
-            log.error("could not read in job parameters for Job " + job, e);
-            return "";
         }
     }
 }

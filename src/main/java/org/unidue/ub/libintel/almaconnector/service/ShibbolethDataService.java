@@ -11,10 +11,6 @@ import java.util.List;
 
 /**
  * offers functions around shibboleth data managed in lib intel. These data can be used to build sp-sided or idp-sided WAYFles-URLS
- *
- * @author Eike Spielberg
- * @author eike.spielberg@uni-due.de
- * @version 1.0
  */
 @Service
 @Slf4j
