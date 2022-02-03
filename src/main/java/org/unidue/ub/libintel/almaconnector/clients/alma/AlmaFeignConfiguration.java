@@ -11,7 +11,7 @@ import org.unidue.ub.libintel.almaconnector.clients.ApiKeyAuth;
  */
 public class AlmaFeignConfiguration {
 
-    @Value("${alma.api.key}")
+    @Value("${libintel.alma.api.key.general}")
     private String almaApiKey;
 
     /**

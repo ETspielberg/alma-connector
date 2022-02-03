@@ -44,7 +44,7 @@ public class SapController {
 
     private final SapService sapService;
 
-    @Value("${sap.home.tax.keys}")
+    @Value("${libintel.sap.home.tax.keys}")
     private List<String> homeTaxKeys;
 
     /**

@@ -52,7 +52,7 @@ public class SapService {
 
     public static SimpleDateFormat dateformat = new SimpleDateFormat("yyyy-MM-dd");
 
-    @Value("${sap.home.tax.keys}")
+    @Value("${libintel.sap.home.tax.keys}")
     private List<String> homeTaxKeys;
 
     private final String file;

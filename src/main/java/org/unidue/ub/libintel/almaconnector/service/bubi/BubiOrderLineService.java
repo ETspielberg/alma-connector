@@ -31,10 +31,10 @@ import java.util.stream.Collectors;
 @Slf4j
 public class BubiOrderLineService {
 
-    @Value("${libintel.bubi.journal.fund:55510-0-1100}")
+    @Value("${libintel.funds.bubi.journal:55510-0-1100}")
     private String journalFund;
 
-    @Value("${libintel.bubi.monograph.fund:55510-0-1200}")
+    @Value("${libintel.funds.bubi.monograph:55510-0-1200}")
     private String monographFund;
 
     private final BubiOrderLineRepository bubiOrderLineRepository;

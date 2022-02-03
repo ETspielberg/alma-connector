@@ -46,13 +46,13 @@ public class ScheduledService {
 
     private final LogService logService;
 
-    @Value("${libintel.profile:dev}")
+    @Value("${libintel.profile:prod}")
     private String profile;
 
-    @Value("${libintel.happ.users}")
+    @Value("${libintel.ub.users.happ}")
     private List<String> happUsers;
 
-    @Value("${libintel.magazin.locations}")
+    @Value("${libintel.ub.locations.magazin}")
     private List<String> magazinLocations;
 
     /**

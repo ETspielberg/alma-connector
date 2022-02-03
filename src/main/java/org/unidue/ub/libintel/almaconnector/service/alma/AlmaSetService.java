@@ -31,7 +31,7 @@ public class AlmaSetService {
 
     private final AlmaAnalyticsReportClient almaAnalyticsReportClient;
 
-    @Value("${alma.set.name.benutzer.ausweisende}")
+    @Value("${libintel.alma.sets.benutzer-ausweisende}")
     private String AlmaSetIdBenutzerAusweisende;
 
     /**

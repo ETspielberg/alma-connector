@@ -26,8 +26,8 @@ import java.io.*;
 @Slf4j
 public class AlmaAnalyticsReportClient {
 
-    @Value("${alma.prod.api.key:1234}")
-    private String almaAcqApiKey;
+    @Value("${libintel.alma.api.key.analytics:1234}")
+    private String almaAnalyticsApiKey;
 
     /**
      * The general path for all Alma analytics reports
@@ -43,7 +43,7 @@ public class AlmaAnalyticsReportClient {
      * @throws AnalyticsNotRetrievedException thrown if the transformation results in errors.
      */
     public <T> T getReport(String reportPath, Class<T> clazz) throws AnalyticsNotRetrievedException {
-        String url = String.format(urlTemplate, reportPath, almaAcqApiKey, 500);
+        String url = String.format(urlTemplate, reportPath, almaAnalyticsApiKey, 500);
         log.info("querying analytics report with url: " + url);
         RestTemplate restTemplate = new RestTemplate();
         String response = restTemplate.getForObject(url, String.class);
@@ -63,7 +63,7 @@ public class AlmaAnalyticsReportClient {
     }
 
     public <T> T getLongReport(String reportPath, Class<T> clazz, String resumptionToken) throws AnalyticsNotRetrievedException {
-        String url = String.format(urlTemplate, reportPath, almaAcqApiKey, 500);
+        String url = String.format(urlTemplate, reportPath, almaAnalyticsApiKey, 500);
         if (!resumptionToken.isEmpty())
             url += "&token=" + resumptionToken;
         RestTemplate restTemplate = new RestTemplate();
@@ -101,7 +101,7 @@ public class AlmaAnalyticsReportClient {
 
         try {
             Transformer transformer = factory.newTransformer(xslt);
-            transformer.setParameter("apikey", this.almaAcqApiKey);
+            transformer.setParameter("apikey", this.almaAnalyticsApiKey);
             transformer.transform(text, textOP);
         } catch (TransformerException e) {
             log.error("could not transform analytics report", e);

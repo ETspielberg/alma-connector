@@ -6,7 +6,7 @@ spring:
   cloud:
     config:
       uri: http://localhost:11811
-      name: client, files, mail, settings-datasource, sap, service-provider, alma-connector, mapping-tables, elasticsearch
+      name: client,mail,datasource-settings,sap,service-provider,alma,mapping-tables,primo,ub-conf
       username: ${libintel_config_username:dalek}
       password: ${libintel_config_password:3l1m1nat3}
       label: ${libintel.profile:dev}

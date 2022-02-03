@@ -28,10 +28,10 @@ import java.util.List;
 @Slf4j
 public class PrimoService {
 
-    @Value("${primo.vid}")
+    @Value("${libintel.primo.vid}")
     String primoVid;
 
-    @Value("${alma.api.key}")
+    @Value("${libintel.alma.api.key.general}")
     private String primoApiKey;
 
     private final static String PRIMO_BASE_URL = "https://api-eu.hosted.exlibrisgroup.com/primo/v1/search?q=%s&vid=%s&apikey=%s";

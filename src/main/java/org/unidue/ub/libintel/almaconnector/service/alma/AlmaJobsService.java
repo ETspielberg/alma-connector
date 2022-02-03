@@ -32,10 +32,10 @@ public class AlmaJobsService {
 
     private final XmlReaderService xmlReaderService;
 
-    @Value("${alma.elisa.import.job.id:00000000}")
+    @Value("${libintel.alma.jobs.elisa-import:00000000}")
     private String elisaJobId;
 
-    @Value("${alma.notify.ending.job.id:00000001}")
+    @Value("${libintel.alma.jobs.notify-ending:00000001}")
     private String notifyEndingJobId;
 
     /**

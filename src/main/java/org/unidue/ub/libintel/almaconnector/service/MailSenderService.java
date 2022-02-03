@@ -22,15 +22,15 @@ import java.util.Date;
 public class MailSenderService {
 
     // the email address to appear as "from"
-    @Value("${libintel.regalfinder.email.from:no-reply@uni-due.de}")
+    @Value("${libintel.email.addresses.from:no-reply@uni-due.de}")
     private String regalfinderMailFrom;
 
     // the list of recipients for the regalfinder mail
-    @Value("${libintel.regalfinder.email.to}")
+    @Value("${libintel.email.addresses.regalfinder}")
     private String[] regalfinderMailTo;
 
     // the list of recipients for the regalfinder mail
-    @Value("${libintel.admins.mail}")
+    @Value("${libintel.email.addresses.admins}")
     private String[] libintelAdmins;
 
     private final JavaMailSender emailSender;

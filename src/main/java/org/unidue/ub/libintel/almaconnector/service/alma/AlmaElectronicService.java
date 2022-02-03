@@ -22,25 +22,25 @@ public class AlmaElectronicService {
     @Value("${doi.resolver.url:https://doi.org/}")
     private String doiUrl;
 
-    @Value("${doi.resolver.url:https://duepublico2.uni-due.de/receive/duepublico_mods_}")
+    @Value("${duepublico.resolver.url:https://duepublico2.uni-due.de/receive/duepublico_mods_}")
     private String duepublicoUrl;
 
-    @Value("${libintel.alma.diss.collection.id}")
+    @Value("${libintel.alma.collections.diss.collection.id}")
     private String dissCollectionId;
 
-    @Value("${libintel.alma.diss.service.id}")
+    @Value("${libintel.alma.collections.diss.service.id}")
     private String dissServiceId;
 
-    @Value("${libintel.alma.oa.collection.id}")
+    @Value("${libintel.alma.collections.oa.collection.id}")
     private String oaCollectionId;
 
-    @Value("${libintel.alma.oa.service.id}")
+    @Value("${libintel.alma.collections.oa.service.id}")
     private String oaServiceId;
 
-    @Value("${libintel.alma.duepublico.collection.id}")
+    @Value("${libintel.alma.collections.duepublico.collection.id}")
     private String duepublicoCollectionId;
 
-    @Value("${libintel.alma.duepublico.service.id}")
+    @Value("${libintel.alma.collections.duepublico.service.id}")
     private String duepublicoServiceId;
 
     /**
