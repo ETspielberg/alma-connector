@@ -32,16 +32,20 @@ public class ApcDataService {
 
     private final AlmaElectronicService almaElectronicService;
 
+    private final GetterService getterService;
+
     ApcDataService(ApcStatisticsRepository apcStatisticsRepository,
                    AlmaAnalyticsReportClient almaAnalyticsReportClient,
                    AlmaCatalogService almaCatalogService,
                    AlmaPoLineService almaPoLineService,
-                   AlmaElectronicService almaElectronicService) {
+                   AlmaElectronicService almaElectronicService,
+                   GetterService getterService) {
         this.almaCatalogService = almaCatalogService;
         this.almaAnalyticsReportClient = almaAnalyticsReportClient;
         this.apcStatisticsRepository = apcStatisticsRepository;
         this.almaPoLineService = almaPoLineService;
         this.almaElectronicService = almaElectronicService;
+        this.getterService = getterService;
     }
 
     public void saveApcReports() {
@@ -74,6 +78,7 @@ public class ApcDataService {
                     }
                 }
                 this.apcStatisticsRepository.save(apcStatistics);
+                this.getterService.indexApcStatistics(apcStatistics);
             }
         } catch (Exception e) {
             log.error("could not save apc data. messaage: " + e.getMessage(), e);

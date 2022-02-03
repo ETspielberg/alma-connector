@@ -4,6 +4,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 import org.unidue.ub.libintel.almaconnector.model.media.elasticsearch.EsPrintManifestation;
+import org.unidue.ub.libintel.almaconnector.model.openaccess.ApcStatistics;
 
 import java.util.List;
 
@@ -19,5 +20,8 @@ public interface GetterClient {
 
     @RequestMapping(method= RequestMethod.POST, value="/es/manifestation")
     EsPrintManifestation saveManifestation(@RequestBody EsPrintManifestation manifestation);
+
+    @RequestMapping(method=RequestMethod.POST, value = "/es/apcStatistics")
+    ApcStatistics saveApcStatistics(@RequestBody ApcStatistics apcStatistics);
 }
 

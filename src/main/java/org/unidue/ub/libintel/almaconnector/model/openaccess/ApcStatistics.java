@@ -434,4 +434,39 @@ public class ApcStatistics {
         this.creationDate = apcData.getInvoiceCreationDate();
         this.invoiceVatPercent = apcData.getVatPercent();
     }
+
+    @Override
+    public String toString() {
+        return "class: 'ApcStatistics'; " +
+                "mmsId: '" + mmsid + "'; " +
+                "creationDate: '" + creationDate + "'; " +
+                "vendorCode: '" + vendorCode + "'; " +
+                "vendor: '" + vendor + "'; " +
+                "creditor: '" + creditor + "'; " +
+                "orderNumber: '" + orderNumber + "'; " +
+                "invoiceNumber: '" + invoiceNumber + "'; " +
+                "invoiceDate: '" + invoiceDate + "'; " +
+                "ledger: '" + ledger + "'; " +
+                "invoiceLineNote: '" + invoiceLineNote + "'; " +
+                "invoiceVatCode: '" + invoiceVatCode + "'; " +
+                "invoiceVatPercent: '" + invoiceVatPercent + "'; " +
+                "firstAuthor: '" + firstAuthor + "'; " +
+                "faculty: '" + faculty + "'; " +
+                "currency: '" + currency + "'; " +
+                "totalCosts: '" + totalCosts + "'; " +
+                "taxCosts: '" + taxCosts + "'; " +
+                "bankCosts: '" + bankCosts + "'; " +
+                "payment: '" + payment + "'; " +
+                "voucherNumber: '" + voucherNumber + "'; " +
+                "realTotalCosts: '" + realTotalCosts + "'; " +
+                "journal: '" + journal + "'; " +
+                "issn: '" + issn + "'; " +
+                "doi: '" + doi + "'; " +
+                "publishingDate: '" + publishingDate + "'; " +
+                "nonCaAuthors: '" + nonCaAuthors + "'; " +
+                "title: '" + title + "'; " +
+                "duepublicoId: '" + duepublicoId + "'; " +
+                "comment: '" + comment + "'; " +
+                "year: '" + year;
+    }
 }

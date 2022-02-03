@@ -15,6 +15,7 @@ import org.unidue.ub.libintel.almaconnector.model.EventType;
 import org.unidue.ub.libintel.almaconnector.model.media.elasticsearch.EsEvent;
 import org.unidue.ub.libintel.almaconnector.model.media.elasticsearch.EsItem;
 import org.unidue.ub.libintel.almaconnector.model.media.elasticsearch.EsPrintManifestation;
+import org.unidue.ub.libintel.almaconnector.model.openaccess.ApcStatistics;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaCatalogService;
 
 import java.util.Date;
@@ -194,5 +195,9 @@ public class GetterService {
             esPrintManifestation = this.index(esPrintManifestation);
         }
         return esPrintManifestation;
+    }
+
+    public ApcStatistics indexApcStatistics(ApcStatistics apcStatistics) {
+        return this.getterClient.saveApcStatistics(apcStatistics);
     }
 }
