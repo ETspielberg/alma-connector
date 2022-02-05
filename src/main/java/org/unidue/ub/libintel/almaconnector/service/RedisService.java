@@ -50,6 +50,8 @@ public class RedisService {
     }
 
     public ItemHook getItemHook(String id) {
+        if (id == null)
+            return null;
         return this.itemHookRepository.findById(id).orElse(null);
     }
 
