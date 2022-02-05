@@ -222,7 +222,7 @@ public class AlmaItemService {
         if (note == null || note.isEmpty()) {
             return;
         }
-        if (note.contains(noteText))
+        if (!note.contains(noteText))
             return;
         item.getItemData().setPublicNote(note.replace(noteText, "").trim());
 
