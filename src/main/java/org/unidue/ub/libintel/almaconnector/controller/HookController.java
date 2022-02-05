@@ -37,6 +37,67 @@ public class HookController {
         this.hookValidatorService = hookValidatorService;
     }
 
+    @GetMapping("/userListener")
+    public ResponseEntity<Challenge> answerUserChallenge(String challenge) {
+        return ResponseEntity.ok(new Challenge(challenge));
+    }
+
+    @GetMapping("/jobListener")
+    public ResponseEntity<Challenge> answerJobChallenge(String challenge) {
+        return ResponseEntity.ok(new Challenge(challenge));
+    }
+
+    @GetMapping("/itemListener")
+    public ResponseEntity<Challenge> answerItemChallenge(String challenge) {
+        return ResponseEntity.ok(new Challenge(challenge));
+    }
+
+    @GetMapping("/bibListener")
+    public ResponseEntity<Challenge> answerBibChallenge(String challenge) {
+        return ResponseEntity.ok(new Challenge(challenge));
+    }
+
+
+    @GetMapping("/requestsListener")
+    public ResponseEntity<Challenge> answerRequestChallenge(String challenge) {
+        return ResponseEntity.ok(new Challenge(challenge));
+    }
+
+    @GetMapping("/loanListener")
+    public ResponseEntity<Challenge> answerLoanChallenge(String challenge) {
+        return ResponseEntity.ok(new Challenge(challenge));
+    }
+
+    @PostMapping("/userListener")
+    public ResponseEntity<?> receiveUserHook(@RequestBody String hookContent, @RequestHeader("X-Exl-Signature") String signature) throws NoSuchAlgorithmException, InvalidKeyException {
+        return this.receiveHook("user", hookContent, signature);
+    }
+
+    @PostMapping("/jobListener")
+    public ResponseEntity<?> receiveJobHook(@RequestBody String hookContent, @RequestHeader("X-Exl-Signature") String signature) throws NoSuchAlgorithmException, InvalidKeyException {
+        return this.receiveHook("job", hookContent, signature);
+    }
+
+    @PostMapping("/itemListener")
+    public ResponseEntity<?> receiveItemHook(@RequestBody String hookContent, @RequestHeader("X-Exl-Signature") String signature) throws NoSuchAlgorithmException, InvalidKeyException {
+        return this.receiveHook("item", hookContent, signature);
+    }
+
+    @PostMapping("/bibListener")
+    public ResponseEntity<?> receiveBibHook(@RequestBody String hookContent, @RequestHeader("X-Exl-Signature") String signature) throws NoSuchAlgorithmException, InvalidKeyException {
+        return this.receiveHook("bib", hookContent, signature);
+    }
+
+    @PostMapping("/requestsListener")
+    public ResponseEntity<?> receiveRequestHook(@RequestBody String hookContent, @RequestHeader("X-Exl-Signature") String signature) throws NoSuchAlgorithmException, InvalidKeyException {
+        return this.receiveHook("request", hookContent, signature);
+    }
+
+    @PostMapping("/loanListener")
+    public ResponseEntity<?> receiveLoanHook(@RequestBody String hookContent, @RequestHeader("X-Exl-Signature") String signature) throws NoSuchAlgorithmException, InvalidKeyException {
+        return this.receiveHook("loan", hookContent, signature);
+    }
+
     @GetMapping("/listener/{hookType}")
     public ResponseEntity<Challenge> answerChallenge(String challenge, @PathVariable String hookType) {
         log.debug(String.format("challenging %s hook endpoint.", hookType));
@@ -44,7 +105,7 @@ public class HookController {
     }
 
     @PostMapping("/listener/{hookType}")
-    public ResponseEntity<?> receiveLoan(@PathVariable String hookType, @RequestBody String hookContent, @RequestHeader("X-Exl-Signature") String signature) throws NoSuchAlgorithmException, InvalidKeyException {
+    public ResponseEntity<?> receiveHook(@PathVariable String hookType, @RequestBody String hookContent, @RequestHeader("X-Exl-Signature") String signature) throws NoSuchAlgorithmException, InvalidKeyException {
         if (this.hookValidatorService.isValid(hookContent, signature)) {
             log.debug("Hook passed validation");
             this.redisService.cacheHook(hookContent, hookType);
