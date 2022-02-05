@@ -1,6 +1,7 @@
 package org.unidue.ub.libintel.almaconnector.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.bibs.*;
 import org.unidue.ub.alma.shared.user.Address;
@@ -42,6 +43,9 @@ public class HookService {
 
     private final GetterService getterService;
 
+    @Value("${libintel.alma.elasticsearch.enable:false}")
+    private boolean enableElasticsearch;
+
     /**
      * constructor based autowiring to the individual services
      *
@@ -50,11 +54,10 @@ public class HookService {
      * @param almaCatalogService    the alma bib api feign client
      * @param bubiOrderLineService  the bubi order line service
      * @param almaElectronicService the alma electronic api feign client
-     * @param almaInvoiceService the alma invoices api feign client
-     * @param regalfinderService the regalfinder service
-     * @param redisService the redis cache service
-     * @param getterService the elasticsearch connector service
-     *
+     * @param almaInvoiceService    the alma invoices api feign client
+     * @param regalfinderService    the regalfinder service
+     * @param redisService          the redis cache service
+     * @param getterService         the elasticsearch connector service
      */
     HookService(AlmaUserService almaUserService,
                 AlmaItemService almaItemService,
@@ -180,7 +183,7 @@ public class HookService {
             }
         }
         // index 'real' user requests to elasticsearch
-        else {
+        else if (enableElasticsearch){
             getterService.indexRequest(hook, item);
         }
     }
@@ -210,8 +213,10 @@ public class HookService {
         String mmsId = itemLoan.getMmsId();
 
         // index loan event to elasticsearch
-        if (HookEventTypes.LOAN_CREATED.name().equals(hook.getEvent().getValue()) || HookEventTypes.LOAN_RETURNED.name().equals(hook.getEvent().getValue())) {
-            this.getterService.indexLoan(hook, item, almaUser);
+        if (enableElasticsearch) {
+            if (HookEventTypes.LOAN_CREATED.name().equals(hook.getEvent().getValue()) || HookEventTypes.LOAN_RETURNED.name().equals(hook.getEvent().getValue())) {
+                this.getterService.indexLoan(hook, item, almaUser);
+            }
         }
 
         // initialize the temporary library value
@@ -296,7 +301,7 @@ public class HookService {
                 // add the user name of the neuerwerbungsregal to the public note
                 if ("LOAN_CREATED".equals(hook.getEvent().getValue())) {
                     log.debug(String.format("setting public note to %s", almaUser.getLastName()));
-                    this.almaItemService.addPublicNote(item,almaUser.getLastName());
+                    this.almaItemService.addPublicNote(item, almaUser.getLastName());
                 }
 
                 // remove the user name of the neuerwerbungsregal from the public note
@@ -309,7 +314,7 @@ public class HookService {
                 this.almaItemService.updateItem(mmsId, item);
                 break;
             default:
-                log.debug("got user loan for "+ almaUser.getUserGroup().getDesc());
+                log.debug("got user loan for " + almaUser.getUserGroup().getDesc());
         }
     }
 
@@ -331,12 +336,12 @@ public class HookService {
         log.debug("received item hook: " + item.toString());
 
         // index deletion event to elasticsearch
-        if ("ITEM_DELETED".equals(hook.getEvent().getValue())) {
+        if (enableElasticsearch && "ITEM_DELETED".equals(hook.getEvent().getValue())) {
             this.getterService.deleteItem(item, hook.getTime());
         }
 
         // index newly created items to elasticsearch
-        else if (HookEventTypes.ITEM_CREATED.name().equals(hook.getEvent().getValue())) {
+        else if (enableElasticsearch && HookEventTypes.ITEM_CREATED.name().equals(hook.getEvent().getValue())) {
             this.getterService.index(item, hook.getTime());
         }
 
@@ -430,7 +435,8 @@ public class HookService {
             }
 
             // index the item changes to elasticsearch
-            this.getterService.updateItem(item, hook.getTime());
+            if (enableElasticsearch)
+                this.getterService.updateItem(item, hook.getTime());
         }
     }
 
@@ -539,6 +545,7 @@ public class HookService {
 
     /**
      * just passes some seconds to wait for alma
+     *
      * @param timeout the time in seconds to wait
      */
     private void waitForAlma(int timeout) {
@@ -567,6 +574,7 @@ public class HookService {
     /**
      * retrieves an item preferably from the item web hook in the redis cache. If no web hook can be found, the item is
      * retrieved from the alma API
+     *
      * @param itemId the id of the item to be retrieved
      * @return an alma Item object
      */
@@ -585,6 +593,7 @@ public class HookService {
     /**
      * retrieves an user preferably from the item web hook in the redis cache. If no web hook can be found, the user is
      * retrieved from the alma API
+     *
      * @param userId the id of the user to be retrieved
      * @return an AlmaUser object
      */
