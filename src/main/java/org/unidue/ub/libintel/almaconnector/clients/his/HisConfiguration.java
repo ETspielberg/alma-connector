@@ -12,7 +12,7 @@ import org.unidue.ub.libintel.almaconnector.clients.ApiKeyAuth;
 @Configuration
 public class HisConfiguration {
 
-    @Value("${alma.register.api.key}")
+    @Value("${libintel.alma.api.key.register}")
     private String almaRegisterApiKey;
 
     /**

@@ -17,9 +17,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.Date;
 
-@XmlRootElement(name = "loan_hook")
+@XmlRootElement(name = "job_hook")
 @XmlAccessorType(XmlAccessType.FIELD)
-@JacksonXmlRootElement(localName = "loan_hook")
+@JacksonXmlRootElement(localName = "job_hook")
 @KeySpace("job_hook")
 @RedisHash(value = "job_hook", timeToLive = 3)
 public class JobHook implements Serializable {
