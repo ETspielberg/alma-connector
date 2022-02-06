@@ -17,7 +17,7 @@ public class NewItemWithOrder {
     @JacksonXmlProperty(localName = "MMSId")
     private String mmsId;
 
-    @JacksonXmlProperty(localName = "ItemId")
+    @JacksonXmlProperty(localName = "PhysicalItemId")
     private String itemId;
 
     @JacksonXmlProperty(localName = "CreationDate")
