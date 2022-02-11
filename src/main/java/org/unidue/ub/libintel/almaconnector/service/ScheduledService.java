@@ -3,6 +3,7 @@ package org.unidue.ub.libintel.almaconnector.service;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.acq.InterestedUser;
@@ -46,6 +47,8 @@ public class ScheduledService {
 
     private final LogService logService;
 
+    private final CacheManager cacheManager;
+
     @Value("${libintel.profile:prod}")
     private String profile;
 
@@ -78,7 +81,8 @@ public class ScheduledService {
                      AlmaCatalogService almaCatalogService,
                      AlmaSetService almaSetService,
                      SaveDataService saveDataService,
-                     LogService logService) {
+                     LogService logService,
+                     CacheManager cacheManager) {
         this.almaAnalyticsReportClient = almaAnalyticsReportClient;
         this.mappingTables = mappingTables;
         this.almaItemService = almaItemService;
@@ -89,6 +93,7 @@ public class ScheduledService {
         this.almaSetService = almaSetService;
         this.saveDataService = saveDataService;
         this.logService = logService;
+        this.cacheManager = cacheManager;
     }
 
     /**
@@ -385,6 +390,12 @@ public class ScheduledService {
         } catch (AnalyticsNotRetrievedException analyticsNotRetrievedException) {
             this.logService.handleAnalyticsException(analyticsNotRetrievedException);
         }
+    }
+
+    @Scheduled(fixedRate = 5000)
+    public void evictAllcachesAtIntervals() {
+        cacheManager.getCacheNames()
+                .forEach(cacheName -> Objects.requireNonNull(cacheManager.getCache(cacheName)).clear());
     }
 
 }
