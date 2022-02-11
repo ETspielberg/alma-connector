@@ -836,11 +836,8 @@ public class SapService {
                         sapData.comment = "Sonst. Literaturkosten";
                         break;
                     }
-                    case "68910100": {
-                        sapData.comment = "Aufwendungen f. Veroeffentlichungen";
-                        break;
-                    }
-                    case "68900100 ": {
+                    case "68910100":
+                    case "68900100": {
                         sapData.comment = "Aufwendungen f. Veroeffentlichungen";
                         break;
                     }
