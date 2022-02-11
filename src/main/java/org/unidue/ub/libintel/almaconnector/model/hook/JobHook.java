@@ -26,7 +26,6 @@ public class JobHook implements Serializable {
 
     public static final String JSON_PROPERTY_ID = "id";
     @XmlElement(name = "id")
-    @Id
     private String id;
 
     public static final String JSON_PROPERTY_ACTION = "action";
