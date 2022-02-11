@@ -166,6 +166,8 @@ public class GetterService {
         List<EsPrintManifestation> printManifestations = this.getterClient.getManifestations("barcode", (item.getItemData().getBarcode()));
         if (printManifestations.size() == 0)
             printManifestations = this.getterClient.getManifestations("shelfmark", item.getItemData().getAlternativeCallNumber());
+        if (printManifestations.size() == 0 && item.getBibData() != null)
+            printManifestations = this.getterClient.getManifestations("multipleIds", item.getBibData().getMmsId());
 
         // retrieve full document
         if (printManifestations.size() > 0)
