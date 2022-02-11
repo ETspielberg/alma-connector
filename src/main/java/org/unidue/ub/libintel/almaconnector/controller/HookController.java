@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.unidue.ub.libintel.almaconnector.model.hook.*;
+import org.unidue.ub.libintel.almaconnector.service.HookService;
 import org.unidue.ub.libintel.almaconnector.service.RedisService;
 import org.unidue.ub.libintel.almaconnector.service.alma.HookValidatorService;
 
@@ -108,7 +109,10 @@ public class HookController {
     public ResponseEntity<?> receiveHook(@PathVariable String hookType, @RequestBody String hookContent, @RequestHeader("X-Exl-Signature") String signature) throws NoSuchAlgorithmException, InvalidKeyException {
         if (this.hookValidatorService.isValid(hookContent, signature)) {
             log.debug("Hook passed validation");
-            this.redisService.cacheHook(hookContent, hookType);
+            if ("job".equals(hookType))
+                log.info("retrieved job hook: " + hookContent);
+            else
+                this.redisService.cacheHook(hookContent, hookType);
             return ResponseEntity.ok().build();
         } else {
             log.warn("hook did not pass validation");
