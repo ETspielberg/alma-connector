@@ -123,7 +123,12 @@ public class AlmaItemService {
      */
     public Item findItemByMmsAndItemId(String mmsId, String itemId) {
         log.debug(String.format("retrieving item by mms id %s and item id %s", mmsId, itemId));
-        return this.almaCatalogApiClient.getBibsMmsIdHoldingsHoldingIdItemsItemPid("application/json", mmsId, "ALL", itemId, "full", "", "");
+        try {
+            return this.almaCatalogApiClient.getBibsMmsIdHoldingsHoldingIdItemsItemPid("application/json", mmsId, "ALL", itemId, "full", "", "");
+        } catch (FeignException feignException) {
+            log.warn("could not retrieve item from alma: " + feignException.getMessage());
+            return null;
+        }
     }
 
     /**
@@ -176,10 +181,6 @@ public class AlmaItemService {
                 "",
                 "",
                 "");
-    }
-
-    public Item refreshItem(Item item) {
-        return this.findItemByMmsAndItemId(item.getBibData().getMmsId(), item.getItemData().getPid());
     }
 
     /**
