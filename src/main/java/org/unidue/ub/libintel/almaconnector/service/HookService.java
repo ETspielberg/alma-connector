@@ -201,6 +201,10 @@ public class HookService {
         }
         log.info(String.format("processing item hook with event %s (%s)", hook.getEvent().getDesc(), hook.getEvent().getValue()));
 
+        // do nothing for renewed loans.
+        if (HookEventTypes.LOAN_RENEWED.name().equals(hook.getEvent().getValue()))
+            return;
+
         // retrieve the item loan object
         HookItemLoan itemLoan = hook.getItemLoan();
         log.debug("processing loan from web hook: " + itemLoan.toString());
@@ -436,7 +440,8 @@ public class HookService {
 
             // index the item changes to elasticsearch
             if (enableElasticsearch)
-                this.getterService.updateItem(item, hook.getTime());
+                if (item.getItemData() != null && item.getItemData().getBarcode() != null || !item.getItemData().getBarcode().isEmpty())
+                    this.getterService.updateItem(item, hook.getTime());
         }
     }
 

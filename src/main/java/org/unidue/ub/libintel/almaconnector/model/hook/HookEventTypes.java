@@ -12,5 +12,7 @@ public enum HookEventTypes {
     ITEM_DELETED,
     LOAN_CREATED,
     LOAN_DUE_DATE,
-    LOAN_RETURNED
+    LOAN_RETURNED,
+    LOAN_RENEWED
+
 }
