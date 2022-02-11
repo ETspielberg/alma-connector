@@ -1,0 +1,55 @@
+{
+  "id": "7861113290006446",
+  "action": "JOB_END",
+  "institution": {
+    "value": "49HBZ_UDE",
+    "desc": "Universität Duisburg-Essen"
+  },
+  "time": "2022-02-06T15:00:10.685Z",
+  "event": null,
+  "job_instance": {
+    "id": "7861113290006446",
+    "external_id": "",
+    "name": "PO Line - Packaging",
+    "submitted_by": {
+      "value": "System",
+      "desc": null
+    },
+    "submit_time": "2022-02-06T15:00:00.562Z",
+    "start_time": "2022-02-06T15:00:00.593Z",
+    "end_time": "2022-02-06T15:00:10.685Z",
+    "progress": 0,
+    "status": {
+      "value": "COMPLETED_SUCCESS",
+      "desc": "Completed Successfully"
+    },
+    "status_date": "2022-02-06Z",
+    "alert": [
+      {
+        "value": "alert_general_success",
+        "desc": "The job completed successfully. For more information view the report details."
+      }
+    ],
+    "counter": [],
+    "job_info": {
+      "id": "S5852244220006446",
+      "name": "PO Line - Packaging",
+      "description": "Packages all PO lines ready for automatic packaging into POs",
+      "type": {
+        "value": "SCHEDULED",
+        "desc": "Scheduled"
+      },
+      "category": {
+        "value": "ACQUISITION",
+        "desc": "Acquisition"
+      },
+      "link": "/almaws/v1/conf/jobs/S5852244220006446"
+    },
+    "link": "/almaws/v1/conf/jobs/M0/instances/7861113290006446"
+  },
+  "bib": null,
+  "holding": null,
+  "item": null,
+  "portfolio": null,
+  "representation": null
+}
