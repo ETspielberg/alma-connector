@@ -42,6 +42,7 @@ public class EsItem {
 	public EsItem(Item almaItem, Date inventoryDate) {
 		this.itemId = almaItem.getItemData().getPid();
 		this.subLibrary = almaItem.getItemData().getLibrary().getValue();
+		this.collection = almaItem.getItemData().getLocation().getValue();
 		this.material = almaItem.getItemData().getPhysicalMaterialType().getValue();
 		this.inventoryDate = inventoryDate;
 		this.shelfmark = almaItem.getItemData().getAlternativeCallNumber();
@@ -279,13 +280,48 @@ public class EsItem {
 		return isChanged;
 	}
 
-	public void closeLoan(Date closeDate) {
+	public void closeLoan(Date closeDate, String loanId) {
 		for (EsEvent esEvent : this.esEvents) {
-			if (EventType.LOAN.equals(esEvent.getType()) && esEvent.getEndDate() == null)
+			if (EventType.LOAN.equals(esEvent.getType()) && esEvent.getEndDate() == null && esEvent.getEventId().equals(loanId)) {
 				esEvent.setEndDate(closeDate);
+				return;
+			}
+		}
+		for (EsEvent esEvent : this.esEvents) {
+			if (EventType.LOAN.equals(esEvent.getType()) && esEvent.getEndDate() == null) {
+				esEvent.setEndDate(closeDate);
+				return;
+			}
 		}
 	}
 
-	public void closeRequest(Date date) {
+	public void closeRequest(Date date, String requestId) {
+		for (EsEvent esEvent : this.esEvents) {
+			if (EventType.REQUEST.equals(esEvent.getType()) && esEvent.getEndDate() == null && esEvent.getEventId().equals(requestId)) {
+				esEvent.setEndDate(date);
+				return;
+			}
+		}
+		for (EsEvent esEvent : this.esEvents) {
+			if (EventType.REQUEST.equals(esEvent.getType()) && esEvent.getEndDate() == null) {
+				esEvent.setEndDate(date);
+				return;
+			}
+		}
+	}
+
+	public void closeCald(Date date, String requestId) {
+		for (EsEvent esEvent : this.esEvents) {
+			if (EventType.CALD.equals(esEvent.getType()) && esEvent.getEndDate() == null && esEvent.getEventId().equals(requestId)) {
+				esEvent.setEndDate(date);
+				return;
+			}
+		}
+		for (EsEvent esEvent : this.esEvents) {
+			if (EventType.CALD.equals(esEvent.getType()) && esEvent.getEndDate() == null) {
+				esEvent.setEndDate(date);
+				return;
+			}
+		}
 	}
 }

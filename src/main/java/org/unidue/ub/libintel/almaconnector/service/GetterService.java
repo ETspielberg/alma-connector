@@ -123,15 +123,21 @@ public class GetterService {
         String eventType = hook.getEvent().getValue();
         HookUserRequest userRequest = hook.getUserRequest();
         String mmsId = userRequest.getMmsId();
-        Date requestDate = userRequest.getRequestDate();
+        String requestId = userRequest.getRequestid();
         EsPrintManifestation esPrintManifestation = retrieveOrBuildManifestation(mmsId, almaItem, hook.getTime());
         if (esPrintManifestation == null)
             return;
         EsItem esItem = esPrintManifestation.findCorrespindingItem(almaItem);
         if (EventType.REQUEST_CREATED.name().equals(eventType))
-            esItem.addEvent(new EsEvent(userRequest.getRequestid(), requestDate, null, EventType.REQUEST, ""));
-        else if (HookEventTypes.REQUEST_CLOSED.name().equals(eventType))
-            esItem.closeRequest(new Date(hook.getUserRequest().getRequestDate().getTime()));
+            if (esItem.getSubLibrary().equals(userRequest.getPickupLocationLibrary()))
+                esItem.addEvent(new EsEvent(requestId, hook.getTime(), null, EventType.REQUEST, ""));
+            else
+                esItem.addEvent(new EsEvent(requestId, hook.getTime(), null, EventType.CALD, ""));
+        else if (HookEventTypes.REQUEST_CLOSED.name().equals(eventType) || HookEventTypes.REQUEST_CANCELED.name().equals(eventType))
+            if (esItem.getSubLibrary().equals(userRequest.getPickupLocationLibrary()))
+                esItem.closeRequest(hook.getTime(), requestId);
+            else
+                esItem.closeCald(hook.getTime(), requestId);
         this.index(esPrintManifestation);
     }
 
@@ -145,13 +151,14 @@ public class GetterService {
         String eventType = hook.getEvent().getValue();
         String mmsId = hook.getItemLoan().getMmsId();
         EsPrintManifestation esPrintManifestation = retrieveOrBuildManifestation(mmsId, almaItem, hook.getTime());
+        String loanId = hook.getItemLoan().getLoanId();
         if (esPrintManifestation == null)
             return;
         EsItem esItem = esPrintManifestation.findCorrespindingItem(almaItem);
         if (HookEventTypes.LOAN_CREATED.name().equals(eventType))
-            esItem.addEvent(new EsEvent(hook.getItemLoan().getLoanId(), hook.getTime(), null, EventType.LOAN, user.getUserGroup().getValue()));
+            esItem.addEvent(new EsEvent(loanId, hook.getTime(), null, EventType.LOAN, user.getUserGroup().getValue()));
         else if (HookEventTypes.LOAN_RETURNED.name().equals(eventType))
-            esItem.closeLoan(hook.getTime());
+            esItem.closeLoan(hook.getTime(), loanId);
         this.index(esPrintManifestation);
     }
 
@@ -180,6 +187,14 @@ public class GetterService {
         EsPrintManifestation esPrintManifestation = this.findManifestationByMmsId(mmsId);
 
         if (esPrintManifestation == null) {
+            esPrintManifestation = findManifestationByItem(almaItem);
+        }
+
+        if (esPrintManifestation == null) {
+            esPrintManifestation = findManifestationByAllItems(mmsId);
+        }
+
+        if (esPrintManifestation == null) {
             log.debug("retrieved manifestation from elasticsearch is null. Building new manifestation from mms id " + mmsId);
             BibWithRecord bib = this.almaCatalogService.getRecord(mmsId);
             if (bib == null) {
@@ -188,6 +203,7 @@ public class GetterService {
             }
             esPrintManifestation = new EsPrintManifestation(bib);
         }
+        esPrintManifestation.setAlmaId(mmsId);
         log.debug("retrieved manifestation from elasticsearch: " + esPrintManifestation.getTitleID());
         EsItem esItem = esPrintManifestation.findCorrespindingItem(almaItem);
         if (esItem == null) {
@@ -197,6 +213,16 @@ public class GetterService {
             esPrintManifestation = this.index(esPrintManifestation);
         }
         return esPrintManifestation;
+    }
+
+    private EsPrintManifestation findManifestationByAllItems(String mmsId) {
+        EsPrintManifestation esPrintManifestation;
+        for (Item item: this.almaCatalogService.getItems(mmsId, "ALL")) {
+            esPrintManifestation = this.findManifestationByItem(item);
+            if (esPrintManifestation != null)
+                return esPrintManifestation;
+        }
+        return null;
     }
 
     public ApcStatistics indexApcStatistics(ApcStatistics apcStatistics) {

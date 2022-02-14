@@ -218,4 +218,18 @@ public class AlmaCatalogService {
         }
         return portfolioList;
     }
+
+    public List<Item> getItems(String mmsId, String holdingId) {
+        int limit = 5;
+        int offset = 0;
+        Items items = this.almaCatalogApiClient.getBibsMmsIdHoldingsHoldingIdItems(mmsId, holdingId, limit, offset, "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "");
+        int numberOfItems = items.getTotalRecordCount();
+        List<Item> itemList = items.getItem();
+        while(offset + limit < numberOfItems) {
+            offset += limit;
+            items = this.almaCatalogApiClient.getBibsMmsIdHoldingsHoldingIdItems(mmsId, holdingId, limit, offset, "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "");;
+            itemList.addAll(items.getItem());
+        }
+        return itemList;
+    }
 }

@@ -4,6 +4,7 @@ public enum HookEventTypes {
 
     REQUEST_CREATED,
     REQUEST_CLOSED,
+    REQUEST_CANCELED,
     BIB_CREATED,
     BIB_UPDATED,
     BIB_DELETED,
