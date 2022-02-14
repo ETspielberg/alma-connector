@@ -5,7 +5,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.unidue.ub.libintel.almaconnector.model.hook.*;
-import org.unidue.ub.libintel.almaconnector.service.HookService;
 import org.unidue.ub.libintel.almaconnector.service.RedisService;
 import org.unidue.ub.libintel.almaconnector.service.alma.HookValidatorService;
 
