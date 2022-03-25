@@ -1,6 +1,8 @@
 package org.unidue.ub.libintel.almaconnector.model.media.elasticsearch;
 
 import org.unidue.ub.alma.shared.bibs.Item;
+import org.unidue.ub.alma.shared.bibs.MarcDatafield;
+import org.unidue.ub.alma.shared.bibs.MarcSubfield;
 import org.unidue.ub.libintel.almaconnector.model.EventType;
 
 import java.util.ArrayList;
@@ -52,6 +54,25 @@ public class EsItem {
 	}
 
     public EsItem() {}
+
+
+	public EsItem(Item item) {
+		this.shelfmark = item.getItemData().getAlternativeCallNumber();
+		this.collection = item.getItemData().getLocation().getValue();
+		this.itemId = item.getItemData().getPid();
+		this.subLibrary = item.getItemData().getLibrary().getValue();
+		this.barcode = item.getItemData().getBarcode();
+		if (item.getItemData().getInventoryDate() != null)
+			this.inventoryDate = item.getItemData().getInventoryDate();
+		else
+			this.inventoryDate = item.getItemData().getArrivalDate();
+		this.esEvents.add(new EsEvent(this.itemId, this.inventoryDate, null, EventType.INVENTORY, ""));
+		this.processStatus = item.getItemData().getProcessType().getValue();
+		this.itemStatus = item.getItemData().getBaseStatus().getValue();
+		this.noteOpac = item.getItemData().getPublicNote();
+		this.material = item.getItemData().getPhysicalMaterialType().getValue();
+
+	}
 
 	public String getNoteOpac() {
 		return noteOpac;

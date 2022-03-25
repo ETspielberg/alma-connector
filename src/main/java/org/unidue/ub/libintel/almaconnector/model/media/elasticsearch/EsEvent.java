@@ -1,7 +1,10 @@
 package org.unidue.ub.libintel.almaconnector.model.media.elasticsearch;
 
+import org.unidue.ub.alma.shared.bibs.ItemLoan;
+import org.unidue.ub.alma.shared.bibs.LoanStatus;
 import org.unidue.ub.libintel.almaconnector.model.EventType;
 
+import java.time.OffsetDateTime;
 import java.util.Date;
 
 /**
@@ -24,6 +27,14 @@ public class EsEvent implements Comparable<EsEvent> {
     private String borrowerStatus;
 
     private String eventId;
+
+    public EsEvent(ItemLoan itemLoan) {
+        this.type = EventType.LOAN;
+        this.beginDate = new Date(itemLoan.getLoanDate().toInstant().toEpochMilli());;
+        this.eventId = itemLoan.getLoanId();
+        if (itemLoan.getLoanStatus().equals(LoanStatus.COMPLETE))
+            this.endDate = new Date(itemLoan.getReturnDate().toInstant().toEpochMilli());
+    }
 
 
     /**

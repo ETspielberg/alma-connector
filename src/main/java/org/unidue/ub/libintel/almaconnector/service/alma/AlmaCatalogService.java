@@ -1,11 +1,17 @@
 package org.unidue.ub.libintel.almaconnector.service.alma;
 
+import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.sql.Update;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.bibs.*;
 import org.unidue.ub.libintel.almaconnector.clients.alma.bib.AlmaCatalogApiClient;
+import org.unidue.ub.libintel.almaconnector.clients.alma.bib.AlmaLoansApiClient;
+import org.unidue.ub.libintel.almaconnector.model.EventType;
+import org.unidue.ub.libintel.almaconnector.model.media.elasticsearch.EsEvent;
+import org.unidue.ub.libintel.almaconnector.model.media.elasticsearch.EsItem;
+import org.unidue.ub.libintel.almaconnector.model.media.elasticsearch.EsPrintManifestation;
+import org.unidue.ub.libintel.almaconnector.model.media.elasticsearch.GetterAlert;
 
 import java.util.List;
 
@@ -23,6 +29,8 @@ import static org.unidue.ub.libintel.almaconnector.service.alma.AlmaElectronicSe
 public class AlmaCatalogService {
 
     private final AlmaCatalogApiClient almaCatalogApiClient;
+
+    private final AlmaLoansApiClient almaLoansApiClient;
 
     @Value("${doi.resolver.url:https://doi.org/}")
     private String doiUrl;
@@ -42,8 +50,10 @@ public class AlmaCatalogService {
      *
      * @param almaCatalogApiClient the alma bib api feign client
      */
-    AlmaCatalogService(AlmaCatalogApiClient almaCatalogApiClient) {
+    AlmaCatalogService(AlmaCatalogApiClient almaCatalogApiClient,
+                       AlmaLoansApiClient almaLoansApiClient) {
         this.almaCatalogApiClient = almaCatalogApiClient;
+        this.almaLoansApiClient = almaLoansApiClient;
     }
 
     /**
@@ -132,9 +142,10 @@ public class AlmaCatalogService {
     /**
      * updates field 024 of the bibliographic record of the given mms with the identifier provided.
      * also creates the corresponding link in field 856
-     * @param mmsId the mms id of the record to be updated
+     *
+     * @param mmsId      the mms id of the record to be updated
      * @param identifier the identifier to be updated in the record
-     * @param type the type of identifier. Currently, supported are doi and duepublico
+     * @param type       the type of identifier. Currently, supported are doi and duepublico
      */
     public void updateIdentifier(String mmsId, String identifier, String type) {
         BibWithRecord bib = this.getRecord(mmsId);
@@ -211,7 +222,7 @@ public class AlmaCatalogService {
         Portfolios portfolios = this.almaCatalogApiClient.getBibsMmsIdPortfolios(mmsId, limit, offset);
         int numberOfPortfolios = portfolios.getTotalRecordCount();
         List<Portfolio> portfolioList = portfolios.getPortfolio();
-        while(offset + limit < numberOfPortfolios) {
+        while (offset + limit < numberOfPortfolios) {
             offset += limit;
             portfolios = this.almaCatalogApiClient.getBibsMmsIdPortfolios(mmsId, limit, offset);
             portfolioList.addAll(portfolios.getPortfolio());
@@ -225,11 +236,55 @@ public class AlmaCatalogService {
         Items items = this.almaCatalogApiClient.getBibsMmsIdHoldingsHoldingIdItems(mmsId, holdingId, limit, offset, "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "");
         int numberOfItems = items.getTotalRecordCount();
         List<Item> itemList = items.getItem();
-        while(offset + limit < numberOfItems) {
+        while (offset + limit < numberOfItems) {
             offset += limit;
-            items = this.almaCatalogApiClient.getBibsMmsIdHoldingsHoldingIdItems(mmsId, holdingId, limit, offset, "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "");;
+            items = this.almaCatalogApiClient.getBibsMmsIdHoldingsHoldingIdItems(mmsId, holdingId, limit, offset, "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "");
             itemList.addAll(items.getItem());
         }
         return itemList;
+    }
+
+    public EsPrintManifestation getOverview(String mmsId) {
+        BibWithRecord bib = this.almaCatalogApiClient.getBibsMmsId(mmsId, "full", "p_avail");
+        EsPrintManifestation manifestation = new EsPrintManifestation(bib);
+        for (Item item : this.getItems(mmsId, "ALL")) {
+            manifestation.addItem(new EsItem(item));
+        }
+
+        addLoans(manifestation, mmsId, "Complete");
+        addLoans(manifestation, mmsId, "Active");
+        return manifestation;
+    }
+
+    public void addLoans(EsPrintManifestation manifestation, String mmsId, String type) {
+        for (EsItem esItem : manifestation.getItems()) {
+            try {
+                addLoansForItem(mmsId, esItem, type);
+            } catch (FeignException fe) {
+                String message = String.format("could not retrieve loans from alma. type: %s, mms id: %s, item id: %s, message: %s", type, mmsId, esItem.getItemId(), fe.getMessage());
+                manifestation.addAlert(new GetterAlert(EventType.LOAN).withAffectedItem(esItem.getItemId()).withMessage(message));
+                log.warn(message, fe);
+            }
+        }
+    }
+
+    public void addLoansForItem(String mmsId, EsItem esItem, String type) {
+        int limit = 100;
+        int offset = 0;
+
+        ItemLoans loans = this.almaLoansApiClient.getAlmawsV1BibsMmsIdHoldingsHoldingIdItemsItemIdLoans(mmsId, "ALL", esItem.getItemId(), limit, offset, "", "", type);
+        if (loans == null || loans.getTotalRecordCount() == 0)
+            return;
+        for (ItemLoan itemLoan : loans.getItemLoan()) {
+            esItem.addEvent(new EsEvent(itemLoan));
+        }
+        while (limit + offset < loans.getTotalRecordCount()) {
+            offset += limit;
+            loans = this.almaLoansApiClient.getAlmawsV1BibsMmsIdHoldingsHoldingIdItemsItemIdLoans(mmsId, "ALL", esItem.getItemId(), limit, offset, "", "", type);
+            for (ItemLoan itemLoan : loans.getItemLoan()) {
+                esItem.addEvent(new EsEvent(itemLoan));
+            }
+        }
+
     }
 }

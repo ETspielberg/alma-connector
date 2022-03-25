@@ -2,6 +2,7 @@ package org.unidue.ub.libintel.almaconnector.model.media.elasticsearch;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.unidue.ub.alma.shared.bibs.BibWithRecord;
+import org.unidue.ub.alma.shared.bibs.MarcDatafield;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -32,6 +33,8 @@ public class EsPrintManifestation implements Cloneable, Comparable<EsPrintManife
 	private int edition = 1;
 
 	private EsBibliographicInformation esBibliographicInformation;
+
+	private List<GetterAlert> alerts = new ArrayList<>();
 
 	public EsPrintManifestation() {
 	}
@@ -94,6 +97,20 @@ public class EsPrintManifestation implements Cloneable, Comparable<EsPrintManife
 
 	public void setEdition(int edition) {
 		this.edition = edition;
+	}
+
+	public List<GetterAlert> getAlerts() {
+		return alerts;
+	}
+
+	public void setAlerts(List<GetterAlert> alerts) {
+		this.alerts = alerts;
+	}
+
+	public void addAlert(GetterAlert alert) {
+		if (this.alerts == null)
+			this.alerts = new ArrayList<>();
+		this.alerts.add(alert);
 	}
 
 	public void addItem(EsItem esItem) {

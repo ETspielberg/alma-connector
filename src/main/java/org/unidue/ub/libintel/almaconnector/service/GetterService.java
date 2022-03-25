@@ -1,5 +1,6 @@
 package org.unidue.ub.libintel.almaconnector.service;
 
+import feign.Feign;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import org.unidue.ub.libintel.almaconnector.model.media.elasticsearch.EsPrintMan
 import org.unidue.ub.libintel.almaconnector.model.openaccess.ApcStatistics;
 import org.unidue.ub.libintel.almaconnector.service.alma.AlmaCatalogService;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -44,8 +46,9 @@ public class GetterService {
         try {
             return this.getterClient.saveManifestation(esPrintManifestation);
         } catch (FeignException feignException) {
-            log.warn(String.format("could not save print manifestation %s, message: %s",
+            log.warn(String.format("could not save print manifestation. titleId: %s, mmms id: %s, message: %s",
                     esPrintManifestation.getTitleID(),
+                    esPrintManifestation.getAlmaId(),
                     feignException.getMessage()),feignException);
             return null;
         }
@@ -68,7 +71,7 @@ public class GetterService {
         if (esPrintManifestation == null) {
             BibWithRecord bib = this.almaCatalogService.getRecord(almaItem.getBibData().getMmsId());
             if (bib == null) {
-                log.error("no record available for mms id " + mmsId);
+                log.error("no record available. mms id: " + mmsId);
                 return;
             }
             esPrintManifestation = new EsPrintManifestation(bib);
@@ -164,18 +167,30 @@ public class GetterService {
 
 
     private EsPrintManifestation findManifestationByMmsId(String mmsId) {
-        List<EsPrintManifestation> hits = this.getterClient.getManifestations("multipleIds", mmsId);
-        log.debug(String.format("manifestations with %s found to be updated: %d", mmsId, hits.size()));
-        return (hits.size() == 0) ? null : hits.get(0);
+        try {
+            List<EsPrintManifestation> hits = this.getterClient.getManifestations("multipleIds", mmsId);
+            log.debug(String.format("manifestations with %s found to be updated: %d", mmsId, hits.size()));
+            return (hits.size() == 0) ? null : hits.get(0);
+        } catch (FeignException fe) {
+            log.warn(String.format("could not connect to getter to retrieve manifestation. mms id: %s", mmsId), fe);
+            return null;
+        }
     }
 
     private EsPrintManifestation findManifestationByItem(Item item) {
-        List<EsPrintManifestation> printManifestations = this.getterClient.getManifestations("barcode", (item.getItemData().getBarcode()));
-        if (printManifestations.size() == 0)
-            printManifestations = this.getterClient.getManifestations("shelfmark", item.getItemData().getAlternativeCallNumber());
-        if (printManifestations.size() == 0 && item.getBibData() != null)
-            printManifestations = this.getterClient.getManifestations("multipleIds", item.getBibData().getMmsId());
-
+        List<EsPrintManifestation> printManifestations = new ArrayList<>();
+        try {
+            printManifestations = this.getterClient.getManifestations("barcode", (item.getItemData().getBarcode()));
+            if (printManifestations.size() == 0)
+                printManifestations = this.getterClient.getManifestations("shelfmark", item.getItemData().getAlternativeCallNumber());
+            if (printManifestations.size() == 0 && item.getBibData() != null)
+                printManifestations = this.getterClient.getManifestations("multipleIds", item.getBibData().getMmsId());
+        } catch (FeignException fe) {
+            log.warn(String.format("could not connect to getter to retrieve manifestation for item. barcode: %s, shelfmark: %s, mms id: %s",
+                    item.getItemData().getBarcode(),
+                    item.getItemData().getAlternativeCallNumber(),
+                    item.getBibData().getMmsId()));
+        }
         // retrieve full document
         if (printManifestations.size() > 0)
             return printManifestations.get(0);
@@ -198,7 +213,7 @@ public class GetterService {
             log.debug("retrieved manifestation from elasticsearch is null. Building new manifestation from mms id " + mmsId);
             BibWithRecord bib = this.almaCatalogService.getRecord(mmsId);
             if (bib == null) {
-                log.error("no record available for mms id " + mmsId);
+                log.error("no record available. mms id: " + mmsId);
                 return null;
             }
             esPrintManifestation = new EsPrintManifestation(bib);

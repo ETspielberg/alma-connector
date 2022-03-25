@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Representation object of the basic bibliographic information of one document
@@ -33,7 +34,7 @@ public class EsBibliographicInformation {
 
 	private String place = "";
 
-	private String year = "";
+	private int year = 0;
 	
 	private String edition = "";
 	
@@ -68,7 +69,22 @@ public class EsBibliographicInformation {
 		} catch (JsonProcessingException e) {
 			this.fullDescription = "";
 		}
-		this.year = bib.getDateOfPublication();
+		String yearString = bib.getDateOfPublication();
+		Pattern yearRegEx = Pattern.compile("[17,|18|19|20][0-9][0-9]");
+		try {
+			Integer.parseInt(yearString);
+		} catch (Exception e) {
+			try {
+				String year = yearRegEx.matcher(yearString).group();
+				if (year.length() == 4) {
+					this.year = Integer.parseInt(year);
+				} else {
+					this.year = 0;
+				}
+			} catch (IllegalStateException ise) {
+				this.year = 0;
+			}
+		}
 		this.place = bib.getPlaceOfPublication();
 	}
 
@@ -96,7 +112,7 @@ public class EsBibliographicInformation {
 			mab += publisher + ", ";
 		if (!place.isEmpty())
 			mab += place + ", ";
-		if (!year.equals(""))
+		if (year != 0)
 			mab += year + ". ";
 		return mab;
 	}
@@ -165,11 +181,11 @@ public class EsBibliographicInformation {
 		this.place = place;
 	}
 
-	public String getYear() {
+	public int getYear() {
 		return year;
 	}
 
-	public void setYear(String year) {
+	public void setYear(int year) {
 		this.year = year;
 	}
 
