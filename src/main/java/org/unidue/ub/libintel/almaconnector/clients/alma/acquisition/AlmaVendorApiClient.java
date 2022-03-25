@@ -2,7 +2,6 @@ package org.unidue.ub.libintel.almaconnector.clients.alma.acquisition;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 import org.unidue.ub.alma.shared.acq.Invoice;
 import org.unidue.ub.alma.shared.acq.PoLine;
@@ -12,7 +11,6 @@ import org.unidue.ub.libintel.almaconnector.clients.alma.AlmaFeignConfiguration;
 import java.util.List;
 
 @FeignClient(name = "vendors", url = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/acq/vendors", configuration = AlmaFeignConfiguration.class)
-@Service
 public interface AlmaVendorApiClient {
 
     /**

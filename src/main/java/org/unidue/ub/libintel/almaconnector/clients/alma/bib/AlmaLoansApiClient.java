@@ -6,12 +6,12 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 import org.unidue.ub.alma.shared.bibs.ItemLoan;
-import org.unidue.ub.alma.shared.user.UserLoans;
+import org.unidue.ub.alma.shared.bibs.ItemLoans;
 import org.unidue.ub.libintel.almaconnector.clients.alma.AlmaFeignConfiguration;
 
 @FeignClient(name = "loans", url = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/bibs", configuration = AlmaFeignConfiguration.class)
 @Service
-public interface LoansApi {
+public interface AlmaLoansApiClient {
 
 
     /**
@@ -21,15 +21,39 @@ public interface LoansApi {
      * @param mmsId     The Bib Record ID. (required)
      * @param holdingId The Holding Record ID. (required)
      * @param itemId    The Item ID. (required)
+     * @param limit Limits the number of results. Optional. Valid values are 0-100. Default value: 10.
+     * @param offset Offset of the results returned. Optional. Default value: 0, which means that the first results will be returned.
+     * @param order_by A few sort options are available (only one can be sent): loan_date, due_date, barcode, title, author and return_date (relevant only for historical loans). A secondary sort key, id, is added to the single sort option chosen. Default sorting is by id.
+     * @param direction The sort direction of asc (default) or desc.
+     * @param loan_status Active or Complete loan status. Default: Active
      * @return Object
      */
     @RequestMapping(method = RequestMethod.GET,
             value = "/{mmsId}/holdings/{holdingId}/items/{itemId}/loans",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    UserLoans getAlmawsV1BibsMmsIdHoldingsHoldingIdItemsItemIdLoans(@PathVariable String mmsId,
+    ItemLoans getAlmawsV1BibsMmsIdHoldingsHoldingIdItemsItemIdLoans(@PathVariable String mmsId,
                                                                     @PathVariable String holdingId,
-                                                                    @PathVariable String itemId);
+                                                                    @PathVariable String itemId,
+                                                                    @RequestParam int limit,
+                                                                    @RequestParam int offset,
+                                                                    @RequestParam String order_by,
+                                                                    @RequestParam String direction,
+                                                                    @RequestParam String loan_status);
+
+
+    @RequestMapping(method = RequestMethod.GET,
+            value = "/{mmsId}/holdings/{holdingId}/items/{itemId}/loans",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    ItemLoans getSimpleLoansForItem(@PathVariable String mmsId,
+                                                                    @PathVariable String holdingId,
+                                                                    @PathVariable String itemId,
+                                                                    @RequestParam int limit,
+                                                                    @RequestParam int offset,
+                                                                    @RequestParam String order_by,
+                                                                    @RequestParam String direction,
+                                                                    @RequestParam String loan_status);
 
     /**
      * Retrieve Item Loan information
@@ -59,13 +83,23 @@ public interface LoansApi {
      * This web service returns Loan information for a Bib record.
      *
      * @param mmsId The Bib Record ID. (required)
+     * @param limit Limits the number of results. Optional. Valid values are 0-100. Default value: 10.
+     * @param offset Offset of the results returned. Optional. Default value: 0, which means that the first results will be returned.
+     * @param order_by A few sort options are available (only one can be sent): loan_date, due_date, barcode, title, author and return_date (relevant only for historical loans). A secondary sort key, id, is added to the single sort option chosen. Default sorting is by id.
+     * @param direction The sort direction of asc (default) or desc.
+     * @param loan_status Active or Complete loan status. Default: Active
      * @return Object
      */
     @RequestMapping(method = RequestMethod.GET,
             value = "/{mmsId}/loans",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    UserLoans getAlmawsV1BibsMmsIdLoans(@PathVariable String mmsId);
+    ItemLoans getAlmawsV1BibsMmsIdLoans(@PathVariable String mmsId,
+                                        @RequestParam int limit,
+                                        @RequestParam int offset,
+                                        @RequestParam String order_by,
+                                        @RequestParam String direction,
+                                        @RequestParam String loan_status);
 
     /**
      * Retrieve Bib Loan information for a Bib id and Loan id

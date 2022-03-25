@@ -2,13 +2,11 @@ package org.unidue.ub.libintel.almaconnector.clients.alma.acquisition;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 import org.unidue.ub.alma.shared.acq.*;
 import org.unidue.ub.libintel.almaconnector.clients.alma.AlmaFeignConfiguration;
 
 @FeignClient(name = "po-lines", url = "https://api-eu.hosted.exlibrisgroup.com/almaws/v1/acq/po-lines", configuration = AlmaFeignConfiguration.class)
-@Service
 public interface AlmaPoLinesApiClient {
 
     /**
