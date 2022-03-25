@@ -20,7 +20,7 @@ public class RegalfinderService {
 
     private final MailSenderService mailSenderService;
 
-    private final List<String> ignoredLocations = Arrays.asList("ENP", "DNP", "EPR", "DPR", "DBB", "EBB", "AFL", "DES", "EES", "DHS", "UNASSIGNED", "FL-AUSL", "FL-LS"," ELS", "ERK", "DRK","EHS", "MPR", "MNP", "MHS", "E08", "E70", "E84", "D07", "D50", "D07", "E37", "E70", "E60");
+    private final List<String> ignoredLocations = Arrays.asList("ENP", "DNP", "EPR", "DPR", "DBB", "EBB", "AFL", "DES", "EES", "DHS", "UNASSIGNED", "FL-AUSL", "FL-LS"," ELS", "ERK", "DRK","EHS", "EHA", "MPR", "MNP", "MHS", "E08", "E36", "E37", "E60", "E70", "E84", "E92", "E94", "E96", "E98", "D04", "D06", "D07", "D08", "D09", "D16", "D50", "D92", "D94", "D96", "D98");
 
     private final static String Regalfinder_URL = "https://services.ub.uni-due.de/ub-map/regalfinder.html?standort=%s&signatur=%s&lang=de&XSL.Style=xml";
 
