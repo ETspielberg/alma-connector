@@ -5,8 +5,8 @@ spring:
     name: alma-connector
   cloud:
     config:
-      uri: http://localhost:11811
-      name: client,mail,datasource-settings,sap,service-provider,alma,mapping-tables,primo,ub-conf
+      uri: https://localhost:11811
+      name: client,mail,datasource-settings,sap,service-provider,alma,mapping-tables,primo,identifier-transfer,ub-conf
       username: ${libintel_config_username:dalek}
       password: ${libintel_config_password:3l1m1nat3}
       label: ${libintel.profile:dev}
