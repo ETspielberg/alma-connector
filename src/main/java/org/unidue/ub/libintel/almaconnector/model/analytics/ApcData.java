@@ -22,59 +22,68 @@ public class ApcData {
     private String ledgerType = "";
 
     @JacksonXmlProperty(localName = "Column4")
+    private String explicitRatio;
+
+    @JacksonXmlProperty(localName = "Column5")
     @DateTimeFormat(pattern="yyyy-MM-dd")
     private LocalDate invoiceCreationDate;
 
-    @JacksonXmlProperty(localName = "Column5")
+    @JacksonXmlProperty(localName = "Column6")
     private String currency = "";
 
-    @JacksonXmlProperty(localName = "Column6")
+    @JacksonXmlProperty(localName = "Column7")
     private String invoiceLineNote = "";
 
-    @JacksonXmlProperty(localName = "Column7")
+    @JacksonXmlProperty(localName = "Column8")
     private String invoiceLinePriceNote = "";
 
-    @JacksonXmlProperty(localName = "Column8")
+    @JacksonXmlProperty(localName = "Column9")
     private double vatPercent = 0.0;
 
-    @JacksonXmlProperty(localName = "Column9")
+    @JacksonXmlProperty(localName = "Column10")
     private String vatCode = "";
 
-    @JacksonXmlProperty(localName = "Column10")
-    @DateTimeFormat(pattern="yyyy-MM-dd")
-    private LocalDate invoiceDate;
-
     @JacksonXmlProperty(localName = "Column11")
-    private String invoiceNumber = "";
+    private double vatNoteData = 0.0;
 
     @JacksonXmlProperty(localName = "Column12")
     @DateTimeFormat(pattern="yyyy-MM-dd")
-    private LocalDate voucherDate;
+    private LocalDate invoiceDate;
 
     @JacksonXmlProperty(localName = "Column13")
-    private String voucherNumber = "";
+    private String invoiceNumber = "";
 
     @JacksonXmlProperty(localName = "Column14")
-    private double vatAmount = 0.0;
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    private LocalDate voucherDate;
 
     @JacksonXmlProperty(localName = "Column15")
-    private double listPrice = 0.0;
+    private String voucherNumber = "";
 
     @JacksonXmlProperty(localName = "Column16")
-    private String orderlineNumber  = "";
+    private double vatAmount = 0.0;
 
     @JacksonXmlProperty(localName = "Column17")
-    private String creditor = "";
+    private String vatType = "";
 
     @JacksonXmlProperty(localName = "Column18")
-    private String vendorCode = "";
+    private double listPrice = 0.0;
 
     @JacksonXmlProperty(localName = "Column19")
-    private String vendorName = "";
+    private String orderlineNumber  = "";
 
     @JacksonXmlProperty(localName = "Column20")
-    private double totalPrice = 0.0;
+    private String creditor = "";
 
     @JacksonXmlProperty(localName = "Column21")
+    private String vendorCode = "";
+
+    @JacksonXmlProperty(localName = "Column22")
+    private String vendorName = "";
+
+    @JacksonXmlProperty(localName = "Column23")
+    private double totalPrice = 0.0;
+
+    @JacksonXmlProperty(localName = "Column24")
     private double transactionAmount = 0.0;
 }

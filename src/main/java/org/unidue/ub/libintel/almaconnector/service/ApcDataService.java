@@ -2,6 +2,7 @@ package org.unidue.ub.libintel.almaconnector.service;
 
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.bibs.*;
 import org.unidue.ub.libintel.almaconnector.clients.alma.analytics.AlmaAnalyticsReportClient;
@@ -33,6 +34,9 @@ public class ApcDataService {
     private final AlmaElectronicService almaElectronicService;
 
     private final GetterService getterService;
+
+    @Value("${libintel.alma.elasticsearch.enable:false}")
+    private boolean enableElasticsearch;
 
     ApcDataService(ApcStatisticsRepository apcStatisticsRepository,
                    AlmaAnalyticsReportClient almaAnalyticsReportClient,
@@ -78,7 +82,8 @@ public class ApcDataService {
                     }
                 }
                 this.apcStatisticsRepository.save(apcStatistics);
-                this.getterService.indexApcStatistics(apcStatistics);
+                if (enableElasticsearch)
+                    this.getterService.indexApcStatistics(apcStatistics);
             }
         } catch (Exception e) {
             log.error("could not save apc data. messaage: " + e.getMessage(), e);
@@ -151,7 +156,7 @@ public class ApcDataService {
                         break;
                     }
                     case "710": {
-                        apcStatistics.setFaculty(retrieveSubfield(datafield, "a"));
+                        apcStatistics.setInstitute(retrieveSubfield(datafield, "a"));
                         break;
                     }
                     case "100": {

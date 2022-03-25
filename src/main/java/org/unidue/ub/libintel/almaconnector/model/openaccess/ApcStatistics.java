@@ -61,8 +61,11 @@ public class ApcStatistics {
     @Column(name = "currency")
     private String currency;
 
-    @Column(name = "total_costs")
-    private double totalCosts;
+    @Column(name = "list_price")
+    private double listPrice;
+
+    @Column(name = "netto_costs")
+    private double nettoCosts;
 
     @Column(name = "tax_costs")
     private double taxCosts;
@@ -109,6 +112,12 @@ public class ApcStatistics {
     @Column(name = "year")
     private int year;
 
+    @Column(name = "institute")
+    private String institute;
+
+    @Column(name = "is_finished")
+    private boolean isFinished;
+
     public ApcStatistics() {
     }
 
@@ -127,11 +136,15 @@ public class ApcStatistics {
         this.currency = apcData.getCurrency();
         this.invoiceVatCode = apcData.getVatCode();
         this.payment = apcData.getTransactionAmount();
-        this.totalCosts = apcData.getListPrice();
+        this.taxCosts = apcData.getVatNoteData();
+        this.nettoCosts = apcData.getTotalPrice() - apcData.getVatNoteData();
         this.realTotalCosts = apcData.getTotalPrice();
         this.creditor = apcData.getCreditor();
         this.creationDate = apcData.getInvoiceCreationDate();
         this.invoiceVatPercent = apcData.getVatPercent();
+        this.isFinished = false;
+        this.listPrice = apcData.getListPrice();
+        this.bankCosts = 0.0;
     }
 
     public String getMmsid() {
@@ -206,12 +219,12 @@ public class ApcStatistics {
         this.faculty = faculty;
     }
 
-    public double getTotalCosts() {
-        return totalCosts;
+    public double getNettoCosts() {
+        return nettoCosts;
     }
 
-    public void setTotalCosts(double totalCosts) {
-        this.totalCosts = totalCosts;
+    public void setNettoCosts(double nettoCosts) {
+        this.nettoCosts = nettoCosts;
     }
 
     public double getTaxCosts() {
@@ -390,6 +403,54 @@ public class ApcStatistics {
         this.year = year;
     }
 
+    public String getInstitute() {
+        return institute;
+    }
+
+    public boolean getIsFinished() {
+        return isFinished;
+    }
+
+    public void setIsFinished(boolean finished) {
+        isFinished = finished;
+    }
+
+    public double getListPrice() {
+        return listPrice;
+    }
+
+    public void setListPrice(double listPrice) {
+        this.listPrice = listPrice;
+    }
+
+    public void setInstitute(String institute) {
+        this.institute = institute;
+        if (institute.toLowerCase().contains("medizin") || institute.contains("klinik"))
+            this.faculty = "Medizin";
+        else if (institute.toLowerCase().contains("biologie"))
+            this.faculty = "Biologie";
+        else if (institute.toLowerCase().contains("physik"))
+            this.faculty = "Physik";
+        else if (institute.toLowerCase().contains("mathemat"))
+            this.faculty = "Mathematik";
+        else if (institute.toLowerCase().contains("geisteswissen"))
+            this.faculty = "Geisteswissenschaften";
+        else if (institute.toLowerCase().contains("wirtschaftswissen"))
+            this.faculty = "Wirtschaftswissenschaften";
+        else if (institute.toLowerCase().contains("mercator"))
+            this.faculty = "Mercator School of Management";
+        else if (institute.contains("Bildungswissen"))
+            this.faculty = "Bildungswissenschaften";
+        else if (institute.toLowerCase().contains("chemi"))
+            this.faculty = "Chemie";
+        else if (institute.toLowerCase().contains("gesellschaftswissenschaften"))
+            this.faculty = "Gesellschaftswissenschaften";
+        else if (institute.toLowerCase().contains("ingenieur"))
+            this.faculty = "Ingenieurwissenschaften";
+        else
+            this.faculty = institute;
+    }
+
     public void update(JournalApcDataDto journalApcDataDto) {
         this.comment = journalApcDataDto.getNote();
         this.duepublicoId = journalApcDataDto.getDuepublicoId();
@@ -415,24 +476,36 @@ public class ApcStatistics {
     }
 
     public void update(ApcData apcData) {
-        this.ledger = apcData.getLedger();
-        this.currency = apcData.getCurrency();
-        this.invoiceDate = apcData.getInvoiceDate();
-        this.invoiceNumber = apcData.getInvoiceNumber();
-        this.voucherNumber = apcData.getVoucherNumber();
-        this.orderNumber = apcData.getOrderlineNumber();
-        this.vendor = apcData.getVendorName();
-        this.vendorCode = apcData.getVendorCode();
-        this.invoicePriceNote = apcData.getInvoiceLinePriceNote();
-        this.invoiceLineNote = apcData.getInvoiceLineNote();
-        this.currency = apcData.getCurrency();
-        this.invoiceVatCode = apcData.getVatCode();
-        this.payment = apcData.getTransactionAmount();
-        this.totalCosts = apcData.getListPrice();
-        this.realTotalCosts = apcData.getTotalPrice();
-        this.creditor = apcData.getCreditor();
-        this.creationDate = apcData.getInvoiceCreationDate();
-        this.invoiceVatPercent = apcData.getVatPercent();
+        if (apcData.getInvoiceNumber().endsWith("_Bank")) {
+            this.bankCosts = apcData.getTransactionAmount();
+            this.realTotalCosts = this.nettoCosts + this.taxCosts + this.bankCosts;
+            this.isFinished = true;
+        } else {
+            this.ledger = apcData.getLedger();
+            this.currency = apcData.getCurrency();
+            this.invoiceDate = apcData.getInvoiceDate();
+            this.invoiceNumber = apcData.getInvoiceNumber();
+            this.voucherNumber = apcData.getVoucherNumber();
+            this.orderNumber = apcData.getOrderlineNumber();
+            this.vendor = apcData.getVendorName();
+            this.vendorCode = apcData.getVendorCode();
+            this.invoicePriceNote = apcData.getInvoiceLinePriceNote();
+            this.invoiceLineNote = apcData.getInvoiceLineNote();
+            this.currency = apcData.getCurrency();
+            this.invoiceVatCode = apcData.getVatCode();
+            this.payment = apcData.getTransactionAmount();
+            this.taxCosts = apcData.getVatNoteData();
+            this.nettoCosts = apcData.getTotalPrice() - apcData.getVatNoteData();
+            this.realTotalCosts = apcData.getTotalPrice();
+            this.creditor = apcData.getCreditor();
+            this.creationDate = apcData.getInvoiceCreationDate();
+            this.invoiceVatPercent = apcData.getVatPercent();
+            if ("EUR".equals(currency) || isFinished)
+                this.isFinished = true;
+            else {
+                this.isFinished = "Yes".equals(apcData.getExplicitRatio());
+            }
+        }
     }
 
     @Override
@@ -452,8 +525,9 @@ public class ApcStatistics {
                 "invoiceVatPercent: '" + invoiceVatPercent + "'; " +
                 "firstAuthor: '" + firstAuthor + "'; " +
                 "faculty: '" + faculty + "'; " +
+                "institute: '" + institute + "'; " +
                 "currency: '" + currency + "'; " +
-                "totalCosts: '" + totalCosts + "'; " +
+                "nettoCosts: '" + nettoCosts + "'; " +
                 "taxCosts: '" + taxCosts + "'; " +
                 "bankCosts: '" + bankCosts + "'; " +
                 "payment: '" + payment + "'; " +

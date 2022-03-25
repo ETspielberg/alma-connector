@@ -19,6 +19,9 @@ public class JournalApcDataDto {
     private LocalDate invoiceDate;
     private String currency;
     private double invoiceVatPercent;
+    private double nettoCosts;
+    private double taxCosts;
+    private double bankCosts;
     private double totalCosts;
     private String journal;
     private String issn;
@@ -30,6 +33,7 @@ public class JournalApcDataDto {
     private String orderNumber;
     private String voucherNumber;
     private String note;
+    private boolean isFinished;
 
     public JournalApcDataDto() {}
 
@@ -41,7 +45,7 @@ public class JournalApcDataDto {
         this.creationDate = apcStatistics.getCreationDate();
         this.vendor = apcStatistics.getVendor();
         this.invoiceNumber = apcStatistics.getInvoiceNumber();
-        this.invoiceAmount = apcStatistics.getTotalCosts();
+        this.invoiceAmount = apcStatistics.getListPrice();
         this.invoiceDate = apcStatistics.getInvoiceDate();
         this.currency = apcStatistics.getCurrency();
         this.invoiceVatPercent = apcStatistics.getInvoiceVatPercent();
@@ -56,5 +60,9 @@ public class JournalApcDataDto {
         this.orderNumber = apcStatistics.getOrderNumber();
         this.voucherNumber = apcStatistics.getVoucherNumber();
         this.note = apcStatistics.getComment();
+        this.isFinished = apcStatistics.getIsFinished();
+        this.taxCosts = apcStatistics.getTaxCosts();
+        this.bankCosts = apcStatistics.getBankCosts();
+        this.nettoCosts = apcStatistics.getNettoCosts();
     }
 }
