@@ -51,7 +51,7 @@ public class AlmaItemService {
             String mmsId = item.getBibData().getMmsId();
             String holdingId = item.getHoldingData().getHoldingId();
             String itemId = item.getItemData().getPid();
-            log.info(String.format("perfoming scan on item (mmsId | holdingId | itemId ): | %s | %s | %s", mmsId, holdingId, itemId));
+            log.info(String.format("perfoming scan on item. mmsId: %s, holdingId: %s itemId: %s", mmsId, holdingId, itemId));
             String workorderDepartment = item.getItemData().getWorkOrderAt().getValue();
             String workorderType = item.getItemData().getWorkOrderType().getValue();
             if (workorderDepartment.contains("AcqDept"))
@@ -126,7 +126,7 @@ public class AlmaItemService {
         try {
             return this.almaCatalogApiClient.getBibsMmsIdHoldingsHoldingIdItemsItemPid("application/json", mmsId, "ALL", itemId, "full", "", "");
         } catch (FeignException feignException) {
-            log.warn("could not retrieve item from alma: " + feignException.getMessage());
+            log.warn(String.format("could not retrieve item. mms id: %s, item id %s, message: %s", mmsId, itemId, feignException.getMessage()));
             return null;
         }
     }
@@ -141,7 +141,7 @@ public class AlmaItemService {
         String mmsId = item.getBibData().getMmsId();
         String holdingId = item.getHoldingData().getHoldingId();
         String itemPid = item.getItemData().getPid();
-        log.debug(String.format("updating item MMS-ID, Holding-ID, Item-ID | %s | %s | %s", mmsId, holdingId, itemPid));
+        log.debug(String.format("updating item. mms id: %s, holding id: %s, item id: %s", mmsId, holdingId, itemPid));
         return this.almaCatalogApiClient.putBibsMmsIdHoldingsHoldingIdItemsItemPid(mmsId, holdingId, itemPid, item);
     }
 
@@ -154,7 +154,7 @@ public class AlmaItemService {
     public Item updateItem(String mmsId, Item item) {
         String holdingId = item.getHoldingData().getHoldingId();
         String itemPid = item.getItemData().getPid();
-        log.debug(String.format("updating item MMS-ID, Holding-ID, Item-ID | %s | %s | %s", mmsId, holdingId, itemPid));
+        log.debug(String.format("updating item. mms id: %s, holding id: %s, item id: %s", mmsId, holdingId, itemPid));
         return this.almaCatalogApiClient.putBibsMmsIdHoldingsHoldingIdItemsItemPid(mmsId, holdingId, itemPid, item);
     }
 
@@ -192,7 +192,7 @@ public class AlmaItemService {
         try {
             return this.findItemByMmsAndItemId("ALL", itemId);
         } catch (FeignException fe) {
-            log.warn(String.format("could not retrieve item %s from alma: %s", itemId, fe.getMessage()), fe);
+            log.warn(String.format("could not retrieve item. item id: %s, message: %s", itemId, fe.getMessage()), fe);
             return null;
         }
     }
