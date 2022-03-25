@@ -17,6 +17,20 @@ feign:
         readTimeout: 600000
 server:
   port: ${server_port:11889}
+  ssl:
+    # enable TLS for server
+    enabled: true
+    key-store: ${libintel.pki.path}/alma-connector.p12
+    key-store-password: ${libintel.almaconnector.ssl.keystore.password}
+    key-store-type: PKCS12
+    protocol: TLS
+    enabled-protocols: TLSv1.2
+    # read the truststore with the libintel root ca certificate (PKSC12 format does not work on windows...)
+    trust-store: ${libintel.pki.path}/truststore.jks
+    trust-store-type: JKS
+    trust-store-password: ${libintel.truststore.password}
+    # set client_auth to want in order to use X509 authentication where possible.
+    client-auth: want
 spring:
   jackson:
     default-property-inclusion: NON_NULL
