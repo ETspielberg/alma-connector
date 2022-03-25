@@ -3,16 +3,16 @@ package org.unidue.ub.libintel.almaconnector.service.alma;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.conf.*;
 import org.unidue.ub.libintel.almaconnector.clients.alma.analytics.AlmaAnalyticsReportClient;
 import org.unidue.ub.libintel.almaconnector.clients.alma.analytics.AnalyticsNotRetrievedException;
 import org.unidue.ub.libintel.almaconnector.clients.alma.conf.SetsApiClient;
-import org.unidue.ub.libintel.almaconnector.model.analytics.AusweisAblaufExterne;
-import org.unidue.ub.libintel.almaconnector.model.analytics.AusweisAblaufExterneReport;
+import org.unidue.ub.libintel.almaconnector.configuration.IdentifierTransferConfiguration;
+import org.unidue.ub.libintel.almaconnector.model.analytics.*;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderLine;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,11 +34,15 @@ public class AlmaSetService {
     @Value("${libintel.alma.sets.benutzer-ausweisende}")
     private String AlmaSetIdBenutzerAusweisende;
 
+    @Value("${libintel.alma.sets.offene-gebuhren:0000}")
+    private String almaSetIdOffeneGebuhren;
+
     /**
      * constructor based autowiring to the sets api client and the item service
      *
      * @param setsApiClient the client for the sets api
      */
+    @Lazy
     AlmaSetService(SetsApiClient setsApiClient,
                    AlmaAnalyticsReportClient almaAnalyticsReportClient) {
         this.setsApiClient = setsApiClient;
@@ -207,10 +211,10 @@ public class AlmaSetService {
             return new ArrayList<>();
         else {
             for (AusweisAblaufExterne ausweisAblaufExterne : allExterne) {
-                if (ausweisAblaufExterne == null || ausweisAblaufExterne.getPrimaryIdentifier() == null)
+                if (ausweisAblaufExterne == null || ausweisAblaufExterne.getIdentifier() == null)
                     return new ArrayList<>();
                 else
-                    ids.add(ausweisAblaufExterne.getPrimaryIdentifier());
+                    ids.add(ausweisAblaufExterne.getIdentifier());
             }
         }
         log.info(String.format("retrieved %d users, whose account is going to expire", ids.size()));

@@ -3,12 +3,10 @@ package org.unidue.ub.libintel.almaconnector.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.unidue.ub.libintel.almaconnector.clients.alma.analytics.AnalyticsNotRetrievedException;
-import org.unidue.ub.libintel.almaconnector.service.LogService;
-import org.unidue.ub.libintel.almaconnector.service.RegalfinderService;
-import org.unidue.ub.libintel.almaconnector.service.SaveDataService;
-import org.unidue.ub.libintel.almaconnector.service.ScheduledService;
+import org.unidue.ub.libintel.almaconnector.service.*;
 
 import java.io.IOException;
 
@@ -25,23 +23,28 @@ public class ServiceController {
 
     private final SaveDataService saveDataService;
 
+    private final IdentifierTransferService identifierTransferService;
+
     private final LogService logService;
 
     /**
      * constructor based autowiring
-     * @param scheduledService the service for the scheduled job
+     *
+     * @param scheduledService   the service for the scheduled job
      * @param regalfinderService the service checking the regalfinder
-     * @param saveDataService the service saving data for preservation purposes
-     * @param logService the service handling the logging and error handling
+     * @param saveDataService    the service saving data for preservation purposes
+     * @param logService         the service handling the logging and error handling
      */
     ServiceController(ScheduledService scheduledService,
                       RegalfinderService regalfinderService,
                       SaveDataService saveDataService,
+                      IdentifierTransferService identifierTransferService,
                       LogService logService) {
         this.scheduledService = scheduledService;
         this.regalfinderService = regalfinderService;
         this.saveDataService = saveDataService;
         this.logService = logService;
+        this.identifierTransferService = identifierTransferService;
     }
 
     @GetMapping("/collectRequests")
@@ -57,7 +60,7 @@ public class ServiceController {
     }
 
     @GetMapping("/usersToEnd")
-    private ResponseEntity<?> updateUsersToEnd(){
+    private ResponseEntity<?> updateUsersToEnd() {
         this.scheduledService.runEndingUserNotificationJob();
         return ResponseEntity.ok().build();
     }
@@ -79,6 +82,12 @@ public class ServiceController {
         } catch (AnalyticsNotRetrievedException analyticsNotRetrievedException) {
             logService.handleAnalyticsException(analyticsNotRetrievedException);
         }
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/runIdentifierTransferJob/{name}")
+    public ResponseEntity<?> runIdentifierTransferJob(@PathVariable String name) throws AnalyticsNotRetrievedException, ClassNotFoundException {
+        this.identifierTransferService.runIdentifierTransport(name);
         return ResponseEntity.ok().build();
     }
 }

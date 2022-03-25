@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.unidue.ub.alma.shared.conf.Job;
 import org.unidue.ub.alma.shared.conf.Jobs;
 import org.unidue.ub.libintel.almaconnector.clients.alma.conf.AlmaJobsApiClient;
+import org.unidue.ub.libintel.almaconnector.configuration.IdentifierTransferConfiguration;
 import org.unidue.ub.libintel.almaconnector.model.JobParametersFile;
 import org.unidue.ub.libintel.almaconnector.model.jobs.JobIdWithDescription;
 import org.unidue.ub.libintel.almaconnector.repository.jpa.JobIdWithDescriptionRepository;
@@ -37,6 +38,9 @@ public class AlmaJobsService {
 
     @Value("${libintel.alma.jobs.notify-ending:00000001}")
     private String notifyEndingJobId;
+
+    @Value("${libintel.alma.jobs.offene-gebuehren:00000001}")
+    private String offeneGebuehrenJob;
 
     /**
      * constructor based autowiring of the alma jobs api feign client and the jobs with description repository
@@ -102,4 +106,25 @@ public class AlmaJobsService {
             log.warn(String.format("could not start job %s: %s", notifyEndingJobId, feignException.getMessage()), feignException);
         }
     }
+
+    public void runOffeneGebuehrenNotificationJob() {
+        JobParametersFile job = this.xmlReaderService.readJobParameters("OffeneGebuehren");
+        log.info(String.format("running jo %s with parameters %s", offeneGebuehrenJob, job.toString()));
+        try {
+            this.almaJobsApiClient.postConfJobsJobId(job, offeneGebuehrenJob, "run");
+        } catch (FeignException feignException) {
+            log.warn(String.format("could not start job %s: %s", offeneGebuehrenJob, feignException.getMessage()), feignException);
+        }
+    }
+
+    public void runJob(IdentifierTransferConfiguration identifierTransferConfiguration) {
+        JobParametersFile job = this.xmlReaderService.readJobParameters(identifierTransferConfiguration.getName());
+        log.info(String.format("running job %s with parameters %s", identifierTransferConfiguration.getJobId(), job.toString()));
+        try {
+            this.almaJobsApiClient.postConfJobsJobId(job, identifierTransferConfiguration.getJobId(), "run");
+        } catch (FeignException feignException) {
+            log.warn(String.format("could not start job %s: %s", identifierTransferConfiguration.getJobId(), feignException.getMessage()), feignException);
+        }
+    }
+
 }

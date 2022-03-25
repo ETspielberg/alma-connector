@@ -13,6 +13,7 @@ import org.unidue.ub.alma.shared.bibs.Item;
 import org.unidue.ub.alma.shared.user.AlmaUser;
 import org.unidue.ub.libintel.almaconnector.clients.alma.analytics.AlmaAnalyticsReportClient;
 import org.unidue.ub.libintel.almaconnector.clients.alma.analytics.AnalyticsNotRetrievedException;
+import org.unidue.ub.libintel.almaconnector.configuration.IdentifierTransferConfigurationMap;
 import org.unidue.ub.libintel.almaconnector.configuration.MappingTables;
 import org.unidue.ub.libintel.almaconnector.model.analytics.*;
 import org.unidue.ub.libintel.almaconnector.model.usage.SingleRequestData;
@@ -42,6 +43,8 @@ public class ScheduledService {
     private final AlmaSetService almaSetService;
 
     private final MappingTables mappingTables;
+
+    private final IdentifierTransferService identifierTransferService;
 
     private final SaveDataService saveDataService;
 
@@ -74,6 +77,7 @@ public class ScheduledService {
      */
     ScheduledService(AlmaAnalyticsReportClient almaAnalyticsReportClient,
                      MappingTables mappingTables,
+                     IdentifierTransferService identifierTransferService,
                      AlmaItemService almaItemService,
                      AlmaPoLineService almaPoLineService,
                      AlmaJobsService almaJobsService,
@@ -85,6 +89,7 @@ public class ScheduledService {
                      CacheManager cacheManager) {
         this.almaAnalyticsReportClient = almaAnalyticsReportClient;
         this.mappingTables = mappingTables;
+        this.identifierTransferService = identifierTransferService;
         this.almaItemService = almaItemService;
         this.almaPoLineService = almaPoLineService;
         this.almaJobsService = almaJobsService;
@@ -299,6 +304,24 @@ public class ScheduledService {
     }
 
     /**
+     * runs the elisa import job on additional times during the week
+     */
+    @Scheduled(cron = "0 0 8 * * TUE")
+    public void runOffeneGebuehrenMahnungNotificationJob() {
+        // do not run this job in the test and dev environment as the analytics report work only in the prod-system
+        if ("dev".equals(profile)) return;
+        log.info("collecting user account set with open fines and fees");
+
+        try {
+            // empty the set of user ids to be notified and transfer the ids from the analytics report to the
+            // corresponding set
+           this.identifierTransferService.runIdentifierTransport("offene-gebuehren-mahnung");
+        } catch (AnalyticsNotRetrievedException analyticsNotRetrievedException) {
+            logService.handleAnalyticsException(analyticsNotRetrievedException);
+        }
+    }
+
+    /**
      * retrieves the open requests and logs the corresponding information to be picked up by beats
      */
     @Scheduled(cron = "0 0 5 * * *")
@@ -396,6 +419,21 @@ public class ScheduledService {
     public void evictAllcachesAtIntervals() {
         cacheManager.getCacheNames()
                 .forEach(cacheName -> Objects.requireNonNull(cacheManager.getCache(cacheName)).clear());
+    }
+
+    /**
+     * retrieves the fine fees from the corresponding analytics report and saves them to the database
+     */
+    @Scheduled(cron = "0 0 9 * * TUE")
+    public void runOffeneGebuehrenMahnungJob() {
+        // do not run this job in the test and dev environment as the analytics report work only in the prod-system
+        if ("dev".equals(profile) || "test".equals(profile)) return;
+        log.info("showing identifier transfer configurations");
+        try {
+            this.identifierTransferService.runIdentifierTransport("offene-gebuehren-mahnung");
+        } catch (AnalyticsNotRetrievedException analyticsNotRetrievedException) {
+            this.logService.handleAnalyticsException(analyticsNotRetrievedException);
+        }
     }
 
 }

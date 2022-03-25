@@ -9,5 +9,5 @@ import lombok.Data;
 public class AusweisAblaufExterne {
 
     @JacksonXmlProperty(localName = "PrimaryIdentifier")
-    private String primaryIdentifier;
+    private String identifier;
 }

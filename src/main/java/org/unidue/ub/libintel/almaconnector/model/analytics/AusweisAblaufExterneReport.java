@@ -22,4 +22,8 @@ public class AusweisAblaufExterneReport {
     public void setRow(List<AusweisAblaufExterne> rows) {
         this.rows = rows;
     }
+
+    public String retrievePath() {
+        return PATH;
+    }
 }
