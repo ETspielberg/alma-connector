@@ -39,8 +39,6 @@ public class SapDataRun {
 
     private long successfullSapData = 0;
 
-    private long totalSapData = 0;
-
     private long missedSapData = 0;
 
     private long numberHomeSapData = 0;
@@ -258,10 +256,6 @@ public class SapDataRun {
             else
                 this.emptyInvoices.add(invoice.getId());
         }
-    }
-
-    public void setTotalSapData(long totalSapData) {
-        this.totalSapData = totalSapData;
     }
 
     public void setHomeSapData(List<SapData> homeSapData) {

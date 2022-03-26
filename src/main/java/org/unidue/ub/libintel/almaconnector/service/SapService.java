@@ -50,7 +50,7 @@ public class SapService {
 
     private final AlmaVendorService vendorService;
 
-    public static SimpleDateFormat dateformat = new SimpleDateFormat("yyyy-MM-dd");
+    public static final SimpleDateFormat dateformat = new SimpleDateFormat("yyyy-MM-dd");
 
     @Value("${libintel.sap.home.tax.keys}")
     private List<String> homeTaxKeys;

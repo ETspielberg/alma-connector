@@ -9,7 +9,6 @@ import org.unidue.ub.alma.shared.conf.*;
 import org.unidue.ub.libintel.almaconnector.clients.alma.analytics.AlmaAnalyticsReportClient;
 import org.unidue.ub.libintel.almaconnector.clients.alma.analytics.AnalyticsNotRetrievedException;
 import org.unidue.ub.libintel.almaconnector.clients.alma.conf.SetsApiClient;
-import org.unidue.ub.libintel.almaconnector.configuration.IdentifierTransferConfiguration;
 import org.unidue.ub.libintel.almaconnector.model.analytics.*;
 import org.unidue.ub.libintel.almaconnector.model.bubi.entities.BubiOrderLine;
 

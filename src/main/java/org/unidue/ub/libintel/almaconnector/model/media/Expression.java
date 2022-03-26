@@ -2,7 +2,6 @@ package org.unidue.ub.libintel.almaconnector.model.media;
 
 import org.unidue.ub.libintel.almaconnector.model.media.elasticsearch.*;
 
-import javax.swing.text.Element;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -178,8 +177,7 @@ public class Expression implements Cloneable {
 	 */
 	public EsBibliographicInformation getBibliographicInformation() {
 		Collections.sort(esPrintManifestations);
-		EsBibliographicInformation information = esPrintManifestations.get(esPrintManifestations.size()-1).getBibliographicInformation();
-		return information;
+		return esPrintManifestations.get(esPrintManifestations.size()-1).getBibliographicInformation();
 	}
 
 

@@ -1,8 +1,6 @@
 package org.unidue.ub.libintel.almaconnector.model.media.elasticsearch;
 
 import org.unidue.ub.alma.shared.bibs.Item;
-import org.unidue.ub.alma.shared.bibs.MarcDatafield;
-import org.unidue.ub.alma.shared.bibs.MarcSubfield;
 import org.unidue.ub.libintel.almaconnector.model.EventType;
 
 import java.util.ArrayList;

@@ -2,7 +2,6 @@ package org.unidue.ub.libintel.almaconnector.model.media.elasticsearch;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.unidue.ub.alma.shared.bibs.BibWithRecord;
-import org.unidue.ub.alma.shared.bibs.MarcDatafield;
 
 import java.util.*;
 import java.util.regex.Matcher;

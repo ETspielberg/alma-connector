@@ -9,7 +9,6 @@ import org.springframework.data.redis.core.RedisHash;
 import org.unidue.ub.alma.shared.conf.GeneralInstitution;
 import org.unidue.ub.alma.shared.conf.JobInstance;
 
-import javax.persistence.Id;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;

@@ -5,6 +5,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * holds all Data for a single invoice line to be uploaded to SAP
@@ -278,10 +279,7 @@ public class SapData implements Comparable<SapData> {
     public String toFixedLengthLine() {
         String string = "";
         string += getSizedString(this.vendorCode, 14);
-        if (this.creditor == null)
-            string += getSizedString("", 14);
-        else
-            string += getSizedString(this.creditor, 14);
+        string += getSizedString(Objects.requireNonNullElse(this.creditor, ""), 14);
         string += getSizedString(readableDateFormatter.format(this.commitmentDate), 12);
         string += getSizedString(readableDateFormatter.format(this.invoiceDate), 12);
         string += getSizedString(this.costType, 12);

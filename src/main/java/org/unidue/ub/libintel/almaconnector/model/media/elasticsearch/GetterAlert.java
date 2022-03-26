@@ -1,10 +1,6 @@
 package org.unidue.ub.libintel.almaconnector.model.media.elasticsearch;
 
-import lombok.Data;
-import org.apache.commons.collections4.Get;
 import org.unidue.ub.libintel.almaconnector.model.EventType;
-
-import java.util.Set;
 
 public class GetterAlert {
 

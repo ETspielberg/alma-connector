@@ -11,7 +11,6 @@ import javax.persistence.Table;
  * POJO containing the data for constructing WAYFless URLs
  */
 @Entity
-@Data
 @Table(name="shibboleth_data")
 public class ShibbolethData {
 
@@ -39,4 +38,71 @@ public class ShibbolethData {
 
     @Column(name="additional_url_parameters")
     private String additionalUrlParameters;
+
+    public ShibbolethData() {
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public String getServiceproviderSibbolethUrl() {
+        return serviceproviderSibbolethUrl;
+    }
+
+    public void setServiceproviderSibbolethUrl(String serviceproviderSibbolethUrl) {
+        this.serviceproviderSibbolethUrl = serviceproviderSibbolethUrl;
+    }
+
+    public boolean isSpSideWayfless() {
+        return spSideWayfless;
+    }
+
+    public void setSpSideWayfless(boolean spSideWayfless) {
+        this.spSideWayfless = spSideWayfless;
+    }
+
+    public String getEntityIdString() {
+        return entityIdString;
+    }
+
+    public void setEntityIdString(String entityIdString) {
+        this.entityIdString = entityIdString;
+    }
+
+    public String getTargetString() {
+        return targetString;
+    }
+
+    public void setTargetString(String targetString) {
+        this.targetString = targetString;
+    }
+
+    public String getShire() {
+        return shire;
+    }
+
+    public void setShire(String shire) {
+        this.shire = shire;
+    }
+
+    public String getProviderId() {
+        return providerId;
+    }
+
+    public void setProviderId(String providerId) {
+        this.providerId = providerId;
+    }
+
+    public String getAdditionalUrlParameters() {
+        return additionalUrlParameters;
+    }
+
+    public void setAdditionalUrlParameters(String additionalUrlParameters) {
+        this.additionalUrlParameters = additionalUrlParameters;
+    }
 }

@@ -60,7 +60,7 @@ public class Nrequests implements Cloneable {
         NLendable = 0;
         mab = "";
         totalDuration = 0L;
-        identifier = this.titleId + String.valueOf(System.currentTimeMillis());
+        identifier = this.titleId + System.currentTimeMillis();
         date = new Date();
         status = "NEW";
         isbn = "";
@@ -76,7 +76,7 @@ public class Nrequests implements Cloneable {
         this.ratio = ratio;
         this.isbn = "";
         date = new Date();
-        identifier = this.titleId + String.valueOf(System.currentTimeMillis());
+        identifier = this.titleId + System.currentTimeMillis();
         mab = "";
         totalDuration = 1L;
         status = "NEW";

@@ -1,11 +1,5 @@
 package org.unidue.ub.libintel.almaconnector.model.media.elasticsearch;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import java.time.LocalDate;
-
 public class EbookCounter extends Counter {
 
     private int year;
